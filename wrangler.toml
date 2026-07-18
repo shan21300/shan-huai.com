@@ -1,0 +1,5 @@
+name = "holy-rain-4c97"
+compatibility_date = "2026-07-15"
+
+[assets]
+directory = "."
