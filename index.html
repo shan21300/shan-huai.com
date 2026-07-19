@@ -2181,58 +2181,71 @@
     var loader=document.getElementById("loader");
     if(reduce || !hasGSAP){ if(loader && loader.parentNode) loader.parentNode.removeChild(loader); return; }
 
-    // --- Real load progress ---
-    // Measure the images the browser is actually fetching for first paint:
-    // every <img> currently in the DOM that has a src. Cached/instant ones count
-    // as done immediately; the rest resolve via load/error. We also gate the
-    // finish on window.load (all critical resources) so 100% means truly ready.
+    // --- Smooth trickle progress (YouTube/Medium pattern) ---
+    // The displayed number is a DESIGNED animation, not a raw data readout.
+    // It autonomously trickles toward a ceiling so it always glides and never
+    // stalls; real load events (images done + page loaded) only raise how far
+    // it's allowed to go. It snaps to 100 only when the page is truly ready.
     var countEl=document.querySelector(".l-count");
     var barEl=document.querySelector(".l-bar");
 
-    var imgs=Array.prototype.slice.call(document.images).filter(function(im){
-      return im.getAttribute("src");           // has a real source
-    });
+    // Track real readiness (used only to release the ceiling + trigger finish).
+    var imgs=Array.prototype.slice.call(document.images).filter(function(im){ return im.getAttribute("src"); });
     var total=imgs.length||1, done=0;
     imgs.forEach(function(im){
       if(im.complete){ done++; }
-      else {
-        im.addEventListener("load", tick, {once:true});
-        im.addEventListener("error", tick, {once:true});
-      }
+      else { im.addEventListener("load",tick,{once:true}); im.addEventListener("error",tick,{once:true}); }
     });
     function tick(){ done++; }
 
-    // window.load == all critical (non-lazy-deferred) resources finished.
     var pageLoaded = (document.readyState==="complete");
     if(!pageLoaded){ window.addEventListener("load", function(){ pageLoaded=true; }, {once:true}); }
 
-    var shown=0;              // eased number actually displayed
+    var shown=0;              // the smoothly-displayed value (0..100)
     var finished=false;
     var start=Date.now();
-    var MAX_MS=12000;         // safety: never hang past 12s
+    var MAX_MS=10000;         // safety: never hang past 10s
 
     function frame(){
-      // Real progress = image completion, but capped at 95% until the page's
-      // load event fires — so the last 5% represents "everything else ready".
-      var imgPct = done/total;                 // 0..1
-      var real = Math.round(imgPct*95) + (pageLoaded ? 5 : 0);
-      if(real>100) real=100;
+      var elapsed = Date.now()-start;
+      var ready = (done>=total && pageLoaded);
 
-      // Ease toward the real value (never jumps, never sits fully still).
-      shown += (real-shown)*0.14 + 0.3;
-      if(shown>real) shown=real;
-      if(shown>100) shown=100;
-
-      countEl.textContent=String(Math.round(shown)).padStart(3,"0");
-      if(barEl) barEl.style.width=shown+"%";
-
-      var timedOut=(Date.now()-start)>MAX_MS;
-      var ready=(done>=total && pageLoaded);
-      if((ready && shown>=99.5) || timedOut){
-        countEl.textContent="100"; if(barEl) barEl.style.width="100%";
-        if(!finished){ finished=true; playOut(); }
-        return;
+      if(!finished){
+        if(ready){
+          // Everything's loaded: glide the rest of the way to 100 quickly & smoothly.
+          shown += (100 - shown)*0.18 + 0.8;
+          if(shown >= 99.6){
+            shown = 100;
+            countEl.textContent="100"; if(barEl) barEl.style.width="100%";
+            finished=true; playOut(); return;
+          }
+        } else {
+          // Not ready yet: TRICKLE. Autonomous, decelerating creep toward a 90 ceiling,
+          // so it always feels alive and never freezes. The closer to 90, the slower —
+          // classic "asymptotic" trickle that reads as genuine loading.
+          var ceiling = 90;
+          // real load nudges the effective ceiling a little higher as images arrive
+          var realBoost = Math.round((done/total)*8);       // up to +8 from real progress
+          var cap = Math.min(92, ceiling + realBoost);
+          var gap = cap - shown;
+          if(gap > 0){
+            // decelerating step, but CAPPED so it never leaps at the start —
+            // steady glide (max ~0.9/frame ~= 54/sec) that eases as it nears the cap.
+            var step = Math.min(0.9, gap*0.02 + 0.25);
+            shown += step;
+            if(shown > cap) shown = cap;
+          }
+        }
       }
+
+      // safety timeout: force finish
+      if(!finished && elapsed > MAX_MS){
+        shown = 100; countEl.textContent="100"; if(barEl) barEl.style.width="100%";
+        finished=true; playOut(); return;
+      }
+
+      countEl.textContent=String(Math.floor(shown)).padStart(3,"0");
+      if(barEl) barEl.style.width=shown.toFixed(1)+"%";
       requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
@@ -2548,8 +2561,10 @@
 
   /* ---------------- Boot ---------------- */
   function boot(){ /* initGL();  <-- 3D logo disabled (recoverable) */ reveal(); }
-  if(document.readyState==="complete") boot();
-  else window.addEventListener("load",boot);
+  // Start the loader EARLY (as soon as the DOM exists) so the counter can track
+  // the whole load from 0, not just the tail after window.load.
+  if(document.readyState==="interactive" || document.readyState==="complete") boot();
+  else document.addEventListener("DOMContentLoaded", boot);
 })();
 
   
