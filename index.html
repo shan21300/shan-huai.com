@@ -2181,38 +2181,54 @@
     var loader=document.getElementById("loader");
     if(reduce || !hasGSAP){ if(loader && loader.parentNode) loader.parentNode.removeChild(loader); return; }
 
-    // --- Real image-load progress ---
-    // Only track eager (non-lazy) images — lazy ones load on scroll and would stall the count
+    // --- Real load progress ---
+    // Measure the images the browser is actually fetching for first paint:
+    // every <img> currently in the DOM that has a src. Cached/instant ones count
+    // as done immediately; the rest resolve via load/error. We also gate the
+    // finish on window.load (all critical resources) so 100% means truly ready.
+    var countEl=document.querySelector(".l-count");
+    var barEl=document.querySelector(".l-bar");
+
     var imgs=Array.prototype.slice.call(document.images).filter(function(im){
-      return (im.getAttribute("loading")||"").toLowerCase()!=="lazy";
+      return im.getAttribute("src");           // has a real source
     });
     var total=imgs.length||1, done=0;
     imgs.forEach(function(im){
       if(im.complete){ done++; }
       else {
-        im.addEventListener("load",tick,{once:true});
-        im.addEventListener("error",tick,{once:true});
+        im.addEventListener("load", tick, {once:true});
+        im.addEventListener("error", tick, {once:true});
       }
     });
     function tick(){ done++; }
 
+    // window.load == all critical (non-lazy-deferred) resources finished.
+    var pageLoaded = (document.readyState==="complete");
+    if(!pageLoaded){ window.addEventListener("load", function(){ pageLoaded=true; }, {once:true}); }
+
     var shown=0;              // eased number actually displayed
-    var countEl=document.querySelector(".l-count");
-    var barEl=document.querySelector(".l-bar");
     var finished=false;
     var start=Date.now();
     var MAX_MS=12000;         // safety: never hang past 12s
 
     function frame(){
-      var real=Math.min(100, Math.round(done/total*100));
-      // if everything is cached/instant, don't flash 100 immediately — ease up
-      shown += (real-shown)*0.12 + 0.4;
+      // Real progress = image completion, but capped at 95% until the page's
+      // load event fires — so the last 5% represents "everything else ready".
+      var imgPct = done/total;                 // 0..1
+      var real = Math.round(imgPct*95) + (pageLoaded ? 5 : 0);
+      if(real>100) real=100;
+
+      // Ease toward the real value (never jumps, never sits fully still).
+      shown += (real-shown)*0.14 + 0.3;
       if(shown>real) shown=real;
       if(shown>100) shown=100;
+
       countEl.textContent=String(Math.round(shown)).padStart(3,"0");
       if(barEl) barEl.style.width=shown+"%";
+
       var timedOut=(Date.now()-start)>MAX_MS;
-      if((done>=total && shown>=99.5) || timedOut){
+      var ready=(done>=total && pageLoaded);
+      if((ready && shown>=99.5) || timedOut){
         countEl.textContent="100"; if(barEl) barEl.style.width="100%";
         if(!finished){ finished=true; playOut(); }
         return;
