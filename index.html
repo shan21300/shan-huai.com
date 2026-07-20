@@ -2127,7 +2127,9 @@
       var big=Math.min(window.innerHeight*0.42, 460)/r.height; // ~42% of screen height, capped
 
       // Pre-stage: logo big + centred + invisible; menu + carousel hidden.
-      gsap.set(brand,{xPercent:-50, y:dy, scale:big, opacity:0, transformOrigin:"50% 50%", willChange:"transform,opacity"});
+      // x:0 stops GSAP stacking its own translate on top of the CSS translateX(-50%)
+      // (which would land the shrink half a logo-width off before snapping to centre).
+      gsap.set(brand,{x:0, xPercent:-50, y:dy, scale:big, opacity:0, transformOrigin:"50% 50%", willChange:"transform,opacity"});
       gsap.set(menuBtn,{opacity:0});
       gsap.set(landing,{opacity:0});
 
