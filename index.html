@@ -361,7 +361,7 @@
 
   /* ---- Project page: pinned image, scroll-driven, right rail ---- */
   .proj-scroll{position:relative}
-  .proj-viewport{position:sticky;top:0;height:100vh;overflow:hidden}
+  .proj-viewport{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
   .proj-head{position:absolute;top:0;left:0;right:0;z-index:5;
     display:grid;grid-template-columns:max-content 1fr max-content;grid-template-rows:auto auto;
     gap:clamp(8px,1.2vw,16px) clamp(12px,2vw,26px);align-items:center;
@@ -710,7 +710,10 @@
 
   /* ===== Selected Works landing (scoped to #landing / .sw-* only) ===== */
   #landing.is-active{background:var(--ink)}
-  .sw-viewport{position:sticky;top:0;height:100vh;overflow:hidden}
+  /* 100svh: on iOS 100vh is the LARGE viewport (toolbar hidden), so the box hangs
+     below the visible area and bottom-anchored children (.sw-caption) end up under
+     Chrome's toolbar. svh is the small/always-visible height. */
+  .sw-viewport{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
 
   /* framed image area (like "live"): inset from edges, leaving room for
      caption (bottom-left) and the horizontal thumbnail rail (bottom). */
