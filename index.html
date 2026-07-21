@@ -2151,10 +2151,11 @@
     function playOut(){
       var brand=document.querySelector(".brandBtn");   // the header logo we animate
       var menuBtn=document.querySelector(".menuBtn");
-      var landing=document.getElementById("landing");  // the carousel we reveal at the end
+      var header=document.querySelector("header");
+      var textEls=loader.querySelectorAll(".l-word,.l-count,.l-bar"); // the loader number/word
 
-      // If anything's missing, just fade the loader out and bail.
-      if(!brand || !landing){ gsap.to(loader,{opacity:0,duration:.5,onComplete:removeLoader}); return; }
+      // If the logo is missing, just fade the loader out and bail.
+      if(!brand){ gsap.to(loader,{opacity:0,duration:.5,onComplete:removeLoader}); return; }
 
       var img=brand.querySelector(".logo-img");
 
@@ -2176,29 +2177,35 @@
       var startY=(window.innerHeight/2)-bigCY;        // centred on screen
       var endY=restCY-bigCY;                          // resting spot in the header
 
-      // Pre-stage: logo big + centred + invisible; menu + carousel hidden.
+      // Lift the header (and its logo) ABOVE the black loader so the logo animates ON
+      // the black, then the LOADER itself fades out to reveal whatever page is behind it.
+      // Revealing by fading the loader (not one specific page) means every page that
+      // shows this intro reveals from black -- landing, archive, a deep-linked project.
       // x:0 stops GSAP stacking its own translate on top of the CSS translateX(-50%)
       // (which would land the shrink half a logo-width off before snapping to centre).
+      gsap.set(header,{zIndex:70});                   // above loader (z-index 60)
       gsap.set(brand,{x:0, xPercent:-50, y:startY, scale:1, opacity:0, transformOrigin:"50% 50%", willChange:"transform,opacity"});
       gsap.set(menuBtn,{opacity:0});
-      gsap.set(landing,{opacity:0});
 
       var tl=gsap.timeline();
-      // 1) black loader simply fades away (no slide)
-      tl.to(loader,{opacity:0,duration:.5,ease:"power2.out",onComplete:removeLoader});
-      // 2) big logo fades in, centred on black
+      // 1) drop the loader's number/word (keep its black background as the cover)
+      tl.to(textEls,{opacity:0,duration:.3,ease:"power2.out"});
+      // 2) big logo fades in, centred, on the black
       tl.to(brand,{opacity:1,duration:.5,ease:"power2.out"}, "-=0.1");
       // 3) it shrinks + rises to its header spot (~0.9s, medium)
       tl.to(brand,{y:endY,scale:endScale,duration:.9,ease:"power3.inOut"}, "+=0.15");
-      // 4) carousel + menu fade in as it lands
-      tl.to([landing,menuBtn],{opacity:1,duration:.6,ease:"power2.out"}, "-=0.4");
-      // 5) hand the logo (and the rest) back to plain CSS control. The inline height
+      // 4) the black loader fades out -> the page content reveals from black as the logo
+      //    lands, and the menu button fades in at the same time
+      tl.to(loader,{opacity:0,duration:.6,ease:"power2.out",onComplete:removeLoader}, "-=0.35");
+      tl.to(menuBtn,{opacity:1,duration:.5,ease:"power2.out"}, "<");
+      // 5) hand the logo, header and menu back to plain CSS control. The inline height
       //    and the transform must be dropped together in one tick, or the logo would
       //    flash at full size for a frame.
       tl.call(function(){
         if(img) img.style.height="";
         gsap.set(brand,{clearProps:"transform,transformOrigin,opacity,willChange"});
-        gsap.set([landing,menuBtn],{clearProps:"opacity"});
+        gsap.set(menuBtn,{clearProps:"opacity"});
+        gsap.set(header,{clearProps:"zIndex"});
       });
     }
   }
