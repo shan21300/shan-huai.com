@@ -495,7 +495,10 @@
      differing heights sit flush at the top of each grid row. */
   .proj-detail-img-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:40px 0;align-items:start}
   .proj-detail-img-pair img,.proj-detail-img-full img{width:100%;height:auto;display:block}
-  .proj-detail-img-full{margin:40px 0;max-width:64ch}
+  /* A single image on its own row is centred (auto side margins). */
+  .proj-detail-img-full{margin:40px auto;max-width:64ch}
+  /* Quarter-width variant for images whose tall natural ratio makes them dominate. */
+  .proj-detail-img-full.is-quarter{max-width:16ch}
   @media(max-width:640px){.proj-detail-img-pair{grid-template-columns:1fr}}
   /* "Cross" moodboard layout: one image per centred row, row 2 twice as wide.
      Every image is a % of this ONE container, so all four scale together on resize
@@ -2068,7 +2071,7 @@
             <p>This design choice is inseparable from the work's conceptual aim. The minimalist set creates space for dissection. The ritual is not being dismantled, but made transparent. By revealing the mechanism behind the gesture, the performance invites the audience to consider how belief is structured, repeated, and mediated.</p>
             <p>The sharktooth gauze becomes more than a screen—it becomes a metaphor for inherited systems: porous, visible, open to interpretation, yet still capable of carrying meaning. Faith here isn't destroyed by visibility—it's confronted. Ritual doesn't lose its power when laid bare; it becomes something we can actually examine.</p>
           </div>
-          <div class="proj-detail-img-full" style="margin-top:28px">
+          <div class="proj-detail-img-full is-quarter" style="margin-top:28px">
             <img src="https://images.squarespace-cdn.com/content/v1/64b8effc2a267405a4c07304/b49e07a3-178b-4f43-9201-d071bd9f07cb/Screenshot+2025-05-04+at+3.48.43%E2%80%AFPM.png" alt="Projected performer frames" loading="lazy">
           </div>
 
