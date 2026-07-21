@@ -506,6 +506,13 @@
   .proj-detail-video.is-portrait{max-width:360px}
   .proj-detail-video iframe{display:block;width:100%;aspect-ratio:16/9;border:0}
   .proj-detail-video.is-portrait iframe{aspect-ratio:9/16}
+  /* Closing notes: reflective statements rather than project documentation. Set apart
+     from everything above by a rule, a large gap, and a narrower reading measure. */
+  .proj-detail-coda{margin-top:clamp(88px,13vh,150px);padding-top:clamp(40px,6vh,64px);
+    border-top:1px solid var(--line)}
+  .proj-detail-coda-label{display:block;font-family:"IBM Plex Mono",monospace;font-size:11px;
+    letter-spacing:.2em;text-transform:uppercase;color:var(--grey);margin-bottom:clamp(32px,5vh,56px)}
+  .proj-detail-coda .proj-detail-body{max-width:68ch}
   .proj-detail-body ul{margin:0 0 1.4em;padding-left:20px;list-style:disc}
   .proj-detail-body li{margin-bottom:.55em}
   .proj-detail-body li ul{margin:.55em 0 0;list-style:circle}
@@ -2242,6 +2249,10 @@
           </div>
         </div>
 
+        <!-- Closing notes: set apart from the project documentation above -->
+        <div class="proj-detail-coda">
+        <span class="proj-detail-coda-label">Notes &amp; Reflections</span>
+
         <!-- Religious Awareness & Ethics -->
         <div class="proj-detail-section">
           <span class="proj-detail-section-label">Religious Awareness &amp; Ethics in Symbolic Practice</span>
@@ -2276,6 +2287,7 @@
             <p>This incident revealed just how easily belief, discomfort, or reverence can be triggered by representation alone—how performance and faith share a dependency on imagination and perception, more than on tangible form. While religious architecture, garments, and traditions help shape the experience of faith, their symbolic force ultimately relies on personal projection. What matters is not just what is seen, but what is felt.</p>
           </div>
         </div>
+        </div><!-- /.proj-detail-coda -->
       </div>
     </section>
 
