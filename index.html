@@ -495,6 +495,9 @@
   .proj-detail-body blockquote cite{display:block;font-style:normal;
     font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;
     text-transform:uppercase;color:var(--grey)}
+  .proj-detail-body ul{margin:0 0 1.4em;padding-left:20px;list-style:disc}
+  .proj-detail-body li{margin-bottom:.55em}
+  .proj-detail-body li ul{margin:.55em 0 0;list-style:circle}
   .proj-detail-h3{font-family:"Cormorant Garamond";font-weight:300;font-size:clamp(25px,3.2vw,44px);
     letter-spacing:-.01em;margin-bottom:16px;color:var(--paper)}
   /* Images keep their ORIGINAL aspect ratio (no 4:3 crop); align-items:start so
@@ -1064,8 +1067,11 @@
           </div>
         </div>
 
+        <!-- Scene #1: Cinema — colour grading -->
         <div class="proj-detail-section">
-          <span class="proj-detail-section-label">Color Grading — Scene #1: Cinema</span>
+          <span class="proj-detail-section-label">Scene #1: Cinema</span>
+
+          <h3 class="proj-detail-h3">Color Grading</h3>
           <div class="proj-detail-body">
             <p>Drag the handle to compare the graded frame against the original footage.</p>
           </div>
@@ -1073,6 +1079,49 @@
             <img class="slider-before" src="https://i.postimg.cc/MzRmpY63/story2.jpg" alt="Graded">
             <img class="slider-after" src="https://i.postimg.cc/080FXw4j/storyunedited.jpg" alt="Original">
             <div class="slider-handle" aria-hidden="true"></div>
+          </div>
+
+          <h3 class="proj-detail-h3" style="margin-top:48px">Problems</h3>
+          <div class="proj-detail-body">
+            <p><strong>#1 — Lighting: Set.</strong> In spite of the intentional darkness intended for this set, the lighting conditions were still insufficient, resulting in underexposure. Our setup incorporated two primary light sources—the projector and the screen. While I managed to capture some reflections from the screen onto the subject, the distance was too great for the light to adequately reach. Consequently, I had to increase the ISO to 1250, risking potential graininess in the images.</p>
+            <p><strong>#2 — Lighting: Subject in Frame.</strong> The primary visual focus in this context lies more on the costume rather than the subject, as the costume inherently introduces and defines the character we've created. The challenge isn't solely centered on ensuring proper exposure for the face or mask; instead, it extends to encompass the entire body and costume as a cohesive visual element.</p>
+          </div>
+
+          <h3 class="proj-detail-h3" style="margin-top:48px">Solutions</h3>
+          <div class="proj-detail-body">
+            <p>The histogram above illustrates that the images predominantly lean towards the left, indicating that they were mostly captured in shadow or underexposed conditions. By strategically placing control points and anchoring both shadow and midtone areas, I managed to effectively separate the subject from the background. However, because the reflection off the cinema screen isn't strong enough, I had to find other ways to create highlights on the subject. I then decided to apply a star filter to catch flares off the subject. Our costume features a lot of reflective surfaces, which became ideal for the concept.</p>
+            <p>A completely dark environment with controlled lighting has long been recognized as ideal for human sensorial manipulation. This principle underlies why cinema, theater, and circus performances all take place or are screened in darkness—a spotlight of focused attention. In terms of post-production, dealing with underexposure tends to be less problematic than managing overexposure, especially considering we're shooting on digital cameras rather than film. I was able to play with the light curve, controlling the point of the shadow in the red, green, and blue channels to create a vintage look that eases out the grainy images.</p>
+            <ul>
+              <li>Aim for a film look to ease out the grainy issue.</li>
+              <li>Histogram indication and fix:
+                <ul>
+                  <li>Uplifted exposure on the main curve.</li>
+                  <li>Low control points on shadow to manipulate vintage tone.</li>
+                </ul>
+              </li>
+              <li>Halation on the highlight to create convincing vintage lens craftsmanship.</li>
+              <li>Denoise to deliver a quality cinematic touch.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Scene #3.1: Pub — lighting -->
+        <div class="proj-detail-section">
+          <span class="proj-detail-section-label">Scene #3.1: Pub</span>
+          <h3 class="proj-detail-h3">Lighting</h3>
+          <div class="proj-detail-body">
+            <p>This set was originally intended to be set at night for a cozy, home-like, classic British-pub scene. Due to the lack of resources and the availability of the pub, we had to compromise to a daytime shooting schedule. The lighting was disastrous, and we were underprepared to say the least. With the intense daylight coming from the outside, I had to compromise and use it as keylight. We then lit up a few candles as fill lights to create a warmer touch to the shadow.</p>
+          </div>
+        </div>
+
+        <!-- Scene #3.2: Pub, Dances — camera movement -->
+        <div class="proj-detail-section">
+          <span class="proj-detail-section-label">Scene #3.2: Pub — Dances</span>
+          <h3 class="proj-detail-h3">Camera Movement</h3>
+          <div class="proj-detail-body">
+            <p>I received a shot list instruction initially geared towards a stationary tripod setup. However, recognizing the potential of our wide-angle lens to create compelling dramatic distortion, I proposed using a gimbal for dynamic camera motion.</p>
+            <p>Wide-angle lenses offer immersive visuals and establish a subjective viewpoint, ideal for accentuating camera movement. Their exaggerated depth alters perspective, making subjects in the background appear smaller while rapidly enlarging those closer to the camera, creating a sense of speed.</p>
+            <p>In the video on the left, I had all gimbal axes unlocked, granting complete control over the flow of this FPV (first person view) camera movement.</p>
           </div>
         </div>
       </div>
