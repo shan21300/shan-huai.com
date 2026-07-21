@@ -518,6 +518,15 @@
   .proj-detail-img-full.is-quarter{max-width:16ch}
   /* Two-up image rows stay two-up on mobile (tighter gap rather than stacking). */
   @media(max-width:640px){.proj-detail-img-pair{gap:8px}}
+  /* Video + image side by side at identical dimensions. Unlike .proj-detail-img-pair
+     this one DOES stack on mobile, since both items are landscape. */
+  .proj-detail-media-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:40px 0}
+  .proj-detail-media-pair .media-cell{position:relative;width:100%;aspect-ratio:16/9;
+    overflow:hidden;background:var(--ink)}
+  .proj-detail-media-pair .media-cell iframe,
+  .proj-detail-media-pair .media-cell img{position:absolute;inset:0;width:100%;height:100%;
+    border:0;display:block;object-fit:cover}
+  @media(max-width:640px){.proj-detail-media-pair{grid-template-columns:1fr;gap:10px}}
   /* "Cross" moodboard layout: one image per centred row, row 2 twice as wide.
      Every image is a % of this ONE container, so all four scale together on resize
      (and max-width below is the single knob for the whole group's size). */
@@ -2177,6 +2186,14 @@
           </div>
 
           <h3 class="proj-detail-h3" style="margin-top:48px">Captured VR/AR View vs Rendered Live Set</h3>
+          <div class="proj-detail-media-pair">
+            <div class="media-cell">
+              <iframe src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/cdd6aa44aea315e8cbcb6837920c4d67/iframe?autoplay=1&muted=1&loop=1&controls=0&preload=auto" allow="autoplay; fullscreen" allowfullscreen title="Captured VR/AR view from inside the headset"></iframe>
+            </div>
+            <div class="media-cell">
+              <img src="/images/projects/holycommunion_horizontal_topdown.jpg" alt="Rendered top-down view of the live set" loading="lazy">
+            </div>
+          </div>
           <div class="proj-detail-body">
             <p>The video on the left shows what the volunteer sees inside the VR headset, while the image on the right presents a rendered top-down view of the physical installation. Together, they reveal the layered duality at the heart of the performance.</p>
             <p>In the rendered image, we see the interactive volunteer standing in front of the central pedestal, wearing a VR headset, surrounded by three vertical projection screens. From the audience's perspective, this setup is minimal, clean, and fully exposed. The screens display a single continuous video, mapped seamlessly across three planar surfaces. The physical space makes no attempt to hide its construction—the mechanics are visible, the symbolism dissected.</p>
