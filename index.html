@@ -496,11 +496,13 @@
   .proj-detail-img-full{margin:40px 0;max-width:64ch}
   .proj-detail-img-pair img{aspect-ratio:4/3;object-fit:cover}
   @media(max-width:640px){.proj-detail-img-pair{grid-template-columns:1fr}}
-  /* "Cross" moodboard layout: one image per centred row, the second row twice as wide */
-  .proj-detail-cross{--cross-w:360px;display:flex;flex-direction:column;align-items:center;
-    gap:14px;margin:40px 0}
-  .proj-detail-cross img{display:block;width:100%;height:auto;max-width:var(--cross-w)}
-  .proj-detail-cross .cross-wide{max-width:calc(var(--cross-w) * 2)}
+  /* "Cross" moodboard layout: one image per centred row, row 2 twice as wide.
+     Every image is a % of this ONE container, so all four scale together on resize
+     (and max-width below is the single knob for the whole group's size). */
+  .proj-detail-cross{display:flex;flex-direction:column;align-items:center;gap:14px;
+    margin:40px auto;width:100%;max-width:360px}
+  .proj-detail-cross img{display:block;width:50%;height:auto}
+  .proj-detail-cross .cross-wide{width:100%}
 
   /* Before/after comparison slider (drag the handle) */
   .custom-image-slider{position:relative;width:100%;margin:40px 0;overflow:hidden;
