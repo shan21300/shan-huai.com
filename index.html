@@ -169,6 +169,16 @@
     text-decoration:none;line-height:1}
   .proj-panel-arrow:hover{opacity:1}
   .proj-panel-gap{height:4px;background:var(--ink);scroll-snap-align:none;flex-shrink:0}
+  /* Video covers are 16:9 — inside a tall portrait panel they letterbox with big
+     black bands. On mobile, make video panels horizontal 16:9 bars (full-bleed
+     width) stacked as a scrollable list, so the video fills edge-to-edge. */
+  @media(max-width:768px){
+    #archive{scroll-snap-type:none;height:100vh;height:100svh;
+      display:flex;flex-direction:column;justify-content:center;gap:4px;
+      padding:96px 0 24px}
+    #archive .proj-panel.is-video{height:auto;aspect-ratio:16/9;
+      flex:0 0 auto;scroll-snap-align:none}
+  }
 
     /* ---------- Layout / pages ---------- */
   main{position:relative;z-index:10}
@@ -726,6 +736,11 @@
     opacity:0;transition:opacity .55s ease;pointer-events:none;cursor:pointer}
   .sw-stage .frame.show{opacity:1;pointer-events:auto}
   .sw-stage .frame img{max-width:100%;max-height:100%;width:auto;height:auto;display:block}
+  /* Video works: poster <img> defines the box (its natural ratio), and the live
+     iframe overlays it exactly (inset:0), so the video fills with no extra bands. */
+  .sw-stage .frame .sw-media{position:relative;display:inline-flex;max-width:100%;max-height:100%}
+  .sw-stage .frame .sw-media img{max-width:100%;max-height:100%;width:auto;height:auto;display:block}
+  .sw-stage .frame .sw-media iframe.sw-video{position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none}
 
   /* caption top-left: Eyebrow / Title / Subtitle - aligned with image top */
   .sw-caption{position:absolute;left:clamp(24px,5vw,80px);top:clamp(120px,15vh,170px);z-index:6;
@@ -785,8 +800,8 @@
 
   <main>
     <!-- LANDING -->
-    <section class="page is-active" id="landing" data-sw='[{&quot;name&quot;: &quot;Holy Communion&quot;, &quot;meta&quot;: &quot;Performance \u00b7 2024&quot;, &quot;cat&quot;: &quot;Performance&quot;, &quot;year&quot;: &quot;2024&quot;}, {&quot;name&quot;: &quot;Butoh Experiment&quot;, &quot;meta&quot;: &quot;Performance \u00b7 2023&quot;, &quot;cat&quot;: &quot;Performance&quot;, &quot;year&quot;: &quot;2023&quot;}, {&quot;name&quot;: &quot;Zero-Case Policy&quot;, &quot;meta&quot;: &quot;Performance \u00b7 2021&quot;, &quot;cat&quot;: &quot;Performance&quot;, &quot;year&quot;: &quot;2021&quot;}, {&quot;name&quot;: &quot;Cornelius&quot;, &quot;meta&quot;: &quot;Chillout Music Festival \u00b7 2025&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2025&quot;}, {&quot;name&quot;: &quot;someshiit \u5c71\u59c6&quot;, &quot;meta&quot;: &quot;Chillout Music Festival \u00b7 2025&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2025&quot;}, {&quot;name&quot;: &quot;Elephant Gym&quot;, &quot;meta&quot;: &quot;Bristol \u00b7 2024&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2024&quot;}, {&quot;name&quot;: &quot;Hillsong&quot;, &quot;meta&quot;: &quot;London \u00b7 2022&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2022&quot;}, {&quot;name&quot;: &quot;The Hope&quot;, &quot;meta&quot;: &quot;Taipei \u00b7 2021&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2021&quot;}, {&quot;name&quot;: &quot;Mosaic&quot;, &quot;meta&quot;: &quot;Hollywood \u00b7 2018\u20132020&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2018\u20132020&quot;}, {&quot;name&quot;: &quot;Kenya Slum&quot;, &quot;meta&quot;: &quot;Nairobi \u00b7 2023&quot;, &quot;cat&quot;: &quot;Photo-Journalism&quot;, &quot;year&quot;: &quot;2023&quot;}, {&quot;name&quot;: &quot;Slava Ukraini&quot;, &quot;meta&quot;: &quot;London \u00b7 2022&quot;, &quot;cat&quot;: &quot;Photo-Journalism&quot;, &quot;year&quot;: &quot;2022&quot;}, {&quot;name&quot;: &quot;Hong Kong Protest&quot;, &quot;meta&quot;: &quot;Hong Kong \u00b7 2019&quot;, &quot;cat&quot;: &quot;Photo-Journalism&quot;, &quot;year&quot;: &quot;2019&quot;}, {&quot;name&quot;: &quot;@0821tingting&quot;, &quot;meta&quot;: &quot;Portrait \u00b7 2022&quot;, &quot;cat&quot;: &quot;Portraiture&quot;, &quot;year&quot;: &quot;2022&quot;}, {&quot;name&quot;: &quot;Duality Within&quot;, &quot;meta&quot;: &quot;Portrait \u00b7 2021&quot;, &quot;cat&quot;: &quot;Portraiture&quot;, &quot;year&quot;: &quot;2021&quot;}, {&quot;name&quot;: &quot;In Mood For Smoke&quot;, &quot;meta&quot;: &quot;Portrait \u00b7 2021&quot;, &quot;cat&quot;: &quot;Portraiture&quot;, &quot;year&quot;: &quot;2021&quot;}, {&quot;name&quot;: &quot;Tatiana&quot;, &quot;meta&quot;: &quot;Portrait \u00b7 2020&quot;, &quot;cat&quot;: &quot;Portraiture&quot;, &quot;year&quot;: &quot;2020&quot;}, {&quot;name&quot;: &quot;Julian and Judy&quot;, &quot;meta&quot;: &quot;Engagement Session \u00b7 2025&quot;, &quot;cat&quot;: &quot;Wedding&quot;, &quot;year&quot;: &quot;2025&quot;}, {&quot;name&quot;: &quot;Daniel and Juny&quot;, &quot;meta&quot;: &quot;Taiwan \u00b7 2021&quot;, &quot;cat&quot;: &quot;Wedding&quot;, &quot;year&quot;: &quot;2021&quot;}]'>
-      <div class="sw-scroll proj-scroll" style="height:678vh">
+    <section class="page is-active" id="landing" data-sw='[{&quot;name&quot;: &quot;Holy Communion&quot;, &quot;meta&quot;: &quot;Performance \u00b7 2024&quot;, &quot;cat&quot;: &quot;Performance&quot;, &quot;year&quot;: &quot;2024&quot;}, {&quot;name&quot;: &quot;Butoh Experiment&quot;, &quot;meta&quot;: &quot;Performance \u00b7 2023&quot;, &quot;cat&quot;: &quot;Performance&quot;, &quot;year&quot;: &quot;2023&quot;}, {&quot;name&quot;: &quot;Zero-Case Policy&quot;, &quot;meta&quot;: &quot;Performance \u00b7 2021&quot;, &quot;cat&quot;: &quot;Performance&quot;, &quot;year&quot;: &quot;2021&quot;}, {&quot;name&quot;: &quot;Cornelius&quot;, &quot;meta&quot;: &quot;Chillout Music Festival \u00b7 2025&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2025&quot;}, {&quot;name&quot;: &quot;someshiit \u5c71\u59c6&quot;, &quot;meta&quot;: &quot;Chillout Music Festival \u00b7 2025&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2025&quot;}, {&quot;name&quot;: &quot;Elephant Gym&quot;, &quot;meta&quot;: &quot;Bristol \u00b7 2024&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2024&quot;}, {&quot;name&quot;: &quot;Hillsong&quot;, &quot;meta&quot;: &quot;London \u00b7 2022&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2022&quot;}, {&quot;name&quot;: &quot;The Hope&quot;, &quot;meta&quot;: &quot;Taipei \u00b7 2021&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2021&quot;}, {&quot;name&quot;: &quot;Mosaic&quot;, &quot;meta&quot;: &quot;Hollywood \u00b7 2018\u20132020&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2018\u20132020&quot;}, {&quot;name&quot;: &quot;Kenya Slum&quot;, &quot;meta&quot;: &quot;Nairobi \u00b7 2023&quot;, &quot;cat&quot;: &quot;Photo-Journalism&quot;, &quot;year&quot;: &quot;2023&quot;}, {&quot;name&quot;: &quot;Slava Ukraini&quot;, &quot;meta&quot;: &quot;London \u00b7 2022&quot;, &quot;cat&quot;: &quot;Photo-Journalism&quot;, &quot;year&quot;: &quot;2022&quot;}, {&quot;name&quot;: &quot;Hong Kong Protest&quot;, &quot;meta&quot;: &quot;Hong Kong \u00b7 2019&quot;, &quot;cat&quot;: &quot;Photo-Journalism&quot;, &quot;year&quot;: &quot;2019&quot;}, {&quot;name&quot;: &quot;@0821tingting&quot;, &quot;meta&quot;: &quot;Portrait \u00b7 2022&quot;, &quot;cat&quot;: &quot;Portraiture&quot;, &quot;year&quot;: &quot;2022&quot;}, {&quot;name&quot;: &quot;Duality Within&quot;, &quot;meta&quot;: &quot;Portrait \u00b7 2021&quot;, &quot;cat&quot;: &quot;Portraiture&quot;, &quot;year&quot;: &quot;2021&quot;}, {&quot;name&quot;: &quot;In Mood For Smoke&quot;, &quot;meta&quot;: &quot;Portrait \u00b7 2021&quot;, &quot;cat&quot;: &quot;Portraiture&quot;, &quot;year&quot;: &quot;2021&quot;}, {&quot;name&quot;: &quot;Tatiana&quot;, &quot;meta&quot;: &quot;Portrait \u00b7 2020&quot;, &quot;cat&quot;: &quot;Portraiture&quot;, &quot;year&quot;: &quot;2020&quot;}, {&quot;name&quot;: &quot;Julian and Judy&quot;, &quot;meta&quot;: &quot;Engagement Session \u00b7 2025&quot;, &quot;cat&quot;: &quot;Wedding&quot;, &quot;year&quot;: &quot;2025&quot;}, {&quot;name&quot;: &quot;Daniel and Juny&quot;, &quot;meta&quot;: &quot;Taiwan \u00b7 2021&quot;, &quot;cat&quot;: &quot;Wedding&quot;, &quot;year&quot;: &quot;2021&quot;}, {&quot;name&quot;: &quot;Making Ordinary Sense&quot;, &quot;meta&quot;: &quot;PDP Year 2 Project \u00b7 2024&quot;, &quot;cat&quot;: &quot;Archive&quot;, &quot;year&quot;: &quot;2024&quot;}, {&quot;name&quot;: &quot;Girlfriend&quot;, &quot;meta&quot;: &quot;PDP Year 2 Music Video \u00b7 2024&quot;, &quot;cat&quot;: &quot;Archive&quot;, &quot;year&quot;: &quot;2024&quot;}]'>
+      <div class="sw-scroll proj-scroll" style="height:753vh">
         <div class="proj-viewport sw-viewport">
           <div class="sw-caption">
             <span class="sw-eyebrow">Selected Works</span>
@@ -812,6 +827,8 @@
             <div class="frame" data-nav="pt-tatiana"><img src="images/portraiture/tatiana_2021-08.jpg" alt="Tatiana" loading="lazy"></div>
             <div class="frame" data-nav="julianjudy"><img src="images/wedding-engagement/Julian%26Judy_engagement-06.jpg" alt="Julian and Judy" loading="lazy"></div>
             <div class="frame" data-nav="danieljuny"><img src="images/wedding-engagement/DJ-Juny_engagement-04.jpg" alt="Daniel and Juny" loading="lazy"></div>
+            <div class="frame" data-nav="archive" data-video="2e55db6d182f6cb0667fa118b13784de"><span class="sw-media"><img src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/thumbnails/thumbnail.jpg?width=1280" alt="Making Ordinary Sense" loading="lazy"></span></div>
+            <div class="frame" data-nav="archive" data-video="bd75fdf49d96c125ba7dc1fcdc705fd5"><span class="sw-media"><img src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/bd75fdf49d96c125ba7dc1fcdc705fd5/thumbnails/thumbnail.jpg?width=1280" alt="Girlfriend" loading="lazy"></span></div>
           </div>
         </div>
       </div>
@@ -853,6 +870,8 @@
         <button class="rt" data-idx="15"><img class="rt-img" src="images/portraiture/tatiana_2021-08.jpg" alt=""></button>
         <button class="rt" data-idx="16"><img class="rt-img" src="images/wedding-engagement/Julian%26Judy_engagement-06.jpg" alt=""></button>
         <button class="rt" data-idx="17"><img class="rt-img" src="images/wedding-engagement/DJ-Juny_engagement-04.jpg" alt=""></button>
+        <button class="rt" data-idx="18"><img class="rt-img" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/thumbnails/thumbnail.jpg?width=240" alt=""></button>
+        <button class="rt" data-idx="19"><img class="rt-img" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/bd75fdf49d96c125ba7dc1fcdc705fd5/thumbnails/thumbnail.jpg?width=240" alt=""></button>
         <div class="rail-cursor"></div>
       </nav>
     </section>
@@ -928,18 +947,18 @@
         <!-- ARCHIVE: older / hidden work. Same scroll-snap panels as Projects.
              Video covers only for now; no detail pages yet (add later like Projects). -->
         <section class="page" id="archive">
-      <div class="proj-panel" style="cursor:default">
+      <div class="proj-panel is-video" style="cursor:default">
         <iframe class="proj-panel-bg" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/iframe?autoplay=1&muted=1&loop=1&controls=0&preload=auto" allow="autoplay; fullscreen" allowfullscreen style="pointer-events:none"></iframe>
         <div class="proj-panel-overlay"></div>
         <div class="proj-panel-info">
           <div class="proj-panel-text">
-            <span class="proj-panel-title">Making Sense of My Ordinary Life (feat. Jay Lin)</span>
+            <span class="proj-panel-title">Making Ordinary Sense</span>
             <span class="proj-panel-meta">PDP Year 2 Project · 2024</span>
           </div>
         </div>
       </div>
 
-      <div class="proj-panel" style="cursor:default">
+      <div class="proj-panel is-video" style="cursor:default">
         <iframe class="proj-panel-bg" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/bd75fdf49d96c125ba7dc1fcdc705fd5/iframe?autoplay=1&muted=1&loop=1&controls=0&preload=auto" allow="autoplay; fullscreen" allowfullscreen style="pointer-events:none"></iframe>
         <div class="proj-panel-overlay"></div>
         <div class="proj-panel-info">
@@ -2513,7 +2532,27 @@
     function apply(idx){
       if(land._swidx===idx) return;
       land._swidx=idx;
-      frames.forEach(function(fr,i){ fr.classList.toggle("show", i===idx); });
+      frames.forEach(function(fr,i){
+        var on = (i===idx);
+        fr.classList.toggle("show", on);
+        // Video works: play a live muted loop ONLY while this is the active slide,
+        // and tear it down on leave so just one stream is ever live (poster shows otherwise).
+        var vid = fr.getAttribute("data-video");
+        if(vid){
+          var box = fr.querySelector(".sw-media") || fr;
+          var existing = box.querySelector("iframe.sw-video");
+          if(on && !existing){
+            var ifr = document.createElement("iframe");
+            ifr.className = "sw-video";
+            ifr.src = "https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/"+vid+"/iframe?autoplay=1&muted=1&loop=1&controls=0&preload=auto";
+            ifr.setAttribute("allow","autoplay; fullscreen");
+            ifr.setAttribute("allowfullscreen","");
+            box.appendChild(ifr);
+          } else if(!on && existing){
+            existing.remove();
+          }
+        }
+      });
       thumbs.forEach(function(t,i){ t.classList.toggle("active", i===idx); });
       var d=data[idx]||{};
       if(capName) capName.textContent=d.name||"";
