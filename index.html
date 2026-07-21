@@ -148,6 +148,8 @@
 
   /* ---------- Projects: full-viewport scroll panels (frequent-headache style) ---------- */
   #projects,#archive{overflow-y:scroll;scroll-snap-type:y mandatory;height:100vh;scroll-behavior:smooth}
+  /* Archive only: pure black rather than the site's --ink (#0B0B0C) */
+  #archive,#archive .proj-panel{background:#000}
   body.on-proj-scroll #projects,body.on-proj-scroll #archive{overflow-y:scroll}
   .proj-panel{position:relative;height:100vh;scroll-snap-align:start;scroll-snap-stop:always;
     overflow:hidden;cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end;
@@ -155,9 +157,10 @@
   .proj-panel-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
     display:block;z-index:0;pointer-events:none}
   .proj-panel iframe.proj-panel-bg{border:none}
-  /* Archive cover videos keep the video's own framing (letterbox on the dark panel),
-     matching how they read before — only the quality changes to native MP4. */
-  .proj-panel.is-video video.proj-panel-bg{object-fit:contain}
+  /* Archive cover videos fill the panel (like the image panels). With `contain` the
+     two clips letterboxed to their own ratios — 2.29:1 vs 1.78:1 — so the imagery
+     ended at different heights and the titles read as misaligned. */
+  .proj-panel.is-video video.proj-panel-bg{object-fit:cover}
   .proj-panel-overlay{position:absolute;inset:0;z-index:1;
     background:linear-gradient(to top,rgba(11,11,12,0.72) 0%,transparent 50%)}
   .proj-panel-info{position:relative;z-index:2;padding:clamp(24px,4vw,48px);
