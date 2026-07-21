@@ -803,6 +803,9 @@
     opacity:0;transition:opacity .55s ease;pointer-events:none;cursor:pointer}
   .sw-stage .frame.show{opacity:1;pointer-events:auto}
   .sw-stage .frame img{max-width:100%;max-height:100%;width:auto;height:auto;display:block}
+  /* <picture> (art-directed covers) must not become the flex child itself,
+     or the img's sizing rules above/below stop resolving. */
+  .sw-stage .frame picture{display:contents}
   /* Video works: poster <img> defines the box (its natural ratio), and the live
      iframe overlays it exactly (inset:0), so the video fills with no extra bands. */
   .sw-stage .frame .sw-media{position:relative;display:inline-flex;max-width:100%;max-height:100%}
@@ -876,7 +879,7 @@
             <span class="sw-meta" data-sw="meta">Performance · 2024</span>
           </div>
           <div class="proj-stage sw-stage">
-            <div class="frame show" data-nav="proj-holycommunion"><img src="/images/projects/holycommunion_horizontal-16-9cover.jpg" alt="Holy Communion" loading="eager"></div>
+            <div class="frame show" data-nav="proj-holycommunion"><picture><source media="(max-width:768px)" srcset="/images/projects/holycommunion_vertical_topdown.jpg"><img src="/images/projects/holycommunion_horizontal-16-9cover.jpg" alt="Holy Communion" loading="eager"></picture></div>
             <div class="frame" data-nav="proj-butoh"><img src="/images/projects/butoh_nigel_-1.jpg" alt="Butoh Experiment" loading="lazy"></div>
             <div class="frame" data-nav="proj-zerocase"><img src="/images/projects/0-case-policy-5.jpg" alt="Zero-Case Policy" loading="lazy"></div>
             <div class="frame" data-nav="gig-cornelius"><img src="/images/Concerts/cornelius_chillout_-2.jpg" alt="Cornelius" loading="lazy"></div>
