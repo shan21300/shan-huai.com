@@ -479,7 +479,7 @@
   .proj-detail-hero{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;margin-bottom:64px}
   /* Art-directed cover: a portrait source is swapped in on mobile (see <picture>),
      so drop the 16:9 crop there and let it run at its natural ratio. */
-  @media(max-width:640px){.proj-detail-hero{aspect-ratio:auto;height:auto}}
+  @media(max-width:768px){.proj-detail-hero{aspect-ratio:auto;height:auto}}
   .proj-detail-title{font-family:"Cormorant Garamond";font-weight:300;font-size:clamp(41px,6.9vw,101px);
     line-height:1;letter-spacing:-.02em;margin-bottom:8px;text-align:center}
   .proj-detail-sub{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;
@@ -803,9 +803,9 @@
     opacity:0;transition:opacity .55s ease;pointer-events:none;cursor:pointer}
   .sw-stage .frame.show{opacity:1;pointer-events:auto}
   .sw-stage .frame img{max-width:100%;max-height:100%;width:auto;height:auto;display:block}
-  /* <picture> (art-directed covers) must not become the flex child itself,
-     or the img's sizing rules above/below stop resolving. */
-  .sw-stage .frame picture{display:contents}
+  /* <picture> wrappers (art-directed covers) must stay out of the box tree, or they
+     become the flex/positioned child and the img's own sizing rules stop resolving. */
+  picture{display:contents}
   /* Video works: poster <img> defines the box (its natural ratio), and the live
      iframe overlays it exactly (inset:0), so the video fills with no extra bands. */
   .sw-stage .frame .sw-media{position:relative;display:inline-flex;max-width:100%;max-height:100%}
@@ -922,7 +922,7 @@
         </div>
       </div>
       <nav class="rail sw-rail" aria-label="thumbnails">
-        <button class="rt active" data-idx="0"><img class="rt-img" src="/images/projects/holycommunion_horizontal-16-9cover.jpg" alt=""></button>
+        <button class="rt active" data-idx="0"><picture><source media="(max-width:768px)" srcset="/images/projects/holycommunion_vertical_topdown.jpg"><img class="rt-img" src="/images/projects/holycommunion_horizontal-16-9cover.jpg" alt=""></picture></button>
         <button class="rt" data-idx="1"><img class="rt-img" src="/images/projects/butoh_nigel_-1.jpg" alt=""></button>
         <button class="rt" data-idx="2"><img class="rt-img" src="/images/projects/0-case-policy-5.jpg" alt=""></button>
         <button class="rt" data-idx="3"><img class="rt-img" src="/images/Concerts/cornelius_chillout_-2.jpg" alt=""></button>
@@ -977,7 +977,7 @@
       <!-- Each panel: swap src on .proj-panel-bg (img or iframe), update title/meta/href -->
 
       <div class="proj-panel" data-nav="proj-holycommunion" style="cursor:pointer">
-        <img class="proj-panel-bg" src="/images/projects/holycommunion_horizontal-16-9cover.jpg" alt="Holy Communion: A Reality Check" loading="lazy">
+        <picture><source media="(max-width:768px)" srcset="/images/projects/holycommunion_vertical_topdown.jpg"><img class="proj-panel-bg" src="/images/projects/holycommunion_horizontal-16-9cover.jpg" alt="Holy Communion: A Reality Check" loading="lazy"></picture>
         <div class="proj-panel-overlay"></div>
         <div class="proj-panel-info">
           <div class="proj-panel-text">
@@ -2057,7 +2057,7 @@
         <button class="back" data-nav="projects" style="margin-bottom:40px">← Projects</button>
 
         <picture>
-          <source media="(max-width:640px)" srcset="/images/projects/holycommunion_vertical_topdown.jpg">
+          <source media="(max-width:768px)" srcset="/images/projects/holycommunion_vertical_topdown.jpg">
           <img loading="lazy" class="proj-detail-hero" src="/images/projects/holycommunion_horizontal-16-9cover.jpg" alt="Holy Communion: A Reality Check">
         </picture>
 
