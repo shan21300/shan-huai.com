@@ -176,7 +176,9 @@
      black bands. On mobile, make video panels horizontal 16:9 bars (full-bleed
      width) stacked as a scrollable list, so the video fills edge-to-edge. */
   @media(max-width:768px){
-    #archive{scroll-snap-type:none;height:100vh;height:100svh;
+    /* .is-active so this ID rule doesn't override .page{display:none} and leave the
+       archive visible on other pages (it was showing stacked at the foot of landing). */
+    #archive.is-active{scroll-snap-type:none;height:100vh;height:100svh;
       display:flex;flex-direction:column;justify-content:center;gap:4px;
       padding:96px 0 24px}
     #archive .proj-panel.is-video{height:auto;aspect-ratio:16/9;
