@@ -510,6 +510,8 @@
     display:flex;align-items:center;justify-content:center;color:var(--paper);font-size:15px;
     border:1.5px solid var(--paper);background:rgba(11,11,12,.4);
     -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+  /* Desktop: show the before/after slider at half size (mobile stays full width) */
+  @media(min-width:769px){ .custom-image-slider{max-width:50%} }
 
   /* Mobile: back button sits in the space between header logo and image top */
   @media(max-width:640px){
