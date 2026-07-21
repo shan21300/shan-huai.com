@@ -491,10 +491,11 @@
   .proj-detail-body strong{color:var(--paper);font-weight:500}
   .proj-detail-h3{font-family:"Cormorant Garamond";font-weight:300;font-size:clamp(25px,3.2vw,44px);
     letter-spacing:-.01em;margin-bottom:16px;color:var(--paper)}
-  .proj-detail-img-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:40px 0}
-  .proj-detail-img-pair img,.proj-detail-img-full img{width:100%;display:block;object-fit:cover}
+  /* Images keep their ORIGINAL aspect ratio (no 4:3 crop); align-items:start so
+     differing heights sit flush at the top of each grid row. */
+  .proj-detail-img-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:40px 0;align-items:start}
+  .proj-detail-img-pair img,.proj-detail-img-full img{width:100%;height:auto;display:block}
   .proj-detail-img-full{margin:40px 0;max-width:64ch}
-  .proj-detail-img-pair img{aspect-ratio:4/3;object-fit:cover}
   @media(max-width:640px){.proj-detail-img-pair{grid-template-columns:1fr}}
   /* "Cross" moodboard layout: one image per centred row, row 2 twice as wide.
      Every image is a % of this ONE container, so all four scale together on resize
