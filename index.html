@@ -497,6 +497,20 @@
   .proj-detail-img-pair img{aspect-ratio:4/3;object-fit:cover}
   @media(max-width:640px){.proj-detail-img-pair{grid-template-columns:1fr}}
 
+  /* Before/after comparison slider (drag the handle) */
+  .custom-image-slider{position:relative;width:100%;margin:40px 0;overflow:hidden;
+    line-height:0;user-select:none;-webkit-user-select:none;touch-action:none;background:var(--ink)}
+  .custom-image-slider .slider-before{display:block;width:100%;height:auto}
+  .custom-image-slider .slider-after{position:absolute;inset:0;width:100%;height:100%;
+    object-fit:cover;clip-path:inset(0 50% 0 0);-webkit-clip-path:inset(0 50% 0 0)}
+  .custom-image-slider .slider-handle{position:absolute;top:0;bottom:0;left:50%;width:2px;
+    transform:translateX(-50%);background:var(--paper);cursor:ew-resize;z-index:3;touch-action:none}
+  .custom-image-slider .slider-handle::after{content:"⟺";position:absolute;top:50%;left:50%;
+    transform:translate(-50%,-50%);width:42px;height:42px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;color:var(--paper);font-size:15px;
+    border:1.5px solid var(--paper);background:rgba(11,11,12,.4);
+    -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+
   /* Mobile: back button sits in the space between header logo and image top */
   @media(max-width:640px){
     .proj-detail-wrap .back{top:clamp(78px,10vh,100px)}
@@ -963,13 +977,70 @@
         </div>
       </div>
 
-      <div class="proj-panel is-video" style="cursor:default">
+      <div class="proj-panel is-video" data-nav="girlfriend" style="cursor:pointer">
         <video class="proj-panel-bg" poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/bd75fdf49d96c125ba7dc1fcdc705fd5/thumbnails/thumbnail.jpg?width=1280" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/bd75fdf49d96c125ba7dc1fcdc705fd5/downloads/default.mp4" autoplay muted loop playsinline preload="none"></video>
         <div class="proj-panel-overlay"></div>
         <div class="proj-panel-info">
           <div class="proj-panel-text">
             <span class="proj-panel-title">Girlfriend</span>
             <span class="proj-panel-meta">PDP Year 2 Music Video · 2024</span>
+          </div>
+          <span class="proj-panel-arrow" aria-hidden="true">↗</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="page proj-detail" id="girlfriend">
+      <div class="pinfo">
+        <div class="pinfo-card">
+          <div class="pinfo-head">
+            <div class="pinfo-tabs"><span class="pinfo-tab is-on" data-view="info">Info</span><span class="pinfo-tab" data-view="desc">Description</span></div>
+            <span class="pinfo-toggle" role="switch" aria-label="Toggle floater" aria-checked="false"></span>
+          </div>
+          <div class="pinfo-body">
+            <div class="pinfo-scroll">
+              <div class="pinfo-view is-on" data-view="info">
+                <div class="pinfo-credits">
+                  <div class="pinfo-ck">Project</div><div class="pinfo-cv">Girlfriend</div>
+                  <div class="pinfo-ck">Artist</div><div class="pinfo-cv">Canty</div>
+                  <div class="pinfo-ck">Context</div><div class="pinfo-cv">CSM PDP Year 2 Music Video</div>
+                  <div class="pinfo-ck">Year</div><div class="pinfo-cv">2024</div>
+                </div>
+              </div>
+              <div class="pinfo-view" data-view="desc">
+                <div class="pinfo-desc"><p>A music video for <em>Canty</em> built on an idea of captivity drawn from the lyrics — a spectrum of emotion from sensuality and desire to jealousy and possessiveness, and the duality found in romantic relationships.</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="proj-detail-wrap">
+        <button class="back" data-nav="archive" style="margin-bottom:40px">← Archive</button>
+
+        <img loading="lazy" class="proj-detail-hero" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/bd75fdf49d96c125ba7dc1fcdc705fd5/thumbnails/thumbnail.jpg?width=1280" alt="Girlfriend by Canty">
+
+        <h1 class="proj-detail-title">Girlfriend</h1>
+        <span class="proj-detail-sub">Canty &nbsp;·&nbsp; CSM PDP Year 2 Music Video &nbsp;·&nbsp; 2024</span>
+
+        <div class="proj-detail-section">
+          <span class="proj-detail-section-label">Overview</span>
+          <div class="proj-detail-body">
+            <p>Our project begins with an idea of captivity drawn from Canty's lyrics. It depicts a spectrum of emotions, from sensuality and desire to jealousy and possessiveness, reflecting the complexities of human relationships and emotions.</p>
+            <p>The singer's deep affection and attachment are emphasized, and the song revolves around the intense emotions in the singer's life. It reflects the complexity of romantic relationships — between right and wrong, love and hate — and the nature of duality found in human complexity.</p>
+            <p>This portfolio showcases the diagnoses of the issues I encountered on set and outlines the steps I took to resolve them.</p>
+          </div>
+        </div>
+
+        <div class="proj-detail-section">
+          <span class="proj-detail-section-label">Color Grading — Scene #1: Cinema</span>
+          <div class="proj-detail-body">
+            <p>Drag the handle to compare the graded frame against the original footage.</p>
+          </div>
+          <div class="custom-image-slider" id="customImageSlider">
+            <img class="slider-before" src="https://i.postimg.cc/MzRmpY63/story2.jpg" alt="Graded">
+            <img class="slider-after" src="https://i.postimg.cc/080FXw4j/storyunedited.jpg" alt="Original">
+            <div class="slider-handle" aria-hidden="true"></div>
           </div>
         </div>
       </div>
@@ -2249,7 +2320,8 @@
     "pt-inmoodforsmoke":"/portraiture/in-mood-for-smoke",
     "pt-tatiana":"/portraiture/tatiana",
     "julianjudy":"/wedding/julian-and-judy",
-    "danieljuny":"/wedding/daniel-and-juny"
+    "danieljuny":"/wedding/daniel-and-juny",
+    "girlfriend":"/archive/girlfriend"
     // note: gig-mosaic-2, julianjudywedding are navigation-only (page 2), no URL
   };
   var PATH2ID = {};
@@ -2937,6 +3009,43 @@
   })();
 
 
+</script>
+
+<!-- Before/after comparison slider (Girlfriend › Color Grading) -->
+<script>
+(function(){
+  var container=document.getElementById("customImageSlider");
+  if(!container) return;
+  var after=container.querySelector(".slider-after");
+  var handle=container.querySelector(".slider-handle");
+  if(!after||!handle) return;
+  var dragging=false;
+  function setPos(pct){
+    pct=Math.max(0,Math.min(100,pct));
+    handle.style.left=pct+"%";
+    var clip="inset(0 "+(100-pct)+"% 0 0)";
+    after.style.clipPath=clip; after.style.webkitClipPath=clip;
+  }
+  setPos(50);
+  function fromClientX(cx){
+    var rect=container.getBoundingClientRect();
+    if(!rect.width) return;
+    setPos(((cx-rect.left)/rect.width)*100);
+  }
+  handle.addEventListener("mousedown",function(e){ dragging=true; e.preventDefault(); });
+  window.addEventListener("mouseup",function(){ dragging=false; });
+  window.addEventListener("mousemove",function(e){
+    if(!dragging) return;
+    var cx=e.clientX; window.requestAnimationFrame(function(){ fromClientX(cx); });
+  });
+  handle.addEventListener("touchstart",function(){ dragging=true; },{passive:true});
+  window.addEventListener("touchend",function(){ dragging=false; });
+  container.addEventListener("touchmove",function(e){
+    if(!dragging) return;
+    e.preventDefault();
+    var cx=e.touches[0].clientX; window.requestAnimationFrame(function(){ fromClientX(cx); });
+  },{passive:false});
+})();
 </script>
 </body>
 </html>
