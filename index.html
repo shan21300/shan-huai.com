@@ -496,6 +496,11 @@
   .proj-detail-img-full{margin:40px 0;max-width:64ch}
   .proj-detail-img-pair img{aspect-ratio:4/3;object-fit:cover}
   @media(max-width:640px){.proj-detail-img-pair{grid-template-columns:1fr}}
+  /* "Cross" moodboard layout: one image per centred row, the second row twice as wide */
+  .proj-detail-cross{--cross-w:360px;display:flex;flex-direction:column;align-items:center;
+    gap:14px;margin:40px 0}
+  .proj-detail-cross img{display:block;width:100%;height:auto;max-width:var(--cross-w)}
+  .proj-detail-cross .cross-wide{max-width:calc(var(--cross-w) * 2)}
 
   /* Before/after comparison slider (drag the handle) */
   .custom-image-slider{position:relative;width:100%;margin:40px 0;overflow:hidden;
@@ -1993,13 +1998,11 @@
         <!-- Moodboard & Concepts -->
         <div class="proj-detail-section">
           <span class="proj-detail-section-label">Moodboard &amp; Concepts</span>
-          <div class="proj-detail-img-pair">
+          <div class="proj-detail-cross">
             <img src="https://images.squarespace-cdn.com/content/v1/64b8effc2a267405a4c07304/56e7081b-491d-41c5-b294-39b1eeb5d41a/Holy-Eucharist-scaled.jpg" alt="Holy Eucharist" loading="lazy">
-            <img src="https://images.squarespace-cdn.com/content/v1/64b8effc2a267405a4c07304/eaf539d1-0bea-42ce-b7cc-714dd30f0a30/Leonardo_da_Vinci__1452-1519__-_The_Last_Supper__1495-1498.jpg" alt="The Last Supper — Leonardo da Vinci" loading="lazy">
-          </div>
-          <div class="proj-detail-img-pair">
+            <img class="cross-wide" src="https://images.squarespace-cdn.com/content/v1/64b8effc2a267405a4c07304/eaf539d1-0bea-42ce-b7cc-714dd30f0a30/Leonardo_da_Vinci__1452-1519__-_The_Last_Supper__1495-1498.jpg" alt="The Last Supper — Leonardo da Vinci" loading="lazy">
+            <img src="https://images.squarespace-cdn.com/content/v1/64b8effc2a267405a4c07304/389a8503-3033-480d-934e-b0a795ee1feb/Screenshot+2025-04-23+at+10.09.36%E2%80%AFPM.png" alt="Global Communion Service" loading="lazy">
             <img src="https://images.squarespace-cdn.com/content/v1/64b8effc2a267405a4c07304/7b78b5dd-3f98-4246-82cd-fee085fc584f/Platon_Cave_Sanraedam_1604.jpg" alt="Plato's Cave — Sanraedam 1604" loading="lazy">
-            <img src="https://images.squarespace-cdn.com/content/v1/64b8effc2a267405a4c07304/389a8503-3033-480d-934e-b0a795ee1feb/Screenshot+2025-04-23+at+10.09.36%E2%80%AFPM.png" alt="Digital reference" loading="lazy">
           </div>
 
           <div class="proj-detail-section" style="margin-top:56px;margin-bottom:40px">
