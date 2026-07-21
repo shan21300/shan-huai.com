@@ -2277,12 +2277,31 @@
 
   function swap(target){
     if(target===current) return;
-    document.getElementById(current).classList.remove("is-active");
-    document.getElementById(target).classList.add("is-active");
+    var curEl=document.getElementById(current);
+    // stop any cover videos on the page we're leaving
+    curEl.querySelectorAll("video").forEach(function(v){ try{ v.pause(); }catch(e){} });
+    curEl.classList.remove("is-active");
+    var nextEl=document.getElementById(target);
+    nextEl.classList.add("is-active");
     window.scrollTo(0,0); current=target; setLanding(target);
     applyViewMode(target);
     pushRoute(target);
+    // start cover videos on the page we're entering (preload=none loads on play)
+    nextEl.querySelectorAll("video.proj-panel-bg").forEach(function(v){
+      var p=v.play(); if(p&&p.catch) p.catch(function(){});
+    });
   }
+  // Mobile browsers pause muted video on tab/app switch and don't always resume;
+  // re-play the active page's cover videos when we come back into view.
+  document.addEventListener("visibilitychange", function(){
+    if(document.hidden) return;
+    var cur=document.getElementById(current);
+    if(!cur) return;
+    cur.querySelectorAll("video.proj-panel-bg, video.sw-video").forEach(function(v){
+      var p=v.play(); if(p&&p.catch) p.catch(function(){});
+    });
+  });
+
   function go(target){                 // curtain transition (logo -> landing)
     if(target===current) return;
     if(reduce || !hasGSAP){ swap(target); return; }
@@ -2502,20 +2521,6 @@
     else initPinfos();
   })();
 
-
-  /* ---- Archive cover videos: pause when off-screen (only the visible one plays) ---- */
-  (function(){
-    var vids = document.querySelectorAll(".proj-panel.is-video video.proj-panel-bg");
-    if(!vids.length || !("IntersectionObserver" in window)) return;
-    var io = new IntersectionObserver(function(entries){
-      entries.forEach(function(e){
-        var v = e.target;
-        if(e.isIntersecting){ var p=v.play(); if(p&&p.catch) p.catch(function(){}); }
-        else { v.pause(); }
-      });
-    }, {threshold:0.4});
-    vids.forEach(function(v){ io.observe(v); });
-  })();
 
   /* ---------------- Boot ---------------- */
   function boot(){ reveal(); }
