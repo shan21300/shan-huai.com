@@ -66,7 +66,11 @@
   header{position:fixed;top:0;left:0;right:0;z-index:40;
     display:flex;align-items:center;justify-content:space-between;
     padding:calc(clamp(14px,2vw,23px) + env(safe-area-inset-top,0px)) calc(clamp(48px,8vw,110px) + env(safe-area-inset-right,0px)) clamp(80px,10vw,140px) calc(clamp(48px,8vw,110px) + env(safe-area-inset-left,0px));
-    background:transparent;pointer-events:none;}
+    background:transparent;pointer-events:none;
+    transition:transform .4s cubic-bezier(.22,1,.36,1);will-change:transform}
+  /* Collapse the header upward while reading (scrolling down); it returns on scroll up. */
+  body.hdr-hidden header{transform:translateY(-100%)}
+  @media(prefers-reduced-motion:reduce){body.hdr-hidden header{transform:none}}
   header::before{content:"";position:absolute;inset:0;z-index:-1;
     background:rgba(11,11,12,0.62);
     -webkit-backdrop-filter:blur(16px);
@@ -2631,6 +2635,7 @@
     var nextEl=document.getElementById(target);
     nextEl.classList.add("is-active");
     window.scrollTo(0,0); current=target; setLanding(target);
+    if(window._hdrReset) window._hdrReset();   // header back down on every page change
     applyViewMode(target);
     pushRoute(target);
     // start cover videos on the page we're entering (preload=none loads on play)
@@ -2865,6 +2870,41 @@
     else initPinfos();
   })();
 
+
+  /* ---- Header collapses upward while scrolling down, returns on scroll up ----
+     The site scrolls in several different containers (window for proj-pages,
+     #projects/#archive, .proj-detail, .snaplist), so listen in the CAPTURE phase:
+     scroll events don't bubble, but capture still sees them from any element. */
+  (function(){
+    var header=document.querySelector("header");
+    if(!header) return;
+    var lastY=0, hidden=false;
+    var SHOW_ABOVE=90;   // always visible near the top of a page
+    var MIN_DELTA=6;     // ignore sub-pixel / jitter
+    function setHidden(v){
+      if(v===hidden) return;
+      hidden=v;
+      document.body.classList.toggle("hdr-hidden", v);
+    }
+    function posOf(t){
+      if(!t || t===window || t===document || t===document.documentElement || t===document.body){
+        return window.scrollY || document.documentElement.scrollTop || 0;
+      }
+      return t.scrollTop || 0;
+    }
+    document.addEventListener("scroll", function(e){
+      // menu covers the page, and the loader intro owns the header — leave it alone
+      if(document.getElementById("loader")) return;
+      var menu=document.getElementById("menu");
+      if(menu && menu.classList.contains("open")) return;
+      var y=posOf(e.target), dy=y-lastY;
+      if(Math.abs(dy)<MIN_DELTA) return;
+      setHidden(y>SHOW_ABOVE && dy>0);
+      lastY=y;
+    }, {capture:true, passive:true});
+    // each page keeps its own scroll position, so reset when navigating
+    window._hdrReset=function(){ lastY=0; setHidden(false); };
+  })();
 
   /* ---------------- Boot ---------------- */
   function boot(){ reveal(); }
