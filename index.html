@@ -2625,6 +2625,8 @@
     });
   }, {threshold:0.1}) : null;
   if(coverIO){ document.querySelectorAll("video.proj-panel-bg").forEach(function(v){ coverIO.observe(v); }); }
+  // the landing carousel lives in a separate top-level IIFE, so share it explicitly
+  window._coverIO = coverIO;
 
   function swap(target){
     if(target===current) return;
@@ -2957,7 +2959,7 @@
             v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
             v.setAttribute("playsinline","");
             box.appendChild(v);
-            if(coverIO) coverIO.observe(v);   // Chrome: play when it's confirmed in view
+            if(window._coverIO) window._coverIO.observe(v);   // Chrome: play when it's confirmed in view
             var p = v.play(); if(p && p.catch) p.catch(function(){});
           } else if(!on && existing){
             existing.remove();
