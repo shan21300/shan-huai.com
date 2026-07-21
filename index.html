@@ -495,6 +495,14 @@
   .proj-detail-body blockquote cite{display:block;font-style:normal;
     font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;
     text-transform:uppercase;color:var(--grey)}
+  /* Small centred caption above a figure (e.g. "captured during work in progress") */
+  .proj-detail-caption{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--grey);text-align:center;margin:0 0 16px}
+  /* Embedded Stream video; .is-portrait for 9:16 clips so they don't dominate */
+  .proj-detail-video{margin:24px auto 40px;width:100%;max-width:760px}
+  .proj-detail-video.is-portrait{max-width:360px}
+  .proj-detail-video iframe{display:block;width:100%;aspect-ratio:16/9;border:0}
+  .proj-detail-video.is-portrait iframe{aspect-ratio:9/16}
   .proj-detail-body ul{margin:0 0 1.4em;padding-left:20px;list-style:disc}
   .proj-detail-body li{margin-bottom:.55em}
   .proj-detail-body li ul{margin:.55em 0 0;list-style:circle}
@@ -2155,6 +2163,12 @@
         <!-- Execution & Work in Progress -->
         <div class="proj-detail-section">
           <span class="proj-detail-section-label">Execution &amp; Work in Progress</span>
+
+          <p class="proj-detail-caption">Captured during the work-in-progress phase</p>
+          <div class="proj-detail-video is-portrait">
+            <iframe src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/124b2a85211417b93f50338e6376f2d4/iframe?autoplay=1&muted=1&loop=1&controls=0&preload=auto" allow="autoplay; fullscreen" allowfullscreen title="Projection mapping illusion — work in progress"></iframe>
+          </div>
+
           <div class="proj-detail-body">
             <p>In performance, this mapped illusion unfolds as a ritual in motion: the bread and wine move from screen to screen, hand to hand, seemingly uninterrupted. Yet the spaces between—the negative space, the borders, the quiet voids—become charged with meaning. These gaps are not just technical, but conceptual. They represent the distance between intention and reception, between tradition and interpretation. The performers' gestures flow across frames, but what's carried through is never entirely whole.</p>
             <p>The act of passing through mediated surfaces reflects how inherited faith is transmitted—ritualized and repeated, but refracted through the conditions of its time. The screen does not simply display; it edits, fragments, and frames. What we receive has already been shaped. In this way, the projections become a reflection of belief itself: visible, moving, continuous, yet always partially obscured by the medium through which it travels.</p>
