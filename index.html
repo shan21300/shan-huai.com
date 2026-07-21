@@ -2275,6 +2275,19 @@
   if(document.readyState === "complete"){ setTimeout(function(){ routeFromLocation(true); }, 80); }
   else { window.addEventListener("load", function(){ setTimeout(function(){ routeFromLocation(true); }, 80); }); }
 
+  // Cover videos: Chrome only allows muted autoplay for IN-VIEW videos and rejects
+  // play() called the instant a section un-hides (before layout settles) -- Safari is
+  // lenient, which is why covers played there but froze on Chrome. So play each cover on
+  // the IntersectionObserver's "visible" callback, when Chrome agrees it's on screen.
+  // PLAY-ONLY: never pause here (a stale initial "not visible" entry must not freeze it);
+  // pausing is explicit -- on nav away (swap) and tab hide (visibilitychange).
+  var coverIO = ("IntersectionObserver" in window) ? new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){ var p=e.target.play(); if(p&&p.catch) p.catch(function(){}); }
+    });
+  }, {threshold:0.1}) : null;
+  if(coverIO){ document.querySelectorAll("video.proj-panel-bg").forEach(function(v){ coverIO.observe(v); }); }
+
   function swap(target){
     if(target===current) return;
     var curEl=document.getElementById(current);
@@ -2573,6 +2586,7 @@
             v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
             v.setAttribute("playsinline","");
             box.appendChild(v);
+            if(coverIO) coverIO.observe(v);   // Chrome: play when it's confirmed in view
             var p = v.play(); if(p && p.catch) p.catch(function(){});
           } else if(!on && existing){
             existing.remove();
