@@ -387,27 +387,31 @@
   .proj-pages{grid-column:3;grid-row:2;justify-self:end;position:static;top:auto;right:auto;margin-left:0;display:flex;gap:8px;align-items:center}
   .proj-name{font-family:"Cormorant Garamond";font-weight:300;font-size:clamp(25px,3.2vw,44px);letter-spacing:-.01em}
   .proj-meta{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey)}
+  /* Sides are symmetric now (no right-hand rail to clear) and the bottom clears the
+     horizontal rail, matching .sw-stage on the landing. */
   .proj-stage{position:absolute;top:calc(var(--head-h,196px) + clamp(14px,2vh,24px));left:clamp(24px,5vw,80px);
-    right:clamp(78px,9vw,140px);bottom:clamp(28px,5vh,54px)}
+    right:clamp(24px,5vw,80px);bottom:clamp(80px,10vh,110px)}
   .frame{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
     opacity:0;transition:opacity .5s ease;pointer-events:none}
   .frame.show{opacity:1}
   .frame img{max-width:100%;max-height:100%;width:auto;height:auto;display:block}
-  .rail{position:fixed;top:clamp(76px,11vh,112px);right:clamp(10px,1.4vw,20px);bottom:clamp(16px,3vh,26px);
-    z-index:30;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;
-    width:clamp(36px,3.8vw,48px)}
-  .rt{flex:0 0 auto;width:100%;aspect-ratio:1/1;position:relative;background:none;padding:0;cursor:pointer;
+  /* Thumbnail rail — horizontal, pinned bottom. Same treatment as the landing
+     carousel rail, applied to every page that has a rail. */
+  .rail{position:fixed;left:0;right:0;bottom:clamp(18px,3vh,30px);top:auto;
+    z-index:30;display:flex;flex-direction:row;justify-content:safe center;align-items:center;
+    gap:6px;width:auto;padding:0 clamp(20px,4vw,48px);flex-wrap:nowrap;overflow-x:auto;
+    scrollbar-width:none}
+  .rail::-webkit-scrollbar{display:none}
+  .rt{flex:0 0 auto;width:clamp(34px,4vw,52px);height:clamp(34px,4vw,52px);
+    aspect-ratio:1/1;position:relative;background:none;padding:0;cursor:pointer;
     overflow:hidden;opacity:.38;transition:opacity .3s ease}
+  .rt:hover{opacity:.75}
   .rt img{width:100%;height:100%;object-fit:cover;display:block}
   .rt.active{opacity:1}
-  .rail-cursor{position:absolute;left:0;top:0;width:100%;border:1.5px solid var(--paper);box-sizing:border-box;
-    pointer-events:none;z-index:2;transition:height .2s ease,width .2s ease}
-  @media(max-width:900px){ .proj-stage{right:clamp(58px,7vw,90px)} }
+  .rail-cursor{position:absolute;top:0;left:0;height:100%;border:1px solid var(--paper);box-sizing:border-box;
+    pointer-events:none;z-index:2;transition:transform .2s ease}
   @media(max-width:700px){
-    .rail{top:auto;left:0;right:0;bottom:0;width:auto;height:clamp(50px,9vh,66px);
-      flex-direction:row;justify-content:safe center;gap:5px;padding:7px 10px;overflow-x:auto;
-      background:rgba(11,11,12,.55);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
-    .rt{width:auto;height:100%}
+    /* rail is horizontal at all widths now; only the stage needs repositioning */
     .proj-stage{left:clamp(16px,4vw,30px);right:clamp(16px,4vw,30px);
       bottom:clamp(62px,11vh,82px)}
   }
@@ -855,7 +859,7 @@
     .sw-stage::after{content:"";position:absolute;inset:0;pointer-events:none;
       background:linear-gradient(to top,rgba(11,11,12,.6) 0%,transparent 42%)}
     /* keep landing rail flush at the very bottom on mobile (override global .rail) */
-    .sw-rail{bottom:0;left:0;right:0;top:auto;height:auto;
+    .rail{bottom:0;left:0;right:0;top:auto;height:auto;
       padding:8px clamp(12px,4vw,20px) calc(8px + env(safe-area-inset-bottom,0px));
       background:linear-gradient(to top,rgba(11,11,12,.55),transparent)}
   }
@@ -2719,32 +2723,29 @@
       thumbs.forEach(function(t,i){ t.classList.toggle("active", i===idx); });
     }
     if(cursor && thumbs.length){
-      if(window.matchMedia("(max-width:700px)").matches){
-        var cursorX = thumbs[idx].offsetLeft;
-        var cursorWidth = thumbs[idx].offsetWidth;
-        cursor.style.transform="translateX("+cursorX+"px)"; cursor.style.width=cursorWidth+"px"; cursor.style.height="100%";
-        
-        // Auto-scroll rail to keep cursor visible (mobile horizontal rail)
-        var rail = page.querySelector(".rail");
-        if(rail){
-          var railWidth = rail.clientWidth;
-          var edgeBuffer = 60;
-          var cursorViewportX = cursorX - rail.scrollLeft;
-          var railScrollWidth = rail.scrollWidth;
-          if(railScrollWidth > railWidth){
-            var targetScroll = rail.scrollLeft;
-            if(cursorViewportX + cursorWidth > railWidth - edgeBuffer){
-              targetScroll = Math.min(cursorX + cursorWidth + edgeBuffer - railWidth, railScrollWidth - railWidth);
-            } else if(cursorViewportX < edgeBuffer){
-              targetScroll = Math.max(cursorX - edgeBuffer, 0);
-            }
-            if(targetScroll !== rail.scrollLeft){
-              rail.scrollLeft = targetScroll;
-            }
+      // Rail is horizontal at every width (same as the landing rail), so the cursor
+      // always tracks along X and the rail auto-scrolls to keep it in view.
+      var cursorX = thumbs[idx].offsetLeft;
+      var cursorWidth = thumbs[idx].offsetWidth;
+      cursor.style.transform="translateX("+cursorX+"px)"; cursor.style.width=cursorWidth+"px"; cursor.style.height="100%";
+
+      var rail = page.querySelector(".rail");
+      if(rail){
+        var railWidth = rail.clientWidth;
+        var edgeBuffer = 60;
+        var cursorViewportX = cursorX - rail.scrollLeft;
+        var railScrollWidth = rail.scrollWidth;
+        if(railScrollWidth > railWidth){
+          var targetScroll = rail.scrollLeft;
+          if(cursorViewportX + cursorWidth > railWidth - edgeBuffer){
+            targetScroll = Math.min(cursorX + cursorWidth + edgeBuffer - railWidth, railScrollWidth - railWidth);
+          } else if(cursorViewportX < edgeBuffer){
+            targetScroll = Math.max(cursorX - edgeBuffer, 0);
+          }
+          if(targetScroll !== rail.scrollLeft){
+            rail.scrollLeft = targetScroll;
           }
         }
-      } else {
-        cursor.style.transform="translateY("+thumbs[idx].offsetTop+"px)"; cursor.style.height=thumbs[idx].offsetHeight+"px"; cursor.style.width="100%";
       }
     }
   }
