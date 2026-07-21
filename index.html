@@ -155,6 +155,9 @@
   .proj-panel-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
     display:block;z-index:0;pointer-events:none}
   .proj-panel iframe.proj-panel-bg{border:none}
+  /* Archive cover videos keep the video's own framing (letterbox on the dark panel),
+     matching how they read before — only the quality changes to native MP4. */
+  .proj-panel.is-video video.proj-panel-bg{object-fit:contain}
   .proj-panel-overlay{position:absolute;inset:0;z-index:1;
     background:linear-gradient(to top,rgba(11,11,12,0.72) 0%,transparent 50%)}
   .proj-panel-info{position:relative;z-index:2;padding:clamp(24px,4vw,48px);
@@ -740,7 +743,7 @@
      iframe overlays it exactly (inset:0), so the video fills with no extra bands. */
   .sw-stage .frame .sw-media{position:relative;display:inline-flex;max-width:100%;max-height:100%}
   .sw-stage .frame .sw-media img{max-width:100%;max-height:100%;width:auto;height:auto;display:block}
-  .sw-stage .frame .sw-media iframe.sw-video{position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none}
+  .sw-stage .frame .sw-media video.sw-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border:0;pointer-events:none;background:var(--ink)}
 
   /* caption top-left: Eyebrow / Title / Subtitle - aligned with image top */
   .sw-caption{position:absolute;left:clamp(24px,5vw,80px);top:clamp(120px,15vh,170px);z-index:6;
@@ -948,7 +951,7 @@
              Video covers only for now; no detail pages yet (add later like Projects). -->
         <section class="page" id="archive">
       <div class="proj-panel is-video" style="cursor:default">
-        <iframe class="proj-panel-bg" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/iframe?autoplay=1&muted=1&loop=1&controls=0&preload=auto" allow="autoplay; fullscreen" allowfullscreen style="pointer-events:none"></iframe>
+        <video class="proj-panel-bg" poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/thumbnails/thumbnail.jpg?width=1280" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/downloads/default.mp4" autoplay muted loop playsinline preload="none"></video>
         <div class="proj-panel-overlay"></div>
         <div class="proj-panel-info">
           <div class="proj-panel-text">
@@ -959,7 +962,7 @@
       </div>
 
       <div class="proj-panel is-video" style="cursor:default">
-        <iframe class="proj-panel-bg" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/bd75fdf49d96c125ba7dc1fcdc705fd5/iframe?autoplay=1&muted=1&loop=1&controls=0&preload=auto" allow="autoplay; fullscreen" allowfullscreen style="pointer-events:none"></iframe>
+        <video class="proj-panel-bg" poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/bd75fdf49d96c125ba7dc1fcdc705fd5/thumbnails/thumbnail.jpg?width=1280" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/bd75fdf49d96c125ba7dc1fcdc705fd5/downloads/default.mp4" autoplay muted loop playsinline preload="none"></video>
         <div class="proj-panel-overlay"></div>
         <div class="proj-panel-info">
           <div class="proj-panel-text">
@@ -2498,6 +2501,20 @@
   })();
 
 
+  /* ---- Archive cover videos: pause when off-screen (only the visible one plays) ---- */
+  (function(){
+    var vids = document.querySelectorAll(".proj-panel.is-video video.proj-panel-bg");
+    if(!vids.length || !("IntersectionObserver" in window)) return;
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        var v = e.target;
+        if(e.isIntersecting){ var p=v.play(); if(p&&p.catch) p.catch(function(){}); }
+        else { v.pause(); }
+      });
+    }, {threshold:0.4});
+    vids.forEach(function(v){ io.observe(v); });
+  })();
+
   /* ---------------- Boot ---------------- */
   function boot(){ reveal(); }
   // Start the loader EARLY (as soon as the DOM exists) so the counter can track
@@ -2540,14 +2557,16 @@
         var vid = fr.getAttribute("data-video");
         if(vid){
           var box = fr.querySelector(".sw-media") || fr;
-          var existing = box.querySelector("iframe.sw-video");
+          var existing = box.querySelector("video.sw-video");
           if(on && !existing){
-            var ifr = document.createElement("iframe");
-            ifr.className = "sw-video";
-            ifr.src = "https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/"+vid+"/iframe?autoplay=1&muted=1&loop=1&controls=0&preload=auto";
-            ifr.setAttribute("allow","autoplay; fullscreen");
-            ifr.setAttribute("allowfullscreen","");
-            box.appendChild(ifr);
+            var v = document.createElement("video");
+            v.className = "sw-video";
+            v.src = "https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/"+vid+"/downloads/default.mp4";
+            v.poster = "https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/"+vid+"/thumbnails/thumbnail.jpg?width=1280";
+            v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
+            v.setAttribute("playsinline","");
+            box.appendChild(v);
+            var p = v.play(); if(p && p.catch) p.catch(function(){});
           } else if(!on && existing){
             existing.remove();
           }
