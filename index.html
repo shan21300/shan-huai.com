@@ -516,7 +516,8 @@
   .proj-detail-img-full{margin:40px auto;max-width:64ch}
   /* Quarter-width variant for images whose tall natural ratio makes them dominate. */
   .proj-detail-img-full.is-quarter{max-width:16ch}
-  @media(max-width:640px){.proj-detail-img-pair{grid-template-columns:1fr}}
+  /* Two-up image rows stay two-up on mobile (tighter gap rather than stacking). */
+  @media(max-width:640px){.proj-detail-img-pair{gap:8px}}
   /* "Cross" moodboard layout: one image per centred row, row 2 twice as wide.
      Every image is a % of this ONE container, so all four scale together on resize
      (and max-width below is the single knob for the whole group's size). */
