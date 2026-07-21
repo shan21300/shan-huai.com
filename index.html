@@ -147,8 +147,8 @@
   nav button:hover::after,nav button[data-active]::after{width:100%}
 
   /* ---------- Projects: full-viewport scroll panels (frequent-headache style) ---------- */
-  #projects{overflow-y:scroll;scroll-snap-type:y mandatory;height:100vh;scroll-behavior:smooth}
-  body.on-proj-scroll #projects{overflow-y:scroll}
+  #projects,#archive{overflow-y:scroll;scroll-snap-type:y mandatory;height:100vh;scroll-behavior:smooth}
+  body.on-proj-scroll #projects,body.on-proj-scroll #archive{overflow-y:scroll}
   .proj-panel{position:relative;height:100vh;scroll-snap-align:start;scroll-snap-stop:always;
     overflow:hidden;cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end;
     background:var(--ink)}
@@ -923,7 +923,12 @@
         </div>
       </div>
 
-      <div class="proj-panel" style="display:none">
+    </section>
+
+        <!-- ARCHIVE: older / hidden work. Same scroll-snap panels as Projects.
+             Video covers only for now; no detail pages yet (add later like Projects). -->
+        <section class="page" id="archive">
+      <div class="proj-panel" style="cursor:default">
         <iframe class="proj-panel-bg" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/iframe?autoplay=1&muted=1&loop=1&controls=0&preload=auto" allow="autoplay; fullscreen" allowfullscreen style="pointer-events:none"></iframe>
         <div class="proj-panel-overlay"></div>
         <div class="proj-panel-info">
@@ -931,11 +936,10 @@
             <span class="proj-panel-title">Making Sense of My Ordinary Life (feat. Jay Lin)</span>
             <span class="proj-panel-meta">PDP Year 2 Project · 2024</span>
           </div>
-          <a class="proj-panel-arrow" href="#" target="_blank" rel="noopener" onclick="event.stopPropagation()">↗</a>
         </div>
       </div>
 
-      <div class="proj-panel" style="display:none">
+      <div class="proj-panel" style="cursor:default">
         <iframe class="proj-panel-bg" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/bd75fdf49d96c125ba7dc1fcdc705fd5/iframe?autoplay=1&muted=1&loop=1&controls=0&preload=auto" allow="autoplay; fullscreen" allowfullscreen style="pointer-events:none"></iframe>
         <div class="proj-panel-overlay"></div>
         <div class="proj-panel-info">
@@ -943,7 +947,6 @@
             <span class="proj-panel-title">Girlfriend</span>
             <span class="proj-panel-meta">PDP Year 2 Music Video · 2024</span>
           </div>
-          <a class="proj-panel-arrow" href="#" target="_blank" rel="noopener" onclick="event.stopPropagation()">↗</a>
         </div>
       </div>
     </section>
@@ -1983,6 +1986,7 @@
       <button class="m-link" data-nav="photojournalism">photo-journalism</button>
       <button class="m-link" data-nav="portraiture">portraiture</button>
       <button class="m-link" data-nav="wedding">wedding</button>
+      <button class="m-link" data-nav="archive">archive</button>
     </div>
     <div class="menu-foot">
       <div class="menu-sec">
@@ -2199,7 +2203,7 @@
     // section id : url path
     "landing":"/","projects":"/projects","live":"/live",
     "photojournalism":"/photojournalism","portraiture":"/portraiture",
-    "wedding":"/wedding","about":"/about","contact":"/contact",
+    "wedding":"/wedding","archive":"/archive","about":"/about","contact":"/contact",
     "proj-holycommunion":"/project/holy-communion",
     "proj-butoh":"/project/butoh-experiment",
     "proj-zerocase":"/project/zero-case-policy",
