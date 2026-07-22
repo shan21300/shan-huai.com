@@ -917,8 +917,8 @@
             <div class="frame" data-nav="pt-tatiana"><img src="/images/portraiture/tatiana_2021-08.jpg" alt="Tatiana" loading="lazy"></div>
             <div class="frame" data-nav="julianjudy"><img src="/images/wedding-engagement/Julian%26Judy_engagement-06.jpg" alt="Julian and Judy" loading="lazy"></div>
             <div class="frame" data-nav="danieljuny"><img src="/images/wedding-engagement/DJ-Juny_engagement-04.jpg" alt="Daniel and Juny" loading="lazy"></div>
-            <div class="frame" data-nav="archive" data-video="2e55db6d182f6cb0667fa118b13784de"><span class="sw-media"><img src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/thumbnails/thumbnail.jpg?width=1280" alt="Making Ordinary Sense" loading="lazy"></span></div>
-            <div class="frame" data-nav="archive" data-video="bd75fdf49d96c125ba7dc1fcdc705fd5"><span class="sw-media"><img src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/bd75fdf49d96c125ba7dc1fcdc705fd5/thumbnails/thumbnail.jpg?width=1280" alt="Girlfriend" loading="lazy"></span></div>
+            <div class="frame" data-nav="making-ordinary-sense" data-video="2e55db6d182f6cb0667fa118b13784de"><span class="sw-media"><img src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/thumbnails/thumbnail.jpg?width=1280" alt="Making Ordinary Sense" loading="lazy"></span></div>
+            <div class="frame" data-nav="girlfriend" data-video="bd75fdf49d96c125ba7dc1fcdc705fd5"><span class="sw-media"><img src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/bd75fdf49d96c125ba7dc1fcdc705fd5/thumbnails/thumbnail.jpg?width=1280" alt="Girlfriend" loading="lazy"></span></div>
           </div>
         </div>
       </div>
@@ -1037,7 +1037,7 @@
         <!-- ARCHIVE: older / hidden work. Same scroll-snap panels as Projects.
              Video covers only for now; no detail pages yet (add later like Projects). -->
         <section class="page" id="archive">
-      <div class="proj-panel is-video" style="cursor:default">
+      <div class="proj-panel is-video" data-nav="making-ordinary-sense" style="cursor:pointer">
         <video class="proj-panel-bg" poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/thumbnails/thumbnail.jpg?width=1280" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/downloads/default.mp4" autoplay muted loop playsinline preload="none"></video>
         <div class="proj-panel-overlay"></div>
         <div class="proj-panel-info">
@@ -1045,6 +1045,7 @@
             <span class="proj-panel-title">Making Ordinary Sense</span>
             <span class="proj-panel-meta">PDP Year 2 Project · 2024</span>
           </div>
+          <span class="proj-panel-arrow" aria-hidden="true">↗</span>
         </div>
       </div>
 
@@ -1171,6 +1172,38 @@
             <p>In the video on the left, I had all gimbal axes unlocked, granting complete control over the flow of this FPV (first person view) camera movement.</p>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section class="page proj-detail" id="making-ordinary-sense">
+      <div class="pinfo">
+        <div class="pinfo-card">
+          <div class="pinfo-head">
+            <div class="pinfo-tabs"><span class="pinfo-tab is-on" data-view="info">Info</span></div>
+            <span class="pinfo-toggle" role="switch" aria-label="Toggle floater" aria-checked="false"></span>
+          </div>
+          <div class="pinfo-body">
+            <div class="pinfo-scroll">
+              <div class="pinfo-view is-on" data-view="info">
+                <div class="pinfo-credits">
+                  <div class="pinfo-ck">Project</div><div class="pinfo-cv">Making Ordinary Sense</div>
+                  <div class="pinfo-ck">Featuring</div><div class="pinfo-cv">Jay Lin</div>
+                  <div class="pinfo-ck">Context</div><div class="pinfo-cv">CSM PDP Year 2 Project</div>
+                  <div class="pinfo-ck">Year</div><div class="pinfo-cv">2024</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="proj-detail-wrap">
+        <button class="back" data-nav="archive" style="margin-bottom:40px">← Archive</button>
+
+        <img loading="lazy" class="proj-detail-hero" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/thumbnails/thumbnail.jpg?width=1280" alt="Making Ordinary Sense">
+
+        <h1 class="proj-detail-title">Making Ordinary Sense</h1>
+        <span class="proj-detail-sub">CSM PDP Year 2 Project &nbsp;·&nbsp; 2024</span>
       </div>
     </section>
         <section class="page snaplist" id="live">
@@ -2580,7 +2613,8 @@
     "pt-tatiana":"/portraiture/tatiana",
     "julianjudy":"/wedding/julian-and-judy",
     "danieljuny":"/wedding/daniel-and-juny",
-    "girlfriend":"/archive/girlfriend"
+    "girlfriend":"/archive/girlfriend",
+    "making-ordinary-sense":"/archive/making-ordinary-sense"
     // note: gig-mosaic-2, julianjudywedding are navigation-only (page 2), no URL
   };
   var PATH2ID = {};
