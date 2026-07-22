@@ -312,6 +312,13 @@
     font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:4px 0;
     transition:color .3s ease}
   .viewtoggle button.active{color:var(--paper)}
+  /* Icon toggles: the artwork is grey, so brighten it toward --paper when active
+     (an <img> can't inherit `color` the way the old text labels did). */
+  .viewtoggle button{display:flex;align-items:center;line-height:0}
+  .viewtoggle button img{width:14px;height:14px;display:block;
+    opacity:.6;transition:opacity .3s ease,filter .3s ease}
+  .viewtoggle button:hover img{opacity:.85}
+  .viewtoggle button.active img{opacity:1;filter:brightness(1.9)}
 
   .works .w-item{position:relative;display:block;overflow:hidden;cursor:pointer;text-decoration:none}
   .w-surf{position:absolute;inset:0;filter:grayscale(1);transition:transform 1.2s cubic-bezier(.22,1,.36,1)}
@@ -970,7 +977,7 @@
 
     <section class="page snaplist" id="photojournalism">
       <div class="gal-head">
-        <div class="viewtoggle"><button data-view="list" class="active">List</button><button data-view="grid">Grid</button></div>
+        <div class="viewtoggle"><button data-view="list" class="active" aria-label="List view" title="List view"><img src="/images/system/icon-list.png" alt=""></button><button data-view="grid" aria-label="Grid view" title="Grid view"><img src="/images/system/icon-grid.png" alt=""></button></div>
       </div>
             <div class="proj-index" data-mode="list">
         <a class="pcard" data-nav="pj-kenyaslum"><img src="/images/Photo-Journalism/kenya_2023_-05.jpg" alt="Kenya Slum" loading="lazy"><div class="pcard-label"><span class="pc-name">Kenya Slum</span><span class="pc-meta">Nairobi · 2023</span></div></a>
@@ -980,7 +987,7 @@
     </section>
     <section class="page snaplist" id="portraiture">
       <div class="gal-head">
-        <div class="viewtoggle"><button data-view="list" class="active">List</button><button data-view="grid">Grid</button></div>
+        <div class="viewtoggle"><button data-view="list" class="active" aria-label="List view" title="List view"><img src="/images/system/icon-list.png" alt=""></button><button data-view="grid" aria-label="Grid view" title="Grid view"><img src="/images/system/icon-grid.png" alt=""></button></div>
       </div>
       <div class="proj-index" data-mode="list">
 
@@ -1208,7 +1215,7 @@
     </section>
         <section class="page snaplist" id="live">
       <div class="gal-head">
-        <div class="viewtoggle"><button data-view="list" class="active">List</button><button data-view="grid">Grid</button></div>
+        <div class="viewtoggle"><button data-view="list" class="active" aria-label="List view" title="List view"><img src="/images/system/icon-list.png" alt=""></button><button data-view="grid" aria-label="Grid view" title="Grid view"><img src="/images/system/icon-grid.png" alt=""></button></div>
       </div>
       <div class="proj-index" data-mode="list">
         <a class="pcard" data-nav="gig-cornelius"><img src="/images/Concerts/cornelius_chillout_-2.jpg" alt="Cornelius" loading="lazy"><div class="pcard-label"><span class="pc-name">Cornelius</span><span class="pc-meta">Chillout Music Festival · 2025</span></div></a>
@@ -1390,7 +1397,7 @@
     <!-- ENGAGEMENT SESSION -->
     <section class="page snaplist" id="wedding">
       <div class="gal-head">
-        <div class="viewtoggle"><button data-view="list" class="active">List</button><button data-view="grid">Grid</button></div>
+        <div class="viewtoggle"><button data-view="list" class="active" aria-label="List view" title="List view"><img src="/images/system/icon-list.png" alt=""></button><button data-view="grid" aria-label="Grid view" title="Grid view"><img src="/images/system/icon-grid.png" alt=""></button></div>
       </div>
       <div class="proj-index" data-mode="list">
         <a class="pcard" data-nav="julianjudy"><img src="/images/wedding-engagement/Julian%26Judy_engagement-06.jpg" alt="Julian and Judy" loading="lazy"><div class="pcard-label"><span class="pc-name">Julian and Judy</span><span class="pc-meta">Engagement Session · 2025</span></div></a>
