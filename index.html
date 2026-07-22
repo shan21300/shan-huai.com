@@ -542,6 +542,9 @@
   .proj-detail-img-pair img,.proj-detail-img-full img{width:100%;height:auto;display:block}
   /* A single image on its own row is centred (auto side margins). */
   .proj-detail-img-full{margin:40px auto;max-width:64ch}
+  /* Full column width (no 64ch cap) — for landscape photos in an essay sequence,
+     so they match the width of a paired-portrait row. */
+  .proj-detail-img-full.is-wide{max-width:none}
   /* Quarter-width variant for images whose tall natural ratio makes them dominate. */
   .proj-detail-img-full.is-quarter{max-width:16ch}
   /* Two-up image rows stay two-up on mobile (tighter gap rather than stacking). */
@@ -1619,7 +1622,7 @@
       </nav>
     </section>
 
-        <section class="page proj-page" id="pj-hkprotest">
+        <section class="page proj-detail" id="pj-hkprotest">
       <div class="pinfo">
         <div class="pinfo-card">
           <div class="pinfo-head">
@@ -1642,50 +1645,54 @@
           </div>
         </div>
       </div>
-      <div class="proj-scroll" style="height:1060vh">
-        <div class="proj-viewport">
-          <div class="proj-head">
-            <button class="back" data-nav="photojournalism">← Photo-journalism</button>
-            <span class="proj-name">The Umbrella Movement</span>
-            <span class="proj-meta">Hong Kong · 2019</span>
+
+      <div class="proj-detail-wrap">
+        <button class="back" data-nav="photojournalism" style="margin-bottom:40px">← Photo-journalism</button>
+
+        <img loading="lazy" class="proj-detail-hero" src="/images/Photo-Journalism/hkProt-06.jpg" alt="The Umbrella Movement">
+
+        <h1 class="proj-detail-title">The Umbrella Movement</h1>
+        <span class="proj-detail-sub">Hong Kong &nbsp;·&nbsp; 2019</span>
+
+          <div class="proj-detail-img-full is-wide">
+            <img src="/images/Photo-Journalism/hkProt-01.jpg" alt="The Umbrella Movement" loading="lazy">
           </div>
-          <div class="proj-stage">
-            <div class="frame show"><img src="/images/Photo-Journalism/hkProt-01.jpg" alt="The Umbrella Movement" loading="lazy"></div>
-            <div class="frame"><img src="/images/Photo-Journalism/hkProt-02.jpg" alt="The Umbrella Movement" loading="lazy"></div>
-            <div class="frame"><img src="/images/Photo-Journalism/hkProt-03.jpg" alt="The Umbrella Movement" loading="lazy"></div>
-            <div class="frame"><img src="/images/Photo-Journalism/hkProt-04.jpg" alt="The Umbrella Movement" loading="lazy"></div>
-            <div class="frame"><img src="/images/Photo-Journalism/hkProt-05.jpg" alt="The Umbrella Movement" loading="lazy"></div>
-            <div class="frame"><img src="/images/Photo-Journalism/hkProt-06.jpg" alt="The Umbrella Movement" loading="lazy"></div>
-            <div class="frame"><img src="/images/Photo-Journalism/hkProt-07.jpg" alt="The Umbrella Movement" loading="lazy"></div>
-            <div class="frame"><img src="/images/Photo-Journalism/hkProt-08.jpg" alt="The Umbrella Movement" loading="lazy"></div>
-            <div class="frame"><img src="/images/Photo-Journalism/hkProt-10.jpg" alt="The Umbrella Movement" loading="lazy"></div>
-            <div class="frame"><img src="/images/Photo-Journalism/hkProt-11.jpg" alt="The Umbrella Movement" loading="lazy"></div>
-            <div class="frame"><img src="/images/Photo-Journalism/hkProt-14.jpg" alt="The Umbrella Movement" loading="lazy"></div>
-            <div class="frame"><img src="/images/Photo-Journalism/hkProt-16.jpg" alt="The Umbrella Movement" loading="lazy"></div>
-            <div class="frame"><img src="/images/Photo-Journalism/hkProt-17.jpg" alt="The Umbrella Movement" loading="lazy"></div>
-            <div class="frame"><img src="/images/Photo-Journalism/hkProt-18.jpg" alt="The Umbrella Movement" loading="lazy"></div>
-            <div class="frame"><img src="/images/Photo-Journalism/hkProt-19.jpg" alt="The Umbrella Movement" loading="lazy"></div>
+          <div class="proj-detail-img-full is-wide">
+            <img src="/images/Photo-Journalism/hkProt-02.jpg" alt="The Umbrella Movement" loading="lazy">
           </div>
-        </div>
+          <div class="proj-detail-img-full is-wide">
+            <img src="/images/Photo-Journalism/hkProt-03.jpg" alt="The Umbrella Movement" loading="lazy">
+          </div>
+          <div class="proj-detail-img-full is-wide">
+            <img src="/images/Photo-Journalism/hkProt-04.jpg" alt="The Umbrella Movement" loading="lazy">
+          </div>
+          <div class="proj-detail-img-full is-wide">
+            <img src="/images/Photo-Journalism/hkProt-05.jpg" alt="The Umbrella Movement" loading="lazy">
+          </div>
+          <div class="proj-detail-img-full is-wide">
+            <img src="/images/Photo-Journalism/hkProt-07.jpg" alt="The Umbrella Movement" loading="lazy">
+          </div>
+          <div class="proj-detail-img-full is-wide">
+            <img src="/images/Photo-Journalism/hkProt-08.jpg" alt="The Umbrella Movement" loading="lazy">
+          </div>
+          <div class="proj-detail-img-full is-wide">
+            <img src="/images/Photo-Journalism/hkProt-10.jpg" alt="The Umbrella Movement" loading="lazy">
+          </div>
+          <div class="proj-detail-img-full is-wide">
+            <img src="/images/Photo-Journalism/hkProt-11.jpg" alt="The Umbrella Movement" loading="lazy">
+          </div>
+          <div class="proj-detail-img-pair">
+            <img src="/images/Photo-Journalism/hkProt-14.jpg" alt="The Umbrella Movement" loading="lazy">
+            <img src="/images/Photo-Journalism/hkProt-16.jpg" alt="The Umbrella Movement" loading="lazy">
+          </div>
+          <div class="proj-detail-img-pair">
+            <img src="/images/Photo-Journalism/hkProt-17.jpg" alt="The Umbrella Movement" loading="lazy">
+            <img src="/images/Photo-Journalism/hkProt-18.jpg" alt="The Umbrella Movement" loading="lazy">
+          </div>
+          <div class="proj-detail-img-pair">
+            <img src="/images/Photo-Journalism/hkProt-19.jpg" alt="The Umbrella Movement" loading="lazy">
+          </div>
       </div>
-      <nav class="rail" aria-label="thumbnails">
-        <button class="rt active" data-idx="0"><img loading="lazy" class="rt-img" src="/images/Photo-Journalism/hkProt-01.jpg" alt=""></button>
-        <button class="rt" data-idx="1"><img loading="lazy" class="rt-img" src="/images/Photo-Journalism/hkProt-02.jpg" alt=""></button>
-        <button class="rt" data-idx="2"><img loading="lazy" class="rt-img" src="/images/Photo-Journalism/hkProt-03.jpg" alt=""></button>
-        <button class="rt" data-idx="3"><img loading="lazy" class="rt-img" src="/images/Photo-Journalism/hkProt-04.jpg" alt=""></button>
-        <button class="rt" data-idx="4"><img loading="lazy" class="rt-img" src="/images/Photo-Journalism/hkProt-05.jpg" alt=""></button>
-        <button class="rt" data-idx="5"><img loading="lazy" class="rt-img" src="/images/Photo-Journalism/hkProt-06.jpg" alt=""></button>
-        <button class="rt" data-idx="6"><img loading="lazy" class="rt-img" src="/images/Photo-Journalism/hkProt-07.jpg" alt=""></button>
-        <button class="rt" data-idx="7"><img loading="lazy" class="rt-img" src="/images/Photo-Journalism/hkProt-08.jpg" alt=""></button>
-        <button class="rt" data-idx="8"><img loading="lazy" class="rt-img" src="/images/Photo-Journalism/hkProt-10.jpg" alt=""></button>
-        <button class="rt" data-idx="9"><img loading="lazy" class="rt-img" src="/images/Photo-Journalism/hkProt-11.jpg" alt=""></button>
-        <button class="rt" data-idx="10"><img loading="lazy" class="rt-img" src="/images/Photo-Journalism/hkProt-14.jpg" alt=""></button>
-        <button class="rt" data-idx="11"><img loading="lazy" class="rt-img" src="/images/Photo-Journalism/hkProt-16.jpg" alt=""></button>
-        <button class="rt" data-idx="12"><img loading="lazy" class="rt-img" src="/images/Photo-Journalism/hkProt-17.jpg" alt=""></button>
-        <button class="rt" data-idx="13"><img loading="lazy" class="rt-img" src="/images/Photo-Journalism/hkProt-18.jpg" alt=""></button>
-        <button class="rt" data-idx="14"><img loading="lazy" class="rt-img" src="/images/Photo-Journalism/hkProt-19.jpg" alt=""></button>
-        <div class="rail-cursor"></div>
-      </nav>
     </section>
 
     <section class="page proj-page" id="pj-slavaukraini">
@@ -2613,7 +2620,7 @@
     "gig-thehope":"/live/the-hope","gig-mosaic":"/live/mosaic",
     "pj-kenyaslum":"/photojournalism/kenya-slum",
     "pj-slavaukraini":"/photojournalism/slava-ukraini",
-    "pj-hkprotest":"/photojournalism/hong-kong-protest",
+    "pj-hkprotest":"/photojournalism/the-umbrella-movement",
     "pt-0821tingting":"/portraiture/0821tingting",
     "pt-dualitywithin":"/portraiture/duality-within",
     "pt-inmoodforsmoke":"/portraiture/in-mood-for-smoke",
