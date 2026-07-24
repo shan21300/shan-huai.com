@@ -536,6 +536,10 @@
   .proj-detail-coda-label{display:block;font-family:"IBM Plex Mono",monospace;font-size:11px;
     letter-spacing:.2em;text-transform:uppercase;color:var(--grey);margin-bottom:clamp(32px,5vh,56px)}
   .proj-detail-coda .proj-detail-body{max-width:68ch}
+  .proj-detail-link{display:inline-block;margin-top:.4em;color:var(--paper);
+    border-bottom:1px solid var(--edge);text-decoration:none;padding-bottom:2px;
+    transition:border-color .25s ease}
+  .proj-detail-link:hover{border-color:var(--paper)}
   .proj-detail-body ul{margin:0 0 1.4em;padding-left:20px;list-style:disc}
   .proj-detail-body li{margin-bottom:.55em}
   .proj-detail-body li ul{margin:.55em 0 0;list-style:circle}
@@ -1302,33 +1306,93 @@
         <div class="rail-cursor"></div>
       </nav>
     </section>
-    <section class="page proj-page" id="gig-elephantgym">
-      <div class="proj-scroll" style="height:430vh">
-        <div class="proj-viewport">
-          <div class="proj-head">
-            <button class="back" data-nav="live">← Live</button>
-            <span class="proj-name">Elephant Gym</span>
-            <span class="proj-meta">Bristol · 2024</span>
+    <section class="page proj-detail" id="gig-elephantgym">
+      <div class="pinfo">
+        <div class="pinfo-card">
+          <div class="pinfo-head">
+            <div class="pinfo-tabs"><span class="pinfo-tab is-on" data-view="info">Info</span><span class="pinfo-tab" data-view="desc">Description</span></div>
+            <span class="pinfo-toggle" role="switch" aria-label="Toggle floater" aria-checked="false"></span>
           </div>
-          <div class="proj-stage">
-            <div class="frame show"><img src="/images/Concerts/elephantgym_bristol-06.jpg" alt="Elephant Gym" loading="lazy"></div>
-            <div class="frame"><img src="/images/Concerts/elephantgym_bristol-07.jpg" alt="Elephant Gym" loading="lazy"></div>
-            <div class="frame"><img src="/images/Concerts/elephantgym_bristol-08.jpg" alt="Elephant Gym" loading="lazy"></div>
-            <div class="frame"><img src="/images/Concerts/elephantgym_bristol-09.jpg" alt="Elephant Gym" loading="lazy"></div>
-            <div class="frame"><img src="/images/Concerts/elephantgym_bristol-10.jpg" alt="Elephant Gym" loading="lazy"></div>
-            <div class="frame"><img src="/images/Concerts/elephantgym_bristol-11.jpg" alt="Elephant Gym" loading="lazy"></div>
+          <div class="pinfo-body">
+            <div class="pinfo-scroll">
+              <div class="pinfo-view is-on" data-view="info">
+                <div class="pinfo-credits">
+                  <div class="pinfo-ck">Project</div><div class="pinfo-cv">Elephant Gym</div>
+                  <div class="pinfo-ck">Location</div><div class="pinfo-cv">Bristol, United Kingdom</div>
+                  <div class="pinfo-ck">Date</div><div class="pinfo-cv">June 2024</div>
+                  <div class="pinfo-ck">Role</div><div class="pinfo-cv">Photography</div>
+                  <div class="pinfo-ck">Interview</div><div class="pinfo-cv">Anderson Hung</div>
+                  <div class="pinfo-ck">Commission</div><div class="pinfo-cv">Independent</div>
+                  <div class="pinfo-ck">Context</div><div class="pinfo-cv">Unit 9 Portfolio &mdash; Silence as Resistance</div>
+                </div>
+              </div>
+              <div class="pinfo-view" data-view="desc">
+                <div class="pinfo-desc"><p>Taiwanese math-rock band Elephant Gym photographed on their Bristol date in June 2024, made alongside Anderson Hung&rsquo;s interview. Shot while the band were nominated at that year&rsquo;s Golden Melody Awards, when a politically charged interruption from the audience was met with restraint rather than confrontation. Slow shutter speeds trace that restraint as movement &mdash; the starting point for an ongoing inquiry into silence as resistance.</p></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <nav class="rail" aria-label="thumbnails">
-        <button class="rt active" data-idx="0"><img loading="lazy" class="rt-img" src="/images/Concerts/elephantgym_bristol-06.jpg" alt=""></button>
-        <button class="rt" data-idx="1"><img loading="lazy" class="rt-img" src="/images/Concerts/elephantgym_bristol-07.jpg" alt=""></button>
-        <button class="rt" data-idx="2"><img loading="lazy" class="rt-img" src="/images/Concerts/elephantgym_bristol-08.jpg" alt=""></button>
-        <button class="rt" data-idx="3"><img loading="lazy" class="rt-img" src="/images/Concerts/elephantgym_bristol-09.jpg" alt=""></button>
-        <button class="rt" data-idx="4"><img loading="lazy" class="rt-img" src="/images/Concerts/elephantgym_bristol-10.jpg" alt=""></button>
-        <button class="rt" data-idx="5"><img loading="lazy" class="rt-img" src="/images/Concerts/elephantgym_bristol-11.jpg" alt=""></button>
-        <div class="rail-cursor"></div>
-      </nav>
+
+      <div class="proj-detail-wrap">
+        <button class="back" data-nav="live" style="margin-bottom:40px">&larr; Live</button>
+
+        <img loading="lazy" class="proj-detail-hero" src="/images/Concerts/elephantgym_bristol-06.jpg" alt="Elephant Gym">
+
+        <h1 class="proj-detail-title">Elephant Gym</h1>
+        <span class="proj-detail-sub">Bristol &nbsp;&middot;&nbsp; 2024</span>
+
+        <div class="proj-detail-section">
+          <span class="proj-detail-section-label">Statement</span>
+          <div class="proj-detail-body">
+            <p>Originally developed as an independent commission in June 2024, this project became part of my Unit 9 portfolio through critical reflection on its thematic relevance. It was this experience that first prompted me to write my Unit 8 dissertation, and eventually led to the development of this wider theme &mdash; silence as resistance. That&rsquo;s why I&rsquo;ve chosen to include this project at the end of the portfolio: it marked the beginning of this line of inquiry, and continues to inform how I think about photography, performance, and the politics of what remains unspoken.</p>
+          </div>
+        </div>
+        <div class="proj-detail-section">
+          <span class="proj-detail-section-label">The Commission</span>
+          <div class="proj-detail-body">
+            <p>The project began when my housemate, Anderson Hung &mdash; a BA Fashion Journalism student &mdash; invited me to photograph his interview with Taiwanese math-rock band Elephant Gym ahead of their Bristol show. As someone with experience in concert and documentary photography, I saw this not only as a personal opportunity but also as a professional collaboration across disciplines.</p>
+            <p>Shortly after the interview was arranged, the band was nominated for Best Band and Album of the Year at the 2024 Golden Melody Awards &mdash; an unexpected but timely development that added new urgency and context to the work. As Taiwan&rsquo;s most prestigious music award &mdash; owned and hosted by the Taiwanese Ministry of Culture &mdash; the Golden Melody Awards celebrate musical excellence across the Mandarin-speaking world. However, the event has increasingly become a site of political tension. In 2024, Taiwanese singer Panai used her acceptance speech to commemorate the 35th anniversary of the Tiananmen Square massacre, stating: &ldquo;The Tiananmen Square incident is also exactly 35 years old, let&rsquo;s not forget.&rdquo; Such moments, while affirming Taiwan&rsquo;s commitment to free speech, also expose the geopolitical fault lines between Taiwan and China. That year, despite several nominations, no Chinese artists attended the ceremony. For artists like Elephant Gym &mdash; nominated during this politically sensitive moment &mdash; visibility on that stage carried layered significance. My role involved capturing both the live performance and the quieter, off-stage moments that reflected those tensions &mdash; political, emotional, and cultural.</p>
+          </div>
+        </div>
+        <div class="proj-detail-section">
+          <span class="proj-detail-section-label">Identity &amp; Restraint</span>
+          <div class="proj-detail-body">
+            <p>What emerged from this shoot was more than just a concert record. In the greenroom, we spoke with the band about Taiwanese identity &mdash; a theme that later surfaced during the performance when an audience member interrupted with a politically charged statement. The band responded with restraint, not confrontation. That moment of silence &mdash; and the visible discomfort &mdash; became a form of live political performance in itself.</p>
+            <p>Through this collaboration, I reflected on how absence, tension, and restraint operate within performance, and how photography can hold space for these subtleties. This project helped me extend my documentary approach in new critical directions, aligning my practice with Unit 9&rsquo;s focus on collaboration, real-world context, and critical authorship.</p>
+            <p>As we spent time with the band, the question of identity surfaced quietly but meaningfully. Rather than loudly declaring themselves as a Taiwanese band, Elephant Gym shared how their roots in Kaohsiung naturally shaped their sound and presence. That understated pride became even more charged during the concert, when an audience member shouted, &ldquo;Taiwan is part of China!&rdquo; The band responded not with confrontation, but with careful words and visible restraint &mdash; a moment that transformed silence into performance.</p>
+            <p>Tell, the band&rsquo;s guitarist, took a moment before responding. He said, &ldquo;We have super complicated international relations and politics, so every man has to serve the military &mdash; including me and our drummer &mdash; so we&rsquo;re grateful that I&rsquo;m holding a guitar right now, instead of a rifle.&rdquo; That sentence stayed with me. In its simplicity, it revealed the depth of conflict the band quietly carries. It reminded me that music &mdash; and performance in general &mdash; can become a medium for tension and resistance, not through noise, but through intention, control, and restraint. It was a masterclass in how to fight for peace and bring peace. Everyone at that event was there because of a shared love for music. Art unites people, while politics tries to tear us apart. These mediums &mdash; music, photography, performance &mdash; are the dialects through which we express our identity and who we are. All art is a form of protest, crying out for individuality and personal expression. We can let art do the work.</p>
+          </div>
+        </div>
+        <div class="proj-detail-section">
+          <span class="proj-detail-section-label">Behind the Lens</span>
+          <div class="proj-detail-body">
+            <p>That belief &mdash; that art can do the work &mdash; stayed with me as I photographed them in that moment. I didn&rsquo;t just want to document a performance; I wanted to capture their way of fighting &mdash; not with aggression, but with music, with intention, and with a deep commitment to peace. I chose to use a slower shutter speed, allowing motion blur to express not chaos, but purpose &mdash; as if each gesture, each chord, each sway of the body was part of a larger act of resistance. It was as though they were using their performance to carve out space for who they are and what they stand for: Taiwan, democracy, and freedom.</p>
+            <p>There was something steadfast in their presence &mdash; not loud, not confrontational, but unwavering. In that moment, they weren&rsquo;t reacting to the audience interruption; they were performing through it. My approach behind the lens was shaped by this clarity: I wasn&rsquo;t capturing stillness, I was capturing belief in motion. Their belief in this way to fight &mdash; this way to peace &mdash; was made visible not only in sound, but in the physical traces of their movement. Photography, too, could honour that.</p>
+          </div>
+        </div>
+        <div class="proj-detail-section">
+          <span class="proj-detail-section-label">Silence as Authorship</span>
+          <div class="proj-detail-body">
+            <p>This project was not just a reflection on those quiet tensions &mdash; the unsaid, the held-back, the moments before and after the music &mdash; but also an awakening. It marked the beginning of my deeper understanding that silence itself could be a form of authorship. In a context where national identity is contested, and where silence can be safer than speech, the band&rsquo;s choice to respond with calm became an act of political agency. That experience became the spark that shaped the foundation of this body of work: a series of responses made not through confrontation, but through stillness. It was through photography that I began to hold space for what remains unspoken &mdash; and to let that silence speak.</p>
+            <p><a class="proj-detail-link" href="#" target="_blank" rel="noopener">Read the interview on Anderson&rsquo;s website &rarr;</a></p>
+          </div>
+        </div>
+
+          <div class="proj-detail-img-pair">
+            <img src="/images/Concerts/elephantgym_bristol-07.jpg" alt="Elephant Gym" loading="lazy">
+            <img src="/images/Concerts/elephantgym_bristol-08.jpg" alt="Elephant Gym" loading="lazy">
+          </div>
+          <div class="proj-detail-img-full is-wide">
+            <img src="/images/Concerts/elephantgym_bristol-09.jpg" alt="Elephant Gym" loading="lazy">
+          </div>
+          <div class="proj-detail-img-pair">
+            <img src="/images/Concerts/elephantgym_bristol-10.jpg" alt="Elephant Gym" loading="lazy">
+          </div>
+          <div class="proj-detail-img-full is-wide">
+            <img src="/images/Concerts/elephantgym_bristol-11.jpg" alt="Elephant Gym" loading="lazy">
+          </div>
+      </div>
     </section>
     <section class="page proj-page" id="gig-hillsong">
       <div class="proj-scroll" style="height:710vh">
