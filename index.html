@@ -842,7 +842,9 @@
 
 
   /* ===== Selected Works landing (scoped to #landing / .sw-* only) ===== */
-  #landing.is-active{background:var(--ink)}
+  #landing.is-active{background:var(--ink);transition:background-color .45s ease}
+  /* Video slides (Making Ordinary Sense / Girlfriend): pure black backdrop */
+  #landing.is-active.sw-black{background:#000}
   /* 100svh: on iOS 100vh is the LARGE viewport (toolbar hidden), so the box hangs
      below the visible area and bottom-anchored children (.sw-caption) end up under
      Chrome's toolbar. svh is the small/always-visible height. */
@@ -3181,6 +3183,9 @@
         }
       });
       thumbs.forEach(function(t,i){ t.classList.toggle("active", i===idx); });
+      // Pure-black backdrop on the video slides (Making Ordinary Sense / Girlfriend),
+      // keyed off the frame's data-video so it follows those projects, not an index.
+      land.classList.toggle("sw-black", !!(frames[idx] && frames[idx].hasAttribute("data-video")));
       var d=data[idx]||{};
       if(capName) capName.textContent=d.name||"";
       if(capMeta) capMeta.textContent=d.meta||"";
