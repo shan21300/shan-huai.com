@@ -954,7 +954,7 @@
             <div class="frame" data-nav="pt-tatiana"><img src="/images/portraiture/tatiana_2021-08.jpg" alt="Tatiana" loading="lazy"></div>
             <div class="frame" data-nav="julianjudy"><img src="/images/wedding-engagement/Julian%26Judy_engagement-06.jpg" alt="Julian and Judy" loading="lazy"></div>
             <div class="frame" data-nav="danieljuny"><img src="/images/wedding-engagement/DJ-Juny_engagement-04.jpg" alt="Daniel and Juny" loading="lazy"></div>
-            <div class="frame" data-nav="making-ordinary-sense" data-video="2e55db6d182f6cb0667fa118b13784de"><span class="sw-media"><img src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/thumbnails/thumbnail.jpg?width=1280" alt="Making Ordinary Sense" loading="lazy"></span></div>
+            <div class="frame" data-nav="making-ordinary-sense" data-video="2e55db6d182f6cb0667fa118b13784de"><span class="sw-media"><img src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/thumbnails/thumbnail.jpg?width=1280&height=720&fit=crop" alt="Making Ordinary Sense" loading="lazy"></span></div>
             <div class="frame" data-nav="girlfriend" data-video="bd75fdf49d96c125ba7dc1fcdc705fd5"><span class="sw-media"><img src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/bd75fdf49d96c125ba7dc1fcdc705fd5/thumbnails/thumbnail.jpg?width=1280" alt="Girlfriend" loading="lazy"></span></div>
           </div>
         </div>
@@ -998,7 +998,7 @@
         <button class="rt" data-idx="16"><img class="rt-img" src="/images/portraiture/tatiana_2021-08.jpg" alt=""></button>
         <button class="rt" data-idx="17"><img class="rt-img" src="/images/wedding-engagement/Julian%26Judy_engagement-06.jpg" alt=""></button>
         <button class="rt" data-idx="18"><img class="rt-img" src="/images/wedding-engagement/DJ-Juny_engagement-04.jpg" alt=""></button>
-        <button class="rt" data-idx="19"><img class="rt-img" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/thumbnails/thumbnail.jpg?width=240" alt=""></button>
+        <button class="rt" data-idx="19"><img class="rt-img" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/thumbnails/thumbnail.jpg?width=240&height=135&fit=crop" alt=""></button>
         <button class="rt" data-idx="20"><img class="rt-img" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/bd75fdf49d96c125ba7dc1fcdc705fd5/thumbnails/thumbnail.jpg?width=240" alt=""></button>
         <div class="rail-cursor"></div>
       </nav>
@@ -1077,7 +1077,7 @@
              Video covers only for now; no detail pages yet (add later like Projects). -->
         <section class="page" id="archive">
       <div class="proj-panel is-video" data-nav="making-ordinary-sense" style="cursor:pointer">
-        <video class="proj-panel-bg" poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/thumbnails/thumbnail.jpg?width=1280" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/downloads/default.mp4" autoplay muted loop playsinline preload="none"></video>
+        <video class="proj-panel-bg" poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/thumbnails/thumbnail.jpg?width=1280&height=720&fit=crop" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/downloads/default.mp4" autoplay muted loop playsinline preload="none"></video>
         <div class="proj-panel-overlay"></div>
         <div class="proj-panel-info">
           <div class="proj-panel-text">
@@ -1239,7 +1239,7 @@
       <div class="proj-detail-wrap">
         <button class="back" data-nav="archive" style="margin-bottom:40px">← Archive</button>
 
-        <img loading="lazy" class="proj-detail-hero" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/thumbnails/thumbnail.jpg?width=1280" alt="Making Ordinary Sense">
+        <img loading="lazy" class="proj-detail-hero" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/thumbnails/thumbnail.jpg?width=1280&height=720&fit=crop" alt="Making Ordinary Sense">
 
         <h1 class="proj-detail-title">Making Ordinary Sense</h1>
         <span class="proj-detail-sub">CSM PDP Year 2 Project &nbsp;·&nbsp; 2024</span>
@@ -1359,7 +1359,7 @@
 
         <img loading="lazy" class="proj-detail-hero is-natural" src="/images/Concerts/elephantgym_bristol-10.jpg" alt="Elephant Gym">
 
-        <h1 class="proj-detail-title">Holding a Guitar or Rifle</h1>
+        <h1 class="proj-detail-title">Instead of a Rifle</h1>
         <span class="proj-detail-sub">Bristol &nbsp;&middot;&nbsp; 2024</span>
 
         <div class="proj-detail-section">
@@ -2555,7 +2555,8 @@
     if(!canHover) return;
     var cur = document.getElementById("cursor-aperture");
     if(!cur) return;
-    var x = 0, y = 0, tx = 0, ty = 0, raf = null;
+    var x = 0, y = 0, tx = 0, ty = 0, raf = null, seen = false;
+    cur.style.opacity = "0";   // stay hidden until the pointer is actually somewhere
     function loop(){
       // smooth follow (LERP)
       tx += (x - tx) * 0.35;
@@ -2568,10 +2569,15 @@
     }
     document.addEventListener("mousemove", function(e){
       x = e.clientX; y = e.clientY;
+      if(!seen){                       // first sighting: snap to the pointer, then reveal
+        seen = true; tx = x; ty = y;
+        cur.style.transform = "translate(" + (x - cur.offsetWidth/2) + "px," + (y - cur.offsetHeight/2) + "px)";
+        cur.style.opacity = "1";
+      }
       if(!raf) raf = requestAnimationFrame(loop);
     }, {passive:true});
     document.addEventListener("mouseleave", function(){ cur.style.opacity = "0"; });
-    document.addEventListener("mouseenter", function(){ cur.style.opacity = "1"; });
+    document.addEventListener("mouseenter", function(){ if(seen) cur.style.opacity = "1"; });
     
     // Hover expansion over interactive elements
     var HOVER_SEL = "a,button,[data-nav],[data-menu-open],[data-view],.pcard,.proj-panel,.rt,.pinfo-head,.pinfo-tab,.pinfo-toggle,input,textarea,summary,label,.frame,.tile,.w-item,.viewtoggle button,.pgbtn,.back,.brandBtn,.menuBtn,.menu-close,.menu-logo,.m-link,.m-sub,.zc-cell";
