@@ -405,8 +405,14 @@
   .proj-meta{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey)}
   /* Sides are symmetric now (no right-hand rail to clear) and the bottom clears the
      horizontal rail, matching .sw-stage on the landing. */
-  .proj-stage{position:absolute;top:calc(var(--head-h,196px) + clamp(14px,2vh,24px));left:clamp(24px,5vw,80px);
+  /* Same box as .sw-stage on Selected Works. Previously the stage started below the
+     whole .proj-head (~213px: 117px clearing the fixed header + title/back), costing
+     ~96px of image height. The head now overlays the stage, as the caption does on
+     Selected Works, so images render at the same size. */
+  .proj-stage{position:absolute;top:clamp(120px,15vh,170px);left:clamp(24px,5vw,80px);
     right:clamp(24px,5vw,80px);bottom:clamp(80px,10vh,110px)}
+  .proj-viewport > .proj-head{position:relative;z-index:6;pointer-events:none}
+  .proj-viewport > .proj-head > *{pointer-events:auto}
   .frame{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
     opacity:0;transition:opacity .5s ease;pointer-events:none}
   .frame.show{opacity:1}
