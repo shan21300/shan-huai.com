@@ -540,6 +540,11 @@
   .proj-detail-coda-label{display:block;font-family:"IBM Plex Mono",monospace;font-size:11px;
     letter-spacing:.2em;text-transform:uppercase;color:var(--grey);margin-bottom:clamp(32px,5vh,56px)}
   .proj-detail-coda .proj-detail-body{max-width:68ch}
+  /* A lone vertical image: centred at the width of one pair slot, rather than
+     sitting in the left-hand column of an orphaned pair row. */
+  .proj-detail-img-single{margin:40px auto;width:calc(50% - 6px)}
+  .proj-detail-img-single img{width:100%;height:auto;display:block}
+  @media(max-width:640px){.proj-detail-img-single{width:calc(50% - 4px)}}
   .proj-detail-link{display:inline-block;margin-top:.4em;color:var(--paper);
     border-bottom:1px solid var(--edge);text-decoration:none;padding-bottom:2px;
     transition:border-color .25s ease}
@@ -1343,7 +1348,7 @@
 
         <img loading="lazy" class="proj-detail-hero is-natural" src="/images/Concerts/elephantgym_bristol-10.jpg" alt="Elephant Gym">
 
-        <h1 class="proj-detail-title">Elephant Gym</h1>
+        <h1 class="proj-detail-title">Holding a guitar or rifle</h1>
         <span class="proj-detail-sub">Bristol &nbsp;&middot;&nbsp; 2024</span>
 
         <div class="proj-detail-section">
@@ -1373,9 +1378,6 @@
             <img src="/images/Concerts/elephantgym_bristol-06.jpg" alt="Elephant Gym" loading="lazy">
             <img src="/images/Concerts/elephantgym_bristol-07.jpg" alt="Elephant Gym" loading="lazy">
           </div>
-          <div class="proj-detail-img-pair">
-            <img src="/images/Concerts/elephantgym_bristol-08.jpg" alt="Elephant Gym" loading="lazy">
-          </div>
           <div class="proj-detail-img-full is-wide">
             <img src="/images/Concerts/elephantgym_bristol-09.jpg" alt="Elephant Gym" loading="lazy">
           </div>
@@ -1394,9 +1396,12 @@
           <span class="proj-detail-section-label">Silence as Authorship</span>
           <div class="proj-detail-body">
             <p>This project was not just a reflection on those quiet tensions &mdash; the unsaid, the held-back, the moments before and after the music &mdash; but also an awakening. It marked the beginning of my deeper understanding that silence itself could be a form of authorship. In a context where national identity is contested, and where silence can be safer than speech, the band&rsquo;s choice to respond with calm became an act of political agency. That experience became the spark that shaped the foundation of this body of work: a series of responses made not through confrontation, but through stillness. It was through photography that I began to hold space for what remains unspoken &mdash; and to let that silence speak.</p>
-            <p><a class="proj-detail-link" href="https://www.hunganderson.com/blog-en/elephant-gym" target="_blank" rel="noopener">Read the interview on Anderson&rsquo;s website &rarr;</a></p>
+            <p><a class="proj-detail-link" href="https://www.hunganderson.com/archive/elephant-gym" target="_blank" rel="noopener">Read the interview on Anderson&rsquo;s website &rarr;</a></p>
           </div>
         </div>
+          <div class="proj-detail-img-single">
+            <img src="/images/Concerts/elephantgym_bristol-08.jpg" alt="Elephant Gym" loading="lazy">
+          </div>
 
     
       </div>
