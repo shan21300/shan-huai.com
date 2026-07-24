@@ -503,6 +503,10 @@
   /* Art-directed cover: a portrait source is swapped in on mobile (see <picture>),
      so drop the 16:9 crop there and let it run at its natural ratio. */
   @media(max-width:768px){.proj-detail-hero{aspect-ratio:auto;height:auto}}
+  /* Uncropped hero: keeps the image's own ratio instead of the 16:9 crop. Height is
+     capped so a portrait cover doesn't push the whole page down. */
+  .proj-detail-hero.is-natural{aspect-ratio:auto;width:auto;height:auto;
+    max-width:100%;max-height:78vh;object-fit:contain;margin-left:auto;margin-right:auto}
   .proj-detail-title{font-family:"Cormorant Garamond";font-weight:300;font-size:clamp(41px,6.9vw,101px);
     line-height:1;letter-spacing:-.02em;margin-bottom:8px;text-align:center}
   .proj-detail-sub{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;
@@ -1337,7 +1341,7 @@
       <div class="proj-detail-wrap">
         <button class="back" data-nav="live" style="margin-bottom:40px">&larr; Live</button>
 
-        <img loading="lazy" class="proj-detail-hero" src="/images/Concerts/elephantgym_bristol-10.jpg" alt="Elephant Gym">
+        <img loading="lazy" class="proj-detail-hero is-natural" src="/images/Concerts/elephantgym_bristol-10.jpg" alt="Elephant Gym">
 
         <h1 class="proj-detail-title">Elephant Gym</h1>
         <span class="proj-detail-sub">Bristol &nbsp;&middot;&nbsp; 2024</span>
@@ -1375,7 +1379,7 @@
           <span class="proj-detail-section-label">Silence as Authorship</span>
           <div class="proj-detail-body">
             <p>This project was not just a reflection on those quiet tensions &mdash; the unsaid, the held-back, the moments before and after the music &mdash; but also an awakening. It marked the beginning of my deeper understanding that silence itself could be a form of authorship. In a context where national identity is contested, and where silence can be safer than speech, the band&rsquo;s choice to respond with calm became an act of political agency. That experience became the spark that shaped the foundation of this body of work: a series of responses made not through confrontation, but through stillness. It was through photography that I began to hold space for what remains unspoken &mdash; and to let that silence speak.</p>
-            <p><a class="proj-detail-link" href="#" target="_blank" rel="noopener">Read the interview on Anderson&rsquo;s website &rarr;</a></p>
+            <p><a class="proj-detail-link" href="https://www.hunganderson.com/blog-en/elephant-gym" target="_blank" rel="noopener">Read the interview on Anderson&rsquo;s website &rarr;</a></p>
           </div>
         </div>
 
