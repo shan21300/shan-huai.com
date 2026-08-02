@@ -566,9 +566,9 @@
      differing heights sit flush at the top of each grid row. */
   .proj-detail-img-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:40px 0;align-items:start}
   .proj-detail-img-pair img,.proj-detail-img-full img{width:100%;height:auto;display:block}
-  /* Self-hosted reel (Cloudflare Stream), centred under the cover + title. Portrait
-     9:16, held to a sensible width so it doesn't dominate the column. */
-  .proj-reel{max-width:405px;margin:8px auto 12px;aspect-ratio:9/16;position:relative}
+  /* Self-hosted reel (Cloudflare Stream), 16:9, filling the column like the
+     landscape gallery images. */
+  .proj-reel{width:100%;margin:8px auto 12px;aspect-ratio:16/9;position:relative}
   .proj-reel iframe{position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:6px}
   .proj-reel-link{text-align:center;margin:0 auto 56px}
   .proj-reel-link a{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;
@@ -2638,6 +2638,18 @@
     }, {passive:true});
     document.addEventListener("mouseleave", function(){ cur.style.opacity = "0"; });
     document.addEventListener("mouseenter", function(){ if(seen) cur.style.opacity = "1"; });
+
+    // Over an embedded player the pointer sits inside a cross-origin iframe, which
+    // swallows mousemove — the aperture would freeze mid-screen. Hide it there and
+    // let the player's own native cursor drive the controls; snap back on exit.
+    document.querySelectorAll(".proj-reel").forEach(function(box){
+      box.addEventListener("mouseenter", function(){ cur.style.opacity = "0"; });
+      box.addEventListener("mouseleave", function(e){
+        x = tx = e.clientX; y = ty = e.clientY;
+        cur.style.transform = "translate(" + (x - cur.offsetWidth/2) + "px," + (y - cur.offsetHeight/2) + "px)";
+        if(seen) cur.style.opacity = "1";
+      });
+    });
     
     // Hover expansion over interactive elements
     var HOVER_SEL = "a,button,[data-nav],[data-menu-open],[data-view],.pcard,.proj-panel,.rt,.pinfo-head,.pinfo-tab,.pinfo-toggle,input,textarea,summary,label,.frame,.tile,.w-item,.viewtoggle button,.pgbtn,.back,.brandBtn,.menuBtn,.menu-close,.menu-logo,.m-link,.m-sub,.zc-cell";
