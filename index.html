@@ -566,13 +566,15 @@
      differing heights sit flush at the top of each grid row. */
   .proj-detail-img-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:40px 0;align-items:start}
   .proj-detail-img-pair img,.proj-detail-img-full img{width:100%;height:auto;display:block}
-  /* Instagram reel embed, centred under the cover + title. The iframe starts at a
-     tall fallback height; Instagram's embed.js postMessages the exact content
-     height once loaded (works even while this SPA panel is hidden). */
-  .proj-ig{max-width:540px;margin:8px auto 56px}
-  .proj-ig-frame{display:block;width:100%;min-width:326px;height:880px;margin:0 auto;
-    background:#fff;border:0;border-radius:3px;
-    box-shadow:0 0 1px 0 rgba(0,0,0,.5),0 1px 10px 0 rgba(0,0,0,.15)}
+  /* Self-hosted reel (Cloudflare Stream), centred under the cover + title. Portrait
+     9:16, held to a sensible width so it doesn't dominate the column. */
+  .proj-reel{max-width:405px;margin:8px auto 12px;aspect-ratio:9/16;position:relative}
+  .proj-reel iframe{position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:6px}
+  .proj-reel-link{text-align:center;margin:0 auto 56px}
+  .proj-reel-link a{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--grey);text-decoration:none;border-bottom:1px solid var(--line);
+    padding-bottom:2px;transition:color .2s}
+  .proj-reel-link a:hover{color:var(--paper)}
   /* A single image on its own row is centred (auto side margins). */
   .proj-detail-img-full{margin:40px auto;max-width:64ch}
   /* Full column width (no 64ch cap) — for landscape photos in an essay sequence,
@@ -2098,12 +2100,12 @@
         <h1 class="proj-detail-title">黑松沙士</h1>
         <span class="proj-detail-sub">HeySong Sarsaparilla</span>
 
-        <!-- Instagram reel, pinned right under the cover + title. A direct iframe
-             embed (not the blockquote+embed.js path) so it sizes correctly even
-             though this SPA panel starts hidden. -->
-        <div class="proj-ig">
-          <iframe class="instagram-media proj-ig-frame" src="https://www.instagram.com/reel/DbXpNKStGdU/embed/captioned/" title="黑松沙士 — Local Remote on Instagram" loading="lazy" frameborder="0" scrolling="no" allowtransparency="true" allowfullscreen></iframe>
+        <!-- The reel, self-hosted on Cloudflare Stream, pinned under the cover + title.
+             Portrait (9:16); adaptive player so it plays reliably in Chrome. -->
+        <div class="proj-reel">
+          <iframe src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/795b2112465b61127f758129b9e3422f/iframe?poster=https%3A%2F%2Fcustomer-8gvoxd7i9ystgmlw.cloudflarestream.com%2F795b2112465b61127f758129b9e3422f%2Fthumbnails%2Fthumbnail.jpg%3Fwidth%3D720" title="黑松沙士 — Local Remote" loading="lazy" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;" allowfullscreen></iframe>
         </div>
+        <p class="proj-reel-link"><a href="https://www.instagram.com/reel/DbXpNKStGdU/" target="_blank" rel="noopener">View on Instagram ↗</a></p>
 
         <!-- Gallery — same logic as The Umbrella Movement: one horizontal image per
              row (full width), two vertical images per row (paired). Cover (04) excluded.
@@ -2899,11 +2901,6 @@
     nextEl.querySelectorAll("video.proj-panel-bg").forEach(function(v){
       var p=v.play(); if(p&&p.catch) p.catch(function(){});
     });
-    // (re)hydrate any Instagram embed on the page we're entering — embed.js only
-    // scans on load, so a blockquote inside a hidden SPA section needs a manual pass
-    if(nextEl.querySelector(".instagram-media") && window.instgrm && window.instgrm.Embeds){
-      window.instgrm.Embeds.process();
-    }
   }
   // Mobile browsers pause muted video on tab/app switch and don't always resume;
   // re-play the active page's cover videos when we come back into view.
@@ -3622,7 +3619,6 @@
   },{passive:false});
 })();
 </script>
-<script async src="https://www.instagram.com/embed.js"></script>
 </body>
 </html>
 
