@@ -819,9 +819,11 @@
   .bio-scroll-wrap{position:relative}
   .bio-slide{height:100vh;overflow:hidden;background:var(--ink);
     display:flex;flex-direction:column;justify-content:center}
-  #about.is-active .bio-slide.slide-1{position:fixed;top:0;left:0;right:0;z-index:1}
+  /* Employment is pinned behind; the About slide sits on top and scrolls up to
+     reveal it (About lifts off from its bottom edge upward). */
+  #about.is-active .bio-slide.slide-2{position:fixed;top:0;left:0;right:0;z-index:1}
   .bio-spacer{height:100vh}
-  .bio-slide.slide-2{position:relative;z-index:2}
+  .bio-slide.slide-1{position:relative;z-index:2}
   .bio-slide-inner{display:flex;flex-direction:column;gap:clamp(20px,3vh,32px);
     width:100%;max-width:680px;margin:0 auto;
     padding:clamp(110px,13vh,160px) clamp(24px,4vw,48px) clamp(40px,6vh,80px);
@@ -836,7 +838,8 @@
   
   /* ========== BIO PAGE (Mobile) ========== */
   @media(max-width:768px){
-    #about.is-active .bio-slide.slide-1{position:relative;top:auto;z-index:auto}
+    #about.is-active .bio-slide.slide-1,
+    #about.is-active .bio-slide.slide-2{position:relative;top:auto;z-index:auto}
     .bio-slide{height:auto;min-height:100vh;overflow:visible;justify-content:flex-start}
     .bio-spacer{display:none}
     .bio-slide-inner{padding:clamp(96px,16vh,130px) 20px 60px;gap:0;max-height:none;overflow:visible}
