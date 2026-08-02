@@ -601,6 +601,14 @@
   .proj-detail-img-full.is-quarter{max-width:16ch}
   /* Two-up image rows stay two-up on mobile (tighter gap rather than stacking). */
   @media(max-width:640px){.proj-detail-img-pair{gap:8px}}
+  /* 黑松 gallery: vertical gaps between image rows match the 12px horizontal pair gap
+     (margin-top only, bottom 0, so no margin-collapse widens it). */
+  #proj-heysong .proj-detail-img-pair{margin:12px 0 0}
+  #proj-heysong .proj-detail-img-full{margin:12px auto 0}
+  @media(max-width:640px){
+    #proj-heysong .proj-detail-img-pair{margin-top:8px}
+    #proj-heysong .proj-detail-img-full{margin-top:8px}
+  }
   /* Video + image side by side at identical dimensions. Unlike .proj-detail-img-pair
      this one DOES stack on mobile, since both items are landscape. */
   .proj-detail-media-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:40px 0}
