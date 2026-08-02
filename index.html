@@ -575,6 +575,21 @@
     text-transform:uppercase;color:var(--grey);text-decoration:none;border-bottom:1px solid var(--line);
     padding-bottom:2px;transition:color .2s}
   .proj-reel-link a:hover{color:var(--paper)}
+  /* Credits: role | name(s) rows. */
+  .proj-credits{max-width:64ch;margin:0 auto;display:grid;
+    grid-template-columns:minmax(150px,230px) 1fr;gap:0 28px}
+  .proj-credits .cr-role{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.08em;
+    color:var(--grey);padding:14px 0;border-top:1px solid rgba(237,234,227,.1);line-height:1.5}
+  .proj-credits .cr-names{padding:14px 0;border-top:1px solid rgba(237,234,227,.1);
+    font-family:"DM Sans",system-ui,sans-serif;font-size:clamp(15px,1.4vw,17px);
+    color:var(--paper);line-height:1.7}
+  .proj-credits-sub{font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.1em;
+    color:var(--paper);margin:44px auto 4px;max-width:64ch}
+  @media(max-width:640px){
+    .proj-credits{grid-template-columns:1fr;gap:0}
+    .proj-credits .cr-role{padding-bottom:0;border-top:1px solid rgba(237,234,227,.1)}
+    .proj-credits .cr-names{padding-top:4px;border-top:none}
+  }
   /* A single image on its own row is centred (auto side margins). */
   .proj-detail-img-full{margin:40px auto;max-width:64ch}
   /* Full column width (no 64ch cap) — for landscape photos in an essay sequence,
@@ -2180,6 +2195,41 @@
         <div class="proj-detail-img-full is-wide"><img src="/images/projects/黑松-10.jpg" alt="黑松汽水" loading="lazy"></div>
         <!-- lone remaining portrait, centred at one column's width so it matches the pairs -->
         <div class="proj-detail-img-full" style="max-width:34ch"><img src="/images/projects/黑松-09.jpg" alt="黑松汽水" loading="lazy"></div>
+
+        <!-- Credits -->
+        <div class="proj-detail-section" style="margin-top:80px">
+          <span class="proj-detail-section-label">Credits</span>
+          <div class="proj-credits">
+            <div class="cr-role">Creative Director</div><div class="cr-names">Brian Liu</div>
+            <div class="cr-role">Art Director</div><div class="cr-names">Thomas Liu</div>
+            <div class="cr-role">Designer</div><div class="cr-names">Mark Yen<br>Song Lin Yu<br>Ben, Song<br>Yunju Chen</div>
+            <div class="cr-role">Type Designer</div><div class="cr-names">Weizhong Zhang</div>
+            <div class="cr-role">Photography Production</div><div class="cr-names">Shan Chiang</div>
+            <div class="cr-role">Creative Strategy</div><div class="cr-names">Celine Tung<br>Annie Xue</div>
+            <div class="cr-role">Project Manager</div><div class="cr-names">Jennie Tseng<br>Tinya Wang</div>
+          </div>
+
+          <p class="proj-credits-sub">【 影像製作團隊 Film Crew 】</p>
+          <div class="proj-credits">
+            <div class="cr-role">創意統籌 Creative Direction</div><div class="cr-names">INTETNION</div>
+            <div class="cr-role">製作公司 Production Company</div><div class="cr-names">NOUS Asia®</div>
+            <div class="cr-role">監製 Executive Producer</div><div class="cr-names">詹漢清 Henry Chan</div>
+            <div class="cr-role">專案經理 Project Manager</div><div class="cr-names">吳語馨 Gipi</div>
+            <div class="cr-role">製片 Producer</div><div class="cr-names">鄒承光 Light Zhou</div>
+            <div class="cr-role">執行製片 Line Producer</div><div class="cr-names">王瑋祥 Strawberry Wang</div>
+            <div class="cr-role">導演 Director</div><div class="cr-names">施譯棋 Yeechi</div>
+            <div class="cr-role">攝影指導 DOP</div><div class="cr-names">林科汝 Lin Ko Ju</div>
+            <div class="cr-role">攝影二助 2nd AC</div><div class="cr-names">陳智晟 Barlow、廖名翊 Adam Liao</div>
+            <div class="cr-role">燈光助理 Lighting Technician</div><div class="cr-names">游易軒</div>
+            <div class="cr-role">演員 Actor / Actress</div><div class="cr-names">郭致媛 Hannah Guo、張靖 Angel Chang、翁乙宏 Justin Wong</div>
+            <div class="cr-role">剪接師 Editor</div><div class="cr-names">施譯棋 Yeechi</div>
+            <div class="cr-role">調色師 Colorist</div><div class="cr-names">李子 Chih Xuan Lee</div>
+            <div class="cr-role">聲音設計 Sound Designer</div><div class="cr-names">黃浤軒 Lawrence Huang</div>
+            <div class="cr-role">配音員 Voice Over Artist</div><div class="cr-names">Celine Tung</div>
+            <div class="cr-role">混音師 Re-Recording Mixer</div><div class="cr-names">楊峻綱 Kang</div>
+            <div class="cr-role">配樂 Music Producer</div><div class="cr-names">楊峻綱 Kang</div>
+          </div>
+        </div>
       </div>
     </section>
 <section class="page proj-page" id="pt-inmoodforsmoke">
