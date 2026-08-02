@@ -577,8 +577,10 @@
   .proj-reel-link a:hover{color:var(--paper)}
   /* Credits: centred role | name(s) rows — role right-aligned to the middle
      gutter, names left-aligned, no divider lines (spacing carries the rhythm). */
-  .proj-credits{display:grid;grid-template-columns:auto auto;justify-content:center;
-    column-gap:44px;row-gap:26px}
+  /* Two equal halves that meet at the frame's centre, so the role|name gutter
+     sits dead-centre: roles right-aligned up to centre, names left-aligned from it. */
+  .proj-credits{display:grid;grid-template-columns:1fr 1fr;max-width:820px;margin:0 auto;
+    column-gap:48px;row-gap:26px}
   .proj-credits .cr-role{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.08em;
     color:var(--grey);line-height:1.7;text-align:right}
   .proj-credits .cr-names{font-family:"DM Sans",system-ui,sans-serif;font-size:clamp(15px,1.4vw,17px);
