@@ -583,9 +583,10 @@
     color:var(--grey);line-height:1.7;text-align:right}
   .proj-credits .cr-names{font-family:"DM Sans",system-ui,sans-serif;font-size:clamp(15px,1.4vw,17px);
     color:var(--paper);line-height:1.7;text-align:left}
-  .proj-credits-sub{font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.1em;
-    color:var(--paper);text-align:center;margin:0 0 26px}
-  .proj-credits + .proj-credits-sub{margin-top:64px}
+  /* Subheadings span the whole grid so both groups share one column alignment. */
+  .proj-credits-sub{grid-column:1/-1;font-family:"IBM Plex Mono",monospace;font-size:13px;
+    letter-spacing:.1em;color:var(--paper);text-align:center;margin:0}
+  .cr-names + .proj-credits-sub{margin-top:38px}
   @media(max-width:640px){
     .proj-credits{column-gap:20px;row-gap:20px}
   }
@@ -2198,8 +2199,8 @@
         <!-- Credits -->
         <div class="proj-detail-section" style="margin-top:80px">
           <span class="proj-detail-section-label">Credits</span>
-          <p class="proj-credits-sub">設計團隊 Design Team</p>
           <div class="proj-credits">
+            <p class="proj-credits-sub">設計團隊 Design Team</p>
             <div class="cr-role">Creative Director</div><div class="cr-names">Brian Liu</div>
             <div class="cr-role">Art Director</div><div class="cr-names">Thomas Liu</div>
             <div class="cr-role">Designer</div><div class="cr-names">Mark Yen<br>Song Lin Yu<br>Ben, Song<br>Yunju Chen</div>
@@ -2207,10 +2208,8 @@
             <div class="cr-role">Photography Production</div><div class="cr-names">Shan Huai Chiang</div>
             <div class="cr-role">Creative Strategy</div><div class="cr-names">Celine Tung<br>Annie Xue</div>
             <div class="cr-role">Project Manager</div><div class="cr-names">Jennie Tseng<br>Tinya Wang</div>
-          </div>
 
-          <p class="proj-credits-sub">影像製作團隊 Film Crew</p>
-          <div class="proj-credits">
+            <p class="proj-credits-sub">影像製作團隊 Film Crew</p>
             <div class="cr-role">創意統籌 Creative Direction</div><div class="cr-names">INTETNION</div>
             <div class="cr-role">製作公司 Production Company</div><div class="cr-names">NOUS Asia®</div>
             <div class="cr-role">監製 Executive Producer</div><div class="cr-names">詹漢清 Henry Chan</div>
