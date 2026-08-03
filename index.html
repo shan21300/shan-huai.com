@@ -900,6 +900,10 @@
   /* <picture> wrappers (art-directed covers) must stay out of the box tree, or they
      become the flex/positioned child and the img's own sizing rules stop resolving. */
   picture{display:contents}
+  /* Discourage casual image saving site-wide: block drag-to-save and text-selection
+     on images. Friction only (not real protection) — pairs with the contextmenu
+     handler in JS. pointer-events left intact so clickable thumbs still work. */
+  img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none}
   /* Video works: poster <img> defines the box (its natural ratio), and the live
      iframe overlays it exactly (inset:0), so the video fills with no extra bands. */
   .sw-stage .frame .sw-media{position:relative;display:inline-flex;max-width:100%;max-height:100%}
@@ -3735,6 +3739,13 @@
     e.preventDefault();
     var cx=e.touches[0].clientX; window.requestAnimationFrame(function(){ fromClientX(cx); });
   },{passive:false});
+})();
+// Site-wide: block right-click "Save image" and drag-to-save ON IMAGES ONLY
+// (right-click still works everywhere else). Friction for casual savers, not DRM.
+(function(){
+  function onImg(e){ var t=e.target; if(t && t.tagName==="IMG"){ e.preventDefault(); } }
+  document.addEventListener("contextmenu", onImg);
+  document.addEventListener("dragstart", onImg);
 })();
 </script>
 </body>
