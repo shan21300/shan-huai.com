@@ -501,6 +501,17 @@
   /* Project detail page */
   .proj-detail{overflow-y:auto;height:100vh}
   .proj-detail-wrap{max-width:1100px;margin:0 auto;padding:clamp(120px,14vh,180px) clamp(20px,4vw,48px) 120px;position:relative}
+  /* 黑松 page: stacked sliding sections. Each section is a full-bleed sticky card with
+     a solid background. Earlier sections sit ON TOP (higher z); later sections slide up
+     from below and tuck UNDER the previous ones. */
+  #proj-heysong .hs-stack{position:relative}
+  #proj-heysong .hs-slide{position:sticky;top:0;min-height:100vh;background:var(--ink)}
+  #proj-heysong .hs-slide:nth-child(1){z-index:40}
+  #proj-heysong .hs-slide:nth-child(2){z-index:30}
+  #proj-heysong .hs-slide:nth-child(3){z-index:20}
+  #proj-heysong .hs-slide:nth-child(4){z-index:10}
+  #proj-heysong .hs-slide-inner{min-height:100vh;box-sizing:border-box}
+  @media(prefers-reduced-motion:reduce){#proj-heysong .hs-slide{position:static}}
   /* Sits in normal flow above the hero (like .proj-head .back on project pages).
      It used to be absolute at the same offset as the wrap's padding-top, which put
      it exactly where content begins — i.e. on top of the hero image. */
@@ -2155,7 +2166,11 @@
         </div>
       </div>
 
-      <div class="proj-detail-wrap">
+      <div class="hs-stack">
+
+        <!-- Slide 1: 品牌概念前導影片 (intro copy + reel) -->
+        <div class="hs-slide">
+         <div class="hs-slide-inner proj-detail-wrap">
         <button class="back" data-nav="projects" style="margin-bottom:40px">← Projects</button>
 
         <img loading="lazy" class="proj-detail-hero is-natural" src="/images/projects/黑松-cover.jpg" alt="黑松沙士">
@@ -2164,7 +2179,7 @@
         <span class="proj-detail-sub">HeySong Sarsaparilla</span>
 
         <div class="proj-detail-section">
-          <span class="proj-detail-section-label">#品牌概念前導影片</span>
+          <span class="proj-detail-section-label">品牌概念前導影片</span>
           <h3 class="proj-detail-h3">跨世代的國民記憶：<br>黑松沙士 &amp; 黑松汽水品牌與包裝設計再造</h3>
           <div class="proj-detail-body">
             <p>走過七十餘載，黑松早已是台灣人共同的味覺底蘊。<br>面對如此深厚的經典，重塑的使命從不在於全盤推翻，而是如何精準地為品牌卸下歷史的包袱。</p>
@@ -2180,11 +2195,12 @@
           <iframe src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/795b2112465b61127f758129b9e3422f/iframe?poster=https%3A%2F%2Fcustomer-8gvoxd7i9ystgmlw.cloudflarestream.com%2F795b2112465b61127f758129b9e3422f%2Fthumbnails%2Fthumbnail.jpg%3Fwidth%3D720" title="黑松沙士 — Local Remote" loading="lazy" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;" allowfullscreen></iframe>
         </div>
         <p class="proj-reel-link"><a href="https://www.instagram.com/reel/DbXpNKStGdU/" target="_blank" rel="noopener">View on Instagram ↗</a></p>
+         </div>
+        </div>
 
-        <!-- Galleries split by product line. Layout = Umbrella logic: landscapes
-             full-width one-per-row, portraits paired two-up. Cover (04) & 05 excluded. -->
-
-        <!-- 黑松沙士 — portraits 01 02 06 07 12 15 · landscapes 17 08 11 14 (03 removed) -->
+        <!-- Slide 2: 黑松沙士 gallery — portraits 01 02 06 07 12 15 · landscapes 17 08 11 14 -->
+        <div class="hs-slide">
+         <div class="hs-slide-inner proj-detail-wrap">
         <div class="proj-detail-section" style="margin-bottom:32px">
           <span class="proj-detail-section-label">黑松沙士</span>
         </div>
@@ -2204,9 +2220,13 @@
           <img src="/images/projects/黑松-15.jpg" alt="黑松沙士" loading="lazy">
         </div>
         <div class="proj-detail-img-full is-wide"><img src="/images/projects/黑松-14.jpg" alt="黑松沙士" loading="lazy"></div>
+         </div>
+        </div>
 
-        <!-- 黑松汽水 — portraits 09 13 16 18 · landscape 10 -->
-        <div class="proj-detail-section" style="margin-top:64px;margin-bottom:32px">
+        <!-- Slide 3: 黑松汽水 gallery — portraits 09 13 16 18 · landscape 10 -->
+        <div class="hs-slide">
+         <div class="hs-slide-inner proj-detail-wrap">
+        <div class="proj-detail-section" style="margin-bottom:32px">
           <span class="proj-detail-section-label">黑松汽水</span>
         </div>
         <div class="proj-detail-img-pair">
@@ -2218,9 +2238,13 @@
           <img src="/images/projects/黑松-09.jpg" alt="黑松汽水" loading="lazy">
           <img src="/images/projects/黑松-18.jpg" alt="黑松汽水" loading="lazy">
         </div>
+         </div>
+        </div>
 
-        <!-- Credits -->
-        <div class="proj-detail-section" style="margin-top:80px">
+        <!-- Slide 4: Credits -->
+        <div class="hs-slide">
+         <div class="hs-slide-inner proj-detail-wrap">
+        <div class="proj-detail-section" style="margin-top:0">
           <span class="proj-detail-section-label">Credits</span>
           <div class="proj-detail-img-full is-wide" style="margin-bottom:44px"><img src="/images/projects/黑松-20.jpg" alt="黑松沙士 credits" loading="lazy"></div>
           <div class="proj-credits">
@@ -2252,6 +2276,8 @@
             <div class="cr-role">混音師 Re-Recording Mixer</div><div class="cr-names">楊峻綱 Kang</div>
             <div class="cr-role">配樂 Music Producer</div><div class="cr-names">楊峻綱 Kang</div>
           </div>
+        </div>
+         </div>
         </div>
       </div>
     </section>
