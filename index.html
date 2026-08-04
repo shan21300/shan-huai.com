@@ -609,6 +609,13 @@
     #proj-heysong .proj-detail-img-pair{margin-top:8px}
     #proj-heysong .proj-detail-img-full{margin-top:8px}
   }
+  /* 黑松 page: each block slips up + fades in as it scrolls into view (JS adds .in). */
+  #proj-heysong .hs-reveal{opacity:0;transform:translateY(34px);
+    transition:opacity .7s ease, transform .8s cubic-bezier(.16,1,.3,1)}
+  #proj-heysong .hs-reveal.in{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){
+    #proj-heysong .hs-reveal{opacity:1;transform:none;transition:none}
+  }
   /* Video + image side by side at identical dimensions. Unlike .proj-detail-img-pair
      this one DOES stack on mobile, since both items are landscape. */
   .proj-detail-media-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:40px 0}
@@ -3749,6 +3756,21 @@
   function onImg(e){ var t=e.target; if(t && t.tagName==="IMG"){ e.preventDefault(); } }
   document.addEventListener("contextmenu", onImg);
   document.addEventListener("dragstart", onImg);
+})();
+// 黑松 page: each block slips up + fades in as it scrolls into view (section-boundary
+// reveal). IntersectionObserver adds .in once, per element.
+(function(){
+  var page=document.getElementById("proj-heysong"); if(!page) return;
+  if(!("IntersectionObserver" in window)) return;
+  var targets=page.querySelectorAll(".proj-detail-section, .proj-reel, .proj-reel-link, .proj-detail-img-pair, .proj-detail-img-full");
+  if(!targets.length) return;
+  targets.forEach(function(el){ el.classList.add("hs-reveal"); });
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); }
+    });
+  },{rootMargin:"0px 0px -10% 0px", threshold:0.06});
+  targets.forEach(function(el){ io.observe(el); });
 })();
 </script>
 </body>
