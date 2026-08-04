@@ -3397,10 +3397,14 @@
           if(on && !existing){
             var v = document.createElement("video");
             v.className = "sw-video";
-            v.src = "https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/"+vid+"/downloads/default.mp4";
+            // Chrome's muted-autoplay gate: muted must be set (property + attribute) BEFORE
+            // the source, or Chrome treats the video as unmuted and blocks autoplay — it
+            // then freezes on the poster. Safari is lenient, which masked this.
+            v.muted = true; v.defaultMuted = true; v.setAttribute("muted","");
+            v.loop = true; v.autoplay = true; v.playsInline = true;
+            v.setAttribute("playsinline",""); v.setAttribute("autoplay","");
             v.poster = "https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/"+vid+"/thumbnails/thumbnail.jpg?width=1280";
-            v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
-            v.setAttribute("playsinline","");
+            v.src = "https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/"+vid+"/downloads/default.mp4";
             box.appendChild(v);
             if(window._coverIO) window._coverIO.observe(v);   // Chrome: play when it's confirmed in view
             var p = v.play(); if(p && p.catch) p.catch(function(){});
