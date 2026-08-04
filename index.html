@@ -10,6 +10,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<!-- hls.js: Chrome/Firefox can't play Cloudflare Stream in a native <video> without it;
+     Safari plays HLS natively. Used to stream cover videos instead of the MP4 download,
+     which Chrome rejects ("no supported sources"). -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.13/hls.min.js"></script>
 <style>
   :root{
     --ink:#0B0B0C;
@@ -1096,7 +1100,7 @@
       <!-- Each panel: swap src on .proj-panel-bg (img or iframe), update title/meta/href -->
 
       <div class="proj-panel is-video" data-nav="proj-heysong" style="cursor:pointer">
-        <video class="proj-panel-bg" poster="/images/projects/黑松-cover.jpg" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/0b36c9ded9204e7376cbc535b745884f/downloads/default.mp4" autoplay muted loop playsinline preload="none"></video>
+        <video class="proj-panel-bg" poster="/images/projects/黑松-cover.jpg" data-stream="0b36c9ded9204e7376cbc535b745884f" autoplay muted loop playsinline preload="none"></video>
         <div class="proj-panel-overlay"></div>
         <div class="proj-panel-info">
           <div class="proj-panel-text">
@@ -1149,7 +1153,7 @@
              Video covers only for now; no detail pages yet (add later like Projects). -->
         <section class="page" id="archive">
       <div class="proj-panel is-video" data-nav="making-ordinary-sense" style="cursor:pointer">
-        <video class="proj-panel-bg" poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/thumbnails/thumbnail.jpg?width=1280&height=720&fit=crop" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/downloads/default.mp4" autoplay muted loop playsinline preload="none"></video>
+        <video class="proj-panel-bg" poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/thumbnails/thumbnail.jpg?width=1280&height=720&fit=crop" data-stream="2e55db6d182f6cb0667fa118b13784de" autoplay muted loop playsinline preload="none"></video>
         <div class="proj-panel-overlay"></div>
         <div class="proj-panel-info">
           <div class="proj-panel-text">
@@ -1161,7 +1165,7 @@
       </div>
 
       <div class="proj-panel is-video" data-nav="girlfriend" style="cursor:pointer">
-        <video class="proj-panel-bg" poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/bd75fdf49d96c125ba7dc1fcdc705fd5/thumbnails/thumbnail.jpg?width=1280" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/bd75fdf49d96c125ba7dc1fcdc705fd5/downloads/default.mp4" autoplay muted loop playsinline preload="none"></video>
+        <video class="proj-panel-bg" poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/bd75fdf49d96c125ba7dc1fcdc705fd5/thumbnails/thumbnail.jpg?width=1280" data-stream="bd75fdf49d96c125ba7dc1fcdc705fd5" autoplay muted loop playsinline preload="none"></video>
         <div class="proj-panel-overlay"></div>
         <div class="proj-panel-info">
           <div class="proj-panel-text">
@@ -3044,9 +3048,32 @@
   // the IntersectionObserver's "visible" callback, when Chrome agrees it's on screen.
   // PLAY-ONLY: never pause here (a stale initial "not visible" entry must not freeze it);
   // pausing is explicit -- on nav away (swap) and tab hide (visibilitychange).
+  // Stream a Cloudflare Stream video into a native <video> via HLS (Chrome/Firefox need
+  // hls.js; Safari plays HLS natively). Used instead of the MP4 download, which Chrome
+  // rejects with "no supported sources". Idempotent per element; MP4 only as last resort.
+  function hsStream(video, id){
+    if(!id || video._streamed) return;
+    video._streamed = true;
+    var m3u8 = "https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/"+id+"/manifest/video.m3u8";
+    if(video.canPlayType("application/vnd.apple.mpegurl")){
+      video.src = m3u8;                                 // Safari: native HLS
+    } else if(window.Hls && window.Hls.isSupported()){
+      var h = new window.Hls({enableWorker:true});
+      h.on(window.Hls.Events.ERROR, function(){});
+      h.loadSource(m3u8); h.attachMedia(video);         // Chrome/Firefox: hls.js
+      video._hls = h;
+    } else {
+      video.src = "https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/"+id+"/downloads/default.mp4";
+    }
+  }
+  window._hsStream = hsStream;
+
   var coverIO = ("IntersectionObserver" in window) ? new IntersectionObserver(function(entries){
     entries.forEach(function(e){
-      if(e.isIntersecting){ var p=e.target.play(); if(p&&p.catch) p.catch(function(){}); }
+      if(e.isIntersecting){
+        if(e.target.dataset && e.target.dataset.stream) hsStream(e.target, e.target.dataset.stream);
+        var p=e.target.play(); if(p&&p.catch) p.catch(function(){});
+      }
     });
   }, {threshold:0.1}) : null;
   if(coverIO){ document.querySelectorAll("video.proj-panel-bg").forEach(function(v){ coverIO.observe(v); }); }
@@ -3065,8 +3092,9 @@
     if(window._hdrReset) window._hdrReset();   // header back down on every page change
     applyViewMode(target);
     pushRoute(target);
-    // start cover videos on the page we're entering (preload=none loads on play)
+    // start cover videos on the page we're entering (HLS attaches lazily on first play)
     nextEl.querySelectorAll("video.proj-panel-bg").forEach(function(v){
+      if(v.dataset.stream) hsStream(v, v.dataset.stream);
       var p=v.play(); if(p&&p.catch) p.catch(function(){});
     });
   }
@@ -3404,8 +3432,8 @@
             v.loop = true; v.autoplay = true; v.playsInline = true;
             v.setAttribute("playsinline",""); v.setAttribute("autoplay","");
             v.poster = "https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/"+vid+"/thumbnails/thumbnail.jpg?width=1280";
-            v.src = "https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/"+vid+"/downloads/default.mp4";
             box.appendChild(v);
+            if(window._hsStream) window._hsStream(v, vid);    // HLS source (Chrome-safe)
             if(window._coverIO) window._coverIO.observe(v);   // Chrome: play when it's confirmed in view
             var p = v.play(); if(p && p.catch) p.catch(function(){});
           } else if(!on && existing){
