@@ -3045,13 +3045,15 @@
     if(!id || video._streamed) return;
     video._streamed = true;
     var m3u8 = "https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/"+id+"/manifest/video.m3u8";
-    if(video.canPlayType("application/vnd.apple.mpegurl")){
-      video.src = m3u8;                                 // Safari: native HLS
-    } else if(window.Hls && window.Hls.isSupported()){
+    if(window.Hls && window.Hls.isSupported()){
+      // Prefer hls.js wherever MSE exists (Chrome/Chromium/Firefox/desktop Safari).
+      // Some Chromium builds falsely report native HLS support, so this must come first.
       var h = new window.Hls({enableWorker:true});
       h.on(window.Hls.Events.ERROR, function(){});
-      h.loadSource(m3u8); h.attachMedia(video);         // Chrome/Firefox: hls.js
+      h.loadSource(m3u8); h.attachMedia(video);
       video._hls = h;
+    } else if(video.canPlayType("application/vnd.apple.mpegurl")){
+      video.src = m3u8;                                 // iOS Safari: native HLS
     } else {
       video.src = "https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/"+id+"/downloads/default.mp4";
     }
@@ -3072,10 +3074,10 @@
     }
     clearTimeout(v._coverTimer);
     v.style.opacity = "0";                       // show the cover image
-    try{ v.pause(); v.currentTime = 0; }catch(e){}
+    try{ v.pause(); }catch(e){}
     v._coverTimer = setTimeout(function(){
+      if(v.currentTime > 0.3){ try{ v.currentTime = 0; }catch(e){} } // restart only if it already played
       v.style.opacity = "1";
-      try{ v.currentTime = 0; }catch(e){}
       var p = v.play(); if(p && p.catch) p.catch(function(){ v.style.opacity = "0"; });
     }, HS_COVER_MS);
   }
