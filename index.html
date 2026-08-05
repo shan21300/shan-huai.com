@@ -524,12 +524,13 @@
   }
   /* "Coming up next" cue at the bottom of each section — a section's own title only
      reveals once the previous card fully slides away, so this previews what's next. */
-  #proj-heysong .hs-next{display:flex;flex-direction:column;align-items:center;gap:8px;
-    margin-top:clamp(56px,9vh,110px);color:var(--grey)}
-  #proj-heysong .hs-next-label{font-family:"IBM Plex Mono",monospace;font-size:13px;
-    letter-spacing:.2em;text-transform:uppercase}
-  #proj-heysong .hs-next-arrow{font-size:15px;line-height:1;animation:hsBob 1.6s ease-in-out infinite}
-  @keyframes hsBob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+  #proj-heysong .hs-next{position:absolute;left:0;right:0;bottom:clamp(36px,5vh,72px);
+    display:flex;flex-direction:column;align-items:center;gap:16px;color:var(--grey)}
+  #proj-heysong .hs-next-label{font-family:"IBM Plex Mono",monospace;
+    font-size:clamp(30px,4vw,44px);letter-spacing:.16em;text-transform:uppercase}
+  #proj-heysong .hs-next-arrow{font-size:clamp(30px,4vw,44px);line-height:1;
+    animation:hsBob 1.6s ease-in-out infinite}
+  @keyframes hsBob{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
   @media(prefers-reduced-motion:reduce){#proj-heysong .hs-next-arrow{animation:none}}
   /* Sits in normal flow above the hero (like .proj-head .back on project pages).
      It used to be absolute at the same offset as the wrap's padding-top, which put
