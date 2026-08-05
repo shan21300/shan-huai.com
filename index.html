@@ -522,6 +522,15 @@
     #proj-heysong .hs-viewport{position:static;height:auto;overflow:visible}
     #proj-heysong .hs-slide{position:relative;transform:none!important}
   }
+  /* "Coming up next" cue at the bottom of each section — a section's own title only
+     reveals once the previous card fully slides away, so this previews what's next. */
+  #proj-heysong .hs-next{display:flex;flex-direction:column;align-items:center;gap:8px;
+    margin-top:clamp(56px,9vh,110px);color:var(--grey)}
+  #proj-heysong .hs-next-label{font-family:"IBM Plex Mono",monospace;font-size:13px;
+    letter-spacing:.2em;text-transform:uppercase}
+  #proj-heysong .hs-next-arrow{font-size:15px;line-height:1;animation:hsBob 1.6s ease-in-out infinite}
+  @keyframes hsBob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+  @media(prefers-reduced-motion:reduce){#proj-heysong .hs-next-arrow{animation:none}}
   /* Sits in normal flow above the hero (like .proj-head .back on project pages).
      It used to be absolute at the same offset as the wrap's padding-top, which put
      it exactly where content begins — i.e. on top of the hero image. */
@@ -2193,7 +2202,7 @@
         <h1 class="proj-detail-title has-logo"><img class="proj-title-logo" src="/images/projects/黑松title.png" alt="黑松沙士"></h1>
 
         <div class="proj-detail-section">
-          <span class="proj-detail-section-label">#品牌概念前導影片</span>
+          <span class="proj-detail-section-label">品牌概念前導影片</span>
           <h3 class="proj-detail-h3">跨世代的國民記憶：<br>黑松沙士 &amp; 黑松汽水品牌與包裝設計再造</h3>
           <div class="proj-detail-body">
             <p>走過七十餘載，黑松早已是台灣人共同的味覺底蘊。<br>面對如此深厚的經典，重塑的使命從不在於全盤推翻，而是如何精準地為品牌卸下歷史的包袱。</p>
@@ -2209,6 +2218,7 @@
           <iframe src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/c296648c4661eaae6b325a4e243acee8/iframe?poster=https%3A%2F%2Fcustomer-8gvoxd7i9ystgmlw.cloudflarestream.com%2Fc296648c4661eaae6b325a4e243acee8%2Fthumbnails%2Fthumbnail.jpg%3Fwidth%3D720" title="黑松沙士 — Local Remote" loading="lazy" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;" allowfullscreen></iframe>
         </div>
         <p class="proj-reel-link"><a href="https://www.instagram.com/reel/DbXpNKStGdU/" target="_blank" rel="noopener">View on Instagram ↗</a></p>
+          <div class="hs-next" aria-hidden="true"><span class="hs-next-label">黑松沙士</span><span class="hs-next-arrow">▾</span></div>
          </div>
         </div>
 
@@ -2235,6 +2245,7 @@
         <div class="proj-detail-img-full is-wide"><img src="/images/projects/黑松-11.jpg" alt="黑松沙士" loading="lazy"></div>
         <!-- lone portrait at the section's tail, centred at one column's width -->
         <div class="proj-detail-img-full" style="max-width:34ch"><img src="/images/projects/黑松-12.jpg" alt="黑松沙士" loading="lazy"></div>
+          <div class="hs-next" aria-hidden="true"><span class="hs-next-label">黑松汽水</span><span class="hs-next-arrow">▾</span></div>
          </div>
         </div>
 
@@ -2253,6 +2264,7 @@
           <img src="/images/projects/黑松-09.jpg" alt="黑松汽水" loading="lazy">
           <img src="/images/projects/黑松-18.jpg" alt="黑松汽水" loading="lazy">
         </div>
+          <div class="hs-next" aria-hidden="true"><span class="hs-next-label">Credits</span><span class="hs-next-arrow">▾</span></div>
          </div>
         </div>
 
