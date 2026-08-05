@@ -171,6 +171,11 @@
      two clips letterboxed to their own ratios — 2.29:1 vs 1.78:1 — so the imagery
      ended at different heights and the titles read as misaligned. */
   .proj-panel.is-video video.proj-panel-bg{object-fit:cover}
+  /* Cover image base layer: sits behind the video; the video fades over it for one
+     play, then fades back to reveal this (cover-then-video cycle). */
+  .proj-panel-cover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+    display:block;z-index:0;pointer-events:none}
+  .proj-panel.is-video video.proj-panel-bg{opacity:0;transition:opacity .5s ease}
   .proj-panel-overlay{position:absolute;inset:0;z-index:1;
     background:linear-gradient(to top,rgba(11,11,12,0.72) 0%,transparent 50%)}
   .proj-panel-info{position:relative;z-index:2;padding:clamp(24px,4vw,48px);
@@ -516,6 +521,9 @@
   #proj-heysong .proj-detail-body{max-width:68ch}
   #proj-heysong .proj-reel{max-width:1040px}
   #proj-heysong .proj-title-logo{max-width:1040px}
+  /* Intro block centred in the page width and centre-aligned. */
+  #proj-heysong .hs-intro{text-align:center}
+  #proj-heysong .hs-intro .proj-detail-body{margin-left:auto;margin-right:auto;text-align:center}
   /* Sits in normal flow above the hero (like .proj-head .back on project pages).
      It used to be absolute at the same offset as the wrap's padding-top, which put
      it exactly where content begins — i.e. on top of the hero image. */
@@ -935,7 +943,7 @@
      iframe overlays it exactly (inset:0), so the video fills with no extra bands. */
   .sw-stage .frame .sw-media{position:relative;display:inline-flex;max-width:100%;max-height:100%}
   .sw-stage .frame .sw-media img{max-width:100%;max-height:100%;width:auto;height:auto;display:block}
-  .sw-stage .frame .sw-media video.sw-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border:0;pointer-events:none;background:var(--ink)}
+  .sw-stage .frame .sw-media video.sw-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border:0;pointer-events:none;background:var(--ink);opacity:0;transition:opacity .5s ease}
 
   /* caption top-left: Eyebrow / Title / Subtitle - aligned with image top */
   .sw-caption{position:absolute;left:clamp(24px,5vw,80px);top:clamp(120px,15vh,170px);z-index:6;
@@ -1101,7 +1109,8 @@
       <!-- Each panel: swap src on .proj-panel-bg (img or iframe), update title/meta/href -->
 
       <div class="proj-panel is-video" data-nav="proj-heysong" style="cursor:pointer">
-        <video class="proj-panel-bg" poster="/images/projects/黑松-cover.jpg" data-stream="0b36c9ded9204e7376cbc535b745884f" autoplay muted loop playsinline preload="none"></video>
+        <img class="proj-panel-cover" src="/images/projects/黑松-cover.jpg" alt="">
+        <video class="proj-panel-bg" data-stream="0b36c9ded9204e7376cbc535b745884f" muted playsinline preload="none"></video>
         <div class="proj-panel-overlay"></div>
         <div class="proj-panel-info">
           <div class="proj-panel-text">
@@ -1154,7 +1163,8 @@
              Video covers only for now; no detail pages yet (add later like Projects). -->
         <section class="page" id="archive">
       <div class="proj-panel is-video" data-nav="making-ordinary-sense" style="cursor:pointer">
-        <video class="proj-panel-bg" poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/thumbnails/thumbnail.jpg?width=1280&height=720&fit=crop" data-stream="2e55db6d182f6cb0667fa118b13784de" autoplay muted loop playsinline preload="none"></video>
+        <img class="proj-panel-cover" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/thumbnails/thumbnail.jpg?width=1280&height=720&fit=crop" alt="">
+        <video class="proj-panel-bg" data-stream="2e55db6d182f6cb0667fa118b13784de" muted playsinline preload="none"></video>
         <div class="proj-panel-overlay"></div>
         <div class="proj-panel-info">
           <div class="proj-panel-text">
@@ -1166,7 +1176,8 @@
       </div>
 
       <div class="proj-panel is-video" data-nav="girlfriend" style="cursor:pointer">
-        <video class="proj-panel-bg" poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/bd75fdf49d96c125ba7dc1fcdc705fd5/thumbnails/thumbnail.jpg?width=1280" data-stream="bd75fdf49d96c125ba7dc1fcdc705fd5" autoplay muted loop playsinline preload="none"></video>
+        <img class="proj-panel-cover" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/bd75fdf49d96c125ba7dc1fcdc705fd5/thumbnails/thumbnail.jpg?width=1280" alt="">
+        <video class="proj-panel-bg" data-stream="bd75fdf49d96c125ba7dc1fcdc705fd5" muted playsinline preload="none"></video>
         <div class="proj-panel-overlay"></div>
         <div class="proj-panel-info">
           <div class="proj-panel-text">
@@ -2184,7 +2195,7 @@
 
         <h1 class="proj-detail-title has-logo"><img class="proj-title-logo" src="/images/projects/黑松title.png" alt="黑松沙士"></h1>
 
-        <div class="proj-detail-section">
+        <div class="proj-detail-section hs-intro">
           <span class="proj-detail-section-label">品牌概念前導影片</span>
           <h3 class="proj-detail-h3">跨世代的國民記憶：<br>黑松沙士 &amp; 黑松汽水品牌與包裝設計再造</h3>
           <div class="proj-detail-body">
@@ -3047,11 +3058,35 @@
   }
   window._hsStream = hsStream;
 
+  // Cover-then-video: hold the cover image for 10s, play the video ONCE (no loop),
+  // then rest on the cover. Works by fading the video's opacity over the cover <img>
+  // that sits behind it. Re-arms whenever the page/slide is (re)entered.
+  var HS_COVER_MS = 10000;
+  function coverCycle(v){
+    if(!v) return;
+    v.loop = false; v.removeAttribute("loop");
+    if(!v._cycleBound){
+      v._cycleBound = true;
+      v.style.transition = "opacity .5s ease";
+      v.addEventListener("ended", function(){ v.style.opacity = "0"; try{ v.pause(); }catch(e){} });
+    }
+    clearTimeout(v._coverTimer);
+    v.style.opacity = "0";                       // show the cover image
+    try{ v.pause(); v.currentTime = 0; }catch(e){}
+    v._coverTimer = setTimeout(function(){
+      v.style.opacity = "1";
+      try{ v.currentTime = 0; }catch(e){}
+      var p = v.play(); if(p && p.catch) p.catch(function(){ v.style.opacity = "0"; });
+    }, HS_COVER_MS);
+  }
+  function coverStop(v){ if(!v) return; clearTimeout(v._coverTimer); try{ v.pause(); }catch(e){} v.style.opacity = "0"; }
+  window._coverCycle = coverCycle; window._coverStop = coverStop;
+
   var coverIO = ("IntersectionObserver" in window) ? new IntersectionObserver(function(entries){
     entries.forEach(function(e){
       if(e.isIntersecting){
         if(e.target.dataset && e.target.dataset.stream) hsStream(e.target, e.target.dataset.stream);
-        var p=e.target.play(); if(p&&p.catch) p.catch(function(){});
+        coverCycle(e.target);
       }
     });
   }, {threshold:0.1}) : null;
@@ -3062,8 +3097,8 @@
   function swap(target){
     if(target===current) return;
     var curEl=document.getElementById(current);
-    // stop any cover videos on the page we're leaving
-    curEl.querySelectorAll("video").forEach(function(v){ try{ v.pause(); }catch(e){} });
+    // stop any cover videos on the page we're leaving (cancel pending cover timers too)
+    curEl.querySelectorAll("video").forEach(function(v){ coverStop(v); });
     curEl.classList.remove("is-active");
     var nextEl=document.getElementById(target);
     nextEl.classList.add("is-active");
@@ -3071,10 +3106,11 @@
     if(window._hdrReset) window._hdrReset();   // header back down on every page change
     applyViewMode(target);
     pushRoute(target);
-    // start cover videos on the page we're entering (HLS attaches lazily on first play)
+    // start the cover cycle on the page we're entering (HLS attaches lazily; the video
+    // plays once after the 10s cover hold, then rests on the cover)
     nextEl.querySelectorAll("video.proj-panel-bg").forEach(function(v){
       if(v.dataset.stream) hsStream(v, v.dataset.stream);
-      var p=v.play(); if(p&&p.catch) p.catch(function(){});
+      coverCycle(v);
     });
   }
   // Mobile browsers pause muted video on tab/app switch and don't always resume;
@@ -3084,7 +3120,8 @@
     var cur=document.getElementById(current);
     if(!cur) return;
     cur.querySelectorAll("video.proj-panel-bg, video.sw-video").forEach(function(v){
-      var p=v.play(); if(p&&p.catch) p.catch(function(){});
+      // only resume videos that were mid-play (opacity 1, not finished); leave cover-resting ones
+      if(v.style.opacity==="1" && !v.ended){ var p=v.play(); if(p&&p.catch) p.catch(function(){}); }
     });
   });
 
@@ -3408,14 +3445,13 @@
             // the source, or Chrome treats the video as unmuted and blocks autoplay — it
             // then freezes on the poster. Safari is lenient, which masked this.
             v.muted = true; v.defaultMuted = true; v.setAttribute("muted","");
-            v.loop = true; v.autoplay = true; v.playsInline = true;
-            v.setAttribute("playsinline",""); v.setAttribute("autoplay","");
+            v.loop = false; v.playsInline = true; v.setAttribute("playsinline","");
             v.poster = "https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/"+vid+"/thumbnails/thumbnail.jpg?width=1280";
             box.appendChild(v);
-            if(window._hsStream) window._hsStream(v, vid);    // HLS source (Chrome-safe)
-            if(window._coverIO) window._coverIO.observe(v);   // Chrome: play when it's confirmed in view
-            var p = v.play(); if(p && p.catch) p.catch(function(){});
+            if(window._hsStream) window._hsStream(v, vid);      // HLS source (Chrome-safe)
+            if(window._coverCycle) window._coverCycle(v);       // cover 10s → play once → rest
           } else if(!on && existing){
+            if(window._coverStop) window._coverStop(existing);
             existing.remove();
           }
         }
