@@ -536,6 +536,10 @@
     max-width:100%;max-height:78vh;object-fit:contain;margin-left:auto;margin-right:auto}
   .proj-detail-title{font-family:"Cormorant Garamond";font-weight:300;font-size:clamp(41px,6.9vw,101px);
     line-height:1;letter-spacing:-.02em;margin-bottom:8px;text-align:center}
+  /* Logo image standing in for the text title: sized to the title's own font-size.
+     The PNG carries ~9% transparent padding top/bottom, so 1.2em makes the visible
+     mark ≈ the text height it replaces. */
+  .proj-detail-title .proj-title-logo{display:block;height:1.2em;width:auto;margin:0 auto}
   .proj-detail-sub{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;
     text-transform:uppercase;color:var(--grey);margin-bottom:64px;display:block;text-align:center}
   .proj-detail-section{margin-bottom:72px}
@@ -2171,7 +2175,7 @@
                 </div>
               </div>
               <div class="pinfo-view" data-view="desc">
-                <div class="pinfo-desc"><p>黑松沙士 and 黑松汽水 &mdash; a soft-drink brand woven into Taiwanese life for over seventy years &mdash; reimagined by Taipei studio Local Remote. The redesign works by subtraction rather than addition: the ornate ribbon emblem is pared into clean, dynamic linework, the classic lettering (rooted in Chen Dunhua&rsquo;s seal-script forms) is sharpened with a precise 70&deg; tilt, and the bottles shed much of their label so the identity can breathe. The sarsaparilla keeps its signature deep russet and gold, refined; the soda line turns emerald, its overlapping geometric circles in teal and lime reading as bubbles and carbonation.</p><p>Its guiding idea &mdash; 撕掉標籤, &ldquo;tearing off the label&rdquo; &mdash; treats heritage as something to distil rather than overwrite. The task was never simply new packaging but, as Local Remote frames it, to modernise a national icon without erasing the public&rsquo;s emotional memory of it &mdash; letting the most familiar of Taiwanese flavours step into contemporary life looking cooler, purer, and more assured.</p></div>
+                <div class="pinfo-desc"><p>Spanning over seven decades, HeySong Sarsaparilla and Soda stand as iconic touchstones of Taiwanese daily life. Commissioned for a major brand overhaul, Taipei studio Local Remote approached these national symbols through a philosophy of subtraction rather than addition. The heritage brand mark, originally inspired by calligrapher Chen Dunhua&rsquo;s seal-script strokes, has been sharpened with a dynamic 70&deg; forward tilt. The ornate classic ribbon emblem was streamlined into minimal, fluid lines, and the bottle labels were dramatically scaled back to allow the design&mdash;and product&mdash;to breathe. While Sarsaparilla retains its signature deep, refined russet and gold palette, the Soda line evolves with vibrant emerald hues and overlapping teal-and-lime geometric circles that evoke carbonated bubbles. Guided by the ethos 撕掉標籤 (&ldquo;tearing off the label&rdquo;), the redesign distils decades of collective memory into a sleek, contemporary visual language without erasing the public&rsquo;s emotional connection.</p><p>As Local Remote&rsquo;s photography producer, my task was to translate this design philosophy from vector art into raw, lived visual culture. Embracing the core art direction of 台灣感性 (Taiwanese Sensibility) and 台潮 (Taiwanese Wave), I oversaw the photography production to bridge nostalgic warmth with a modern edge. We wanted the imagery to feel intimately grounded in local life yet effortlessly cool&mdash;capturing how a 70-year-old flavor naturally moves through modern night markets, convenience stores, and street corners. Through light, texture, and candid staging, the visual showcase doesn&rsquo;t just display new packaging; it honors the sensory relationship Taiwan has had with HeySong for generations, letting a national classic step confidently into the present.</p></div>
               </div>
             </div>
           </div>
@@ -2188,7 +2192,7 @@
 
         <img loading="lazy" class="proj-detail-hero is-natural" src="/images/projects/黑松-cover.jpg" alt="黑松沙士">
 
-        <h1 class="proj-detail-title">黑松沙士</h1>
+        <h1 class="proj-detail-title has-logo"><img class="proj-title-logo" src="/images/projects/黑松title.png" alt="黑松沙士"></h1>
         <span class="proj-detail-sub">HeySong Sarsaparilla</span>
 
         <div class="proj-detail-section">
