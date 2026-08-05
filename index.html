@@ -508,6 +508,14 @@
   /* Project detail page */
   .proj-detail{overflow-y:auto;height:100vh}
   .proj-detail-wrap{max-width:1100px;margin:0 auto;padding:clamp(120px,14vh,180px) clamp(20px,4vw,48px) 120px;position:relative}
+  /* ── 黑松 page: full-bleed trial. The container spans the viewport with small edge
+     gutters (images fill the width); body text keeps a readable measure so it doesn't
+     stretch; the reel and logo are capped so display type stays proportionate. ── */
+  #proj-heysong .proj-detail-wrap{max-width:none;
+    padding-left:clamp(24px,6vw,140px);padding-right:clamp(24px,6vw,140px)}
+  #proj-heysong .proj-detail-body{max-width:68ch}
+  #proj-heysong .proj-reel{max-width:1040px}
+  #proj-heysong .proj-title-logo{max-width:1040px}
   /* Sits in normal flow above the hero (like .proj-head .back on project pages).
      It used to be absolute at the same offset as the wrap's padding-top, which put
      it exactly where content begins — i.e. on top of the hero image. */
