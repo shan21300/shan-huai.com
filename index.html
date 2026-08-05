@@ -517,10 +517,18 @@
   #proj-heysong .hs-viewport{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
   #proj-heysong .hs-slide{position:absolute;top:0;left:0;right:0;min-height:100vh;
     background:var(--ink);will-change:transform}
-  #proj-heysong .hs-slide:nth-child(1){z-index:40}
-  #proj-heysong .hs-slide:nth-child(2){z-index:30}
-  #proj-heysong .hs-slide:nth-child(3){z-index:20}
-  #proj-heysong .hs-slide:nth-child(4){z-index:10}
+  #proj-heysong .hs-slide:nth-child(1){z-index:40;background:#5E0000}
+  #proj-heysong .hs-slide:nth-child(2){z-index:30;background:#A40000}
+  #proj-heysong .hs-slide:nth-child(3){z-index:20;background:#7ECEF4}
+  #proj-heysong .hs-slide:nth-child(4){z-index:10;background:#FFFFFF}
+  /* Light-background sections (3 & 4): flip text to dark so it stays legible. */
+  #proj-heysong .hs-slide:nth-child(3) .proj-detail-section-label,
+  #proj-heysong .hs-slide:nth-child(3) .hs-next-label,
+  #proj-heysong .hs-slide:nth-child(3) .hs-next-arrow,
+  #proj-heysong .hs-slide:nth-child(4) .proj-detail-section-label,
+  #proj-heysong .hs-slide:nth-child(4) .proj-credits-sub,
+  #proj-heysong .hs-slide:nth-child(4) .cr-names{color:#111}
+  #proj-heysong .hs-slide:nth-child(4) .cr-role{color:#555}
   @media(prefers-reduced-motion:reduce){
     #proj-heysong .hs-viewport{position:static;height:auto;overflow:visible}
     #proj-heysong .hs-slide{position:relative;transform:none!important}
