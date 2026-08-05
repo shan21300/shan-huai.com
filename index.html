@@ -508,48 +508,6 @@
   /* Project detail page */
   .proj-detail{overflow-y:auto;height:100vh}
   .proj-detail-wrap{max-width:1100px;margin:0 auto;padding:clamp(120px,14vh,180px) clamp(20px,4vw,48px) 120px;position:relative}
-  /* 黑松 page: sections stacked in a pinned viewport. The active section scrolls up
-     through its own height (JS translate); the rest stay frozen at the top, beneath it
-     (earlier sections on top, descending z), until their turn. Tall sections are fine —
-     each scrolls through its full height while active. A tall .hs-scroll spacer + a
-     sticky .hs-viewport supply the pin+scroll (the same reliable pattern as .proj-page). */
-  #proj-heysong .hs-scroll{position:relative}
-  #proj-heysong .hs-viewport{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
-  #proj-heysong .hs-slide{position:absolute;top:0;left:0;right:0;min-height:100vh;
-    background:var(--ink);will-change:transform}
-  #proj-heysong .hs-slide:nth-child(1){z-index:40;background:#5E0000}
-  #proj-heysong .hs-slide:nth-child(2){z-index:30;background:#D2A36C}
-  #proj-heysong .hs-slide:nth-child(3){z-index:20;background:#7ECEF4}
-  #proj-heysong .hs-slide:nth-child(4){z-index:10;background:#FFFFFF}
-  /* Light-background sections (2, 3 & 4): dark labels/credits so they stay legible. */
-  #proj-heysong .hs-slide:nth-child(2) .proj-detail-section-label,
-  #proj-heysong .hs-slide:nth-child(3) .proj-detail-section-label,
-  #proj-heysong .hs-slide:nth-child(4) .proj-detail-section-label,
-  #proj-heysong .hs-slide:nth-child(4) .proj-credits-sub,
-  #proj-heysong .hs-slide:nth-child(4) .cr-names{color:#111}
-  #proj-heysong .hs-slide:nth-child(4) .cr-role{color:#555}
-  /* "Coming up next" cue tinted to preview the upcoming section's colour. */
-  #proj-heysong .hs-slide:nth-child(1) .hs-next-label,
-  #proj-heysong .hs-slide:nth-child(1) .hs-next-arrow{color:#D2A36C}
-  #proj-heysong .hs-slide:nth-child(2) .hs-next-label,
-  #proj-heysong .hs-slide:nth-child(2) .hs-next-arrow{color:#1EA235}
-  #proj-heysong .hs-slide:nth-child(3) .hs-next-label,
-  #proj-heysong .hs-slide:nth-child(3) .hs-next-arrow{color:#FFFFFF}
-  @media(prefers-reduced-motion:reduce){
-    #proj-heysong .hs-viewport{position:static;height:auto;overflow:visible}
-    #proj-heysong .hs-slide{position:relative;transform:none!important}
-  }
-  /* "Coming up next" cue pinned just above each section's bottom border. The extra
-     bottom padding on the slide keeps section content clear of the cue (no overlap). */
-  #proj-heysong .hs-slide-inner{padding-bottom:clamp(200px,26vh,300px)}
-  #proj-heysong .hs-next{position:absolute;left:0;right:0;bottom:clamp(28px,4vh,56px);
-    display:flex;flex-direction:column;align-items:center;gap:16px;color:var(--paper)}
-  #proj-heysong .hs-next-label{font-family:"IBM Plex Mono",monospace;font-weight:700;
-    font-size:clamp(30px,4vw,44px);letter-spacing:.16em;text-transform:uppercase;color:var(--paper)}
-  #proj-heysong .hs-next-arrow{font-size:clamp(30px,4vw,44px);line-height:1;font-weight:700;
-    color:var(--paper);animation:hsBob 1.6s ease-in-out infinite}
-  @keyframes hsBob{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
-  @media(prefers-reduced-motion:reduce){#proj-heysong .hs-next-arrow{animation:none}}
   /* Sits in normal flow above the hero (like .proj-head .back on project pages).
      It used to be absolute at the same offset as the wrap's padding-top, which put
      it exactly where content begins — i.e. on top of the hero image. */
@@ -2213,12 +2171,7 @@
         </div>
       </div>
 
-      <div class="hs-scroll">
-       <div class="hs-viewport">
-
-        <!-- Section 1: 品牌概念前導影片 (intro + reel) -->
-        <div class="hs-slide">
-         <div class="hs-slide-inner proj-detail-wrap">
+      <div class="proj-detail-wrap">
         <button class="back" data-nav="projects" style="margin-bottom:40px">← Projects</button>
 
         <h1 class="proj-detail-title has-logo"><img class="proj-title-logo" src="/images/projects/黑松title.png" alt="黑松沙士"></h1>
@@ -2240,14 +2193,9 @@
           <iframe src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/c296648c4661eaae6b325a4e243acee8/iframe?poster=https%3A%2F%2Fcustomer-8gvoxd7i9ystgmlw.cloudflarestream.com%2Fc296648c4661eaae6b325a4e243acee8%2Fthumbnails%2Fthumbnail.jpg%3Fwidth%3D720" title="黑松沙士 — Local Remote" loading="lazy" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;" allowfullscreen></iframe>
         </div>
         <p class="proj-reel-link"><a href="https://www.instagram.com/reel/DbXpNKStGdU/" target="_blank" rel="noopener">View on Instagram ↗</a></p>
-          <div class="hs-next" aria-hidden="true"><span class="hs-next-label">黑松沙士</span><span class="hs-next-arrow">▾</span></div>
-         </div>
-        </div>
 
-        <!-- Section 2: 黑松沙士 gallery — portraits 01 02 06 07 12 15 · landscapes 17 08 11 14 -->
-        <div class="hs-slide">
-         <div class="hs-slide-inner proj-detail-wrap">
-        <div class="proj-detail-section" style="margin-bottom:32px">
+        <!-- 黑松沙士 gallery -->
+        <div class="proj-detail-section" style="margin-top:64px;margin-bottom:32px">
           <span class="proj-detail-section-label">黑松沙士</span>
         </div>
         <div class="proj-detail-img-pair">
@@ -2267,14 +2215,9 @@
         <div class="proj-detail-img-full is-wide"><img src="/images/projects/黑松-11.jpg" alt="黑松沙士" loading="lazy"></div>
         <!-- lone portrait at the section's tail, centred at one column's width -->
         <div class="proj-detail-img-full" style="max-width:34ch"><img src="/images/projects/黑松-12.jpg" alt="黑松沙士" loading="lazy"></div>
-          <div class="hs-next" aria-hidden="true"><span class="hs-next-label">黑松汽水</span><span class="hs-next-arrow">▾</span></div>
-         </div>
-        </div>
 
-        <!-- Section 3: 黑松汽水 gallery — portraits 09 13 16 18 · landscape 10 -->
-        <div class="hs-slide">
-         <div class="hs-slide-inner proj-detail-wrap">
-        <div class="proj-detail-section" style="margin-bottom:32px">
+        <!-- 黑松汽水 gallery -->
+        <div class="proj-detail-section" style="margin-top:64px;margin-bottom:32px">
           <span class="proj-detail-section-label">黑松汽水</span>
         </div>
         <div class="proj-detail-img-pair">
@@ -2286,14 +2229,9 @@
           <img src="/images/projects/黑松-09.jpg" alt="黑松汽水" loading="lazy">
           <img src="/images/projects/黑松-18.jpg" alt="黑松汽水" loading="lazy">
         </div>
-          <div class="hs-next" aria-hidden="true"><span class="hs-next-label">Credits</span><span class="hs-next-arrow">▾</span></div>
-         </div>
-        </div>
 
-        <!-- Section 4: Credits -->
-        <div class="hs-slide">
-         <div class="hs-slide-inner proj-detail-wrap">
-        <div class="proj-detail-section" style="margin-top:0">
+        <!-- Credits -->
+        <div class="proj-detail-section" style="margin-top:80px">
           <span class="proj-detail-section-label">Credits</span>
           <div class="proj-detail-img-full is-wide" style="margin-bottom:44px"><img src="/images/projects/黑松-20.jpg" alt="黑松沙士 credits" loading="lazy"></div>
           <div class="proj-credits">
@@ -2326,9 +2264,6 @@
             <div class="cr-role">配樂 Music Producer</div><div class="cr-names">楊峻綱 Kang</div>
           </div>
         </div>
-         </div>
-        </div>
-       </div>
       </div>
     </section>
 <section class="page proj-page" id="pt-inmoodforsmoke">
@@ -3878,52 +3813,6 @@
     });
   },{rootMargin:"0px 0px -10% 0px", threshold:0.06});
   targets.forEach(function(el){ io.observe(el); });
-})();
-// 黑松 page: active section scrolls, others frozen until their turn. Each section
-// translates up through its own height (budget); while a section's scroll budget hasn't
-// started it stays at 0 (frozen at the top, beneath the current one). Earlier sections
-// sit on top (descending z), so the active one slides up to reveal the next beneath it.
-// A tall .hs-scroll spacer + sticky .hs-viewport provide the pin & scroll length.
-(function(){
-  var page=document.getElementById("proj-heysong"); if(!page) return;
-  var scroll=page.querySelector(".hs-scroll");
-  var slides=[].slice.call(page.querySelectorAll(".hs-slide"));
-  if(!scroll || slides.length<2) return;
-  if(window.matchMedia("(prefers-reduced-motion:reduce)").matches) return;
-
-  var budgets=[], total=0, vh=0, raf=null;
-  function measure(){
-    vh=window.innerHeight; budgets=[]; total=0;
-    slides.forEach(function(s,i){
-      var h=s.offsetHeight;                              // section's own content height
-      var b=(i===slides.length-1) ? Math.max(h-vh,0) : h; // last only scrolls through
-      budgets.push(b); total+=b;
-    });
-    scroll.style.height=(total+vh)+"px";                 // pin duration + one screen
-  }
-  function apply(){
-    raf=null;
-    var y=-scroll.getBoundingClientRect().top;           // px scrolled into the pinned range
-    if(y<0)y=0; if(y>total)y=total;
-    var acc=0;
-    for(var i=0;i<slides.length;i++){
-      var t=Math.min(Math.max(y-acc,0),budgets[i]);      // this section's travel
-      slides[i].style.transform = t ? ("translate3d(0,"+(-t)+"px,0)") : "";
-      acc+=budgets[i];
-    }
-  }
-  function onScroll(){ if(!raf) raf=requestAnimationFrame(apply); }
-  function refresh(){ measure(); apply(); }
-
-  refresh();
-  window.addEventListener("scroll", onScroll, {passive:true});
-  page.addEventListener("scroll", onScroll, {passive:true});
-  window.addEventListener("resize", refresh);
-  page.querySelectorAll(".hs-slide img").forEach(function(img){
-    if(!img.complete) img.addEventListener("load", refresh, {once:true});
-  });
-  new MutationObserver(function(){ if(page.classList.contains("is-active")) refresh(); })
-    .observe(page,{attributes:true,attributeFilter:["class"]});
 })();
 </script>
 </body>
