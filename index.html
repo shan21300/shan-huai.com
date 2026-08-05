@@ -521,17 +521,20 @@
   #proj-heysong .hs-slide:nth-child(2){z-index:30;background:#D2A36C}
   #proj-heysong .hs-slide:nth-child(3){z-index:20;background:#7ECEF4}
   #proj-heysong .hs-slide:nth-child(4){z-index:10;background:#FFFFFF}
-  /* Light-background sections (2, 3 & 4): flip text to dark so it stays legible. */
+  /* Light-background sections (2, 3 & 4): dark labels/credits so they stay legible. */
   #proj-heysong .hs-slide:nth-child(2) .proj-detail-section-label,
-  #proj-heysong .hs-slide:nth-child(2) .hs-next-label,
-  #proj-heysong .hs-slide:nth-child(2) .hs-next-arrow,
   #proj-heysong .hs-slide:nth-child(3) .proj-detail-section-label,
-  #proj-heysong .hs-slide:nth-child(3) .hs-next-label,
-  #proj-heysong .hs-slide:nth-child(3) .hs-next-arrow,
   #proj-heysong .hs-slide:nth-child(4) .proj-detail-section-label,
   #proj-heysong .hs-slide:nth-child(4) .proj-credits-sub,
   #proj-heysong .hs-slide:nth-child(4) .cr-names{color:#111}
   #proj-heysong .hs-slide:nth-child(4) .cr-role{color:#555}
+  /* "Coming up next" cue tinted to preview the upcoming section's colour. */
+  #proj-heysong .hs-slide:nth-child(1) .hs-next-label,
+  #proj-heysong .hs-slide:nth-child(1) .hs-next-arrow{color:#D2A36C}
+  #proj-heysong .hs-slide:nth-child(2) .hs-next-label,
+  #proj-heysong .hs-slide:nth-child(2) .hs-next-arrow{color:#1EA235}
+  #proj-heysong .hs-slide:nth-child(3) .hs-next-label,
+  #proj-heysong .hs-slide:nth-child(3) .hs-next-arrow{color:#FFFFFF}
   @media(prefers-reduced-motion:reduce){
     #proj-heysong .hs-viewport{position:static;height:auto;overflow:visible}
     #proj-heysong .hs-slide{position:relative;transform:none!important}
