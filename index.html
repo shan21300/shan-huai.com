@@ -113,6 +113,13 @@
     display:flex;flex-direction:column;justify-content:flex-start;
     opacity:0;visibility:hidden}
   #menu.open{opacity:1;visibility:visible}
+  /* Opened from the 黑松 page (the one page with a light bg): invert so the menu still
+     reads as a reveal against it, instead of blending into a page that's now light too. */
+  #menu.menu-inverted{background:var(--ink)}
+  #menu.menu-inverted .menu-close,
+  #menu.menu-inverted .m-link,
+  #menu.menu-inverted .m-sub,
+  #menu.menu-inverted .menu-mini a{color:var(--paper)}
   .menu-close{position:absolute;top:clamp(14px,2vw,26px);right:clamp(48px,8vw,110px);left:auto;
     background:none;border:none;color:var(--ink);cursor:pointer;z-index:3;
     font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.12em;text-transform:lowercase;
@@ -513,22 +520,69 @@
   /* Project detail page */
   .proj-detail{overflow-y:auto;height:100vh}
   .proj-detail-wrap{max-width:1100px;margin:0 auto;padding:clamp(120px,14vh,180px) clamp(20px,4vw,48px) 120px;position:relative}
-  /* ── 黑松 page: full-bleed trial. The container spans the viewport with small edge
-     gutters (images fill the width); body text keeps a readable measure so it doesn't
-     stretch; the reel and logo are capped so display type stays proportionate. ── */
-  #proj-heysong .proj-detail-wrap{max-width:none;
-    padding-left:clamp(24px,6vw,140px);padding-right:clamp(24px,6vw,140px)}
-  #proj-heysong .proj-detail-body{max-width:68ch}
-  #proj-heysong .proj-reel{max-width:1040px}
-  #proj-heysong .proj-title-logo{max-width:1040px}
-  /* Intro block centred in the page width and centre-aligned. */
-  #proj-heysong .hs-intro{text-align:center}
-  #proj-heysong .hs-intro .proj-detail-body{margin-left:auto;margin-right:auto;text-align:center}
-  /* Enlarge the short first title line so it matches the second line's width. */
-  #proj-heysong .hs-intro .hs-t1{display:inline-block;font-size:2.01em;line-height:1.15}
-  #proj-heysong .hs-intro .hs-t2{display:inline-block;line-height:1.15}
-  /* Gap between the title and the body copy. */
-  #proj-heysong .hs-intro .proj-detail-h3{margin-bottom:clamp(40px,6vh,84px)}
+  /* ── 黑松 page: light-theme redesign (paper-light bg, ink-dark text) — the one page
+     on the site that flips the palette. Scoped to .proj-detail-wrap (not #proj-heysong
+     itself) so the .pinfo floater — a sibling that sits outside .proj-detail-wrap and
+     always stays dark via its own translucent backdrop, independent of the page below
+     it — is unaffected by the flipped tokens. Same trick as #menu's inversion: swap the
+     RGB base, keep each token's original alpha. ── */
+  #proj-heysong{background:#f4f1ec;overflow-x:hidden}
+  #proj-heysong .proj-detail-wrap{max-width:1400px;
+    --ink:#f4f1ec;--paper:#181410;--grey:#86827e;
+    --edge:rgba(24,20,16,.55);--line:rgba(24,20,16,.14);
+    padding-left:clamp(20px,4vw,48px);padding-right:clamp(20px,4vw,48px)}
+  #proj-heysong .hs-nav-row{margin-bottom:18px}
+  /* max-width keeps clear of the .pinfo floater, which is fixed top-right regardless
+     of page content and would otherwise sit on top of the last column. */
+  #proj-heysong .hs-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;
+    max-width:900px;border-top:1px solid var(--line);padding-top:18px}
+  #proj-heysong .hs-meta-k{font-family:"IBM Plex Mono",monospace;font-size:11px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--grey);margin-bottom:6px}
+  #proj-heysong .hs-meta-v{font-family:"DM Sans",system-ui,sans-serif;font-size:14px;
+    font-weight:500;color:var(--paper)}
+  #proj-heysong .hs-title-logo{display:block;width:min(100%,900px);height:auto;margin:0 0 20px}
+  #proj-heysong .hs-sub{font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--grey)}
+  #proj-heysong .hs-cols{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
+  #proj-heysong .hs-cjk{font-family:"Cormorant Garamond";font-weight:400;
+    font-size:clamp(19px,1.7vw,23px);line-height:1.75;color:var(--paper);max-width:520px}
+  #proj-heysong .hs-cjk p{margin:0 0 1.2em}
+  #proj-heysong .hs-en{font-family:"DM Sans",system-ui,sans-serif;font-size:15px;
+    line-height:1.8;color:var(--grey);max-width:520px}
+  #proj-heysong .hs-en p{margin:0 0 1.2em}
+  /* Full-bleed breakout: escapes .proj-detail-wrap's max-width/centring entirely,
+     unlike the padding-cancelling trick used elsewhere — this one spans the viewport. */
+  #proj-heysong .hs-hero-wrap{width:100vw;margin-left:calc(50% - 50vw);
+    margin-right:calc(50% - 50vw);margin-bottom:4px}
+  #proj-heysong .hs-hero{width:100%;height:min(88vh,900px);object-fit:cover;display:block}
+  #proj-heysong .hs-cap{font-family:"IBM Plex Mono",monospace;font-size:11px;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--grey);padding:16px 0 0;margin:0}
+  #proj-heysong .hs-sec-label{display:flex;justify-content:space-between;align-items:baseline;
+    border-top:1px solid var(--line);padding-top:18px;margin-bottom:36px}
+  #proj-heysong .hs-sec-cjk{font-family:"Cormorant Garamond";font-weight:500;
+    font-size:26px;color:var(--paper)}
+  #proj-heysong .hs-sec-en{font-family:"IBM Plex Mono",monospace;font-size:11px;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--grey)}
+  #proj-heysong .hs-quote{max-width:900px;margin:120px auto;text-align:center;
+    font-family:"Cormorant Garamond";font-weight:400;font-size:clamp(24px,3.6vw,38px);
+    line-height:1.55;color:var(--paper)}
+  #proj-heysong .hs-credits2{display:grid;grid-template-columns:1fr 1fr;gap:80px;margin-top:32px}
+  #proj-heysong .hs-credits-heading{font-family:"IBM Plex Mono",monospace;font-size:12px;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin-bottom:24px}
+  #proj-heysong .hs-credits2 .proj-credits{grid-template-columns:auto 1fr;max-width:none;
+    margin:0;column-gap:16px;row-gap:0}
+  #proj-heysong .hs-credits2 .cr-role{text-align:left;padding:12px 0;border-bottom:1px solid var(--line)}
+  #proj-heysong .hs-credits2 .cr-names{padding:12px 0;border-bottom:1px solid var(--line)}
+  #proj-heysong .hs-foot{display:flex;justify-content:space-between;align-items:center;
+    border-top:1px solid var(--line);padding-top:18px;margin-top:80px}
+  #proj-heysong .hs-foot button{font-family:"IBM Plex Mono",monospace;font-size:12px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--paper);
+    background:none;border:none;cursor:pointer;padding:4px 0}
+  #proj-heysong .hs-foot-top{color:var(--grey)}
+  @media(max-width:860px){
+    #proj-heysong .hs-cols,#proj-heysong .hs-credits2{grid-template-columns:1fr;gap:28px}
+    #proj-heysong .hs-meta{grid-template-columns:1fr 1fr}
+  }
   /* Sits in normal flow above the hero (like .proj-head .back on project pages).
      It used to be absolute at the same offset as the wrap's padding-top, which put
      it exactly where content begins — i.e. on top of the hero image. */
@@ -2196,97 +2250,129 @@
       </div>
 
       <div class="proj-detail-wrap">
-        <button class="back" data-nav="projects" style="margin-bottom:40px">← Projects</button>
+        <div class="proj-detail-section hs-nav-row">
+          <button class="back" data-nav="projects">← Projects</button>
+        </div>
 
-        <h1 class="proj-detail-title has-logo"><img class="proj-title-logo" src="/images/projects/黑松title.png" alt="黑松沙士"></h1>
+        <div class="proj-detail-section hs-meta">
+          <div><div class="hs-meta-k">Project</div><div class="hs-meta-v">黑松沙士 (HeySong Sarsaparilla)</div></div>
+          <div><div class="hs-meta-k">Studio</div><div class="hs-meta-v">Local Remote</div></div>
+          <div><div class="hs-meta-k">Category</div><div class="hs-meta-v">Branding</div></div>
+          <div><div class="hs-meta-k">Year</div><div class="hs-meta-v">2026</div></div>
+        </div>
 
-        <div class="proj-detail-section hs-intro">
-          <span class="proj-detail-section-label">品牌概念前導影片</span>
-          <h3 class="proj-detail-h3"><span class="hs-t1">跨世代的國民記憶：</span><br><span class="hs-t2">黑松沙士 &amp; 黑松汽水品牌與包裝設計再造</span></h3>
-          <div class="proj-detail-body">
-            <p>走過七十餘載，黑松早已是台灣人共同的味覺底蘊。<br>面對如此深厚的經典，重塑的使命從不在於全盤推翻，而是如何精準地為品牌卸下歷史的包袱。</p>
+        <div class="proj-detail-section">
+          <img class="hs-title-logo" src="/images/projects/黑松沙士title_black.png" alt="黑松沙士">
+          <span class="hs-sub">HeySong Sarsaparilla &amp; Soda — Brand Photography Production</span>
+        </div>
+
+        <div class="proj-detail-section hs-cols">
+          <div class="hs-cjk">
+            <p>走過七十餘載，黑松早已是台灣人共同的味覺底蘊。面對如此深厚的經典，重塑的使命從不在於全盤推翻，而是如何精準地為品牌卸下歷史的包袱。</p>
             <p>我們以 #撕掉標籤 為策略核心，重新梳理黑松沙士與黑松汽水的視覺語彙。褪去老字號的繁複外衣，將最具代表性的色彩與符號去蕪存菁，提煉出契合當代生活風格的純粹輪廓。</p>
             <p>與其被時代賦予新標籤，我們選擇大膽留白，將經典的詮釋權交還給大眾。讓這份最熟悉的台式風味，以更從容、自信的姿態，走入未來的日常。</p>
             <p>全新包裝，現已於全台各大通路陸續上架。</p>
           </div>
+          <div class="hs-en">
+            <p>Spanning over seven decades, HeySong Sarsaparilla and Soda stand as iconic touchstones of Taiwanese daily life. Commissioned for a major brand overhaul, Taipei studio Local Remote approached these national symbols through a philosophy of subtraction rather than addition. The heritage brand mark, originally inspired by calligrapher Chen Dunhua&rsquo;s seal-script strokes, has been sharpened with a dynamic 70&deg; forward tilt. The ornate classic ribbon emblem was streamlined into minimal, fluid lines, and the bottle labels were dramatically scaled back to allow the design&mdash;and product&mdash;to breathe. While Sarsaparilla retains its signature deep, refined russet and gold palette, the Soda line evolves with vibrant emerald hues and overlapping teal-and-lime geometric circles that evoke carbonated bubbles. Guided by the ethos 撕掉標籤 (&ldquo;tearing off the label&rdquo;), the redesign distils decades of collective memory into a sleek, contemporary visual language without erasing the public&rsquo;s emotional connection.</p>
+            <p>As Local Remote&rsquo;s photography producer, my task was to translate this design philosophy from vector art into raw, lived visual culture. Embracing the core art direction of 台灣感性 (Taiwanese Sensibility) and 台潮 (Taiwanese Wave), I oversaw the photography production to bridge nostalgic warmth with a modern edge. We wanted the imagery to feel intimately grounded in local life yet effortlessly cool&mdash;capturing how a 70-year-old flavor naturally moves through modern night markets, convenience stores, and street corners. Through light, texture, and candid staging, the visual showcase doesn&rsquo;t just display new packaging; it honors the sensory relationship Taiwan has had with HeySong for generations, letting a national classic step confidently into the present.</p>
+          </div>
         </div>
 
-        <!-- The reel, self-hosted on Cloudflare Stream. Sits below the intro copy.
-             16:9; adaptive player so it plays reliably in Chrome. -->
+        <!-- The reel, self-hosted on Cloudflare Stream. 16:9; adaptive player so it plays reliably in Chrome. -->
         <div class="proj-reel">
           <iframe src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/c296648c4661eaae6b325a4e243acee8/iframe?poster=https%3A%2F%2Fcustomer-8gvoxd7i9ystgmlw.cloudflarestream.com%2Fc296648c4661eaae6b325a4e243acee8%2Fthumbnails%2Fthumbnail.jpg%3Fwidth%3D720" title="黑松沙士 — Local Remote" loading="lazy" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;" allowfullscreen></iframe>
         </div>
         <p class="proj-reel-link"><a href="https://www.instagram.com/reel/DbXpNKStGdU/" target="_blank" rel="noopener">View on Instagram ↗</a></p>
 
+        <!-- Full-bleed hero, breaks out of the wrap's max-width (see .hs-hero-wrap) -->
+        <div class="hs-hero-wrap"><img class="hs-hero" src="/images/projects/黑松-cover.jpg" alt="黑松沙士" loading="lazy"></div>
+        <p class="hs-cap">01 — Local Remote, 2026</p>
+
         <!-- 黑松沙士 gallery -->
-        <div class="proj-detail-section" style="margin-top:64px;margin-bottom:32px">
-          <span class="proj-detail-section-label">黑松沙士</span>
+        <div class="proj-detail-section hs-sec-label" style="margin-top:96px">
+          <span class="hs-sec-cjk">黑松沙士</span><span class="hs-sec-en">Sarsaparilla</span>
         </div>
+        <div class="proj-detail-img-full is-wide"><img src="/images/projects/黑松-17.jpg" alt="黑松沙士" loading="lazy"></div>
         <div class="proj-detail-img-pair">
           <img src="/images/projects/黑松-01.jpg" alt="黑松沙士" loading="lazy">
           <img src="/images/projects/黑松-02.jpg" alt="黑松沙士" loading="lazy">
         </div>
-        <div class="proj-detail-img-full is-wide"><img src="/images/projects/黑松-17.jpg" alt="黑松沙士" loading="lazy"></div>
+        <div class="proj-detail-img-full is-wide"><img src="/images/projects/黑松-08.jpg" alt="黑松沙士" loading="lazy"></div>
         <div class="proj-detail-img-pair">
           <img src="/images/projects/黑松-04.jpg" alt="黑松沙士" loading="lazy">
           <img src="/images/projects/黑松-15.jpg" alt="黑松沙士" loading="lazy">
         </div>
+        <div class="proj-detail-img-full is-wide"><img src="/images/projects/黑松-11.jpg" alt="黑松沙士" loading="lazy"></div>
         <div class="proj-detail-img-pair">
           <img src="/images/projects/黑松-06.jpg" alt="黑松沙士" loading="lazy">
           <img src="/images/projects/黑松-07.jpg" alt="黑松沙士" loading="lazy">
         </div>
-        <div class="proj-detail-img-full is-wide"><img src="/images/projects/黑松-08.jpg" alt="黑松沙士" loading="lazy"></div>
-        <div class="proj-detail-img-full is-wide"><img src="/images/projects/黑松-11.jpg" alt="黑松沙士" loading="lazy"></div>
-        <!-- lone portrait at the section's tail; matched to the pair grid's per-image width (50% minus half the 12px gap) -->
+        <!-- lone portrait; matched to the pair grid's per-image width (50% minus half the 12px gap) -->
         <div class="proj-detail-img-full is-wide" style="max-width:calc((100% - 12px)/2)"><img src="/images/projects/黑松-12.jpg" alt="黑松沙士" loading="lazy"></div>
 
+        <p class="hs-quote">與其被時代賦予新標籤，我們選擇大膽留白，將經典的詮釋權交還給大眾。讓這份最熟悉的台式風味，以更從容、自信的姿態，走入未來的日常。</p>
+
         <!-- 黑松汽水 gallery -->
-        <div class="proj-detail-section" style="margin-top:64px;margin-bottom:32px">
-          <span class="proj-detail-section-label">黑松汽水</span>
+        <div class="proj-detail-section hs-sec-label">
+          <span class="hs-sec-cjk">黑松汽水</span><span class="hs-sec-en">Soda</span>
         </div>
+        <div class="proj-detail-img-full is-wide"><img src="/images/projects/黑松-10.jpg" alt="黑松汽水" loading="lazy"></div>
         <div class="proj-detail-img-pair">
           <img src="/images/projects/黑松-16.jpg" alt="黑松汽水" loading="lazy">
           <img src="/images/projects/黑松-13.jpg" alt="黑松汽水" loading="lazy">
         </div>
-        <div class="proj-detail-img-full is-wide"><img src="/images/projects/黑松-10.jpg" alt="黑松汽水" loading="lazy"></div>
         <div class="proj-detail-img-pair">
           <img src="/images/projects/黑松-09.jpg" alt="黑松汽水" loading="lazy">
           <img src="/images/projects/黑松-18.jpg" alt="黑松汽水" loading="lazy">
         </div>
 
         <!-- Credits -->
-        <div class="proj-detail-section" style="margin-top:80px">
+        <div class="proj-detail-section" style="margin-top:96px;margin-bottom:32px">
           <span class="proj-detail-section-label">Credits</span>
-          <div class="proj-detail-img-full is-wide" style="margin-bottom:44px"><img src="/images/projects/黑松-20.jpg" alt="黑松沙士 credits" loading="lazy"></div>
-          <div class="proj-credits">
-            <p class="proj-credits-sub">設計團隊 Design Team</p>
-            <div class="cr-role">Creative Director</div><div class="cr-names">Brian Liu</div>
-            <div class="cr-role">Art Director</div><div class="cr-names">Thomas Liu</div>
-            <div class="cr-role">Designer</div><div class="cr-names">Mark Yen<br>Song Lin Yu<br>Ben, Song<br>Yunju Chen</div>
-            <div class="cr-role">Type Designer</div><div class="cr-names">Weizhong Zhang</div>
-            <div class="cr-role">Photography Production</div><div class="cr-names">Shan Huai Chiang</div>
-            <div class="cr-role">Creative Strategy</div><div class="cr-names">Celine Tung<br>Annie Xue</div>
-            <div class="cr-role">Project Manager</div><div class="cr-names">Jennie Tseng<br>Tinya Wang</div>
+        </div>
+        <div class="proj-detail-img-full is-wide" style="margin-bottom:44px"><img src="/images/projects/黑松-20.jpg" alt="黑松沙士 credits" loading="lazy"></div>
 
-            <p class="proj-credits-sub">影像製作團隊 Film Crew</p>
-            <div class="cr-role">創意統籌 Creative Direction</div><div class="cr-names">INTETNION</div>
-            <div class="cr-role">製作公司 Production Company</div><div class="cr-names">NOUS Asia®</div>
-            <div class="cr-role">監製 Executive Producer</div><div class="cr-names">詹漢清 Henry Chan</div>
-            <div class="cr-role">專案經理 Project Manager</div><div class="cr-names">吳語馨 Gipi</div>
-            <div class="cr-role">製片 Producer</div><div class="cr-names">鄒承光 Light Zhou</div>
-            <div class="cr-role">執行製片 Line Producer</div><div class="cr-names">王瑋祥 Strawberry Wang</div>
-            <div class="cr-role">導演 Director</div><div class="cr-names">施譯棋 Yeechi</div>
-            <div class="cr-role">攝影指導 DOP</div><div class="cr-names">林科汝 Lin Ko Ju</div>
-            <div class="cr-role">攝影二助 2nd AC</div><div class="cr-names">陳智晟 Barlow、廖名翊 Adam Liao</div>
-            <div class="cr-role">燈光助理 Lighting Technician</div><div class="cr-names">游易軒</div>
-            <div class="cr-role">演員 Actor / Actress</div><div class="cr-names">郭致媛 Hannah Guo、張靖 Angel Chang、翁乙宏 Justin Wong</div>
-            <div class="cr-role">剪接師 Editor</div><div class="cr-names">施譯棋 Yeechi</div>
-            <div class="cr-role">調色師 Colorist</div><div class="cr-names">李子 Chih Xuan Lee</div>
-            <div class="cr-role">聲音設計 Sound Designer</div><div class="cr-names">黃浤軒 Lawrence Huang</div>
-            <div class="cr-role">配音員 Voice Over Artist</div><div class="cr-names">Celine Tung</div>
-            <div class="cr-role">混音師 Re-Recording Mixer</div><div class="cr-names">楊峻綱 Kang</div>
-            <div class="cr-role">配樂 Music Producer</div><div class="cr-names">楊峻綱 Kang</div>
+        <div class="proj-detail-section hs-credits2">
+          <div>
+            <div class="hs-credits-heading">設計團隊 — Design Team</div>
+            <div class="proj-credits">
+              <div class="cr-role">Creative Director</div><div class="cr-names">Brian Liu</div>
+              <div class="cr-role">Art Director</div><div class="cr-names">Thomas Liu</div>
+              <div class="cr-role">Designer</div><div class="cr-names">Mark Yen<br>Song Lin Yu<br>Ben, Song<br>Yunju Chen</div>
+              <div class="cr-role">Type Designer</div><div class="cr-names">Weizhong Zhang</div>
+              <div class="cr-role">Photography Production</div><div class="cr-names">Shan Huai Chiang</div>
+              <div class="cr-role">Creative Strategy</div><div class="cr-names">Celine Tung<br>Annie Xue</div>
+              <div class="cr-role">Project Manager</div><div class="cr-names">Jennie Tseng<br>Tinya Wang</div>
+            </div>
           </div>
+          <div>
+            <div class="hs-credits-heading">影像製作團隊 — Film Crew</div>
+            <div class="proj-credits">
+              <div class="cr-role">創意統籌 Creative Direction</div><div class="cr-names">INTETNION</div>
+              <div class="cr-role">製作公司 Production Company</div><div class="cr-names">NOUS Asia®</div>
+              <div class="cr-role">監製 Executive Producer</div><div class="cr-names">詹漢清 Henry Chan</div>
+              <div class="cr-role">專案經理 Project Manager</div><div class="cr-names">吳語馨 Gipi</div>
+              <div class="cr-role">製片 Producer</div><div class="cr-names">鄒承光 Light Zhou</div>
+              <div class="cr-role">執行製片 Line Producer</div><div class="cr-names">王瑋祥 Strawberry Wang</div>
+              <div class="cr-role">導演 Director</div><div class="cr-names">施譯棋 Yeechi</div>
+              <div class="cr-role">攝影指導 DOP</div><div class="cr-names">林科汝 Lin Ko Ju</div>
+              <div class="cr-role">攝影二助 2nd AC</div><div class="cr-names">陳智晟 Barlow、廖名翊 Adam Liao</div>
+              <div class="cr-role">燈光助理 Lighting Technician</div><div class="cr-names">游易軒</div>
+              <div class="cr-role">演員 Actor / Actress</div><div class="cr-names">郭致媛 Hannah Guo、張靖 Angel Chang、翁乙宏 Justin Wong</div>
+              <div class="cr-role">剪接師 Editor</div><div class="cr-names">施譯棋 Yeechi</div>
+              <div class="cr-role">調色師 Colorist</div><div class="cr-names">李子 Chih Xuan Lee</div>
+              <div class="cr-role">聲音設計 Sound Designer</div><div class="cr-names">黃浤軒 Lawrence Huang</div>
+              <div class="cr-role">配音員 Voice Over Artist</div><div class="cr-names">Celine Tung</div>
+              <div class="cr-role">混音師 Re-Recording Mixer</div><div class="cr-names">楊峻綱 Kang</div>
+              <div class="cr-role">配樂 Music Producer</div><div class="cr-names">楊峻綱 Kang</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hs-foot">
+          <button class="hs-foot-back" data-nav="projects" type="button">← Back to Projects</button>
+          <button class="hs-foot-top" type="button" onclick="this.closest('.proj-detail').scrollTo({top:0,behavior:'smooth'})">Back to Top ↑</button>
         </div>
       </div>
     </section>
@@ -3148,6 +3234,15 @@
 
   /* Menu overlay */
   function openMenu(){
+    // 黑松 page is light-themed (the one page that flips the palette), so the menu's
+    // usual light-bg/dark-text inversion would blend into it — invert it back to
+    // dark-bg/light-text here to keep the reveal contrast, matching every other page.
+    var inverted = current === "proj-heysong";
+    menuEl.classList.toggle("menu-inverted", inverted);
+    var menuLogoImg = document.querySelector(".menu-logo-img");
+    if(menuLogoImg) menuLogoImg.src = inverted
+      ? "/images/system/shanhuailogoinversed_white.png"
+      : "/images/system/shanhuailogoinversed_black.png";
     menuEl.classList.add("open");
     if(reduce || !hasGSAP) return;
     gsap.fromTo(menuEl,{opacity:0},{opacity:1,duration:.4,ease:"power2.out"});
@@ -3855,7 +3950,7 @@
 (function(){
   var page=document.getElementById("proj-heysong"); if(!page) return;
   if(!("IntersectionObserver" in window)) return;
-  var targets=page.querySelectorAll(".proj-detail-section, .proj-reel, .proj-reel-link, .proj-detail-img-pair, .proj-detail-img-full");
+  var targets=page.querySelectorAll(".proj-detail-section, .proj-reel, .proj-reel-link, .proj-detail-img-pair, .proj-detail-img-full, .hs-hero-wrap, .hs-quote");
   if(!targets.length) return;
   targets.forEach(function(el){ el.classList.add("hs-reveal"); });
   var io=new IntersectionObserver(function(entries){
