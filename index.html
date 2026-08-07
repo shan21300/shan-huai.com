@@ -532,15 +532,17 @@
     --edge:rgba(24,20,16,.55);--line:rgba(24,20,16,.14);
     padding-left:clamp(20px,4vw,48px);padding-right:clamp(20px,4vw,48px)}
   #proj-heysong .hs-nav-row{margin-bottom:18px}
-  /* max-width keeps clear of the .pinfo floater, which is fixed top-right regardless
-     of page content and would otherwise sit on top of the last column. */
+  /* The row itself spans full width; padding-right (not a max-width cap) keeps the
+     last column's text clear of the .pinfo floater, which is fixed top-right
+     regardless of page content. */
   #proj-heysong .hs-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;
-    max-width:900px;border-top:1px solid var(--line);padding-top:18px}
+    padding-right:min(320px,26vw);border-top:1px solid var(--line);padding-top:18px}
   #proj-heysong .hs-meta-k{font-family:"IBM Plex Mono",monospace;font-size:11px;
     letter-spacing:.14em;text-transform:uppercase;color:var(--grey);margin-bottom:6px}
   #proj-heysong .hs-meta-v{font-family:"DM Sans",system-ui,sans-serif;font-size:14px;
     font-weight:500;color:var(--paper)}
-  #proj-heysong .hs-title-logo{display:block;width:min(100%,900px);height:auto;margin:0 0 20px}
+  #proj-heysong .hs-title-block{text-align:center}
+  #proj-heysong .hs-title-logo{display:block;width:min(100%,900px);height:auto;margin:0 auto 20px}
   #proj-heysong .hs-sub{font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.1em;
     text-transform:uppercase;color:var(--grey)}
   #proj-heysong .hs-cols{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
@@ -581,7 +583,7 @@
   #proj-heysong .hs-foot-top{color:var(--grey)}
   @media(max-width:860px){
     #proj-heysong .hs-cols,#proj-heysong .hs-credits2{grid-template-columns:1fr;gap:28px}
-    #proj-heysong .hs-meta{grid-template-columns:1fr 1fr}
+    #proj-heysong .hs-meta{grid-template-columns:1fr 1fr;padding-right:0}
   }
   /* Sits in normal flow above the hero (like .proj-head .back on project pages).
      It used to be absolute at the same offset as the wrap's padding-top, which put
@@ -2261,7 +2263,7 @@
           <div><div class="hs-meta-k">Year</div><div class="hs-meta-v">2026</div></div>
         </div>
 
-        <div class="proj-detail-section">
+        <div class="proj-detail-section hs-title-block">
           <img class="hs-title-logo" src="/images/projects/黑松沙士title_black.png" alt="黑松沙士">
           <span class="hs-sub">HeySong Sarsaparilla &amp; Soda — Brand Photography Production</span>
         </div>
