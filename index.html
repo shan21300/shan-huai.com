@@ -102,6 +102,9 @@
      over the marquee like .proj-name/.proj-meta already do — no page scroll needed. */
   #proj-butoh .proj-head{grid-template-rows:auto auto auto}
   #proj-butoh .proj-head .proj-meta-grid{grid-column:1/4;grid-row:3;margin:12px 0 0}
+  /* The extra grid row makes the header taller than the other .proj-marquee pages, so
+     the marquee needs to start further down to clear it instead of running underneath. */
+  #proj-butoh .marquee{top:clamp(260px,32vh,330px)}
   .marquee{position:absolute;left:0;right:0;top:clamp(150px,20vh,210px);bottom:clamp(24px,5vh,44px);
     display:flex;align-items:center;overflow:hidden;cursor:grab;touch-action:none}
   .marquee.grabbing{cursor:grabbing}
