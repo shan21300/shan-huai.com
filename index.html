@@ -527,9 +527,13 @@
      it — is unaffected by the flipped tokens. Same trick as #menu's inversion: swap the
      RGB base, keep each token's original alpha. ── */
   #proj-heysong{background:#f4f1ec;overflow-x:hidden}
+  /* Top padding is much smaller than the base rule's clamp(120px,14vh,180px) — that
+     gap exists elsewhere to clear the fixed header over a plain background, but here
+     the hero image (which precedes .proj-detail-wrap) already fills that space. */
   #proj-heysong .proj-detail-wrap{max-width:1400px;
     --ink:#f4f1ec;--paper:#181410;--grey:#86827e;
     --edge:rgba(24,20,16,.55);--line:rgba(24,20,16,.14);
+    padding-top:56px;
     padding-left:clamp(20px,4vw,48px);padding-right:clamp(20px,4vw,48px)}
   #proj-heysong .hs-nav-row{margin-bottom:18px}
   #proj-heysong .hs-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;
