@@ -98,6 +98,13 @@
   body.on-proj footer{display:none}
   /* ---- Project page: horizontal infinite scroll (marquee), drag + auto ---- */
   .proj-marquee{position:relative;height:100vh;overflow:hidden}
+  /* Butoh only: the marquee panel stays a fixed-height first screen, but the page as a
+     whole scrolls vertically to reveal the intro text below it (every other
+     .proj-marquee page is marquee-only, so this stays scoped to #proj-butoh). */
+  #proj-butoh{height:100vh;overflow-y:auto}
+  #proj-butoh .marquee-wrap{position:relative;height:100vh}
+  #proj-butoh .butoh-intro{padding:64px clamp(20px,4vw,48px) 96px}
+  #proj-butoh .butoh-intro .proj-detail-body{max-width:68ch}
   .marquee{position:absolute;left:0;right:0;top:clamp(150px,20vh,210px);bottom:clamp(24px,5vh,44px);
     display:flex;align-items:center;overflow:hidden;cursor:grab;touch-action:none}
   .marquee.grabbing{cursor:grabbing}
@@ -566,12 +573,6 @@
     margin:0;column-gap:16px;row-gap:0}
   #proj-heysong .hs-credits2 .cr-role{text-align:left;padding:12px 0;border-bottom:1px solid var(--line)}
   #proj-heysong .hs-credits2 .cr-names{padding:12px 0;border-bottom:1px solid var(--line)}
-  #proj-heysong .hs-foot{display:flex;justify-content:space-between;align-items:center;
-    border-top:1px solid var(--line);padding-top:18px;margin-top:80px}
-  #proj-heysong .hs-foot button{font-family:"IBM Plex Mono",monospace;font-size:12px;
-    letter-spacing:.14em;text-transform:uppercase;color:var(--paper);
-    background:none;border:none;cursor:pointer;padding:4px 0}
-  #proj-heysong .hs-foot-top{color:var(--grey)}
   @media(max-width:860px){
     #proj-heysong .hs-cols,#proj-heysong .hs-credits2{grid-template-columns:1fr;gap:28px}
     #proj-heysong .hs-meta{grid-template-columns:1fr 1fr}
@@ -2185,35 +2186,46 @@
           </div>
         </div>
       </div>
-      <div class="proj-head">
-        <button class="back" data-nav="projects">← Projects</button>
-        <span class="proj-name">Butoh Experiment</span>
-        <span class="proj-meta">Performance · 2023</span>
+      <div class="marquee-wrap">
+        <div class="proj-head">
+          <button class="back" data-nav="projects">← Projects</button>
+          <span class="proj-name">Butoh Experiment</span>
+          <span class="proj-meta">Performance · 2023</span>
+        </div>
+        <div class="marquee">
+          <div class="marquee-track">
+          <div class="marquee-set">
+            <img src="/images/projects/butoh_nigel_-2.jpg" alt="Butoh Experiment" loading="lazy">
+            <img src="/images/projects/butoh_nigel_-3.jpg" alt="Butoh Experiment" loading="lazy">
+            <img src="/images/projects/butoh_nigel_-4.jpg" alt="Butoh Experiment" loading="lazy">
+            <img src="/images/projects/butoh_nigel_-5.jpg" alt="Butoh Experiment" loading="lazy">
+            <img src="/images/projects/butoh_nigel_-6.jpg" alt="Butoh Experiment" loading="lazy">
+            <img src="/images/projects/butoh_nigel_-7.jpg" alt="Butoh Experiment" loading="lazy">
+            <img src="/images/projects/butoh_nigel_-8.jpg" alt="Butoh Experiment" loading="lazy">
+            <img src="/images/projects/butoh_nigel_-9.jpg" alt="Butoh Experiment" loading="lazy">
+            <img src="/images/projects/butoh_nigel_-1.jpg" alt="Butoh Experiment" loading="lazy">
+          </div>
+          <div class="marquee-set">
+            <img src="/images/projects/butoh_nigel_-2.jpg" alt="Butoh Experiment" loading="lazy">
+            <img src="/images/projects/butoh_nigel_-3.jpg" alt="Butoh Experiment" loading="lazy">
+            <img src="/images/projects/butoh_nigel_-4.jpg" alt="Butoh Experiment" loading="lazy">
+            <img src="/images/projects/butoh_nigel_-5.jpg" alt="Butoh Experiment" loading="lazy">
+            <img src="/images/projects/butoh_nigel_-6.jpg" alt="Butoh Experiment" loading="lazy">
+            <img src="/images/projects/butoh_nigel_-7.jpg" alt="Butoh Experiment" loading="lazy">
+            <img src="/images/projects/butoh_nigel_-8.jpg" alt="Butoh Experiment" loading="lazy">
+            <img src="/images/projects/butoh_nigel_-9.jpg" alt="Butoh Experiment" loading="lazy">
+            <img src="/images/projects/butoh_nigel_-1.jpg" alt="Butoh Experiment" loading="lazy">
+          </div>
+          </div>
+        </div>
       </div>
-      <div class="marquee">
-        <div class="marquee-track">
-        <div class="marquee-set">
-          <img src="/images/projects/butoh_nigel_-2.jpg" alt="Butoh Experiment" loading="lazy">
-          <img src="/images/projects/butoh_nigel_-3.jpg" alt="Butoh Experiment" loading="lazy">
-          <img src="/images/projects/butoh_nigel_-4.jpg" alt="Butoh Experiment" loading="lazy">
-          <img src="/images/projects/butoh_nigel_-5.jpg" alt="Butoh Experiment" loading="lazy">
-          <img src="/images/projects/butoh_nigel_-6.jpg" alt="Butoh Experiment" loading="lazy">
-          <img src="/images/projects/butoh_nigel_-7.jpg" alt="Butoh Experiment" loading="lazy">
-          <img src="/images/projects/butoh_nigel_-8.jpg" alt="Butoh Experiment" loading="lazy">
-          <img src="/images/projects/butoh_nigel_-9.jpg" alt="Butoh Experiment" loading="lazy">
-          <img src="/images/projects/butoh_nigel_-1.jpg" alt="Butoh Experiment" loading="lazy">
-        </div>
-        <div class="marquee-set">
-          <img src="/images/projects/butoh_nigel_-2.jpg" alt="Butoh Experiment" loading="lazy">
-          <img src="/images/projects/butoh_nigel_-3.jpg" alt="Butoh Experiment" loading="lazy">
-          <img src="/images/projects/butoh_nigel_-4.jpg" alt="Butoh Experiment" loading="lazy">
-          <img src="/images/projects/butoh_nigel_-5.jpg" alt="Butoh Experiment" loading="lazy">
-          <img src="/images/projects/butoh_nigel_-6.jpg" alt="Butoh Experiment" loading="lazy">
-          <img src="/images/projects/butoh_nigel_-7.jpg" alt="Butoh Experiment" loading="lazy">
-          <img src="/images/projects/butoh_nigel_-8.jpg" alt="Butoh Experiment" loading="lazy">
-          <img src="/images/projects/butoh_nigel_-9.jpg" alt="Butoh Experiment" loading="lazy">
-          <img src="/images/projects/butoh_nigel_-1.jpg" alt="Butoh Experiment" loading="lazy">
-        </div>
+
+      <div class="butoh-intro">
+        <span class="proj-detail-section-label">About</span>
+        <div class="proj-detail-body">
+          <p>Butoh Experiment approaches the Japanese avant-garde form not as documentation, but as visual translation. Butoh — literally "dance of darkness" — emerged from postwar Japan as a rejection of Western ideals of beauty, embracing the grotesque, the decayed, and the transformative. This session with performer Nigel Daley extends that inquiry into the photographic frame: how does the still image hold what butoh treats as ceaseless becoming?</p>
+          <p>Through white body paint, projected shadow, and slow accumulation of gesture, the work uncovers the beauty of distortion from within. The darkroom and butoh share a singular focus: both turn inward. A camera documents the exterior; the darkroom and butoh excavate what already exists inside — muscle memory, suppressed emotion, the latent self.</p>
+          <p>These photographs serve as a response to butoh's core inquiry: what makes us uniquely human? What is our condition as a species? How do we reconcile self-interest with massive inequality? We make the world, and it makes us. Butoh's greatness lies in its refusal to look away — it uses the body as an instrument for examination and self-awareness, forcing us to witness what we would rather hide.</p>
         </div>
       </div>
     </section>
@@ -2354,11 +2366,6 @@
               <div class="cr-role">配樂 Music Producer</div><div class="cr-names">楊峻綱 Kang</div>
             </div>
           </div>
-        </div>
-
-        <div class="hs-foot">
-          <button class="hs-foot-back" data-nav="projects" type="button">← Back to Projects</button>
-          <button class="hs-foot-top" type="button" onclick="this.closest('.proj-detail').scrollTo({top:0,behavior:'smooth'})">Back to Top ↑</button>
         </div>
       </div>
     </section>
