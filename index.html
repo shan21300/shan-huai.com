@@ -103,8 +103,7 @@
      .proj-marquee page is marquee-only, so this stays scoped to #proj-butoh). */
   #proj-butoh{height:100vh;overflow-y:auto}
   #proj-butoh .marquee-wrap{position:relative;height:100vh}
-  #proj-butoh .butoh-intro{padding:64px clamp(20px,4vw,48px) 96px}
-  #proj-butoh .butoh-intro .proj-detail-body{max-width:68ch}
+  #proj-butoh .butoh-meta{padding:64px clamp(20px,4vw,48px) 96px}
   .marquee{position:absolute;left:0;right:0;top:clamp(150px,20vh,210px);bottom:clamp(24px,5vh,44px);
     display:flex;align-items:center;overflow:hidden;cursor:grab;touch-action:none}
   .marquee.grabbing{cursor:grabbing}
@@ -549,6 +548,17 @@
     letter-spacing:.14em;text-transform:uppercase;color:var(--grey);margin-bottom:6px}
   #proj-heysong .hs-meta-v{font-family:"DM Sans",system-ui,sans-serif;font-size:14px;
     font-weight:500;color:var(--paper)}
+  /* Project-info grid — same layout/typography as 黑松沙士's .hs-meta, reused as-is
+     (site's normal dark tokens, no colour override) on pages that don't have their
+     own bilingual/light treatment. Column count follows however many fields a page
+     actually has (Butoh only has 3, others have 4). */
+  .proj-meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+    gap:24px;border-top:1px solid var(--line);padding-top:18px;margin:24px 0 56px}
+  .proj-meta-grid .pmg-k{font-family:"IBM Plex Mono",monospace;font-size:11px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--grey);margin-bottom:6px}
+  .proj-meta-grid .pmg-v{font-family:"DM Sans",system-ui,sans-serif;font-size:14px;
+    font-weight:500;color:var(--paper)}
+  @media(max-width:640px){.proj-meta-grid{grid-template-columns:1fr 1fr}}
   #proj-heysong .hs-cols{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
   #proj-heysong .hs-cjk{font-family:"Cormorant Garamond";font-weight:400;
     font-size:clamp(19px,1.7vw,23px);line-height:1.75;color:var(--paper);max-width:520px}
@@ -1279,7 +1289,14 @@
       </div>
 
       <div class="proj-detail-wrap">
-        <button class="back" data-nav="archive" style="margin-bottom:40px">← Archive</button>
+        <button class="back" data-nav="archive">← Archive</button>
+
+        <div class="proj-meta-grid">
+          <div><div class="pmg-k">Project</div><div class="pmg-v">Girlfriend</div></div>
+          <div><div class="pmg-k">Artist</div><div class="pmg-v">Canty</div></div>
+          <div><div class="pmg-k">Context</div><div class="pmg-v">CSM PDP Year 2 Music Video</div></div>
+          <div><div class="pmg-k">Year</div><div class="pmg-v">2024</div></div>
+        </div>
 
         <img loading="lazy" class="proj-detail-hero" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/bd75fdf49d96c125ba7dc1fcdc705fd5/thumbnails/thumbnail.jpg?width=1280" alt="Girlfriend by Canty">
 
@@ -2220,12 +2237,11 @@
         </div>
       </div>
 
-      <div class="butoh-intro">
-        <span class="proj-detail-section-label">About</span>
-        <div class="proj-detail-body">
-          <p>Butoh Experiment approaches the Japanese avant-garde form not as documentation, but as visual translation. Butoh — literally "dance of darkness" — emerged from postwar Japan as a rejection of Western ideals of beauty, embracing the grotesque, the decayed, and the transformative. This session with performer Nigel Daley extends that inquiry into the photographic frame: how does the still image hold what butoh treats as ceaseless becoming?</p>
-          <p>Through white body paint, projected shadow, and slow accumulation of gesture, the work uncovers the beauty of distortion from within. The darkroom and butoh share a singular focus: both turn inward. A camera documents the exterior; the darkroom and butoh excavate what already exists inside — muscle memory, suppressed emotion, the latent self.</p>
-          <p>These photographs serve as a response to butoh's core inquiry: what makes us uniquely human? What is our condition as a species? How do we reconcile self-interest with massive inequality? We make the world, and it makes us. Butoh's greatness lies in its refusal to look away — it uses the body as an instrument for examination and self-awareness, forcing us to witness what we would rather hide.</p>
+      <div class="butoh-meta">
+        <div class="proj-meta-grid">
+          <div><div class="pmg-k">Feature</div><div class="pmg-v">Nigel Daley</div></div>
+          <div><div class="pmg-k">Date</div><div class="pmg-v">January 24, 2023</div></div>
+          <div><div class="pmg-k">Frames</div><div class="pmg-v">8</div></div>
         </div>
       </div>
     </section>
@@ -2578,7 +2594,14 @@
       </div>
 
       <div class="proj-detail-wrap">
-        <button class="back" data-nav="projects" style="margin-bottom:40px">← Projects</button>
+        <button class="back" data-nav="projects">← Projects</button>
+
+        <div class="proj-meta-grid">
+          <div><div class="pmg-k">Project</div><div class="pmg-v">Holy Communion: A Reality Check</div></div>
+          <div><div class="pmg-k">Context</div><div class="pmg-v">Live @CSM Experiments Project</div></div>
+          <div><div class="pmg-k">Role</div><div class="pmg-v">Concept, Direction, Performance Design</div></div>
+          <div><div class="pmg-k">Year</div><div class="pmg-v">2025</div></div>
+        </div>
 
         <picture>
           <source media="(max-width:768px)" srcset="/images/projects/holycommunion_vertical_topdown.jpg">
