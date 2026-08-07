@@ -98,12 +98,10 @@
   body.on-proj footer{display:none}
   /* ---- Project page: horizontal infinite scroll (marquee), drag + auto ---- */
   .proj-marquee{position:relative;height:100vh;overflow:hidden}
-  /* Butoh only: the marquee panel stays a fixed-height first screen, but the page as a
-     whole scrolls vertically to reveal the intro text below it (every other
-     .proj-marquee page is marquee-only, so this stays scoped to #proj-butoh). */
-  #proj-butoh{height:100vh;overflow-y:auto}
-  #proj-butoh .marquee-wrap{position:relative;height:100vh}
-  #proj-butoh .butoh-meta{padding:64px clamp(20px,4vw,48px) 96px}
+  /* Butoh only: an extra row in the overlay header for the project-info grid, sitting
+     over the marquee like .proj-name/.proj-meta already do — no page scroll needed. */
+  #proj-butoh .proj-head{grid-template-rows:auto auto auto}
+  #proj-butoh .proj-head .proj-meta-grid{grid-column:1/4;grid-row:3;margin:12px 0 0}
   .marquee{position:absolute;left:0;right:0;top:clamp(150px,20vh,210px);bottom:clamp(24px,5vh,44px);
     display:flex;align-items:center;overflow:hidden;cursor:grab;touch-action:none}
   .marquee.grabbing{cursor:grabbing}
@@ -2203,45 +2201,40 @@
           </div>
         </div>
       </div>
-      <div class="marquee-wrap">
-        <div class="proj-head">
-          <button class="back" data-nav="projects">← Projects</button>
-          <span class="proj-name">Butoh Experiment</span>
-          <span class="proj-meta">Performance · 2023</span>
-        </div>
-        <div class="marquee">
-          <div class="marquee-track">
-          <div class="marquee-set">
-            <img src="/images/projects/butoh_nigel_-2.jpg" alt="Butoh Experiment" loading="lazy">
-            <img src="/images/projects/butoh_nigel_-3.jpg" alt="Butoh Experiment" loading="lazy">
-            <img src="/images/projects/butoh_nigel_-4.jpg" alt="Butoh Experiment" loading="lazy">
-            <img src="/images/projects/butoh_nigel_-5.jpg" alt="Butoh Experiment" loading="lazy">
-            <img src="/images/projects/butoh_nigel_-6.jpg" alt="Butoh Experiment" loading="lazy">
-            <img src="/images/projects/butoh_nigel_-7.jpg" alt="Butoh Experiment" loading="lazy">
-            <img src="/images/projects/butoh_nigel_-8.jpg" alt="Butoh Experiment" loading="lazy">
-            <img src="/images/projects/butoh_nigel_-9.jpg" alt="Butoh Experiment" loading="lazy">
-            <img src="/images/projects/butoh_nigel_-1.jpg" alt="Butoh Experiment" loading="lazy">
-          </div>
-          <div class="marquee-set">
-            <img src="/images/projects/butoh_nigel_-2.jpg" alt="Butoh Experiment" loading="lazy">
-            <img src="/images/projects/butoh_nigel_-3.jpg" alt="Butoh Experiment" loading="lazy">
-            <img src="/images/projects/butoh_nigel_-4.jpg" alt="Butoh Experiment" loading="lazy">
-            <img src="/images/projects/butoh_nigel_-5.jpg" alt="Butoh Experiment" loading="lazy">
-            <img src="/images/projects/butoh_nigel_-6.jpg" alt="Butoh Experiment" loading="lazy">
-            <img src="/images/projects/butoh_nigel_-7.jpg" alt="Butoh Experiment" loading="lazy">
-            <img src="/images/projects/butoh_nigel_-8.jpg" alt="Butoh Experiment" loading="lazy">
-            <img src="/images/projects/butoh_nigel_-9.jpg" alt="Butoh Experiment" loading="lazy">
-            <img src="/images/projects/butoh_nigel_-1.jpg" alt="Butoh Experiment" loading="lazy">
-          </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="butoh-meta">
+      <div class="proj-head">
+        <button class="back" data-nav="projects">← Projects</button>
+        <span class="proj-name">Butoh Experiment</span>
+        <span class="proj-meta">Performance · 2023</span>
         <div class="proj-meta-grid">
           <div><div class="pmg-k">Feature</div><div class="pmg-v">Nigel Daley</div></div>
           <div><div class="pmg-k">Date</div><div class="pmg-v">January 24, 2023</div></div>
           <div><div class="pmg-k">Frames</div><div class="pmg-v">8</div></div>
+        </div>
+      </div>
+      <div class="marquee">
+        <div class="marquee-track">
+        <div class="marquee-set">
+          <img src="/images/projects/butoh_nigel_-2.jpg" alt="Butoh Experiment" loading="lazy">
+          <img src="/images/projects/butoh_nigel_-3.jpg" alt="Butoh Experiment" loading="lazy">
+          <img src="/images/projects/butoh_nigel_-4.jpg" alt="Butoh Experiment" loading="lazy">
+          <img src="/images/projects/butoh_nigel_-5.jpg" alt="Butoh Experiment" loading="lazy">
+          <img src="/images/projects/butoh_nigel_-6.jpg" alt="Butoh Experiment" loading="lazy">
+          <img src="/images/projects/butoh_nigel_-7.jpg" alt="Butoh Experiment" loading="lazy">
+          <img src="/images/projects/butoh_nigel_-8.jpg" alt="Butoh Experiment" loading="lazy">
+          <img src="/images/projects/butoh_nigel_-9.jpg" alt="Butoh Experiment" loading="lazy">
+          <img src="/images/projects/butoh_nigel_-1.jpg" alt="Butoh Experiment" loading="lazy">
+        </div>
+        <div class="marquee-set">
+          <img src="/images/projects/butoh_nigel_-2.jpg" alt="Butoh Experiment" loading="lazy">
+          <img src="/images/projects/butoh_nigel_-3.jpg" alt="Butoh Experiment" loading="lazy">
+          <img src="/images/projects/butoh_nigel_-4.jpg" alt="Butoh Experiment" loading="lazy">
+          <img src="/images/projects/butoh_nigel_-5.jpg" alt="Butoh Experiment" loading="lazy">
+          <img src="/images/projects/butoh_nigel_-6.jpg" alt="Butoh Experiment" loading="lazy">
+          <img src="/images/projects/butoh_nigel_-7.jpg" alt="Butoh Experiment" loading="lazy">
+          <img src="/images/projects/butoh_nigel_-8.jpg" alt="Butoh Experiment" loading="lazy">
+          <img src="/images/projects/butoh_nigel_-9.jpg" alt="Butoh Experiment" loading="lazy">
+          <img src="/images/projects/butoh_nigel_-1.jpg" alt="Butoh Experiment" loading="lazy">
+        </div>
         </div>
       </div>
     </section>
