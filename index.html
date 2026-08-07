@@ -532,11 +532,8 @@
     --edge:rgba(24,20,16,.55);--line:rgba(24,20,16,.14);
     padding-left:clamp(20px,4vw,48px);padding-right:clamp(20px,4vw,48px)}
   #proj-heysong .hs-nav-row{margin-bottom:18px}
-  /* The row itself spans full width; padding-right (not a max-width cap) keeps the
-     last column's text clear of the .pinfo floater, which is fixed top-right
-     regardless of page content. */
   #proj-heysong .hs-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;
-    padding-right:min(320px,26vw);border-top:1px solid var(--line);padding-top:18px}
+    border-top:1px solid var(--line);padding-top:18px}
   #proj-heysong .hs-meta-k{font-family:"IBM Plex Mono",monospace;font-size:11px;
     letter-spacing:.14em;text-transform:uppercase;color:var(--grey);margin-bottom:6px}
   #proj-heysong .hs-meta-v{font-family:"DM Sans",system-ui,sans-serif;font-size:14px;
@@ -552,13 +549,10 @@
   #proj-heysong .hs-en{font-family:"DM Sans",system-ui,sans-serif;font-size:15px;
     line-height:1.8;color:var(--grey);max-width:520px}
   #proj-heysong .hs-en p{margin:0 0 1.2em}
-  /* Full-bleed breakout: escapes .proj-detail-wrap's max-width/centring entirely,
-     unlike the padding-cancelling trick used elsewhere — this one spans the viewport. */
-  #proj-heysong .hs-hero-wrap{width:100vw;margin-left:calc(50% - 50vw);
-    margin-right:calc(50% - 50vw);margin-bottom:4px}
+  /* Full-bleed at the very top of the page — a direct child of #proj-heysong (which
+     has no padding of its own, unlike .proj-detail-wrap), so it's edge-to-edge with
+     no breakout trick needed. */
   #proj-heysong .hs-hero{width:100%;height:min(88vh,900px);object-fit:cover;display:block}
-  #proj-heysong .hs-cap{font-family:"IBM Plex Mono",monospace;font-size:11px;
-    letter-spacing:.1em;text-transform:uppercase;color:var(--grey);padding:16px 0 0;margin:0}
   #proj-heysong .hs-sec-label{display:flex;justify-content:space-between;align-items:baseline;
     border-top:1px solid var(--line);padding-top:18px;margin-bottom:36px}
   #proj-heysong .hs-sec-cjk{font-family:"Cormorant Garamond";font-weight:500;
@@ -583,7 +577,7 @@
   #proj-heysong .hs-foot-top{color:var(--grey)}
   @media(max-width:860px){
     #proj-heysong .hs-cols,#proj-heysong .hs-credits2{grid-template-columns:1fr;gap:28px}
-    #proj-heysong .hs-meta{grid-template-columns:1fr 1fr;padding-right:0}
+    #proj-heysong .hs-meta{grid-template-columns:1fr 1fr}
   }
   /* Sits in normal flow above the hero (like .proj-head .back on project pages).
      It used to be absolute at the same offset as the wrap's padding-top, which put
@@ -2227,6 +2221,8 @@
       </div>
     </section>
 <section class="page proj-detail" id="proj-heysong">
+      <!-- Full-bleed hero, right at the top of the page -->
+      <img class="hs-hero" src="/images/projects/黑松-cover.jpg" alt="黑松沙士" loading="lazy">
       <div class="pinfo">
         <div class="pinfo-card">
           <div class="pinfo-head">
@@ -2286,10 +2282,6 @@
           <iframe src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/c296648c4661eaae6b325a4e243acee8/iframe?poster=https%3A%2F%2Fcustomer-8gvoxd7i9ystgmlw.cloudflarestream.com%2Fc296648c4661eaae6b325a4e243acee8%2Fthumbnails%2Fthumbnail.jpg%3Fwidth%3D720" title="黑松沙士 — Local Remote" loading="lazy" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;" allowfullscreen></iframe>
         </div>
         <p class="proj-reel-link"><a href="https://www.instagram.com/reel/DbXpNKStGdU/" target="_blank" rel="noopener">View on Instagram ↗</a></p>
-
-        <!-- Full-bleed hero, breaks out of the wrap's max-width (see .hs-hero-wrap) -->
-        <div class="hs-hero-wrap"><img class="hs-hero" src="/images/projects/黑松-cover.jpg" alt="黑松沙士" loading="lazy"></div>
-        <p class="hs-cap">01 — Local Remote, 2026</p>
 
         <!-- 黑松沙士 gallery -->
         <div class="proj-detail-section hs-sec-label" style="margin-top:96px">
@@ -3952,7 +3944,7 @@
 (function(){
   var page=document.getElementById("proj-heysong"); if(!page) return;
   if(!("IntersectionObserver" in window)) return;
-  var targets=page.querySelectorAll(".proj-detail-section, .proj-reel, .proj-reel-link, .proj-detail-img-pair, .proj-detail-img-full, .hs-hero-wrap, .hs-quote");
+  var targets=page.querySelectorAll(".proj-detail-section, .proj-reel, .proj-reel-link, .proj-detail-img-pair, .proj-detail-img-full, .hs-hero, .hs-quote");
   if(!targets.length) return;
   targets.forEach(function(el){ el.classList.add("hs-reveal"); });
   var io=new IntersectionObserver(function(entries){
