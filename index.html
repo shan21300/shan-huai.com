@@ -3138,9 +3138,12 @@
     var id = (e.state && e.state.id) || idForPath(location.pathname) || "landing";
     if(id!==current) swap(id);
   });
-  // On initial load, honor the URL (deep-link). Deferred so init settles first.
-  if(document.readyState === "complete"){ setTimeout(function(){ routeFromLocation(true); }, 80); }
-  else { window.addEventListener("load", function(){ setTimeout(function(){ routeFromLocation(true); }, 80); }); }
+  // On initial load, honor the URL (deep-link). Deferred so init settles first — but
+  // only until the DOM is parsed, not "load": that waits for every image on the page
+  // (including ones on other routes) to finish downloading, which is why grid views
+  // used to render as the single-column list layout until every image had loaded.
+  if(document.readyState !== "loading"){ setTimeout(function(){ routeFromLocation(true); }, 80); }
+  else { document.addEventListener("DOMContentLoaded", function(){ setTimeout(function(){ routeFromLocation(true); }, 80); }); }
 
   // Cover videos: Chrome only allows muted autoplay for IN-VIEW videos and rejects
   // play() called the instant a section un-hides (before layout settles) -- Safari is
