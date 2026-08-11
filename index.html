@@ -3089,7 +3089,7 @@
   function setLanding(t){
     document.body.classList.toggle("on-landing", t==="landing");
     var el=document.getElementById(t);
-    document.body.classList.toggle("on-proj", !!(el && (el.classList.contains("proj-page")||el.classList.contains("proj-marquee"))));
+    document.body.classList.toggle("on-proj", !!(el && (el.classList.contains("proj-page")||el.classList.contains("proj-marquee")||el.classList.contains("proj-detail"))));
   }
   setLanding("landing");
 
