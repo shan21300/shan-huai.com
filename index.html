@@ -3985,11 +3985,15 @@
   document.addEventListener("dragstart", onImg);
 })();
 // 黑松 page: each block slips up + fades in as it scrolls into view (section-boundary
-// reveal). IntersectionObserver adds .in once, per element.
+// reveal). IntersectionObserver adds .in once, per element. Excludes the above-the-fold
+// top section (hero, nav row, meta grid, intro, video reel) — those are already in the
+// viewport the instant the page becomes active, and if the observer's first callback
+// ever misses that (a page-swap timing edge case), the element is stuck at opacity:0
+// forever even though it loaded fine, which looks identical to "didn't load."
 (function(){
   var page=document.getElementById("proj-heysong"); if(!page) return;
   if(!("IntersectionObserver" in window)) return;
-  var targets=page.querySelectorAll(".proj-detail-section, .proj-reel, .proj-reel-link, .proj-detail-img-pair, .proj-detail-img-full, .hs-hero, .hs-quote");
+  var targets=page.querySelectorAll(".proj-detail-section:not(.hs-nav-row):not(.hs-meta):not(.hs-cols), .proj-detail-img-pair, .proj-detail-img-full, .hs-quote");
   if(!targets.length) return;
   targets.forEach(function(el){ el.classList.add("hs-reveal"); });
   var io=new IntersectionObserver(function(entries){
