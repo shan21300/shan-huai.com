@@ -584,9 +584,23 @@
     margin:0;column-gap:16px;row-gap:0}
   #proj-heysong .hs-credits2 .cr-role{text-align:left;padding:12px 0;border-bottom:1px solid var(--line)}
   #proj-heysong .hs-credits2 .cr-names{padding:12px 0;border-bottom:1px solid var(--line)}
+  /* "Show more" only applies on mobile, where the two columns stack into one long
+     read — on desktop the class is simply ignored and everything stays visible. */
+  #proj-heysong .hs-more-btn{display:none}
   @media(max-width:860px){
     #proj-heysong .hs-cols,#proj-heysong .hs-credits2{grid-template-columns:1fr;gap:28px}
     #proj-heysong .hs-meta{grid-template-columns:1fr 1fr}
+    #proj-heysong .hs-cols.is-collapsed .hs-more{display:none}
+    /* Fade the last couple of lines of visible text into the page background, signalling
+       there's more below — sits exactly at the bottom of .hs-cjk since .hs-more (the
+       hidden rest) takes no space while collapsed. */
+    #proj-heysong .hs-cols.is-collapsed .hs-cjk{position:relative}
+    #proj-heysong .hs-cols.is-collapsed .hs-cjk::after{content:"";position:absolute;
+      left:0;right:0;bottom:0;height:3.2em;pointer-events:none;
+      background:linear-gradient(to bottom, rgba(244,241,236,0), #f4f1ec 85%)}
+    #proj-heysong .hs-more-btn{display:block;margin-top:0;padding:4px 0;
+      font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;
+      text-transform:uppercase;color:var(--grey);background:none;border:none;cursor:pointer}
   }
   /* Sits in normal flow above the hero (like .proj-head .back on project pages).
      It used to be absolute at the same offset as the wrap's padding-top, which put
@@ -2280,17 +2294,20 @@
           <div><div class="hs-meta-k">Year</div><div class="hs-meta-v">2026</div></div>
         </div>
 
-        <div class="proj-detail-section hs-cols">
+        <div class="proj-detail-section hs-cols is-collapsed">
           <div class="hs-cjk">
             <p>走過七十餘載，黑松早已是台灣人共同的味覺底蘊。面對如此深厚的經典，重塑的使命從不在於全盤推翻，而是如何精準地為品牌卸下歷史的包袱。</p>
             <p>我們以 #撕掉標籤 為策略核心，重新梳理黑松沙士與黑松汽水的視覺語彙。褪去老字號的繁複外衣，將最具代表性的色彩與符號去蕪存菁，提煉出契合當代生活風格的純粹輪廓。</p>
-            <p>與其被時代賦予新標籤，我們選擇大膽留白，將經典的詮釋權交還給大眾。讓這份最熟悉的台式風味，以更從容、自信的姿態，走入未來的日常。</p>
-            <p>全新包裝，現已於全台各大通路陸續上架。</p>
+            <div class="hs-more">
+              <p>與其被時代賦予新標籤，我們選擇大膽留白，將經典的詮釋權交還給大眾。讓這份最熟悉的台式風味，以更從容、自信的姿態，走入未來的日常。</p>
+              <p>全新包裝，現已於全台各大通路陸續上架。</p>
+            </div>
           </div>
-          <div class="hs-en">
+          <div class="hs-en hs-more">
             <p>Spanning over seven decades, HeySong Sarsaparilla and Soda stand as iconic touchstones of Taiwanese daily life. Commissioned for a major brand overhaul, Taipei studio Local Remote approached these national symbols through a philosophy of subtraction rather than addition. The heritage brand mark, originally inspired by calligrapher Chen Dunhua&rsquo;s seal-script strokes, has been sharpened with a dynamic 70&deg; forward tilt. The ornate classic ribbon emblem was streamlined into minimal, fluid lines, and the bottle labels were dramatically scaled back to allow the design&mdash;and product&mdash;to breathe. While Sarsaparilla retains its signature deep, refined russet and gold palette, the Soda line evolves with vibrant emerald hues and overlapping teal-and-lime geometric circles that evoke carbonated bubbles. Guided by the ethos 撕掉標籤 (&ldquo;tearing off the label&rdquo;), the redesign distils decades of collective memory into a sleek, contemporary visual language without erasing the public&rsquo;s emotional connection.</p>
             <p>As Local Remote&rsquo;s photography producer, my task was to translate this design philosophy from vector art into raw, lived visual culture. Embracing the core art direction of 台灣感性 (Taiwanese Sensibility) and 台潮 (Taiwanese Wave), I oversaw the photography production to bridge nostalgic warmth with a modern edge. We wanted the imagery to feel intimately grounded in local life yet effortlessly cool&mdash;capturing how a 70-year-old flavor naturally moves through modern night markets, convenience stores, and street corners. Through light, texture, and candid staging, the visual showcase doesn&rsquo;t just display new packaging; it honors the sensory relationship Taiwan has had with HeySong for generations, letting a national classic step confidently into the present.</p>
           </div>
+          <button class="hs-more-btn" type="button" onclick="var c=this.closest('.hs-cols');c.classList.toggle('is-collapsed');this.textContent=c.classList.contains('is-collapsed')?'Show more':'Show less';">Show more</button>
         </div>
 
         <!-- The reel, self-hosted on Cloudflare Stream. 16:9; adaptive player so it plays reliably in Chrome. -->
