@@ -594,6 +594,13 @@
   /* "Show more" only applies on mobile, where the two columns stack into one long
      read — on desktop the class is simply ignored and everything stays visible. */
   #proj-heysong .hs-more-btn{display:none}
+  /* Same pill-button convention as .back ("← Projects") — outline that inverts to a
+     filled pill on hover. */
+  #proj-heysong .hs-link-btn{display:inline-block;background:none;border:1px solid var(--edge);
+    color:var(--paper);font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;padding:8px 16px;border-radius:100px;text-decoration:none;
+    transition:.25s;opacity:.9}
+  #proj-heysong .hs-link-btn:hover{opacity:1;background:var(--paper);color:var(--ink);border-color:var(--paper)}
   @media(max-width:860px){
     #proj-heysong .hs-cols,#proj-heysong .hs-credits2{grid-template-columns:1fr;gap:28px}
     #proj-heysong .hs-meta{grid-template-columns:1fr 1fr}
@@ -2316,6 +2323,10 @@
           </div>
           <button class="hs-more-btn" type="button" onclick="var c=this.closest('.hs-cols');c.classList.toggle('is-collapsed');this.textContent=c.classList.contains('is-collapsed')?'Show more':'Show less';">Show more</button>
         </div>
+
+        <p style="text-align:center;margin-top:32px">
+          <a class="hs-link-btn" href="https://localremote.co/projects/heysong-sarsaparilla" target="_blank" rel="noopener">View on Local Remote ↗</a>
+        </p>
 
         <!-- The reel, self-hosted on Cloudflare Stream. 16:9; adaptive player so it plays reliably in Chrome. -->
         <div class="proj-reel">
