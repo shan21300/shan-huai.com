@@ -582,6 +582,11 @@
      showcase piece rather than stretched full-bleed like the gallery photography. */
   #proj-heysong .hs-poster{margin:40px auto;max-width:min(460px,60%)}
   #proj-heysong .hs-poster img{width:100%;height:auto;display:block}
+  /* Looping muted video standing in for a gallery photo — no controls, plays inline like
+     a living photo. Explicit aspect-ratio (measured from the source: 512x640) reserves
+     its box immediately so nothing shifts while the stream attaches. */
+  #proj-heysong .hs-gallery-video{width:100%;height:auto;display:block;
+    aspect-ratio:4/5;object-fit:cover;background:var(--ink)}
   @media(max-width:640px){#proj-heysong .hs-poster{max-width:70%}}
   #proj-heysong .hs-credits-heading{font-family:"IBM Plex Mono",monospace;font-size:12px;
     letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin-bottom:24px}
@@ -2341,7 +2346,9 @@
           <img src="/images/projects/黑松-12.jpg" alt="黑松沙士" loading="lazy">
         </div>
         <div class="proj-detail-img-pair">
-          <img src="/images/projects/黑松-07.jpg" alt="黑松沙士" loading="lazy">
+          <video class="hs-gallery-video" data-stream="a0b5d9d2d70131d8043e51beb5d81478"
+            poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/a0b5d9d2d70131d8043e51beb5d81478/thumbnails/thumbnail.jpg?width=720"
+            muted loop playsinline preload="none"></video>
           <img src="/images/projects/黑松-22.avif" alt="黑松沙士 packaging reveal" loading="lazy">
         </div>
 
@@ -3234,6 +3241,19 @@
   if(coverIO){ document.querySelectorAll("video.proj-panel-bg").forEach(function(v){ coverIO.observe(v); }); }
   // the landing carousel lives in a separate top-level IIFE, so share it explicitly
   window._coverIO = coverIO;
+
+  // Gallery-inline looping videos (muted, no controls, no cover-image reveal like
+  // coverCycle — just attach the stream and loop continuously once in view).
+  var galleryVideoIO = ("IntersectionObserver" in window) ? new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        var v = e.target;
+        if(v.dataset.stream) hsStream(v, v.dataset.stream);
+        var p = v.play(); if(p && p.catch) p.catch(function(){});
+      }
+    });
+  }, {threshold:0.1}) : null;
+  if(galleryVideoIO){ document.querySelectorAll(".hs-gallery-video").forEach(function(v){ galleryVideoIO.observe(v); }); }
 
   function swap(target){
     if(target===current) return;
