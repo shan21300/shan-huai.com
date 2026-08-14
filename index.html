@@ -2455,7 +2455,9 @@
      copy below is a TBD placeholder. Swap media + copy in, then remove hs-img-ph. -->
 <section class="page proj-detail hs-layout" id="proj-sub">
       <!-- Full-bleed hero, right at the top of the page -->
-      <div class="hs-hero hs-img-ph">Hero image</div>
+      <video class="hs-hero" data-stream="e997d71eb8270f43dddcebf6eeefa9fa"
+        poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/e997d71eb8270f43dddcebf6eeefa9fa/thumbnails/thumbnail.jpg?width=1280"
+        muted loop playsinline preload="none"></video>
       <div class="pinfo">
         <div class="pinfo-card">
           <div class="pinfo-head">
@@ -2508,10 +2510,6 @@
         <p class="hs-link-wrap">
           <a class="hs-link-btn" href="#" target="_blank" rel="noopener">View project ↗</a>
         </p>
-
-        <!-- The reel, self-hosted on Cloudflare Stream. 16:9; adaptive player so it plays reliably in Chrome. -->
-        <div class="proj-reel hs-img-ph">Video reel</div>
-        <p class="proj-reel-link"><a href="#" target="_blank" rel="noopener">View on Instagram ↗</a></p>
 
         <!-- Gallery, part 1 -->
         <div class="proj-detail-section hs-sec-label" style="margin-top:calc(100%/3)">
@@ -3412,7 +3410,7 @@
       }
     });
   }, {threshold:0.1}) : null;
-  if(galleryVideoIO){ document.querySelectorAll(".hs-gallery-video").forEach(function(v){ galleryVideoIO.observe(v); }); }
+  if(galleryVideoIO){ document.querySelectorAll(".hs-gallery-video, .hs-hero[data-stream]").forEach(function(v){ galleryVideoIO.observe(v); }); }
 
   function swap(target){
     if(target===current) return;
