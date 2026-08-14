@@ -583,10 +583,12 @@
   #proj-heysong .hs-poster{margin:40px auto;max-width:min(460px,60%)}
   #proj-heysong .hs-poster img{width:100%;height:auto;display:block}
   /* Looping muted video standing in for a gallery photo — no controls, plays inline like
-     a living photo. Explicit aspect-ratio (measured from the source: 512x640) reserves
-     its box immediately so nothing shifts while the stream attaches. */
+     a living photo. aspect-ratio is 3:4 (not the source's native 4:5) to match its pair
+     partner 黑松-22, which is also 3:4 — object-fit:cover crops the sides to fit, safe
+     here since the source is a centred product shot on a plain background. Still reserves
+     the box immediately so nothing shifts while the stream attaches. */
   #proj-heysong .hs-gallery-video{width:100%;height:auto;display:block;
-    aspect-ratio:4/5;object-fit:cover;background:var(--ink)}
+    aspect-ratio:3/4;object-fit:cover;background:var(--ink)}
   @media(max-width:640px){#proj-heysong .hs-poster{max-width:70%}}
   #proj-heysong .hs-credits-heading{font-family:"IBM Plex Mono",monospace;font-size:12px;
     letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin-bottom:24px}
