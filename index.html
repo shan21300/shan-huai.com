@@ -594,6 +594,8 @@
   /* "Show more" only applies on mobile, where the two columns stack into one long
      read — on desktop the class is simply ignored and everything stays visible. */
   #proj-heysong .hs-more-btn{display:none}
+  #proj-heysong .hs-link-wrap{text-align:center;margin:0 0 72px}
+  #proj-heysong .proj-reel{margin-top:0}
   /* Same pill-button convention as .back ("← Projects") — outline that inverts to a
      filled pill on hover. */
   #proj-heysong .hs-link-btn{display:inline-block;background:none;border:1px solid var(--edge);
@@ -2324,7 +2326,7 @@
           <button class="hs-more-btn" type="button" onclick="var c=this.closest('.hs-cols');c.classList.toggle('is-collapsed');this.textContent=c.classList.contains('is-collapsed')?'Show more':'Show less';">Show more</button>
         </div>
 
-        <p style="text-align:center;margin-top:32px">
+        <p class="hs-link-wrap">
           <a class="hs-link-btn" href="https://localremote.co/projects/heysong-sarsaparilla" target="_blank" rel="noopener">View on Local Remote ↗</a>
         </p>
 
