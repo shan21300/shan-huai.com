@@ -528,26 +528,26 @@
   .proj-detail{overflow-y:auto;height:100vh}
   .proj-detail-wrap{max-width:1100px;margin:0 auto;padding:clamp(120px,14vh,180px) clamp(20px,4vw,48px) 120px;position:relative}
   /* ── 黑松 page: light-theme redesign (paper-light bg, ink-dark text) — the one page
-     on the site that flips the palette. Scoped to .proj-detail-wrap (not #proj-heysong
+     on the site that flips the palette. Scoped to .proj-detail-wrap (not .hs-layout
      itself) so the .pinfo floater — a sibling that sits outside .proj-detail-wrap and
      always stays dark via its own translucent backdrop, independent of the page below
      it — is unaffected by the flipped tokens. Same trick as #menu's inversion: swap the
      RGB base, keep each token's original alpha. ── */
-  #proj-heysong{background:#f4f1ec;overflow-x:hidden}
+  .hs-layout{background:#f4f1ec;overflow-x:hidden}
   /* Top padding is much smaller than the base rule's clamp(120px,14vh,180px) — that
      gap exists elsewhere to clear the fixed header over a plain background, but here
      the hero image (which precedes .proj-detail-wrap) already fills that space. */
-  #proj-heysong .proj-detail-wrap{max-width:1400px;
+  .hs-layout .proj-detail-wrap{max-width:1400px;
     --ink:#f4f1ec;--paper:#181410;--grey:#86827e;
     --edge:rgba(24,20,16,.55);--line:rgba(24,20,16,.14);
     padding-top:25px;
     padding-left:clamp(20px,4vw,48px);padding-right:clamp(20px,4vw,48px)}
-  #proj-heysong .hs-nav-row{margin-bottom:18px}
-  #proj-heysong .hs-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;
+  .hs-layout .hs-nav-row{margin-bottom:18px}
+  .hs-layout .hs-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;
     border-top:1px solid var(--line);padding-top:18px}
-  #proj-heysong .hs-meta-k{font-family:"IBM Plex Mono",monospace;font-size:11px;
+  .hs-layout .hs-meta-k{font-family:"IBM Plex Mono",monospace;font-size:11px;
     letter-spacing:.14em;text-transform:uppercase;color:var(--grey);margin-bottom:6px}
-  #proj-heysong .hs-meta-v{font-family:"DM Sans",system-ui,sans-serif;font-size:14px;
+  .hs-layout .hs-meta-v{font-family:"DM Sans",system-ui,sans-serif;font-size:14px;
     font-weight:500;color:var(--paper)}
   /* Project-info grid — same layout/typography as 黑松沙士's .hs-meta, reused as-is
      (site's normal dark tokens, no colour override) on pages that don't have their
@@ -560,61 +560,68 @@
   .proj-meta-grid .pmg-v{font-family:"DM Sans",system-ui,sans-serif;font-size:14px;
     font-weight:500;color:var(--paper)}
   @media(max-width:640px){.proj-meta-grid{grid-template-columns:1fr 1fr}}
-  #proj-heysong .hs-cols{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
-  #proj-heysong .hs-cjk{font-family:"Cormorant Garamond";font-weight:400;
+  .hs-layout .hs-cols{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
+  .hs-layout .hs-cjk{font-family:"Cormorant Garamond";font-weight:400;
     font-size:clamp(19px,1.7vw,23px);line-height:1.75;color:var(--paper);max-width:520px}
-  #proj-heysong .hs-cjk p{margin:0 0 1.2em}
-  #proj-heysong .hs-en{font-family:"DM Sans",system-ui,sans-serif;font-size:15px;
+  .hs-layout .hs-cjk p{margin:0 0 1.2em}
+  .hs-layout .hs-en{font-family:"DM Sans",system-ui,sans-serif;font-size:15px;
     line-height:1.8;color:var(--grey);max-width:520px}
-  #proj-heysong .hs-en p{margin:0 0 1.2em}
-  /* Full-bleed at the very top of the page — a direct child of #proj-heysong (which
+  .hs-layout .hs-en p{margin:0 0 1.2em}
+  /* Full-bleed at the very top of the page — a direct child of .hs-layout (which
      has no padding of its own, unlike .proj-detail-wrap), so it's edge-to-edge with
      no breakout trick needed. */
-  #proj-heysong .hs-hero{width:100%;height:min(88vh,900px);object-fit:cover;display:block}
-  #proj-heysong .hs-sec-label{border-top:1px solid var(--line);padding-top:18px;
+  .hs-layout .hs-hero{width:100%;height:min(88vh,900px);object-fit:cover;display:block}
+  .hs-layout .hs-sec-label{border-top:1px solid var(--line);padding-top:18px;
     margin-bottom:36px;text-align:center}
-  #proj-heysong .hs-sec-logo{display:block;width:100%;height:auto;margin:0 auto}
-  #proj-heysong .hs-quote{max-width:900px;margin:calc(100%/3) auto;text-align:center;
+  .hs-layout .hs-sec-logo{display:block;width:100%;height:auto;margin:0 auto}
+  .hs-layout .hs-quote{max-width:900px;margin:calc(100%/3) auto;text-align:center;
     font-family:"Cormorant Garamond";font-weight:400;font-size:clamp(24px,3.6vw,38px);
     line-height:1.55;color:var(--paper)}
-  #proj-heysong .hs-credits2{display:grid;grid-template-columns:1fr 1fr;gap:80px;margin-top:32px}
+  .hs-layout .hs-credits2{display:grid;grid-template-columns:1fr 1fr;gap:80px;margin-top:32px}
   /* Looping muted video standing in for a gallery photo — no controls, plays inline like
      a living photo. aspect-ratio is 3:4 (not the source's native 4:5) to match its pair
      partner 黑松-22, which is also 3:4 — object-fit:cover crops the sides to fit, safe
      here since the source is a centred product shot on a plain background. Still reserves
      the box immediately so nothing shifts while the stream attaches. */
-  #proj-heysong .hs-gallery-video{width:100%;height:auto;display:block;
+  .hs-layout .hs-gallery-video{width:100%;height:auto;display:block;
     aspect-ratio:3/4;object-fit:cover;background:var(--ink)}
-  #proj-heysong .hs-credits-heading{font-family:"IBM Plex Mono",monospace;font-size:12px;
+  .hs-layout .hs-credits-heading{font-family:"IBM Plex Mono",monospace;font-size:12px;
     letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin-bottom:24px}
-  #proj-heysong .hs-credits2 .proj-credits{grid-template-columns:auto 1fr;max-width:none;
+  .hs-layout .hs-credits2 .proj-credits{grid-template-columns:auto 1fr;max-width:none;
     margin:0;column-gap:16px;row-gap:0}
-  #proj-heysong .hs-credits2 .cr-role{text-align:left;padding:12px 0;border-bottom:1px solid var(--line)}
-  #proj-heysong .hs-credits2 .cr-names{padding:12px 0;border-bottom:1px solid var(--line)}
+  .hs-layout .hs-credits2 .cr-role{text-align:left;padding:12px 0;border-bottom:1px solid var(--line)}
+  .hs-layout .hs-credits2 .cr-names{padding:12px 0;border-bottom:1px solid var(--line)}
   /* "Show more" only applies on mobile, where the two columns stack into one long
      read — on desktop the class is simply ignored and everything stays visible. */
-  #proj-heysong .hs-more-btn{display:none}
-  #proj-heysong .hs-link-wrap{text-align:center;margin:0 0 72px}
-  #proj-heysong .proj-reel{margin-top:0}
+  .hs-layout .hs-more-btn{display:none}
+  .hs-layout .hs-link-wrap{text-align:center;margin:0 0 72px}
+  .hs-layout .proj-reel{margin-top:0}
   /* Same pill-button convention as .back ("← Projects") — outline that inverts to a
      filled pill on hover. */
-  #proj-heysong .hs-link-btn{display:inline-block;background:none;border:1px solid var(--edge);
+  .hs-layout .hs-link-btn{display:inline-block;background:none;border:1px solid var(--edge);
     color:var(--paper);font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;
     text-transform:uppercase;padding:8px 16px;border-radius:100px;text-decoration:none;
     transition:.25s;opacity:.9}
-  #proj-heysong .hs-link-btn:hover{opacity:1;background:var(--paper);color:var(--ink);border-color:var(--paper)}
+  .hs-layout .hs-link-btn:hover{opacity:1;background:var(--paper);color:var(--ink);border-color:var(--paper)}
+  /* Stand-in for a gallery slot before real photography is dropped in — same box
+     the eventual <img>/<video> will occupy, so swapping media in later doesn't
+     shift any layout. Remove the class (and add the real media) when ready. */
+  .hs-layout .hs-img-ph{display:flex;align-items:center;justify-content:center;
+    width:100%;background:rgba(24,20,16,.05);border:1px dashed var(--edge);
+    color:var(--grey);font-family:"IBM Plex Mono",monospace;font-size:11px;
+    letter-spacing:.08em;text-transform:uppercase;text-align:center;padding:12px}
   @media(max-width:860px){
-    #proj-heysong .hs-cols,#proj-heysong .hs-credits2{grid-template-columns:1fr;gap:28px}
-    #proj-heysong .hs-meta{grid-template-columns:1fr 1fr}
-    #proj-heysong .hs-cols.is-collapsed .hs-more{display:none}
+    .hs-layout .hs-cols,.hs-layout .hs-credits2{grid-template-columns:1fr;gap:28px}
+    .hs-layout .hs-meta{grid-template-columns:1fr 1fr}
+    .hs-layout .hs-cols.is-collapsed .hs-more{display:none}
     /* Fade the last couple of lines of visible text into the page background, signalling
        there's more below — sits exactly at the bottom of .hs-cjk since .hs-more (the
        hidden rest) takes no space while collapsed. */
-    #proj-heysong .hs-cols.is-collapsed .hs-cjk{position:relative}
-    #proj-heysong .hs-cols.is-collapsed .hs-cjk::after{content:"";position:absolute;
+    .hs-layout .hs-cols.is-collapsed .hs-cjk{position:relative}
+    .hs-layout .hs-cols.is-collapsed .hs-cjk::after{content:"";position:absolute;
       left:0;right:0;bottom:0;height:3.2em;pointer-events:none;
       background:linear-gradient(to bottom, rgba(244,241,236,0), #f4f1ec 85%)}
-    #proj-heysong .hs-more-btn{display:block;margin-top:0;padding:4px 0;
+    .hs-layout .hs-more-btn{display:block;margin-top:0;padding:4px 0;
       font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;
       text-transform:uppercase;color:var(--grey);background:none;border:none;cursor:pointer}
   }
@@ -725,18 +732,18 @@
   @media(max-width:640px){.proj-detail-img-pair{gap:8px}}
   /* 黑松 gallery: vertical gaps between image rows match the 12px horizontal pair gap
      (margin-top only, bottom 0, so no margin-collapse widens it). */
-  #proj-heysong .proj-detail-img-pair{margin:12px 0 0}
-  #proj-heysong .proj-detail-img-full{margin:12px auto 0}
+  .hs-layout .proj-detail-img-pair{margin:12px 0 0}
+  .hs-layout .proj-detail-img-full{margin:12px auto 0}
   @media(max-width:640px){
-    #proj-heysong .proj-detail-img-pair{margin-top:8px}
-    #proj-heysong .proj-detail-img-full{margin-top:8px}
+    .hs-layout .proj-detail-img-pair{margin-top:8px}
+    .hs-layout .proj-detail-img-full{margin-top:8px}
   }
   /* 黑松 page: each block slips up + fades in as it scrolls into view (JS adds .in). */
-  #proj-heysong .hs-reveal{opacity:0;transform:translateY(34px);
+  .hs-layout .hs-reveal{opacity:0;transform:translateY(34px);
     transition:opacity .7s ease, transform .8s cubic-bezier(.16,1,.3,1)}
-  #proj-heysong .hs-reveal.in{opacity:1;transform:none}
+  .hs-layout .hs-reveal.in{opacity:1;transform:none}
   @media(prefers-reduced-motion:reduce){
-    #proj-heysong .hs-reveal{opacity:1;transform:none;transition:none}
+    .hs-layout .hs-reveal{opacity:1;transform:none;transition:none}
   }
   /* Video + image side by side at identical dimensions. Unlike .proj-detail-img-pair
      this one DOES stack on mobile, since both items are landscape. */
@@ -1048,6 +1055,11 @@
     letter-spacing:-.01em;color:var(--paper);line-height:1.04}
   /* 黑松沙士 slide: logo image stands in for the text name (JS swaps it in). */
   .sw-name .sw-name-logo{display:block;height:3em;width:auto}
+  /* SUB's title mark reads small at the shared 3em — bump it 1.2x. Targets the file
+     directly (works in both spots it's used: this caption logo and the Projects
+     listing panel title) so heysong's logo at the same class isn't affected. */
+  .sw-name-logo[src="/images/projects/SUB_title.png"],
+  .proj-panel-logo[src="/images/projects/SUB_title.png"]{height:3.6em}
   .sw-meta{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.08em;
     text-transform:uppercase;color:var(--paper);opacity:.65}
 
@@ -1099,16 +1111,17 @@
 
   <main>
     <!-- LANDING -->
-    <section class="page is-active" id="landing" data-sw='[{&quot;name&quot;: &quot;黑松沙士&quot;, &quot;meta&quot;: &quot;Local Remote · 2026&quot;, &quot;detail&quot;: &quot;Local Remote · 2026&quot;, &quot;cat&quot;: &quot;Branding&quot;, &quot;logo&quot;: &quot;/images/projects/黑松title.png&quot;}, {&quot;name&quot;: &quot;Holy Communion&quot;, &quot;meta&quot;: &quot;Performance · 2024&quot;, &quot;detail&quot;: &quot;Central Saint Martins · 2024&quot;, &quot;cat&quot;: &quot;Performance&quot;, &quot;year&quot;: &quot;2024&quot;}, {&quot;name&quot;: &quot;Butoh Experiment&quot;, &quot;meta&quot;: &quot;Performance · 2023&quot;, &quot;detail&quot;: &quot;Central Saint Martins · 2023&quot;, &quot;cat&quot;: &quot;Performance&quot;, &quot;year&quot;: &quot;2023&quot;}, {&quot;name&quot;: &quot;Zero-Case Policy&quot;, &quot;meta&quot;: &quot;Performance · 2021&quot;, &quot;detail&quot;: &quot;London · 2024&quot;, &quot;cat&quot;: &quot;Photography&quot;, &quot;year&quot;: &quot;2021&quot;}, {&quot;name&quot;: &quot;Cornelius&quot;, &quot;meta&quot;: &quot;Chillout Music Festival · 2025&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2025&quot;}, {&quot;name&quot;: &quot;someshiit 山姆&quot;, &quot;meta&quot;: &quot;Chillout Music Festival · 2025&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2025&quot;}, {&quot;name&quot;: &quot;Elephant Gym&quot;, &quot;meta&quot;: &quot;Bristol · 2024&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2024&quot;}, {&quot;name&quot;: &quot;Hillsong&quot;, &quot;meta&quot;: &quot;London · 2022&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2022&quot;}, {&quot;name&quot;: &quot;Mosaic&quot;, &quot;meta&quot;: &quot;Hollywood · 2018–2020&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2018–2020&quot;}, {&quot;name&quot;: &quot;Kenya Slum&quot;, &quot;meta&quot;: &quot;Nairobi · 2023&quot;, &quot;cat&quot;: &quot;Photo-Journalism&quot;, &quot;year&quot;: &quot;2023&quot;}, {&quot;name&quot;: &quot;Slava Ukraini&quot;, &quot;meta&quot;: &quot;London · 2022&quot;, &quot;cat&quot;: &quot;Photo-Journalism&quot;, &quot;year&quot;: &quot;2022&quot;}, {&quot;name&quot;: &quot;The Umbrella Movement&quot;, &quot;meta&quot;: &quot;Hong Kong · 2019&quot;, &quot;cat&quot;: &quot;Photo-Journalism&quot;, &quot;year&quot;: &quot;2019&quot;}, {&quot;name&quot;: &quot;Untitled Sketch&quot;, &quot;meta&quot;: &quot;Taipei · 2023&quot;, &quot;cat&quot;: &quot;Portraiture&quot;, &quot;year&quot;: &quot;2023&quot;}, {&quot;name&quot;: &quot;Duality Within&quot;, &quot;meta&quot;: &quot;Portrait · 2021&quot;, &quot;cat&quot;: &quot;Portraiture&quot;, &quot;year&quot;: &quot;2021&quot;}, {&quot;name&quot;: &quot;In Mood For Smoke&quot;, &quot;meta&quot;: &quot;Portrait · 2021&quot;, &quot;cat&quot;: &quot;Portraiture&quot;, &quot;year&quot;: &quot;2021&quot;}, {&quot;name&quot;: &quot;Julian and Judy&quot;, &quot;meta&quot;: &quot;Engagement Session · 2025&quot;, &quot;cat&quot;: &quot;Wedding&quot;, &quot;year&quot;: &quot;2025&quot;}, {&quot;name&quot;: &quot;Daniel and Juny&quot;, &quot;meta&quot;: &quot;Taiwan · 2021&quot;, &quot;cat&quot;: &quot;Wedding&quot;, &quot;year&quot;: &quot;2021&quot;}, {&quot;name&quot;: &quot;Girlfriend&quot;, &quot;meta&quot;: &quot;PDP Year 2 Music Video · 2024&quot;, &quot;cat&quot;: &quot;Archive&quot;, &quot;year&quot;: &quot;2024&quot;}]'>
-      <div class="sw-scroll proj-scroll" style="height:791vh">
+    <section class="page is-active" id="landing" data-sw='[{&quot;name&quot;: &quot;SUB&quot;, &quot;meta&quot;: &quot;Local Remote · 2026&quot;, &quot;detail&quot;: &quot;Local Remote · 2026&quot;, &quot;cat&quot;: &quot;Branding&quot;, &quot;logo&quot;: &quot;/images/projects/SUB_title.png&quot;}, {&quot;name&quot;: &quot;黑松沙士&quot;, &quot;meta&quot;: &quot;Local Remote · 2026&quot;, &quot;detail&quot;: &quot;Local Remote · 2026&quot;, &quot;cat&quot;: &quot;Branding&quot;, &quot;logo&quot;: &quot;/images/projects/黑松title.png&quot;}, {&quot;name&quot;: &quot;Holy Communion&quot;, &quot;meta&quot;: &quot;Performance · 2024&quot;, &quot;detail&quot;: &quot;Central Saint Martins · 2024&quot;, &quot;cat&quot;: &quot;Performance&quot;, &quot;year&quot;: &quot;2024&quot;}, {&quot;name&quot;: &quot;Butoh Experiment&quot;, &quot;meta&quot;: &quot;Performance · 2023&quot;, &quot;detail&quot;: &quot;Central Saint Martins · 2023&quot;, &quot;cat&quot;: &quot;Performance&quot;, &quot;year&quot;: &quot;2023&quot;}, {&quot;name&quot;: &quot;Zero-Case Policy&quot;, &quot;meta&quot;: &quot;Performance · 2021&quot;, &quot;detail&quot;: &quot;London · 2024&quot;, &quot;cat&quot;: &quot;Photography&quot;, &quot;year&quot;: &quot;2021&quot;}, {&quot;name&quot;: &quot;Cornelius&quot;, &quot;meta&quot;: &quot;Chillout Music Festival · 2025&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2025&quot;}, {&quot;name&quot;: &quot;someshiit 山姆&quot;, &quot;meta&quot;: &quot;Chillout Music Festival · 2025&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2025&quot;}, {&quot;name&quot;: &quot;Elephant Gym&quot;, &quot;meta&quot;: &quot;Bristol · 2024&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2024&quot;}, {&quot;name&quot;: &quot;Hillsong&quot;, &quot;meta&quot;: &quot;London · 2022&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2022&quot;}, {&quot;name&quot;: &quot;Mosaic&quot;, &quot;meta&quot;: &quot;Hollywood · 2018–2020&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2018–2020&quot;}, {&quot;name&quot;: &quot;Kenya Slum&quot;, &quot;meta&quot;: &quot;Nairobi · 2023&quot;, &quot;cat&quot;: &quot;Photo-Journalism&quot;, &quot;year&quot;: &quot;2023&quot;}, {&quot;name&quot;: &quot;Slava Ukraini&quot;, &quot;meta&quot;: &quot;London · 2022&quot;, &quot;cat&quot;: &quot;Photo-Journalism&quot;, &quot;year&quot;: &quot;2022&quot;}, {&quot;name&quot;: &quot;The Umbrella Movement&quot;, &quot;meta&quot;: &quot;Hong Kong · 2019&quot;, &quot;cat&quot;: &quot;Photo-Journalism&quot;, &quot;year&quot;: &quot;2019&quot;}, {&quot;name&quot;: &quot;Untitled Sketch&quot;, &quot;meta&quot;: &quot;Taipei · 2023&quot;, &quot;cat&quot;: &quot;Portraiture&quot;, &quot;year&quot;: &quot;2023&quot;}, {&quot;name&quot;: &quot;Duality Within&quot;, &quot;meta&quot;: &quot;Portrait · 2021&quot;, &quot;cat&quot;: &quot;Portraiture&quot;, &quot;year&quot;: &quot;2021&quot;}, {&quot;name&quot;: &quot;In Mood For Smoke&quot;, &quot;meta&quot;: &quot;Portrait · 2021&quot;, &quot;cat&quot;: &quot;Portraiture&quot;, &quot;year&quot;: &quot;2021&quot;}, {&quot;name&quot;: &quot;Julian and Judy&quot;, &quot;meta&quot;: &quot;Engagement Session · 2025&quot;, &quot;cat&quot;: &quot;Wedding&quot;, &quot;year&quot;: &quot;2025&quot;}, {&quot;name&quot;: &quot;Daniel and Juny&quot;, &quot;meta&quot;: &quot;Taiwan · 2021&quot;, &quot;cat&quot;: &quot;Wedding&quot;, &quot;year&quot;: &quot;2021&quot;}, {&quot;name&quot;: &quot;Girlfriend&quot;, &quot;meta&quot;: &quot;PDP Year 2 Music Video · 2024&quot;, &quot;cat&quot;: &quot;Archive&quot;, &quot;year&quot;: &quot;2024&quot;}]'>
+      <div class="sw-scroll proj-scroll" style="height:835vh">
         <div class="proj-viewport sw-viewport">
           <div class="sw-caption">
             <span class="sw-eyebrow">Selected Works</span>
-            <span class="sw-name" data-sw="name"><img class="sw-name-logo" src="/images/projects/黑松title.png" alt="黑松沙士"></span>
+            <span class="sw-name" data-sw="name"><img class="sw-name-logo" src="/images/projects/SUB_title.png" alt="SUB"></span>
             <span class="sw-meta" data-sw="meta">Local Remote · 2026</span>
           </div>
           <div class="proj-stage sw-stage">
-            <div class="frame show" data-nav="proj-heysong" data-video="0b36c9ded9204e7376cbc535b745884f"><span class="sw-media"><img src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/0b36c9ded9204e7376cbc535b745884f/thumbnails/thumbnail.jpg?width=1280" alt="黑松沙士" loading="eager"></span></div>
+            <div class="frame show" data-nav="proj-sub" data-video="e997d71eb8270f43dddcebf6eeefa9fa"><span class="sw-media"><img src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/e997d71eb8270f43dddcebf6eeefa9fa/thumbnails/thumbnail.jpg?width=1280" alt="SUB" loading="eager"></span></div>
+            <div class="frame" data-nav="proj-heysong" data-video="0b36c9ded9204e7376cbc535b745884f"><span class="sw-media"><img src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/0b36c9ded9204e7376cbc535b745884f/thumbnails/thumbnail.jpg?width=1280" alt="黑松沙士" loading="eager"></span></div>
             <div class="frame" data-nav="proj-holycommunion"><picture><source media="(max-width:768px)" srcset="/images/projects/holycommunion_vertical_topdown.jpg"><img src="/images/projects/holycommunion_horizontal-16-9cover.jpg" alt="Holy Communion" loading="lazy"></picture></div>
             <div class="frame" data-nav="proj-butoh"><img src="/images/projects/butoh_nigel_-1.jpg" alt="Butoh Experiment" loading="lazy"></div>
             <div class="frame" data-nav="proj-zerocase"><img src="/images/projects/0-case-policy-5.jpg" alt="Zero-Case Policy" loading="lazy"></div>
@@ -1149,24 +1162,25 @@
         </div>
       </div>
       <nav class="rail sw-rail" aria-label="thumbnails">
-        <button class="rt active" data-idx="0"><img class="rt-img" src="/images/projects/黑松-04.jpg" alt=""></button>
-        <button class="rt" data-idx="1"><picture><source media="(max-width:768px)" srcset="/images/projects/holycommunion_vertical_topdown.jpg"><img class="rt-img" src="/images/projects/holycommunion_horizontal-16-9cover.jpg" alt="" loading="lazy"></picture></button>
-        <button class="rt" data-idx="2"><img class="rt-img" src="/images/projects/butoh_nigel_-1.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="3"><img class="rt-img" src="/images/projects/0-case-policy-5.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="4"><img class="rt-img" src="/images/Concerts/cornelius_chillout_-2.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="5"><img class="rt-img" src="/images/Concerts/someshiitSam_chillout_-01.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="6"><img class="rt-img" src="/images/Concerts/elephantgym_bristol-10.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="7"><img class="rt-img" src="/images/Concerts/Hillsong_London-10.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="8"><img class="rt-img" src="/images/Concerts/Mosaic_02.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="9"><img class="rt-img" src="/images/Photo-Journalism/kenya_2023_-05.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="10"><img class="rt-img" src="/images/Photo-Journalism/Slava-Ukrani-11.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="11"><img class="rt-img" src="/images/Photo-Journalism/hkProt-06.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="12"><img class="rt-img" src="/images/portraiture/rooftop_motion-cover.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="13"><img class="rt-img" src="/images/portraiture/duality_within_2021-21.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="14"><img class="rt-img" src="/images/portraiture/In-mood-for-smoke_2021-3.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="15"><img class="rt-img" src="/images/wedding-engagement/Julian%26Judy_engagement-06.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="16"><img class="rt-img" src="/images/wedding-engagement/DJ-Juny_engagement-04.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="17"><img class="rt-img" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/bd75fdf49d96c125ba7dc1fcdc705fd5/thumbnails/thumbnail.jpg?width=240" alt="" loading="lazy"></button>
+        <button class="rt active" data-idx="0"><img class="rt-img" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/e997d71eb8270f43dddcebf6eeefa9fa/thumbnails/thumbnail.jpg?width=240" alt="" loading="lazy"></button>
+        <button class="rt" data-idx="1"><img class="rt-img" src="/images/projects/黑松-04.jpg" alt=""></button>
+        <button class="rt" data-idx="2"><picture><source media="(max-width:768px)" srcset="/images/projects/holycommunion_vertical_topdown.jpg"><img class="rt-img" src="/images/projects/holycommunion_horizontal-16-9cover.jpg" alt="" loading="lazy"></picture></button>
+        <button class="rt" data-idx="3"><img class="rt-img" src="/images/projects/butoh_nigel_-1.jpg" alt="" loading="lazy"></button>
+        <button class="rt" data-idx="4"><img class="rt-img" src="/images/projects/0-case-policy-5.jpg" alt="" loading="lazy"></button>
+        <button class="rt" data-idx="5"><img class="rt-img" src="/images/Concerts/cornelius_chillout_-2.jpg" alt="" loading="lazy"></button>
+        <button class="rt" data-idx="6"><img class="rt-img" src="/images/Concerts/someshiitSam_chillout_-01.jpg" alt="" loading="lazy"></button>
+        <button class="rt" data-idx="7"><img class="rt-img" src="/images/Concerts/elephantgym_bristol-10.jpg" alt="" loading="lazy"></button>
+        <button class="rt" data-idx="8"><img class="rt-img" src="/images/Concerts/Hillsong_London-10.jpg" alt="" loading="lazy"></button>
+        <button class="rt" data-idx="9"><img class="rt-img" src="/images/Concerts/Mosaic_02.jpg" alt="" loading="lazy"></button>
+        <button class="rt" data-idx="10"><img class="rt-img" src="/images/Photo-Journalism/kenya_2023_-05.jpg" alt="" loading="lazy"></button>
+        <button class="rt" data-idx="11"><img class="rt-img" src="/images/Photo-Journalism/Slava-Ukrani-11.jpg" alt="" loading="lazy"></button>
+        <button class="rt" data-idx="12"><img class="rt-img" src="/images/Photo-Journalism/hkProt-06.jpg" alt="" loading="lazy"></button>
+        <button class="rt" data-idx="13"><img class="rt-img" src="/images/portraiture/rooftop_motion-cover.jpg" alt="" loading="lazy"></button>
+        <button class="rt" data-idx="14"><img class="rt-img" src="/images/portraiture/duality_within_2021-21.jpg" alt="" loading="lazy"></button>
+        <button class="rt" data-idx="15"><img class="rt-img" src="/images/portraiture/In-mood-for-smoke_2021-3.jpg" alt="" loading="lazy"></button>
+        <button class="rt" data-idx="16"><img class="rt-img" src="/images/wedding-engagement/Julian%26Judy_engagement-06.jpg" alt="" loading="lazy"></button>
+        <button class="rt" data-idx="17"><img class="rt-img" src="/images/wedding-engagement/DJ-Juny_engagement-04.jpg" alt="" loading="lazy"></button>
+        <button class="rt" data-idx="18"><img class="rt-img" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/bd75fdf49d96c125ba7dc1fcdc705fd5/thumbnails/thumbnail.jpg?width=240" alt="" loading="lazy"></button>
         <div class="rail-cursor"></div>
       </nav>
     </section>
@@ -1246,6 +1260,19 @@
           <div class="proj-panel-text">
             <span class="proj-panel-title">Zero-Case Policy</span>
             <span class="proj-panel-meta">Performance · 2021</span>
+          </div>
+          <a class="proj-panel-arrow" href="#" onclick="event.preventDefault();event.stopPropagation()">↗</a>
+        </div>
+      </div>
+
+      <div class="proj-panel is-video" data-nav="proj-sub" style="cursor:pointer">
+        <img class="proj-panel-cover" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/e997d71eb8270f43dddcebf6eeefa9fa/thumbnails/thumbnail.jpg?width=1280" alt="" loading="lazy">
+        <video class="proj-panel-bg" data-stream="e997d71eb8270f43dddcebf6eeefa9fa" muted playsinline preload="none"></video>
+        <div class="proj-panel-overlay"></div>
+        <div class="proj-panel-info">
+          <div class="proj-panel-text">
+            <span class="proj-panel-title"><img class="proj-panel-logo" src="/images/projects/SUB_title.png" alt="SUB"></span>
+            <span class="proj-panel-meta">Local Remote · 2026</span>
           </div>
           <a class="proj-panel-arrow" href="#" onclick="event.preventDefault();event.stopPropagation()">↗</a>
         </div>
@@ -2271,7 +2298,7 @@
         </div>
       </div>
     </section>
-<section class="page proj-detail" id="proj-heysong">
+<section class="page proj-detail hs-layout" id="proj-heysong">
       <!-- Full-bleed hero, right at the top of the page -->
       <img class="hs-hero" src="/images/projects/黑松-cover.jpg" alt="黑松沙士" loading="eager" fetchpriority="high">
       <div class="pinfo">
@@ -2418,6 +2445,128 @@
               <div class="cr-role">配音員 Voice Over Artist</div><div class="cr-names">Celine Tung</div>
               <div class="cr-role">混音師 Re-Recording Mixer</div><div class="cr-names">楊峻綱 Kang</div>
               <div class="cr-role">配樂 Music Producer</div><div class="cr-names">楊峻綱 Kang</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<!-- SUB: clone of the 黑松沙士 (.hs-layout) template. Structure/layout only — every
+     .hs-img-ph box is a placeholder standing in for real photography/video, and all
+     copy below is a TBD placeholder. Swap media + copy in, then remove hs-img-ph. -->
+<section class="page proj-detail hs-layout" id="proj-sub">
+      <!-- Full-bleed hero, right at the top of the page -->
+      <div class="hs-hero hs-img-ph">Hero image</div>
+      <div class="pinfo">
+        <div class="pinfo-card">
+          <div class="pinfo-head">
+            <div class="pinfo-tabs"><span class="pinfo-tab is-on" data-view="info">Info</span><span class="pinfo-tab" data-view="desc">Description</span></div>
+            <span class="pinfo-toggle" role="switch" aria-label="Toggle floater" aria-checked="false"></span>
+          </div>
+          <div class="pinfo-body">
+            <div class="pinfo-scroll">
+              <div class="pinfo-view is-on" data-view="info">
+                <div class="pinfo-credits">
+                  <div class="pinfo-ck">Project</div><div class="pinfo-cv">SUB</div>
+                  <div class="pinfo-ck">Studio</div><div class="pinfo-cv">Local Remote</div>
+                  <div class="pinfo-ck">Category</div><div class="pinfo-cv">Branding</div>
+                  <div class="pinfo-ck">Year</div><div class="pinfo-cv">2026</div>
+                </div>
+              </div>
+              <div class="pinfo-view" data-view="desc">
+                <div class="pinfo-desc"><p>Project description goes here.</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="proj-detail-wrap">
+        <div class="proj-detail-section hs-nav-row">
+          <button class="back" data-nav="projects">← Projects</button>
+        </div>
+
+        <div class="proj-detail-section hs-meta">
+          <div><div class="hs-meta-k">Project</div><div class="hs-meta-v">SUB</div></div>
+          <div><div class="hs-meta-k">Studio</div><div class="hs-meta-v">Local Remote</div></div>
+          <div><div class="hs-meta-k">Category</div><div class="hs-meta-v">Branding</div></div>
+          <div><div class="hs-meta-k">Year</div><div class="hs-meta-v">2026</div></div>
+        </div>
+
+        <div class="proj-detail-section hs-cols is-collapsed">
+          <div class="hs-cjk">
+            <p>中文介紹文字待補。</p>
+            <div class="hs-more">
+              <p>更多中文介紹文字待補。</p>
+            </div>
+          </div>
+          <div class="hs-en hs-more">
+            <p>Project description placeholder — replace with the real intro copy.</p>
+          </div>
+          <button class="hs-more-btn" type="button" onclick="var c=this.closest('.hs-cols');c.classList.toggle('is-collapsed');this.textContent=c.classList.contains('is-collapsed')?'Show more':'Show less';">Show more</button>
+        </div>
+
+        <p class="hs-link-wrap">
+          <a class="hs-link-btn" href="#" target="_blank" rel="noopener">View project ↗</a>
+        </p>
+
+        <!-- The reel, self-hosted on Cloudflare Stream. 16:9; adaptive player so it plays reliably in Chrome. -->
+        <div class="proj-reel hs-img-ph">Video reel</div>
+        <p class="proj-reel-link"><a href="#" target="_blank" rel="noopener">View on Instagram ↗</a></p>
+
+        <!-- Gallery, part 1 -->
+        <div class="proj-detail-section hs-sec-label" style="margin-top:calc(100%/3)">
+          <span class="proj-detail-section-label">SUB — Gallery</span>
+        </div>
+        <div class="proj-detail-img-full is-wide"><div class="hs-img-ph" style="aspect-ratio:16/9">Gallery image</div></div>
+        <div class="proj-detail-img-pair">
+          <div class="hs-img-ph" style="aspect-ratio:3/4">Gallery image</div>
+          <div class="hs-img-ph" style="aspect-ratio:3/4">Gallery image</div>
+        </div>
+        <div class="proj-detail-img-full is-wide"><div class="hs-img-ph" style="aspect-ratio:16/9">Gallery image</div></div>
+        <div class="proj-detail-img-pair">
+          <div class="hs-img-ph" style="aspect-ratio:3/4">Gallery image</div>
+          <div class="hs-img-ph" style="aspect-ratio:3/4">Gallery image</div>
+        </div>
+        <div class="proj-detail-img-full is-wide"><div class="hs-img-ph" style="aspect-ratio:16/9">Gallery image</div></div>
+        <div class="proj-detail-img-pair">
+          <div class="hs-img-ph" style="aspect-ratio:3/4">Gallery image</div>
+          <div class="hs-img-ph" style="aspect-ratio:3/4">Gallery image</div>
+        </div>
+
+        <p class="hs-quote">大標語 / pull-quote 待補。</p>
+
+        <!-- Gallery, part 2 -->
+        <div class="proj-detail-section hs-sec-label">
+          <span class="proj-detail-section-label">SUB — Gallery 02</span>
+        </div>
+        <div class="proj-detail-img-full is-wide"><div class="hs-img-ph" style="aspect-ratio:16/9">Gallery image</div></div>
+        <div class="proj-detail-img-pair">
+          <div class="hs-img-ph" style="aspect-ratio:3/4">Gallery image</div>
+          <div class="hs-img-ph" style="aspect-ratio:3/4">Gallery image</div>
+        </div>
+        <div class="proj-detail-img-pair">
+          <div class="hs-img-ph" style="aspect-ratio:3/4">Gallery image</div>
+          <div class="hs-img-ph" style="aspect-ratio:3/4">Gallery image</div>
+        </div>
+        <div class="proj-detail-img-full is-wide"><div class="hs-img-ph" style="aspect-ratio:16/9">Gallery image</div></div>
+
+        <!-- Credits -->
+        <div class="proj-detail-section" style="margin-top:calc(100%/3);margin-bottom:32px">
+          <span class="proj-detail-section-label">Credits</span>
+        </div>
+        <div class="proj-detail-img-full is-wide" style="margin-bottom:44px"><div class="hs-img-ph" style="aspect-ratio:16/9">Credits image</div></div>
+
+        <div class="proj-detail-section hs-credits2">
+          <div>
+            <div class="hs-credits-heading">Design Team</div>
+            <div class="proj-credits">
+              <div class="cr-role">Role</div><div class="cr-names">Name</div>
+            </div>
+          </div>
+          <div>
+            <div class="hs-credits-heading">Production Team</div>
+            <div class="proj-credits">
+              <div class="cr-role">Role</div><div class="cr-names">Name</div>
             </div>
           </div>
         </div>
@@ -3137,6 +3286,7 @@
     "proj-butoh":"/project/butoh-experiment",
     "proj-heysong":"/project/heysong-sarsaparilla",
     "proj-zerocase":"/project/zero-case-policy",
+    "proj-sub":"/project/sub",
     "gig-cornelius":"/live/cornelius","gig-someshiitsam":"/live/someshiit-sam",
     "gig-elephantgym":"/live/elephant-gym","gig-hillsong":"/live/hillsong",
     "gig-thehope":"/live/the-hope","gig-mosaic":"/live/mosaic",
@@ -3311,10 +3461,11 @@
 
   /* Menu overlay */
   function openMenu(){
-    // 黑松 page is light-themed (the one page that flips the palette), so the menu's
-    // usual light-bg/dark-text inversion would blend into it — invert it back to
+    // Light-themed pages (.hs-layout — the palette-flipped project template) would
+    // blend into the menu's usual light-bg/dark-text inversion — invert it back to
     // dark-bg/light-text here to keep the reveal contrast, matching every other page.
-    var inverted = current === "proj-heysong";
+    var curEl = document.getElementById(current);
+    var inverted = !!(curEl && curEl.classList.contains("hs-layout"));
     menuEl.classList.toggle("menu-inverted", inverted);
     var menuLogoImg = document.querySelector(".menu-logo-img");
     if(menuLogoImg) menuLogoImg.src = inverted
@@ -4022,24 +4173,26 @@
   document.addEventListener("contextmenu", onImg);
   document.addEventListener("dragstart", onImg);
 })();
-// 黑松 page: each block slips up + fades in as it scrolls into view (section-boundary
-// reveal). IntersectionObserver adds .in once, per element. Excludes the above-the-fold
-// top section (hero, nav row, meta grid, intro, video reel) — those are already in the
-// viewport the instant the page becomes active, and if the observer's first callback
-// ever misses that (a page-swap timing edge case), the element is stuck at opacity:0
-// forever even though it loaded fine, which looks identical to "didn't load."
+// .hs-layout pages (the light-theme project template, e.g. 黑松): each block slips
+// up + fades in as it scrolls into view (section-boundary reveal). IntersectionObserver
+// adds .in once, per element. Excludes the above-the-fold top section (hero, nav row,
+// meta grid, intro, video reel) — those are already in the viewport the instant the
+// page becomes active, and if the observer's first callback ever misses that (a
+// page-swap timing edge case), the element is stuck at opacity:0 forever even though
+// it loaded fine, which looks identical to "didn't load."
 (function(){
-  var page=document.getElementById("proj-heysong"); if(!page) return;
   if(!("IntersectionObserver" in window)) return;
-  var targets=page.querySelectorAll(".proj-detail-section:not(.hs-nav-row):not(.hs-meta):not(.hs-cols), .proj-detail-img-pair, .proj-detail-img-full, .hs-quote");
-  if(!targets.length) return;
-  targets.forEach(function(el){ el.classList.add("hs-reveal"); });
-  var io=new IntersectionObserver(function(entries){
-    entries.forEach(function(e){
-      if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); }
-    });
-  },{rootMargin:"0px 0px -10% 0px", threshold:0.06});
-  targets.forEach(function(el){ io.observe(el); });
+  document.querySelectorAll(".hs-layout").forEach(function(page){
+    var targets=page.querySelectorAll(".proj-detail-section:not(.hs-nav-row):not(.hs-meta):not(.hs-cols), .proj-detail-img-pair, .proj-detail-img-full, .hs-quote");
+    if(!targets.length) return;
+    targets.forEach(function(el){ el.classList.add("hs-reveal"); });
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); }
+      });
+    },{rootMargin:"0px 0px -10% 0px", threshold:0.06});
+    targets.forEach(function(el){ io.observe(el); });
+  });
 })();
 </script>
 </body>
