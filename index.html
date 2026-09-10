@@ -203,11 +203,17 @@
   /* SUB's mark reads oversized at the shared 3em — shrink it 1.5x. Targets the
      file directly so heysong's logo at the same class is unaffected. */
   .proj-panel-logo[src="/images/projects/SUB_title.png"]{height:2em}
-  /* LLP's wordmark is a very wide/thin lockup (4500x519) — at the shared 3em height
-     it reads oversized and overly wide. Shrink by half; applies to both places it
-     stands in for the title (panel card + landing caption). */
-  .proj-panel-logo[src="/images/projects/LLP_title.png"],
-  .sw-name-logo[src="/images/projects/LLP_title.png"]{height:1.5em}
+  /* LLP's wordmark is a very wide/thin lockup (4500x519, ~8.7:1) — scaling it by
+     height like the others blows the width out to 600-800px+ and overflows both
+     the panel card and the landing caption. Cap by width instead (roughly the
+     footprint the plain text name would take at that font-size) and let height
+     follow from the aspect ratio. */
+  /* Extra-specific selectors (parent class + attribute) so these reliably beat
+     the base .proj-panel-title .proj-panel-logo / .sw-name .sw-name-logo rules
+     regardless of source order — a same-specificity override placed earlier in
+     the file loses the cascade tie to a later one, which silently broke this. */
+  .proj-panel-title .proj-panel-logo[src="/images/projects/LLP_title.png"]{height:auto;width:9em}
+  .sw-name .sw-name-logo[src="/images/projects/LLP_title.png"]{height:auto;width:9em}
   .proj-panel-meta{font-family:"IBM Plex Mono",monospace;font-size:12px;
     letter-spacing:.12em;text-transform:uppercase;color:var(--grey)}
   .proj-panel-arrow{color:var(--paper);font-size:clamp(20px,2vw,28px);
