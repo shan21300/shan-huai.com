@@ -212,8 +212,11 @@
      the base .proj-panel-title .proj-panel-logo / .sw-name .sw-name-logo rules
      regardless of source order — a same-specificity override placed earlier in
      the file loses the cascade tie to a later one, which silently broke this. */
-  .proj-panel-title .proj-panel-logo[src="/images/projects/LLP_title.png"]{height:auto;width:9em}
-  .sw-name .sw-name-logo[src="/images/projects/LLP_title.png"]{height:auto;width:9em}
+  /* The PNG itself has ~4.16% transparent padding on its left edge, which reads
+     as the wordmark sitting shifted right of the subtext below it. Pull it back
+     by that fraction of its own (rendered) width to flush the visible left edge. */
+  .proj-panel-title .proj-panel-logo[src="/images/projects/LLP_title.png"]{height:auto;width:9em;transform:translateX(-4.16%)}
+  .sw-name .sw-name-logo[src="/images/projects/LLP_title.png"]{height:auto;width:9em;transform:translateX(-4.16%)}
   .proj-panel-meta{font-family:"IBM Plex Mono",monospace;font-size:12px;
     letter-spacing:.12em;text-transform:uppercase;color:var(--grey)}
   .proj-panel-arrow{color:var(--paper);font-size:clamp(20px,2vw,28px);
@@ -1259,7 +1262,7 @@
         <div class="proj-panel-info">
           <div class="proj-panel-text">
             <span class="proj-panel-title"><img class="proj-panel-logo" src="/images/projects/LLP_title.png" alt="Local Local Park"></span>
-            <span class="proj-panel-meta">Local Remote · TBD</span>
+            <span class="proj-panel-meta">Local Remote · 2026</span>
           </div>
           <a class="proj-panel-arrow" href="#" onclick="event.preventDefault();event.stopPropagation()">↗</a>
         </div>
@@ -2598,7 +2601,7 @@
                   <div class="pinfo-ck">Project</div><div class="pinfo-cv">Local Local Park</div>
                   <div class="pinfo-ck">Studio</div><div class="pinfo-cv">Local Remote</div>
                   <div class="pinfo-ck">Category</div><div class="pinfo-cv">TBD</div>
-                  <div class="pinfo-ck">Year</div><div class="pinfo-cv">TBD</div>
+                  <div class="pinfo-ck">Year</div><div class="pinfo-cv">2026</div>
                   <div class="pinfo-ck">Team</div>
                   <div class="pinfo-cv">
                     <span class="sub">TBD</span>TBD
@@ -2622,7 +2625,7 @@
           <div><div class="hs-meta-k">Project</div><div class="hs-meta-v">Local Local Park</div></div>
           <div><div class="hs-meta-k">Studio</div><div class="hs-meta-v">Local Remote</div></div>
           <div><div class="hs-meta-k">Category</div><div class="hs-meta-v">TBD</div></div>
-          <div><div class="hs-meta-k">Year</div><div class="hs-meta-v">TBD</div></div>
+          <div><div class="hs-meta-k">Year</div><div class="hs-meta-v">2026</div></div>
         </div>
 
         <div class="proj-detail-section hs-cols is-collapsed">
