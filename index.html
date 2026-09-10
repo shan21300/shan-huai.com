@@ -1240,6 +1240,20 @@
         </div>
       </div>
 
+      <!-- Local Local Park: placeholder panel — swap the hs-img-ph div below for a
+           real .proj-panel-bg img/video once media is in, then remove hs-img-ph. -->
+      <div class="proj-panel" data-nav="proj-locallocalpark" style="cursor:pointer">
+        <div class="proj-panel-bg hs-img-ph">LOCAL LOCAL PARK — media pending</div>
+        <div class="proj-panel-overlay"></div>
+        <div class="proj-panel-info">
+          <div class="proj-panel-text">
+            <span class="proj-panel-title">Local Local Park</span>
+            <span class="proj-panel-meta">Local Remote · TBD</span>
+          </div>
+          <a class="proj-panel-arrow" href="#" onclick="event.preventDefault();event.stopPropagation()">↗</a>
+        </div>
+      </div>
+
       <div class="proj-panel" data-nav="proj-holycommunion" style="cursor:pointer">
         <picture><source media="(max-width:768px)" srcset="/images/projects/holycommunion_vertical_topdown.jpg"><img class="proj-panel-bg" src="/images/projects/holycommunion_horizontal-16-9cover.jpg" alt="Holy Communion: A Reality Check" loading="lazy"></picture>
         <div class="proj-panel-overlay"></div>
@@ -2554,6 +2568,78 @@
         </div>
       </div>
     </section>
+<!-- Local Local Park: clone of the SUB/黑松沙士 (.hs-layout) template. Structure/layout
+     only — every .hs-img-ph box is a placeholder standing in for real photography/video,
+     and all copy below is a TBD placeholder. Swap media + copy in, then remove hs-img-ph. -->
+<section class="page proj-detail hs-layout" id="proj-locallocalpark">
+      <div class="hs-hero hs-img-ph">HERO IMAGE / VIDEO — TBD</div>
+      <div class="pinfo">
+        <div class="pinfo-card">
+          <div class="pinfo-head">
+            <div class="pinfo-tabs"><span class="pinfo-tab is-on" data-view="info">Info</span><span class="pinfo-tab" data-view="desc">Description</span></div>
+            <span class="pinfo-toggle" role="switch" aria-label="Toggle floater" aria-checked="false"></span>
+          </div>
+          <div class="pinfo-body">
+            <div class="pinfo-scroll">
+              <div class="pinfo-view is-on" data-view="info">
+                <div class="pinfo-credits">
+                  <div class="pinfo-ck">Project</div><div class="pinfo-cv">Local Local Park</div>
+                  <div class="pinfo-ck">Studio</div><div class="pinfo-cv">Local Remote</div>
+                  <div class="pinfo-ck">Category</div><div class="pinfo-cv">TBD</div>
+                  <div class="pinfo-ck">Year</div><div class="pinfo-cv">TBD</div>
+                  <div class="pinfo-ck">Team</div>
+                  <div class="pinfo-cv">
+                    <span class="sub">TBD</span>TBD
+                  </div>
+                </div>
+              </div>
+              <div class="pinfo-view" data-view="desc">
+                <div class="pinfo-desc"><p>TBD — project description to be added.</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="proj-detail-wrap">
+        <div class="proj-detail-section hs-nav-row">
+          <button class="back" data-nav="projects">← Projects</button>
+        </div>
+
+        <div class="proj-detail-section hs-meta">
+          <div><div class="hs-meta-k">Project</div><div class="hs-meta-v">Local Local Park</div></div>
+          <div><div class="hs-meta-k">Studio</div><div class="hs-meta-v">Local Remote</div></div>
+          <div><div class="hs-meta-k">Category</div><div class="hs-meta-v">TBD</div></div>
+          <div><div class="hs-meta-k">Year</div><div class="hs-meta-v">TBD</div></div>
+        </div>
+
+        <div class="proj-detail-section hs-cols is-collapsed">
+          <div class="hs-cjk">
+            <p>TBD — 中文專案介紹待補。</p>
+          </div>
+          <div class="hs-en hs-more">
+            <p>TBD — project description to be added.</p>
+          </div>
+          <button class="hs-more-btn" type="button" onclick="var c=this.closest('.hs-cols');c.classList.toggle('is-collapsed');this.textContent=c.classList.contains('is-collapsed')?'Show more':'Show less';">Show more</button>
+        </div>
+
+        <!-- <p class="hs-link-wrap">
+          <a class="hs-link-btn" href="https://localremote.co/projects/TBD" target="_blank" rel="noopener">View on Local Remote ↗</a>
+        </p> -->
+
+        <!-- Gallery -->
+        <div class="proj-detail-img-full is-wide hs-img-ph" style="margin-top:calc(100%/3)">GALLERY IMAGE — TBD</div>
+        <div class="proj-detail-img-pair">
+          <div class="hs-img-ph">IMAGE — TBD</div>
+          <div class="hs-img-ph">IMAGE — TBD</div>
+        </div>
+        <div class="proj-detail-img-full is-wide hs-img-ph">GALLERY IMAGE — TBD</div>
+        <div class="proj-detail-img-pair">
+          <div class="hs-img-ph">IMAGE — TBD</div>
+          <div class="hs-img-ph">IMAGE — TBD</div>
+        </div>
+      </div>
+    </section>
 <section class="page proj-page" id="pt-inmoodforsmoke">
       <div class="proj-scroll" style="height:500vh">
         <div class="proj-viewport">
@@ -3269,6 +3355,7 @@
     "proj-heysong":"/project/heysong-sarsaparilla",
     "proj-zerocase":"/project/zero-case-policy",
     "proj-sub":"/project/sub",
+    "proj-locallocalpark":"/project/local-local-park",
     "gig-cornelius":"/live/cornelius","gig-someshiitsam":"/live/someshiit-sam",
     "gig-elephantgym":"/live/elephant-gym","gig-hillsong":"/live/hillsong",
     "gig-thehope":"/live/the-hope","gig-mosaic":"/live/mosaic",
