@@ -1240,14 +1240,12 @@
         </div>
       </div>
 
-      <!-- Local Local Park: placeholder panel — swap the hs-img-ph div below for a
-           real .proj-panel-bg img/video once media is in, then remove hs-img-ph. -->
       <div class="proj-panel" data-nav="proj-locallocalpark" style="cursor:pointer">
-        <div class="proj-panel-bg hs-img-ph">LOCAL LOCAL PARK — media pending</div>
+        <img class="proj-panel-bg" src="/images/projects/LLP_1.avif" alt="" loading="lazy">
         <div class="proj-panel-overlay"></div>
         <div class="proj-panel-info">
           <div class="proj-panel-text">
-            <span class="proj-panel-title">Local Local Park</span>
+            <span class="proj-panel-title"><img class="proj-panel-logo" src="/images/projects/LLP_title.png" alt="Local Local Park"></span>
             <span class="proj-panel-meta">Local Remote · TBD</span>
           </div>
           <a class="proj-panel-arrow" href="#" onclick="event.preventDefault();event.stopPropagation()">↗</a>
@@ -2568,11 +2566,12 @@
         </div>
       </div>
     </section>
-<!-- Local Local Park: clone of the SUB/黑松沙士 (.hs-layout) template. Structure/layout
-     only — every .hs-img-ph box is a placeholder standing in for real photography/video,
-     and all copy below is a TBD placeholder. Swap media + copy in, then remove hs-img-ph. -->
+<!-- Local Local Park: clone of the SUB/黑松沙士 (.hs-layout) template. Hero + gallery
+     media (LLP_N images, Cloudflare Stream video IDs) are real and in the same order
+     as localremote.co/projects/local-local-park. Copy (category, year, team, description)
+     is still TBD placeholder text. -->
 <section class="page proj-detail hs-layout" id="proj-locallocalpark">
-      <div class="hs-hero hs-img-ph">HERO IMAGE / VIDEO — TBD</div>
+      <img class="hs-hero" src="/images/projects/LLP_1.avif" alt="Local Local Park" loading="eager">
       <div class="pinfo">
         <div class="pinfo-card">
           <div class="pinfo-head">
@@ -2627,16 +2626,52 @@
           <a class="hs-link-btn" href="https://localremote.co/projects/TBD" target="_blank" rel="noopener">View on Local Remote ↗</a>
         </p> -->
 
-        <!-- Gallery -->
-        <div class="proj-detail-img-full is-wide hs-img-ph" style="margin-top:calc(100%/3)">GALLERY IMAGE — TBD</div>
+        <!-- Gallery: same relative order as localremote.co/projects/local-local-park
+             (image slots use the curated LLP_N subset; every video slot from the
+             source page is kept, using the Cloudflare Stream IDs for this project). -->
+        <div class="proj-detail-img-full is-wide" style="margin-top:calc(100%/3)"><img src="/images/projects/LLP_2.avif" alt="Local Local Park" loading="lazy"></div>
+        <div class="proj-detail-img-full is-wide"><img src="/images/projects/LLP_3.avif" alt="Local Local Park" loading="lazy"></div>
         <div class="proj-detail-img-pair">
-          <div class="hs-img-ph">IMAGE — TBD</div>
-          <div class="hs-img-ph">IMAGE — TBD</div>
+          <img src="/images/projects/LLP_4.avif" alt="Local Local Park" loading="lazy">
+          <img src="/images/projects/LLP_5.avif" alt="Local Local Park" loading="lazy">
         </div>
-        <div class="proj-detail-img-full is-wide hs-img-ph">GALLERY IMAGE — TBD</div>
+        <div class="proj-detail-img-full is-wide"><img src="/images/projects/LLP_6.avif" alt="Local Local Park" loading="lazy"></div>
+        <div class="proj-detail-img-full is-wide"><img src="/images/projects/LLP_7.avif" alt="Local Local Park" loading="lazy"></div>
         <div class="proj-detail-img-pair">
-          <div class="hs-img-ph">IMAGE — TBD</div>
-          <div class="hs-img-ph">IMAGE — TBD</div>
+          <img src="/images/projects/LLP_8.avif" alt="Local Local Park" loading="lazy">
+          <img src="/images/projects/LLP_9.avif" alt="Local Local Park" loading="lazy">
+        </div>
+        <div class="proj-detail-img-pair">
+          <img src="/images/projects/LLP_10.avif" alt="Local Local Park" loading="lazy">
+          <img src="/images/projects/LLP_11.avif" alt="Local Local Park" loading="lazy">
+        </div>
+        <div class="proj-detail-img-full is-wide"><img src="/images/projects/LLP_12.avif" alt="Local Local Park" loading="lazy"></div>
+        <div class="proj-detail-img-full is-wide"><img src="/images/projects/LLP_13.avif" alt="Local Local Park" loading="lazy"></div>
+        <div class="proj-detail-img-pair">
+          <video class="hs-gallery-video" data-stream="aeb4091ed0fe9508b1f26e5bea74ccba"
+            poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/aeb4091ed0fe9508b1f26e5bea74ccba/thumbnails/thumbnail.jpg?width=1280"
+            style="aspect-ratio:4/5" muted loop playsinline preload="none"></video>
+          <video class="hs-gallery-video" data-stream="4e5e8e41b491b76c5cdb360e79266395"
+            poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/4e5e8e41b491b76c5cdb360e79266395/thumbnails/thumbnail.jpg?width=1280"
+            style="aspect-ratio:4/5" muted loop playsinline preload="none"></video>
+        </div>
+        <div class="proj-detail-img-full is-wide"><img src="/images/projects/LLP_14.avif" alt="Local Local Park" loading="lazy"></div>
+        <div class="proj-detail-img-pair">
+          <img src="/images/projects/LLP_15.avif" alt="Local Local Park" loading="lazy">
+          <video class="hs-gallery-video" data-stream="5dccf1a31f7bd03cfe208175447b164d"
+            poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/5dccf1a31f7bd03cfe208175447b164d/thumbnails/thumbnail.jpg?width=1280"
+            style="aspect-ratio:1080/1342" muted loop playsinline preload="none"></video>
+        </div>
+        <div class="proj-detail-img-full is-wide"><img src="/images/projects/LLP_17.avif" alt="Local Local Park" loading="lazy"></div>
+        <div class="proj-detail-img-full is-wide">
+          <video class="hs-gallery-video" data-stream="106a0b2147ac59c5e8cff2a51fdb294f"
+            poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/106a0b2147ac59c5e8cff2a51fdb294f/thumbnails/thumbnail.jpg?width=1280"
+            style="aspect-ratio:1756/1080" muted loop playsinline preload="none"></video>
+        </div>
+        <div class="proj-detail-img-full is-wide">
+          <video class="hs-gallery-video" data-stream="f9e09df24554c25a0a73185cb83fa8cc"
+            poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/f9e09df24554c25a0a73185cb83fa8cc/thumbnails/thumbnail.jpg?width=1280"
+            style="aspect-ratio:1756/1080" muted loop playsinline preload="none"></video>
         </div>
       </div>
     </section>
