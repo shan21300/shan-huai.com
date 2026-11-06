@@ -756,6 +756,40 @@
     .hs-layout .proj-detail-img-full{margin-top:8px}
   }
   /* 黑松 page: each block slips up + fades in as it scrolls into view (JS adds .in). */
+  /* English lines inside a Chinese column use the English column's type (DM Sans), not the
+     serif the Chinese copy is set in, so the two descriptions read as one family. */
+  .hs-layout .hs-cjk p.hs-latin{font-family:"DM Sans",system-ui,sans-serif;font-size:15px;
+    line-height:1.8;color:var(--grey)}
+  /* Local Local Park: description starts collapsed on desktop too (other hs-layout pages only
+     collapse on mobile). Both columns clip to the same height with a fade; the shared
+     "Show more" button expands them. Mobile falls through to the shared rules above. */
+  @media(min-width:861px){
+    .hs-layout .hs-cols.llp-desc.is-collapsed .hs-cjk,
+    .hs-layout .hs-cols.llp-desc.is-collapsed .hs-en{max-height:176px;overflow:hidden;position:relative}
+    .hs-layout .hs-cols.llp-desc.is-collapsed .hs-cjk::after,
+    .hs-layout .hs-cols.llp-desc.is-collapsed .hs-en::after{content:"";position:absolute;
+      left:0;right:0;bottom:0;height:3.6em;pointer-events:none;
+      background:linear-gradient(to bottom, rgba(244,241,236,0), #f4f1ec 85%)}
+    .hs-layout .hs-cols.llp-desc .hs-more-btn{display:block;grid-column:1/-1;margin-top:4px;padding:4px 0;
+      font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;
+      text-transform:uppercase;color:var(--grey);background:none;border:none;cursor:pointer;text-align:left}
+    .hs-layout .hs-cols.llp-desc .hs-more-btn:hover{color:var(--paper)}
+  }
+  /* Local Local Park: first four gallery images as an infinite, slowly self-moving carousel.
+     Slide widths are chosen so landscape (~1.5:1) and portrait (4:5) slides land at the same
+     height, with the next slide peeking in. No cropping — images keep their own aspect ratio. */
+  .hs-layout .llp-track{display:flex;gap:12px;overflow-x:auto;align-items:center;
+    scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;cursor:grab}
+  .hs-layout .llp-track::-webkit-scrollbar{display:none}
+  .hs-layout .llp-track.is-drag{cursor:grabbing}
+  .hs-layout .llp-slide{margin:0;flex:0 0 82%}
+  .hs-layout .llp-slide.is-port{flex-basis:43%}
+  .hs-layout .llp-slide img{width:100%;height:auto;display:block;user-select:none}
+  @media(max-width:640px){
+    .hs-layout .llp-track{gap:8px}
+    .hs-layout .llp-slide{flex-basis:88%}
+    .hs-layout .llp-slide.is-port{flex-basis:50%}
+  }
   .hs-layout .hs-reveal{opacity:0;transform:translateY(34px);
     transition:opacity .7s ease, transform .8s cubic-bezier(.16,1,.3,1)}
   .hs-layout .hs-reveal.in{opacity:1;transform:none}
@@ -2633,13 +2667,13 @@
           <div><div class="hs-meta-k">Year</div><div class="hs-meta-v">2026</div></div>
         </div>
 
-        <div class="proj-detail-section hs-cols is-collapsed">
+        <div class="proj-detail-section hs-cols is-collapsed llp-desc">
           <div class="hs-cjk">
             <p>再地聚場是一個融合餐飲、調酒與現場音樂的社交場域。正如一片綠地因城市的環抱而成為公園，人與人之間的連結，也需要一個專屬的場所，讓故事得以展開。</p>
             <p>品牌識別以「鴿子」為核心。牠是城市中最常見、卻也最常被忽略的存在。鴿子自在穿梭於街道、公園與廣場之間，總會自然地聚集在人群匯聚之處。我們以鴿子作為標誌，將再地聚場定位為城市互動的節點，讓來自不同背景的人們輕鬆相聚，分享日常片刻。</p>
             <p>我們從十九至二十世紀的自然博物館圖錄、植物圖鑑、公園標示，以及歐洲紋章學的象徵構圖中汲取視覺線索，發展出一系列徽章，代表品牌的四大核心：音樂、飲品、餐食與社交。這些徽章如同再地聚場的城市紋章，各自代表一種相聚的理由。它們出自同一套設計語彙，確保系統一致，同時又各有鮮明個性，構成一套高度延展的識別系統。</p>
             <p>色彩計畫讓飽和鮮明的綠色與溫暖深沉的酒紅色相互對話。這抹標誌性的綠色貫穿包裝、菜單、制服、指標與周邊商品，成為串聯整個空間的主軸，留下鮮明又直覺的深刻印象。</p>
-            <p>Find Your Moment. Make It Local.</p>
+            <p class="hs-latin">Find Your Moment. Make It Local.</p>
             <p>讓每一次駐足，都成為這座城市的關鍵時刻。</p>
           </div>
           <div class="hs-en hs-more">
@@ -2653,18 +2687,22 @@
           <button class="hs-more-btn" type="button" onclick="var c=this.closest('.hs-cols');c.classList.toggle('is-collapsed');this.textContent=c.classList.contains('is-collapsed')?'Show more':'Show less';">Show more</button>
         </div>
 
-        <!-- <p class="hs-link-wrap">
-          <a class="hs-link-btn" href="https://localremote.co/projects/TBD" target="_blank" rel="noopener">View on Local Remote ↗</a>
-        </p> -->
+        <p class="hs-link-wrap">
+          <a class="hs-link-btn" href="https://www.localremote.co/projects/local-local-park" target="_blank" rel="noopener">View on Local Remote ↗</a>
+        </p>
 
         <!-- Gallery: same relative order as localremote.co/projects/local-local-park
              (image slots use the curated LLP_N subset; every video slot from the
              source page is kept, using the Cloudflare Stream IDs for this project). -->
-        <div class="proj-detail-img-full is-wide" style="margin-top:calc(100%/3)"><img src="/images/projects/LLP_2.avif" alt="Local Local Park" loading="lazy"></div>
-        <div class="proj-detail-img-full is-wide"><img src="/images/projects/LLP_3.avif" alt="Local Local Park" loading="lazy"></div>
-        <div class="proj-detail-img-pair">
-          <img src="/images/projects/LLP_4.avif" alt="Local Local Park" loading="lazy">
-          <img src="/images/projects/LLP_5.avif" alt="Local Local Park" loading="lazy">
+        <!-- Carousel: LLP_2-5 as a seamless, slowly self-moving loop (JS clones the set; drag/swipe still works). -->
+        <div class="proj-detail-img-full is-wide llp-carousel" style="margin-top:calc(100%/3)">
+          <div class="llp-track" tabindex="0" aria-label="Local Local Park images">
+            <figure class="llp-slide is-land"><img src="/images/projects/LLP_2.avif" alt="Local Local Park" loading="lazy" draggable="false"></figure>
+            <figure class="llp-slide is-land"><img src="/images/projects/LLP_3.avif" alt="Local Local Park" loading="lazy" draggable="false"></figure>
+            <figure class="llp-slide is-port"><img src="/images/projects/LLP_4.avif" alt="Local Local Park" loading="lazy" draggable="false"></figure>
+            <figure class="llp-slide is-port"><img src="/images/projects/LLP_5.avif" alt="Local Local Park" loading="lazy" draggable="false"></figure>
+          </div>
+        </div>
         </div>
         <div class="proj-detail-img-full is-wide"><img src="/images/projects/LLP_6.avif" alt="Local Local Park" loading="lazy"></div>
         <div class="proj-detail-img-full is-wide"><img src="/images/projects/LLP_7.avif" alt="Local Local Park" loading="lazy"></div>
@@ -4327,6 +4365,63 @@
       });
     },{rootMargin:"0px 0px -10% 0px", threshold:0.06});
     targets.forEach(function(el){ io.observe(el); });
+  });
+})();
+// Local Local Park carousel: seamless infinite loop that drifts slowly on its own.
+// The slide set is cloned once; scrollLeft wraps by one set-width. Touch/trackpad/mouse-drag
+// still scroll natively and the drift pauses briefly while the user is interacting.
+(function(){
+  var SPEED=32, RESUME=1600; // px per second, ms of calm before drifting again
+  var reduce=window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document.querySelectorAll(".llp-carousel").forEach(function(c){
+    var track=c.querySelector(".llp-track");
+    var orig=Array.prototype.slice.call(track.querySelectorAll(".llp-slide"));
+    orig.forEach(function(sl){
+      var cl=sl.cloneNode(true); cl.setAttribute("aria-hidden","true");
+      cl.querySelector("img").setAttribute("alt",""); track.appendChild(cl);
+    });
+    var first=orig[0], firstClone=track.children[orig.length];
+    function setW(){ return firstClone.offsetLeft-first.offsetLeft; }
+    var pos=0, last=0, inView=true, resumeAt=0, prev=0;
+    function wrap(){
+      var w=setW(); if(!w) return;
+      // Position w (first clone) looks identical to position 0, so treat them as one spot.
+      if(track.scrollLeft>w){ track.scrollLeft-=w; pos=track.scrollLeft; }
+      else if(track.scrollLeft<=0){ track.scrollLeft=w; pos=w; }
+    }
+    function touch(){ resumeAt=performance.now()+RESUME; pos=track.scrollLeft; }
+    track.addEventListener("scroll",function(){
+      if(Math.abs(track.scrollLeft-last)>1.5){ touch(); }   // user-driven (not our own drift)
+      wrap();
+    },{passive:true});
+    ["touchstart","wheel"].forEach(function(ev){ track.addEventListener(ev,touch,{passive:true}); });
+    var down=false, sx=0, sl0=0, moved=false;
+    track.addEventListener("pointerdown",function(e){
+      if(e.pointerType!=="mouse") return;
+      down=true; moved=false; sx=e.clientX; sl0=track.scrollLeft; touch();
+    });
+    window.addEventListener("pointermove",function(e){
+      if(!down) return;
+      var dx=e.clientX-sx;
+      if(Math.abs(dx)>4){ moved=true; track.classList.add("is-drag"); }
+      if(moved){ track.scrollLeft=sl0-dx; touch(); }
+    });
+    window.addEventListener("pointerup",function(){
+      if(!down) return; down=false; track.classList.remove("is-drag"); touch();
+    });
+    if("IntersectionObserver" in window){
+      new IntersectionObserver(function(es){ inView=es[0].isIntersecting; }).observe(c);
+    }
+    function tick(t){
+      var dt=Math.min((t-prev)/1000,0.1); prev=t;
+      if(!reduce && inView && !down && t>=resumeAt && track.clientWidth){
+        if(Math.abs(track.scrollLeft-last)>1.5) pos=track.scrollLeft;
+        pos+=SPEED*dt; track.scrollLeft=pos; last=track.scrollLeft;
+        wrap();
+      }
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(function(t){ prev=t; tick(t); });
   });
 })();
 </script>
