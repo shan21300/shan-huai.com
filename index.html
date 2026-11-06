@@ -3716,7 +3716,7 @@
   // Cover-then-video: hold the cover image for 10s, play the video ONCE (no loop),
   // then rest on the cover. Works by fading the video's opacity over the cover <img>
   // that sits behind it. Re-arms whenever the page/slide is (re)entered.
-  var HS_COVER_MS = 10000;
+  var HS_COVER_MS = 0;   // was 10000 (10s still-image hold); now videos start as soon as they're shown
   function coverCycle(v, holdMs){
     if(!v) return;
     var hold = (typeof holdMs === "number") ? holdMs : HS_COVER_MS;
