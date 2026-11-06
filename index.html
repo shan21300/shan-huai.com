@@ -3717,8 +3717,9 @@
   // then rest on the cover. Works by fading the video's opacity over the cover <img>
   // that sits behind it. Re-arms whenever the page/slide is (re)entered.
   var HS_COVER_MS = 10000;
-  function coverCycle(v){
+  function coverCycle(v, holdMs){
     if(!v) return;
+    var hold = (typeof holdMs === "number") ? holdMs : HS_COVER_MS;
     v.loop = false; v.removeAttribute("loop");
     if(!v._cycleBound){
       v._cycleBound = true;
@@ -3732,7 +3733,7 @@
       if(v.currentTime > 0.3){ try{ v.currentTime = 0; }catch(e){} } // restart only if it already played
       v.style.opacity = "1";
       var p = v.play(); if(p && p.catch) p.catch(function(){ v.style.opacity = "0"; });
-    }, HS_COVER_MS);
+    }, hold);
   }
   function coverStop(v){ if(!v) return; clearTimeout(v._coverTimer); try{ v.pause(); }catch(e){} v.style.opacity = "0"; }
   window._coverCycle = coverCycle; window._coverStop = coverStop;
@@ -4127,7 +4128,7 @@
             v.poster = "https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/"+vid+"/thumbnails/thumbnail.jpg?width=1280";
             box.appendChild(v);
             if(window._hsStream) window._hsStream(v, vid);      // HLS source (Chrome-safe)
-            if(window._coverCycle) window._coverCycle(v);       // cover 10s → play once → rest
+            if(window._coverCycle) window._coverCycle(v, 0);    // landing: play at once (no 10s cover hold) → play once → rest
           } else if(!on && existing){
             if(window._coverStop) window._coverStop(existing);
             existing.remove();
