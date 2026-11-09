@@ -178,6 +178,13 @@
     letter-spacing:.14em;text-transform:uppercase;opacity:0;transform:translate3d(-100px,-100px,0);
     transition:opacity .2s ease;will-change:transform}
   .vg-pill.on{opacity:1}
+  /* Meta beside each image, where the reference puts its "(n)" order: bottom-aligned, to the
+     right of compact images and to the left of the open one (desktop; phones keep it under the title). */
+  .vg-meta{position:absolute;left:0;top:0;width:var(--metaw,140px);pointer-events:none;visibility:hidden;will-change:transform,opacity;
+    font-family:"IBM Plex Mono",monospace;font-size:10px;line-height:1.5;letter-spacing:.08em;text-transform:uppercase;color:var(--edge)}
+  .vg-meta span{display:block}
+  .vg-meta.is-left{text-align:right;color:var(--paper)}
+  @media (min-width:720px){ #vg-info .m{display:none} #vg-info .go{margin-top:2px} }
   .vg-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;
     -webkit-user-drag:none;opacity:0;transition:opacity .6s ease}
   .vg-media img.is-loaded{opacity:1}
@@ -197,7 +204,7 @@
   :root{--sp:clamp(16px,3.2vw,48px)}
   /* Phones keep the reference's layout: title list on the left, images on one centre line. */
   @media (max-width:719px){
-    .vg-hint{display:none !important}
+    .vg-hint,.vg-meta{display:none !important}
     .vg-tl{font-size:19px}
     .vg-info .m,.vg-info .go{font-size:9px;letter-spacing:.08em}
     .vg-info .m{white-space:normal}
@@ -832,8 +839,12 @@
         tl.type = "button"; tl.className = "vg-tl"; tl.setAttribute("data-ti", i); tl.textContent = w.name;
         titlesEl.insertBefore(tl, infoEl);
         vstage.appendChild(el);
+        var meta = document.createElement("div");
+        meta.className = "vg-meta"; meta.setAttribute("aria-hidden", "true");
+        w.label.split(" · ").forEach(function(part){ var sp = document.createElement("span"); sp.textContent = part; meta.appendChild(sp); });
+        vstage.appendChild(meta);
         var img = el.querySelector("img"); img.alt = w.name;
-        var it = { w:w, el:el, tl:tl, media:el.querySelector(".vg-media"), img:img, hit:el.querySelector(".vg-hit"),
+        var it = { w:w, el:el, tl:tl, meta:meta, metaH:0, left:null, media:el.querySelector(".vg-media"), img:img, hit:el.querySelector(".vg-hit"),
           ratio:w.w / w.h, A:0, C:0, swell:1, shown:false };
         img.addEventListener("load", function(){ img.classList.add("is-loaded"); });
         return it;
@@ -852,8 +863,12 @@
       sItems.forEach(function(it){ titlesW = Math.max(titlesW, it.tl.offsetWidth); });
       titlesW = Math.max(titlesW, infoEl.offsetWidth);
       L.colLeft = pad + Math.min(titlesW, cap) + (mobile ? 14 : clamp(vw * 0.04, 32, 64));
-      L.maxW = vw - L.colLeft - pad;
-      L.axis = L.colLeft + L.maxW / 2;          // every image is centred on this vertical line
+      L.metaW = mobile ? 0 : 140;                // meta block width beside the images
+      L.metaGap = 14;
+      var gut = mobile ? 0 : L.metaW + L.metaGap; // room for meta on both sides keeps the axis centred
+      L.maxW = vw - L.colLeft - pad - 2 * gut;
+      L.axis = L.colLeft + gut + L.maxW / 2;     // every image is centred on this vertical line
+      vstage.style.setProperty("--metaw", L.metaW + "px");
       L.Amax = mobile ? Math.min(vh * 0.5, 520) : Math.min(vh * 0.58, 720);
       L.Cbase = L.Amax * (mobile ? 0.34 : 0.30);
       L.gap = mobile ? 10 : 16;
@@ -865,6 +880,7 @@
         it.C = Math.min(L.Cbase, it.A, (L.maxW * 0.62) / it.ratio);
         it.el.style.width = (it.A * it.ratio) + "px";
         it.el.style.height = it.A + "px";
+        it.metaH = mobile ? 0 : it.meta.offsetHeight;
       });
       kick();
     }
@@ -925,8 +941,15 @@
         var y = it.top + off;
         var visible = y < L.vh + 40 && y + it.h > -40;
         if(Math.abs(it.d) < 5 && !it.img.getAttribute("src")) it.img.src = it.w.full;
-        if(!visible){ if(it.shown){ it.el.style.visibility = "hidden"; it.shown = false; } continue; }
-        if(!it.shown){ it.el.style.visibility = "visible"; it.shown = true; }
+        if(!visible){ if(it.shown){ it.el.style.visibility = "hidden"; it.meta.style.visibility = "hidden"; it.shown = false; } continue; }
+        if(!it.shown){ it.el.style.visibility = "visible"; it.meta.style.visibility = "visible"; it.shown = true; }
+        if(!L.mobile){
+          var left = it.t > 0.5, half = it.A * it.ratio * it.s / 2;
+          if(left !== it.left){ it.meta.classList.toggle("is-left", left); it.left = left; }
+          var mx2 = left ? L.axis - half - L.metaGap - L.metaW : L.axis + half + L.metaGap;
+          it.meta.style.transform = "translate3d(" + mx2 + "px," + (y + it.h - it.metaH + par) + "px,0)";
+          it.meta.style.opacity = (0.55 + 0.45 * it.t).toFixed(3);
+        }
         var sw = 1;
         if(allowSwell && it.t < 0.5){
           var cy = y + it.h / 2, half = it.A * it.ratio * it.s / 2;
@@ -948,7 +971,7 @@
     }
     var TL_MIN = 0.46;
     function renderTitles(ai){
-      var TL_LINE = 21 * L.tlk, TL_ACTIVE = 40 * L.tlk, TL_INFO = L.mobile ? 60 : 62;
+      var TL_LINE = 21 * L.tlk, TL_ACTIVE = 40 * L.tlk, TL_INFO = L.mobile ? 60 : 34;
       var y = 0, aY = 0, i, it;
       for(i = 0; i < N; i++){
         it = sItems[i]; it.tlY = y;
