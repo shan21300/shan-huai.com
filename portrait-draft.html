@@ -89,14 +89,14 @@
   /* Each tile is a grid CELL: hairline top/left border (adjacent cells abut, so the
      borders draw the grid, as in the reference), the uncropped image inset by --pad.
      Columns are staggered, so horizontal lines step from column to column. */
-  .stage{--pad:20px}
+  .stage{--pad:20px;--radius:4px}   /* reference image radius: 4px */
   .tile{position:absolute;left:0;top:0;transform-origin:50% 50%;will-change:transform,opacity;
     border-top:1px solid var(--line);border-left:1px solid var(--line);
     background:rgba(0,0,0,.1);overflow:hidden;visibility:hidden;contain:layout style;
     transition:background-color .3s ease,box-shadow .3s ease}
-  .tile::before{content:"";position:absolute;left:var(--pad);top:var(--pad);right:var(--pad);bottom:var(--pad);background:#151516}
+  .tile::before{content:"";position:absolute;left:var(--pad);top:var(--pad);right:var(--pad);bottom:var(--pad);background:#151516;border-radius:var(--radius)}
   .tile img{position:absolute;display:block;pointer-events:none;-webkit-user-drag:none;user-select:none}
-  .tile .sharp{left:var(--pad);top:var(--pad);width:calc(100% - 2*var(--pad));height:calc(100% - 2*var(--pad));
+  .tile .sharp{left:var(--pad);top:var(--pad);width:calc(100% - 2*var(--pad));height:calc(100% - 2*var(--pad));border-radius:var(--radius);
     opacity:0;transition:opacity .45s ease}
   .tile.ready .sharp{opacity:1}
   .tile.instant .sharp{transition:none}
@@ -141,7 +141,7 @@
   .viewer[hidden]{display:none}
   .viewer.open{opacity:1}
   .v-fig{grid-row:2;display:flex;align-items:center;justify-content:center;min-height:0;padding:clamp(8px,2vh,24px) clamp(56px,8vw,120px)}
-  .v-img{max-width:100%;max-height:100%;width:auto;height:auto;display:block;object-fit:contain;transition:filter .3s ease}
+  .v-img{max-width:100%;max-height:100%;width:auto;height:auto;display:block;object-fit:contain;border-radius:4px;transition:filter .3s ease}
   .v-img.lowres{filter:blur(6px)}
   .v-bar{grid-row:3;display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;
     padding:0 clamp(20px,4vw,48px) calc(clamp(18px,3vh,30px) + env(safe-area-inset-bottom,0px))}
@@ -205,7 +205,17 @@
     <!-- Portrait data, in site order (newest series first). The wall scatters it; the viewer's
          prev/next follow this order. -->
     <script type="application/json" id="portraits">
-  [{"name":"Untitled Sketch","meta":"Taipei · 2023","nav":"pt-untitledsketch","images":[{"full":"/images/portraiture/rooftop_motion-cover.jpg","thumb":"/images/portraiture/thumbs/rooftop_motion-cover.jpg","w":1333,"h":2000},
+  [{"name":"Butoh Experiment","meta":"Performance · 2023","nav":"proj-butoh","images":[
+    {"full":"/images/projects/butoh_nigel_-2.jpg","thumb":"/images/projects/thumbs/butoh_nigel_-2.jpg","w":1600,"h":2000},
+    {"full":"/images/projects/butoh_nigel_-3.jpg","thumb":"/images/projects/thumbs/butoh_nigel_-3.jpg","w":1600,"h":2000},
+    {"full":"/images/projects/butoh_nigel_-4.jpg","thumb":"/images/projects/thumbs/butoh_nigel_-4.jpg","w":1334,"h":2000},
+    {"full":"/images/projects/butoh_nigel_-5.jpg","thumb":"/images/projects/thumbs/butoh_nigel_-5.jpg","w":1600,"h":2000},
+    {"full":"/images/projects/butoh_nigel_-6.jpg","thumb":"/images/projects/thumbs/butoh_nigel_-6.jpg","w":1600,"h":2000},
+    {"full":"/images/projects/butoh_nigel_-7.jpg","thumb":"/images/projects/thumbs/butoh_nigel_-7.jpg","w":1600,"h":2000},
+    {"full":"/images/projects/butoh_nigel_-8.jpg","thumb":"/images/projects/thumbs/butoh_nigel_-8.jpg","w":1600,"h":2000},
+    {"full":"/images/projects/butoh_nigel_-9.jpg","thumb":"/images/projects/thumbs/butoh_nigel_-9.jpg","w":1280,"h":1600},
+    {"full":"/images/projects/butoh_nigel_-1.jpg","thumb":"/images/projects/thumbs/butoh_nigel_-1.jpg","w":1333,"h":2000}]},
+  {"name":"Untitled Sketch","meta":"Taipei · 2023","nav":"pt-untitledsketch","images":[{"full":"/images/portraiture/rooftop_motion-cover.jpg","thumb":"/images/portraiture/thumbs/rooftop_motion-cover.jpg","w":1333,"h":2000},
     {"full":"/images/portraiture/rooftop_motion-1.jpg","thumb":"/images/portraiture/thumbs/rooftop_motion-1.jpg","w":1600,"h":2000},
     {"full":"/images/portraiture/rooftop_motion-2.jpg","thumb":"/images/portraiture/thumbs/rooftop_motion-2.jpg","w":1600,"h":2000},
     {"full":"/images/portraiture/rooftop_motion-3.jpg","thumb":"/images/portraiture/thumbs/rooftop_motion-3.jpg","w":1600,"h":2000},
@@ -246,7 +256,7 @@
     {"full":"/images/portraiture/tatiana_2021-12.jpg","thumb":"/images/portraiture/thumbs/tatiana_2021-12.jpg","w":1333,"h":2000},
     {"full":"/images/portraiture/tatiana_2021-14.jpg","thumb":"/images/portraiture/thumbs/tatiana_2021-14.jpg","w":1333,"h":2000}]}]
     </script>
-    <noscript><ul class="nojs"><li><a href="/portraiture/untitled-sketch">Untitled Sketch</a></li><li><a href="/portraiture/0821tingting">@0821tingting</a></li><li><a href="/portraiture/duality-within">Duality Within</a></li><li><a href="/portraiture/in-mood-for-smoke">In Mood For Smoke</a></li><li><a href="/portraiture/tatiana">Tatiana</a></li></ul></noscript>
+    <noscript><ul class="nojs"><li><a href="/project/butoh-experiment">Butoh Experiment</a></li><li><a href="/portraiture/untitled-sketch">Untitled Sketch</a></li><li><a href="/portraiture/0821tingting">@0821tingting</a></li><li><a href="/portraiture/duality-within">Duality Within</a></li><li><a href="/portraiture/in-mood-for-smoke">In Mood For Smoke</a></li><li><a href="/portraiture/tatiana">Tatiana</a></li></ul></noscript>
   </main>
 
   <div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Portrait viewer" hidden>
@@ -293,7 +303,8 @@
     "portraiture":"/portraiture","wedding":"/wedding","archive":"/archive","about":"/about","contact":"/contact",
     "pt-0821tingting":"/portraiture/0821tingting","pt-dualitywithin":"/portraiture/duality-within",
     "pt-inmoodforsmoke":"/portraiture/in-mood-for-smoke","pt-tatiana":"/portraiture/tatiana",
-    "pt-untitledsketch":"/portraiture/untitled-sketch"
+    "pt-untitledsketch":"/portraiture/untitled-sketch",
+    "proj-butoh":"/project/butoh-experiment"
   };
   function go(target){ var url = ROUTES[target]; if(url) location.href = url; }
 
