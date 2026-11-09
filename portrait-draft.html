@@ -999,17 +999,24 @@
       activeIdx = i;
       var it = sItems[i], w = it.w;
       it.el.classList.add("is-active"); it.hit.setAttribute("aria-current", "true"); it.tl.setAttribute("aria-current", "true");
+      if(hovIt) pillLabel();                       // e.g. "go to" → "view" once the hovered image opens
       infoM.textContent = w.label;
       infoGo.href = ROUTES[w.nav] || "/"; infoGo.setAttribute("data-nav", w.nav);
     }
 
-    /* ---------- Hover (mouse only): grow the hovered image, dim the rest, "view" pill ---------- */
-    var pill = document.getElementById("vg-pill"), hovIt = null, hoverTick = 0, pillRaf = 0;
+    /* ---------- Hover (mouse only): grow the hovered image, dim the rest, cursor pill ----------
+       The pill says what a click will do: "view" on the open image (opens the viewer),
+       "go to" on any other image (scrolls the index to it). */
+    var pill = document.getElementById("vg-pill"), hovIt = null, hoverTick = 0, pillRaf = 0, pillTxt = "view";
+    function pillLabel(){
+      var t = hovIt && hovIt === sItems[activeIdx] ? "view" : "go to";
+      if(t !== pillTxt){ pill.textContent = t; pillTxt = t; if(!pillRaf) pillRaf = requestAnimationFrame(movePill); }
+    }
     function setHover(it){
-      if(it === hovIt) return;
+      if(it === hovIt){ if(it) pillLabel(); return; }
       if(hovIt) hovIt.el.classList.remove("hov");
       hovIt = it;
-      if(it) it.el.classList.add("hov");
+      if(it){ it.el.classList.add("hov"); pillLabel(); }
       vstage.classList.toggle("has-hover", !!it);
       vstage.classList.toggle("pill-on", !!it);
       pill.classList.toggle("on", !!it);
