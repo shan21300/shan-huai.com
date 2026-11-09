@@ -19,7 +19,8 @@
     The script reads everything (href, size, thumbnail) from those links.
   - Thumbnails: /images/carousel/<nav>.webp, 800px tall (generated from the landing images).
   - No WebGL, or prefers-reduced-motion → the same list is shown as a plain horizontal strip.
-  - The intro loader runs once per browser session (sessionStorage).
+  - The intro loader runs once per browser session (sessionStorage); after 100 the logo
+    zooms out from the centre to its spot top-left, where it is also the menu button.
 -->
 <title>Shan-Huai Chiang</title>
 <link rel="icon" type="image/png" href="/images/system/favicon.png" />
@@ -55,38 +56,59 @@
   .mono{font-family:"IBM Plex Mono",monospace;font-weight:400;letter-spacing:.04em}
 
 
-  /* ---------- Top bar ---------- */
-  .top{position:fixed;top:0;left:0;right:0;z-index:20;pointer-events:none;
-    display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
-    padding:calc(var(--py) + env(safe-area-inset-top,0px)) calc(var(--px) + env(safe-area-inset-right,0px)) 0 calc(var(--px) + env(safe-area-inset-left,0px))}
+  /* ---------- Top bar: just the logo, which is also the menu button ---------- */
+  .top{position:fixed;top:0;left:0;z-index:32;pointer-events:none;
+    padding:calc(var(--py) + env(safe-area-inset-top,0px)) 0 0 calc(var(--px) + env(safe-area-inset-left,0px))}
   .top > *{pointer-events:auto}
-  .brand{justify-self:start;display:flex;align-items:center;line-height:0;text-decoration:none}
-  .brand img{height:var(--logo);width:auto;display:block;opacity:.92;transition:opacity .2s}
-  .brand:hover img{opacity:1}
-  .practice{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--grey);white-space:nowrap}
-  .draft-tag{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);background:var(--paper);
-    padding:2px 5px;margin-left:12px;vertical-align:1px}
-  .links{justify-self:end;display:flex;gap:clamp(14px,1.8vw,26px);list-style:none}
-  .links a{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.1em;text-transform:lowercase;
-    text-decoration:none;color:var(--edge);transition:color .2s}
-  .links a:hover,.links a:focus-visible{color:var(--paper)}
+  .brand{position:relative;display:block;line-height:0;padding:0;border:0;background:none;cursor:pointer;color:inherit}
+  .brand img{height:var(--logo);width:auto;display:block;transition:opacity .35s ease}
+  .brand .logo-w{opacity:.92}
+  .brand .logo-b{position:absolute;left:0;top:0;opacity:0}
+  .brand:hover .logo-w{opacity:1}
+  html.menu-open .brand .logo-w{opacity:0}       /* on the light menu the logo turns black, same spot */
+  html.menu-open .brand .logo-b{opacity:.92}
+  html.menu-open .brand:hover .logo-b{opacity:1}
+  .brand:focus-visible{outline:1px solid var(--edge);outline-offset:6px}
   a:focus-visible{outline:1px solid var(--paper);outline-offset:4px}
 
-  /* ---------- Bottom bar: intro · current caption · counter ---------- */
+  /* ---------- Bottom: the current project's caption ---------- */
   .foot{position:fixed;left:0;right:0;bottom:0;z-index:20;pointer-events:none;
-    display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:20px;
+    display:flex;justify-content:center;
     padding:0 calc(var(--px) + env(safe-area-inset-right,0px)) calc(var(--py) + env(safe-area-inset-bottom,0px)) calc(var(--px) + env(safe-area-inset-left,0px))}
-  .intro{max-width:44ch;font-size:13px;line-height:1.45;color:var(--paper)}
-  .intro .hint{color:var(--grey)}
-  .cap{justify-self:center;text-align:center;width:min(46vw,520px);height:44px;contain:strict;
+  .cap{text-align:center;width:min(80vw,520px);height:44px;contain:strict;
     display:flex;flex-direction:column;justify-content:flex-end;align-items:center;
     transition:opacity .35s ease}
   .cap-name{font-family:"Cormorant Garamond",serif;font-weight:300;font-size:22px;line-height:1.1;letter-spacing:-.01em;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
   .cap-meta{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-top:4px;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-  .count{justify-self:end;font-size:12px;color:var(--edge);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
-  html:not(.gl) .cap, html:not(.gl) .count{display:none}
+  html:not(.gl) .cap{display:none}
+
+  /* ---------- Menu (ported from index.html; the logo above it is the toggle) ---------- */
+  #menu{position:fixed;inset:0;z-index:30;background:var(--paper);color:var(--ink);
+    padding:calc(var(--py) + var(--logo) + clamp(40px,8vh,90px)) var(--px) clamp(28px,4vw,48px);
+    display:flex;flex-direction:column;justify-content:flex-start;
+    opacity:0;visibility:hidden;transition:opacity .35s cubic-bezier(.55,.085,.68,.53),visibility 0s linear .35s}
+  #menu.open{opacity:1;visibility:visible;transition:opacity .4s cubic-bezier(.25,.46,.45,.94)}
+  .menu-cats{display:flex;flex-direction:column;align-items:flex-start;gap:clamp(24px,3vh,44px);margin:auto 0}
+  .m-link,.m-sub,.menu-mini a{display:block;width:fit-content;color:var(--ink);text-decoration:none;
+    font-family:"Cormorant Garamond",serif;font-weight:300;font-size:clamp(30px,3.9vw,53px);line-height:1.1;
+    letter-spacing:-.02em;text-transform:lowercase}
+  .m-link:hover,.m-sub:hover,.menu-mini a:hover{font-style:italic}
+  .m-link.m-soon{cursor:default}                               /* placeholder until its page exists */
+  .m-link.m-soon:hover{font-style:normal}
+  #menu a:focus-visible{outline:1px solid var(--ink);outline-offset:4px}
+  .menu-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:26px;flex-wrap:wrap;margin-top:auto}
+  .menu-sec,.menu-mini{display:flex;gap:clamp(16px,2vw,30px);flex-wrap:wrap;align-items:flex-end}
+  /* entrance: links rise in with a stagger, like the GSAP timeline on the live site */
+  #menu .m-link,#menu .menu-foot > *{opacity:0;transform:translateY(26px);
+    transition:opacity .6s cubic-bezier(.215,.61,.355,1),transform .6s cubic-bezier(.215,.61,.355,1)}
+  #menu .menu-foot > *{transform:translateY(14px)}
+  #menu.open .m-link,#menu.open .menu-foot > *{opacity:1;transform:none}
+  #menu.open .m-link:nth-child(1){transition-delay:.05s}
+  #menu.open .m-link:nth-child(2){transition-delay:.11s}
+  #menu.open .menu-foot > :nth-child(1){transition-delay:.22s}
+  #menu.open .menu-foot > :nth-child(2){transition-delay:.30s}
 
   /* ---------- WebGL stage ---------- */
   .stage{position:fixed;inset:0;z-index:1;touch-action:pan-y;
@@ -136,16 +158,11 @@
   #veil{position:fixed;inset:0;z-index:45;background:var(--ink);opacity:0;pointer-events:none;transition:opacity .32s ease}
   body.is-leaving #veil{opacity:1}
 
-  @media (max-width:1060px){
-    .top{grid-template-columns:auto 1fr}
-    .practice{display:none}
-    .links{grid-column:2}
-  }
   @media (max-width:760px){
-    .foot{grid-template-columns:1fr auto;row-gap:14px}
-    .intro{grid-column:1 / -1;max-width:none;font-size:12.5px}
-    .cap{justify-self:start;text-align:left;align-items:flex-start;width:auto;max-width:72vw;contain:layout paint}
     .cap-name{font-size:20px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    #menu,#menu.open,#menu .m-link,#menu .menu-foot > *,.brand img{transition:none}
   }
 </style>
 <script>
@@ -167,16 +184,20 @@
   <div id="veil" aria-hidden="true"></div>
 
   <header class="top">
-    <a class="brand" href="/" aria-label="Shan-Huai — home"><img src="/images/system/shanhuailogoinversed_white.png" alt="" width="1918" height="3696"></a>
-    <span class="practice mono">Moving Image · Photography · Art Direction<span class="draft-tag">draft</span></span>
-    <nav aria-label="Site">
-      <ul class="links">
-        <li><a href="/personal">personal</a></li>
-        <li><a href="/about">bio</a></li>
-        <li><a href="https://www.instagram.com/shanhuai.c/" target="_blank" rel="noopener">instagram</a></li>
-      </ul>
-    </nav>
+    <button class="brand" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="menu"><img class="logo-w" src="/images/system/shanhuailogoinversed_white.png" alt="" width="1918" height="3696"><img class="logo-b" src="/images/system/shanhuailogoinversed_black.png" alt="" width="1918" height="3696" loading="lazy"></button>
   </header>
+
+  <div id="menu" role="dialog" aria-modal="true" aria-label="Menu">
+    <!-- Same items as index.html's menu: Commercial / Personal, then bio and Instagram. -->
+    <nav class="menu-cats" aria-label="Site">
+      <span class="m-link m-soon" aria-disabled="true">commercial</span>
+      <a class="m-link" href="/personal">personal</a>
+    </nav>
+    <div class="menu-foot">
+      <div class="menu-sec"><a class="m-sub" href="/about">bio</a></div>
+      <div class="menu-mini"><a href="https://www.instagram.com/shanhuai.c/" target="_blank" rel="noopener">instagram</a></div>
+    </div>
+  </div>
 
   <main class="page">
     <h1 class="mono" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)">Shan-Huai Chiang — selected work</h1>
@@ -207,9 +228,7 @@
   </main>
 
   <footer class="foot">
-    <p class="intro">Shan-Huai Chiang — based in Taipei, working at Local Remote as an Image Maker. <span class="hint">Drag, swipe or scroll to browse.</span></p>
     <div class="cap" aria-live="polite"><span class="cap-name"></span><span class="cap-meta mono"></span></div>
-    <span class="count mono" aria-hidden="true"></span>
   </footer>
 
 <script>
@@ -262,6 +281,26 @@
       e.preventDefault();
     }, { passive:false });
   }
+  /* ---------- Menu: the logo opens and closes it, and stays put top-left ---------- */
+  var menuEl = document.getElementById("menu"), brandBtn = document.querySelector(".brand");
+  var behind = [document.querySelector("main"), document.querySelector(".foot")];
+  function setMenu(open, focusBack){
+    if(open === doc.classList.contains("menu-open")) return;
+    doc.classList.toggle("menu-open", open);
+    menuEl.classList.toggle("open", open);
+    brandBtn.setAttribute("aria-expanded", open ? "true" : "false");
+    brandBtn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    behind.forEach(function(el){ if(open) el.setAttribute("inert", ""); else el.removeAttribute("inert"); });
+    if(open){ var first = menuEl.querySelector("a[href]"); if(first) setTimeout(function(){ first.focus({ preventScroll:true }); }, 60); }
+    else if(focusBack) brandBtn.focus({ preventScroll:true });
+    document.dispatchEvent(new CustomEvent("shc:menu", { detail:{ open:open } }));
+  }
+  brandBtn.addEventListener("click", function(){ setMenu(!doc.classList.contains("menu-open"), false); });
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape" && doc.classList.contains("menu-open")){ e.preventDefault(); setMenu(false, true); }
+  });
+  window.addEventListener("pageshow", function(e){ if(e.persisted) setMenu(false, false); });
+
   if(reduce){ useStrip(); return; }
 
   /* ---------- WebGL carousel ---------- */
@@ -269,7 +308,6 @@
   var canvas = stage.querySelector("canvas");
   var capEl = document.querySelector(".cap");
   var capName = capEl.querySelector(".cap-name"), capMeta = capEl.querySelector(".cap-meta");
-  var countEl = document.querySelector(".count");
   var loaderEl = document.getElementById("loader");
   var lCount = loaderEl.querySelector(".l-count"), lBar = loaderEl.querySelector(".l-bar");
 
@@ -501,7 +539,7 @@
   window.addEventListener("blur", function(){ pointer.in = false; });
 
   window.addEventListener("wheel", function(e){
-    if(e.ctrlKey || leaving) return;                  /* pinch-zoom */
+    if(e.ctrlKey || leaving || doc.classList.contains("menu-open")) return;   /* pinch-zoom / menu open */
     var d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
     if(e.deltaMode === 1) d *= 16; else if(e.deltaMode === 2) d *= H;
     target += Math.max(-260, Math.min(260, d*1.1));
@@ -510,7 +548,7 @@
 
   document.addEventListener("keydown", function(e){
     if(e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
-    if(e.altKey || e.metaKey || e.ctrlKey || !inst.length) return;
+    if(e.altKey || e.metaKey || e.ctrlKey || !inst.length || doc.classList.contains("menu-open")) return;
     var dir = e.key === "ArrowRight" ? 1 : -1;
     var active = document.activeElement, li = links.indexOf(active);
     if(li >= 0){ links[(li + dir + N) % N].focus(); e.preventDefault(); return; } /* focus handler glides */
@@ -647,7 +685,7 @@
   function playOut(){
     outStarted = true;
     try{ sessionStorage.setItem("shc-intro-seen", "1"); }catch(e){}
-    var real = document.querySelector(".brand img");
+    var real = document.querySelector(".brand .logo-w");
     if(!real || !Element.prototype.animate){ doc.classList.remove("intro-run"); finishIntro(); return; }
     var fade = { duration:300, easing:"cubic-bezier(.25,.46,.45,.94)", fill:"forwards" };
     Array.prototype.forEach.call(loaderEl.querySelectorAll(".l-word,.l-count,.l-bar"), function(el){
@@ -705,7 +743,6 @@
     var w = works[wi];
     capName.textContent = w.name;
     capMeta.textContent = w.cat + " — " + w.meta;
-    countEl.textContent = (wi < 9 ? "0" : "") + (wi + 1) + " / " + (N < 10 ? "0" : "") + N;
   }
 
   /* ---------- Frame loop ---------- */
@@ -794,10 +831,22 @@
   function start(){ if(running) return; running = true; lastT = performance.now(); dirty = true; raf = requestAnimationFrame(loop); }
   function stop(){ running = false; cancelAnimationFrame(raf); }
 
+  /* behind the opaque menu: stop rendering and pause videos (they resume when it closes) */
+  var menuHold = 0;
+  document.addEventListener("shc:menu", function(e){
+    clearTimeout(menuHold);
+    if(e.detail.open){
+      menuHold = setTimeout(function(){             /* after the menu has faded in */
+        if(!doc.classList.contains("menu-open")) return;
+        stop(); works.forEach(function(w){ if(w.video && !w.video.paused) w.video.pause(); });
+      }, 450);
+    }else if(!document.hidden && !lost){ start(); lastSched = 0; }
+  });
+
   /* pause (rendering and videos) while the tab is hidden */
   document.addEventListener("visibilitychange", function(){
     if(document.hidden){ stop(); works.forEach(function(w){ if(w.video && !w.video.paused) w.video.pause(); }); }
-    else if(!lost){ start(); lastSched = 0; }
+    else if(!lost && !doc.classList.contains("menu-open")){ start(); lastSched = 0; }
   });
 
   /* resize: observe, but apply in the next animation frame */
