@@ -59,9 +59,19 @@
   .hdr-left{position:absolute;left:calc(var(--hx) + env(safe-area-inset-left,0px));top:calc(var(--hy) + env(safe-area-inset-top,0px));
     height:var(--hdr);display:flex;align-items:center;gap:16px;pointer-events:auto}
   .hdr-left .hdr-btn{position:static;height:auto}
-  .modeBtn .opt{opacity:.45;transition:opacity .2s}
+  /* wall ⟷ index: an iOS-style switch, a thinner take on the site's floater toggle
+     (.pinfo-toggle: 44×26 track, 22px thumb) sized to sit with the mono labels. */
+  .modeBtn{gap:10px}
+  .modeBtn .opt{opacity:.45;transition:opacity .3s ease}
   .modeBtn .opt.on{opacity:1}
-  .modeBtn .sep{opacity:.35}
+  .modeBtn .sw{position:relative;flex:0 0 auto;width:34px;height:18px;border-radius:9px;
+    background:rgba(120,120,128,0.32);transition:background .3s ease}
+  .modeBtn .sw::before{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;
+    background:var(--paper);box-shadow:0 1px 3px rgba(0,0,0,0.3);transition:transform .3s cubic-bezier(.2,.7,.2,1)}
+  .modeBtn[aria-checked="true"] .sw{background:rgba(237,234,227,0.65)}
+  .modeBtn[aria-checked="true"] .sw::before{transform:translateX(16px)}
+  .modeBtn:focus-visible{outline:none}
+  .modeBtn:focus-visible .sw{outline:1px solid var(--paper);outline-offset:3px}
   .st-count{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.04em;color:var(--edge);display:none}
   .st-count b{font-weight:400;color:var(--paper)}
   body.mode-index .st-count{display:inline}
@@ -218,15 +228,15 @@
   }
 
   @media (prefers-reduced-motion: reduce){
-    .tile,.tile .sharp,.tile .blur,.tile .cap,.viewer,.v-img,.hud-hint,#menu,.vg-media img{transition:none !important}
+    .tile,.tile .sharp,.tile .blur,.tile .cap,.viewer,.v-img,.hud-hint,#menu,.vg-media img,.modeBtn .sw,.modeBtn .sw::before,.modeBtn .opt{transition:none !important}
   }
 </style>
 </head>
 <body>
   <header>
     <div class="hdr-left">
-      <button class="hdr-btn modeBtn" data-act="mode" aria-label="Switch view (wall or index)" aria-pressed="false">
-        <span class="opt opt-wall on">wall</span><span class="sep" aria-hidden="true">/</span><span class="opt opt-index">index</span>
+      <button class="hdr-btn modeBtn" data-act="mode" role="switch" aria-checked="false" aria-label="Index view">
+        <span class="opt opt-wall on" aria-hidden="true">wall</span><span class="sw" aria-hidden="true"></span><span class="opt opt-index" aria-hidden="true">index</span>
       </button>
       <span class="st-count" aria-hidden="true"><b id="st-n">01</b> / <span id="st-total">00</span></span>
     </div>
@@ -1072,7 +1082,7 @@
     document.body.classList.toggle("mode-index", m === "index");
     modeBtn.querySelector(".opt-wall").classList.toggle("on", m === "wall");
     modeBtn.querySelector(".opt-index").classList.toggle("on", m === "index");
-    modeBtn.setAttribute("aria-pressed", m === "index" ? "true" : "false");
+    modeBtn.setAttribute("aria-checked", m === "index" ? "true" : "false");
     if(hovT) unhover(hovT, true);
     if(m === "index"){
       // open the index on whatever cover is nearest the wall's centre
