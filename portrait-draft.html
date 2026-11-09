@@ -12,7 +12,7 @@
 <script>document.documentElement.classList.add("js");</script>
 <!--
   DRAFT — the covers of every Live, Photo-Journalism, Portraiture and Wedding project
-  (plus Butoh Experiment), shown two ways:
+  (plus Butoh Experiment and Zero-Case Policy), shown two ways:
     · WALL  — a draggable, infinite, curved grid of fixed cells (default)
     · INDEX — the Stack Index format (vertical media stack + left title index)
   The header's left button switches between them (#index in the URL opens the index).
@@ -65,6 +65,8 @@
   .st-count{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.04em;color:var(--edge);display:none}
   .st-count b{font-weight:400;color:var(--paper)}
   body.mode-index .st-count{display:inline}
+  /* Logo only appears inside the open menu (the overlay's own .menu-logo); hidden in the header. */
+  header .brandBtn{display:none}
   .brandBtn{position:absolute;left:50%;top:calc(var(--hy) + env(safe-area-inset-top,0px));transform:translateX(-50%);
     background:none;border:none;cursor:pointer;padding:0;line-height:0;pointer-events:auto}
   .logo-img{height:var(--hdr);width:auto;display:block;opacity:.9;transition:opacity .2s}
@@ -286,6 +288,7 @@
   {"nav":"gig-thehope","name":"The Hope","cat":"Live","meta":"Taipei · 2021","full":"/images/Concerts/TheHope_Taipei_2021_cover.jpg","w":1333,"h":2000},
   {"nav":"pt-inmoodforsmoke","name":"In Mood For Smoke","cat":"Portraiture","meta":"Portrait · 2021","full":"/images/portraiture/In-mood-for-smoke_2021-3.jpg","w":1348,"h":2000},
   {"nav":"danieljuny","name":"Daniel and Juny","cat":"Wedding","meta":"Taiwan · 2021","full":"/images/wedding-engagement/DJ-Juny_engagement-04.jpg","w":1333,"h":2000},
+  {"nav":"proj-zerocase","name":"Zero-Case Policy","cat":"Photography","meta":"Performance · 2021","full":"/images/projects/0-case-policy-5.jpg","w":1333,"h":2000},
   {"nav":"pt-tatiana","name":"Tatiana","cat":"Portraiture","meta":"Portrait · 2020","full":"/images/portraiture/tatiana_2021-08.jpg","w":1333,"h":2000},
   {"nav":"gig-mosaic","name":"Mosaic","cat":"Live","meta":"Hollywood · 2018–2020","full":"/images/Concerts/Mosaic_02.jpg","w":1333,"h":2000},
   {"nav":"pj-hkprotest","name":"The Umbrella Movement","cat":"Photo-Journalism","meta":"Hong Kong · 2019","full":"/images/Photo-Journalism/hkProt-06.jpg","w":2000,"h":1333}
@@ -339,6 +342,7 @@
     "landing":"/","projects":"/projects","live":"/live","photojournalism":"/photojournalism",
     "portraiture":"/portraiture","wedding":"/wedding","archive":"/archive","about":"/about","contact":"/contact",
     "proj-butoh":"/project/butoh-experiment",
+    "proj-zerocase":"/project/zero-case-policy",
     "gig-cornelius":"/live/cornelius","gig-someshiitsam":"/live/someshiit-sam",
     "gig-elephantgym":"/live/elephant-gym","gig-hillsong":"/live/hillsong",
     "gig-thehope":"/live/the-hope","gig-mosaic":"/live/mosaic",
