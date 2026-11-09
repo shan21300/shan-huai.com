@@ -4047,7 +4047,11 @@
       if(document.getElementById("loader")) return;
       var menu=document.getElementById("menu");
       if(menu && menu.classList.contains("open")) return;
-      var y=posOf(e.target), dy=y-lastY;
+      var y=posOf(e.target);
+      // landing: the page scroll drives the carousel, so the header stays put
+      var land=document.getElementById("landing");
+      if(land && land.classList.contains("is-active")){ lastY=y; setHidden(false); return; }
+      var dy=y-lastY;
       if(Math.abs(dy)<MIN_DELTA) return;
       setHidden(y>SHOW_ABOVE && dy>0);
       lastY=y;
