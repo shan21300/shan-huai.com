@@ -592,6 +592,12 @@
      has no padding of its own, unlike .proj-detail-wrap), so it's edge-to-edge with
      no breakout trick needed. */
   .hs-layout .hs-hero{width:100%;height:min(88vh,900px);object-fit:cover;display:block}
+  /* FROMETO on phones: show the hero video whole at its native 16:9 instead of
+     cropping it to the tall 88vh box. aspect-ratio reserves the box before the
+     stream attaches, so nothing below shifts. */
+  @media(max-width:860px){
+    #proj-frometo .hs-hero{height:auto;aspect-ratio:16/9}
+  }
   .hs-layout .hs-sec-label{border-top:1px solid var(--line);padding-top:18px;
     margin-bottom:36px;text-align:center}
   .hs-layout .hs-sec-logo{display:block;width:100%;height:auto;margin:0 auto}
