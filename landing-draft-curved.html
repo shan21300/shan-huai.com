@@ -121,13 +121,16 @@
   /* ---------- Intro loader (first visit per session) ---------- */
   #loader{position:fixed;inset:0;z-index:40;background:var(--ink);
     display:flex;align-items:flex-end;justify-content:space-between;
-    padding:calc(var(--py) + 8px) var(--px);transition:opacity .45s ease}
-  #loader.is-done{opacity:0;pointer-events:none}
+    padding:calc(var(--py) + 8px) var(--px)}
   #loader .l-word{font-family:"Cormorant Garamond",serif;font-weight:300;font-size:clamp(26px,3.2vw,40px);line-height:.9}
   #loader .l-count{font-size:clamp(13px,1vw,14px);color:var(--edge);font-variant-numeric:tabular-nums}
   #loader .l-bar{position:absolute;left:0;bottom:0;height:1px;width:100%;background:var(--edge);
     transform-origin:0 50%;transform:scaleX(0)}
   html.no-loader #loader{display:none}
+  /* intro: after 100, the logo appears large in the centre, then shrinks to its spot top-left
+     (a big copy animates over the black and hands over to the real header logo when it lands) */
+  html.intro-run .brand img{opacity:0;transition:none}
+  .logo-fly{position:fixed;z-index:46;pointer-events:none;display:block;will-change:transform,opacity}
 
   /* leaving for a project page */
   #veil{position:fixed;inset:0;z-index:45;background:var(--ink);opacity:0;pointer-events:none;transition:opacity .32s ease}
@@ -150,7 +153,7 @@
   (function(){
     var d=document.documentElement, reduce=matchMedia("(prefers-reduced-motion: reduce)").matches, seen=false;
     try{ seen = sessionStorage.getItem("shc-intro-seen")==="1"; }catch(e){}
-    if(reduce || seen) d.classList.add("no-loader");
+    if(reduce || seen) d.classList.add("no-loader"); else d.classList.add("intro-run");
     if(!reduce) d.classList.add("gl"); /* removed again if WebGL is unavailable */
   })();
 </script>
@@ -244,7 +247,7 @@
   var stripOn = false;
   function useStrip(){
     if(stripOn) return; stripOn = true;
-    doc.classList.remove("gl");
+    doc.classList.remove("gl", "intro-run");
     doc.classList.add("no-loader");
     links.forEach(function(a){
       var img = a.querySelector("img");
@@ -637,11 +640,42 @@
   var useLoader = !doc.classList.contains("no-loader");
   var t0 = now(), introDone = !useLoader, firstVisible = null, shownPct = 0;
   var MIN_MS = 800, MAX_MS = 1600;
+  var outStarted = false;
+  /* Same sequence and timings as the live site's GSAP intro, with the Web Animations API:
+     counter out (0.3s) → big logo fades in, centred (0.5s) → short hold → it shrinks and
+     glides to the header, top-left (0.9s) → the black lifts as it lands (0.6s). */
+  function playOut(){
+    outStarted = true;
+    try{ sessionStorage.setItem("shc-intro-seen", "1"); }catch(e){}
+    var real = document.querySelector(".brand img");
+    if(!real || !Element.prototype.animate){ doc.classList.remove("intro-run"); finishIntro(); return; }
+    var fade = { duration:300, easing:"cubic-bezier(.25,.46,.45,.94)", fill:"forwards" };
+    Array.prototype.forEach.call(loaderEl.querySelectorAll(".l-word,.l-count,.l-bar"), function(el){
+      el.animate([{ opacity:1 }, { opacity:0 }], fade);
+    });
+    var rest = real.getBoundingClientRect();
+    var aspect = real.naturalWidth && real.naturalHeight ? real.naturalWidth/real.naturalHeight : 1918/3696;
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var bigH = Math.min(vh*0.42, 460, vw*0.62/aspect), bigW = bigH*aspect;   /* drawn big, so it only ever scales down (stays sharp) */
+    var fly = document.createElement("img");
+    fly.src = real.currentSrc || real.src; fly.alt = ""; fly.className = "logo-fly";
+    fly.style.cssText = "left:" + (vw - bigW)/2 + "px;top:" + (vh - bigH)/2 + "px;width:" + bigW + "px;height:" + bigH + "px;opacity:0";
+    document.body.appendChild(fly);
+    var dx = rest.left + rest.width/2 - vw/2, dy = rest.top + rest.height/2 - vh/2, sc = rest.height/bigH;
+    fly.animate([{ opacity:0 }, { opacity:1 }], { duration:500, delay:200, easing:"cubic-bezier(.25,.46,.45,.94)", fill:"forwards" });
+    var move = fly.animate([
+      { transform:"translate(0px,0px) scale(1)" },
+      { transform:"translate(" + dx + "px," + dy + "px) scale(" + sc + ")" }
+    ], { duration:900, delay:850, easing:"cubic-bezier(.645,.045,.355,1)", fill:"forwards" });
+    setTimeout(finishIntro, 1400);                 /* the black starts lifting 0.35s before the logo lands */
+    var land = function(){ doc.classList.remove("intro-run"); if(fly.parentNode) fly.parentNode.removeChild(fly); };
+    if(move.finished) move.finished.then(land, land); else setTimeout(land, 1750);
+  }
   function finishIntro(){
     introDone = true;
-    try{ sessionStorage.setItem("shc-intro-seen", "1"); }catch(e){}
-    loaderEl.classList.add("is-done");
-    setTimeout(function(){ loaderEl.style.display = "none"; }, 500);
+    var lift = loaderEl.animate ? loaderEl.animate([{ opacity:1 }, { opacity:0 }], { duration:600, easing:"cubic-bezier(.25,.46,.45,.94)", fill:"forwards" }) : null;
+    loaderEl.style.pointerEvents = "none";
+    setTimeout(function(){ loaderEl.style.display = "none"; }, lift ? 620 : 0);
     /* frames develop left → right */
     var at = now() + 120;
     var order = inst.map(function(p, k){ return k; }).sort(function(a, b){ return x0Of(a) - x0Of(b); })
@@ -651,7 +685,7 @@
     dirty = true;
   }
   function tickIntro(t){
-    if(introDone) return;
+    if(introDone || outStarted) return;
     if(!firstVisible && inst.length) firstVisible = visibleWorks();
     var ready = 0; (firstVisible || []).forEach(function(w){ if(w.state === 3 || w.state === -1) ready++; });
     var real = firstVisible && firstVisible.length ? ready/firstVisible.length : 1;
@@ -661,7 +695,7 @@
     var n = Math.round(shownPct*100);
     lCount.textContent = (n < 10 ? "00" : n < 100 ? "0" : "") + n;
     lBar.style.transform = "scaleX(" + shownPct.toFixed(3) + ")";
-    if(shownPct >= 1) finishIntro();
+    if(shownPct >= 1) playOut();
   }
 
   /* ---------- Caption ---------- */
