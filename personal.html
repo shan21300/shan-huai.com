@@ -28,6 +28,8 @@
     --hdr:clamp(75px,7.5vw,102px);
     --hx:clamp(48px,8vw,110px);
     --hy:clamp(14px,2vw,26px);
+    /* logo spot shared with index.html: top-left on every page */
+    --cc-px:clamp(16px,2.6vw,40px);--cc-py:clamp(14px,2vw,26px);--cc-logo:clamp(40px,3.6vw,52px);
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{height:100%}
@@ -54,9 +56,10 @@
     font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.12em;text-transform:lowercase;
     padding:4px 0;pointer-events:auto;opacity:.9}
   .hdr-btn:hover{opacity:1}
-  .menuBtn{right:calc(var(--hx) + env(safe-area-inset-right,0px))}
-  .hdr-left{position:absolute;left:calc(var(--hx) + env(safe-area-inset-left,0px));top:calc(var(--hy) + env(safe-area-inset-top,0px));
-    height:var(--hdr);display:flex;align-items:center;gap:16px;pointer-events:auto}
+  .menuBtn{display:none}   /* the logo is the menu button, as on the rest of the site */
+  /* wall ⟷ index switch: top-right (the logo has the top-left corner) */
+  .hdr-left{position:absolute;right:calc(var(--cc-px) + env(safe-area-inset-right,0px));top:calc(var(--cc-py) + env(safe-area-inset-top,0px));
+    height:var(--cc-logo);display:flex;align-items:center;gap:16px;pointer-events:auto}
   .hdr-left .hdr-btn{position:static;height:auto}
   /* wall ⟷ index: an iOS-style switch, a thinner take on the site's floater toggle
      (.pinfo-toggle: 44×26 track, 22px thumb) sized to sit with the mono labels. */
@@ -71,12 +74,20 @@
   .modeBtn[aria-checked="true"] .sw::before{transform:translateX(16px)}
   .modeBtn:focus-visible{outline:none}
   .modeBtn:focus-visible .sw{outline:1px solid var(--paper);outline-offset:3px}
-  /* Logo only appears inside the open menu (the overlay's own .menu-logo); hidden in the header. */
-  header .brandBtn{display:none}
-  .brandBtn{position:absolute;left:50%;top:calc(var(--hy) + env(safe-area-inset-top,0px));transform:translateX(-50%);
+  /* The logo: top-left at the same spot as index.html, and the menu button. It stays put over
+     the open menu (black there); the menu's own centred logo and "close" are hidden. */
+  .brandBtn{position:absolute;left:calc(var(--cc-px) + env(safe-area-inset-left,0px));top:calc(var(--cc-py) + env(safe-area-inset-top,0px));
     background:none;border:none;cursor:pointer;padding:0;line-height:0;pointer-events:auto}
-  .logo-img{height:var(--hdr);width:auto;display:block;opacity:.9;transition:opacity .2s}
-  .logo-img:hover{opacity:1}
+  .brandBtn .logo-img{height:var(--cc-logo);width:auto;display:block;opacity:.9;transition:opacity .35s ease}
+  .brandBtn .logo-img-b{position:absolute;left:0;top:0;height:var(--cc-logo);width:auto;opacity:0;transition:opacity .35s ease}
+  .brandBtn:hover .logo-img{opacity:1}
+  body.menu-is-open header{z-index:80}
+  body.menu-is-open header::before{display:none}
+  body.menu-is-open .hdr-left{visibility:hidden}
+  body.menu-is-open .brandBtn .logo-img{opacity:0}
+  body.menu-is-open .brandBtn .logo-img-b{opacity:.92}
+  body.menu-is-open .brandBtn:focus-visible{outline-color:var(--ink)}
+  #menu .menu-close,#menu .menu-logo{display:none}
   @media(max-width:768px){
     :root{--hdr:56px;--hx:20px}
   }
@@ -258,7 +269,7 @@
         <span class="opt opt-wall on" aria-hidden="true">wall</span><span class="sw" aria-hidden="true"></span><span class="opt opt-index" aria-hidden="true">index</span>
       </button>
     </div>
-    <button class="brandBtn" data-nav="landing" aria-label="Home"><img src="/images/system/shanhuailogoinversed_white.png" alt="Shan-Huai" class="logo-img"></button>
+    <button class="brandBtn" data-act="menu-toggle" aria-label="Open menu" aria-controls="menu" aria-expanded="false"><img src="/images/system/shanhuailogoinversed_white.png" alt="Shan-Huai" class="logo-img"><img src="/images/system/shanhuailogoinversed_black.png" alt="" class="logo-img-b" aria-hidden="true" loading="lazy"></button>
     <button class="hdr-btn menuBtn" data-menu-open aria-label="Menu" aria-controls="menu" aria-expanded="false">menu</button>
   </header>
 
@@ -335,6 +346,7 @@
     <div class="menu-cats">
       <!-- Navigation is Commercial / Personal for now. The earlier page links stay below,
            hidden (not deleted), so they can be brought back by removing "hidden". -->
+      <button class="m-link m-home" data-nav="landing">home</button>
       <span class="m-link m-soon" aria-disabled="true">commercial</span>
       <a class="m-link" href="/personal" aria-current="page">personal</a>
       <button class="m-link" data-nav="projects" hidden>project</button>
@@ -1219,9 +1231,14 @@
   });
 
   /* ---------- Menu ---------- */
-  var menu = document.getElementById("menu"), menuBtn = document.querySelector("[data-menu-open]");
-  function openMenu(){ Stack.clearHover(); menu.classList.add("open"); menuOpen = true; menuBtn.setAttribute("aria-expanded", "true"); menu.querySelector(".menu-close").focus(); }
-  function closeMenu(){ menu.classList.remove("open"); menuOpen = false; menuBtn.setAttribute("aria-expanded", "false"); dirty = true; Stack.kick(); menuBtn.focus(); }
+  var menu = document.getElementById("menu"), menuBtn = document.querySelector("header .brandBtn");   /* the logo */
+  function firstMenuItem(){ var c = menu.querySelectorAll("a[href],button"); for(var i = 0; i < c.length; i++){ if(c[i].offsetParent) return c[i]; } return null; }
+  function openMenu(){ Stack.clearHover(); menu.classList.add("open"); menuOpen = true; document.body.classList.add("menu-is-open");
+    menuBtn.setAttribute("aria-expanded", "true"); menuBtn.setAttribute("aria-label", "Close menu");
+    var f = firstMenuItem(); if(f) f.focus(); }
+  function closeMenu(){ menu.classList.remove("open"); menuOpen = false; document.body.classList.remove("menu-is-open");
+    menuBtn.setAttribute("aria-expanded", "false"); menuBtn.setAttribute("aria-label", "Open menu");
+    dirty = true; Stack.kick(); menuBtn.focus(); }
 
   /* ---------- One delegated click handler (data-nav / data-act) ---------- */
   var ACTS = {
@@ -1229,6 +1246,7 @@
     "next": function(){ showItem(vi + 1); },
     "close": closeViewer,
     "menu-close": closeMenu,
+    "menu-toggle": function(){ if(menuOpen) closeMenu(); else openMenu(); },
     "mode": function(){ setMode(mode === "wall" ? "index" : "wall", true); }
   };
   document.addEventListener("click", function(e){
@@ -1244,8 +1262,9 @@
   });
 
   /* ---------- Global keys ---------- */
-  function trap(container, e){
+  function trap(container, e, extra){
     var f = [].filter.call(container.querySelectorAll("button,a[href]"), function(x){ return !x.hidden && x.offsetParent !== null; });
+    if(extra) f.unshift(extra);
     if(!f.length) return;
     var first = f[0], lastEl = f[f.length - 1];
     if(e.shiftKey && document.activeElement === first){ e.preventDefault(); lastEl.focus(); }
@@ -1261,7 +1280,7 @@
     }
     if(menuOpen){
       if(e.key === "Escape"){ e.preventDefault(); closeMenu(); }
-      else if(e.key === "Tab") trap(menu, e);
+      else if(e.key === "Tab") trap(menu, e, menuBtn);
       return;
     }
     if(mode === "index") Stack.key(e);
