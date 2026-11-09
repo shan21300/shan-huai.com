@@ -8,7 +8,7 @@
   CURVED CAROUSEL LANDING — draft for shan-huai.com (standalone; not linked from index.html)
 
   A looping row of project frames on an asymmetric bend (flat on the left, rising toward
-  the right edge) with a horizontal streak blur at both screen edges, drawn by a small
+  the right edge) with a liquid sideways drag of the image at both screen edges, drawn by a small
   WebGL renderer. Scroll, drag or swipe to browse; clicking a frame opens the project at
   its normal site URL (/project/…, /live/…, …), which index.html's router deep-links.
   Every frame is cropped to 3:4 (portrait) or 4:3 (landscape). Projects with a
@@ -304,29 +304,25 @@
     "  vUV = aUV;",
     "}"].join("\n");
   var FS = [
-    "precision mediump float;",
-    "uniform sampler2D uTex; uniform vec4 uCrop; uniform vec2 uRes, uEdge;",
-    "uniform float uAlpha, uDim, uReveal, uFocus, uFrameW, uBlurPx, uEdgeL, uEdgeR;",
+    "#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#endif",
+    "uniform sampler2D uTex; uniform vec4 uCrop; uniform vec2 uRes, uEdge, uScr;",
+    "uniform float uAlpha, uDim, uReveal, uFocus, uFx0, uFw, uZone, uK, uFcy, uFh, uFa, uFp;",
     "varying vec2 vUV;",
-    "vec3 tex(vec2 uv){ return texture2D(uTex, uCrop.xy + clamp(uv, 0.0, 1.0)*uCrop.zw).rgb; }",
     "void main(){",
-    "  float sx = gl_FragCoord.x/uRes.x;",
-    /* streak blur near the screen edges: horizontal taps pulled from the inner side */
-    "  float bl = smoothstep(uEdgeL, 0.0, sx), br = smoothstep(uEdgeR, 1.0, sx);",
-    "  float amt = max(bl*bl, br*br);",
-    "  float dir = bl > br ? 1.0 : -1.0;",
-    "  vec3 c;",
-    "  if(amt < 0.003){ c = tex(vUV); }",
-    "  else {",
-    "    float spread = amt*uBlurPx/uFrameW;",
-    "    vec3 acc = vec3(0.0); float ws = 0.0;",
-    "    for(int i = 0; i < 16; i++){",
-    "      float t = float(i)/15.0;",
-    "      float wt = 1.0 - 0.65*t;",
-    "      acc += tex(vUV + vec2((t*1.2 - 0.2)*spread*dir, 0.0))*wt; ws += wt;",
-    "    }",
-    "    c = acc/ws;",
-    "  }",
+    /* Liquid edge drag: inside the outer zone on each side, the image is sampled from a
+       point pulled back toward the zone's inner line, so content smears outward smoothly
+       (one continuous warp, no blended copies). The frame's outline is untouched. */
+    "  float s = gl_FragCoord.x/uRes.x*uScr.x;",            /* screen x, CSS px */
+    "  float z = uZone, sp = s;",
+    "  if(s < z){ float t = (z - s)/z; sp = z - z*(1.0 - exp(-uK*t))/uK; }",
+    "  else if(s > uScr.x - z){ float t = (s - uScr.x + z)/z; sp = uScr.x - z + z*(1.0 - exp(-uK*t))/uK; }",
+    "  float u = clamp((sp - uScr.x*0.5 - uFx0)/uFw, 0.0, 1.0);",
+    /* vertical position computed per pixel from the same bend as the vertex shader
+       (interpolating it per triangle leaves sawtooth steps that the edge drag magnifies) */
+    "  float yy = (1.0 - gl_FragCoord.y/uRes.y)*uScr.y;",
+    "  float sc = 1.0 + uFa*pow(clamp(s/uScr.x, 0.0, 1.25), uFp);",
+    "  float v = clamp(0.5 + (yy - uFcy)/(uFh*sc), 0.0, 1.0);",
+    "  vec3 c = texture2D(uTex, uCrop.xy + vec2(u, v)*uCrop.zw).rgb;",
     "  vec3 ink = vec3(0.043, 0.043, 0.047);",
     "  c = mix(vec3(0.082, 0.082, 0.086), c, uAlpha);",
     "  float l = dot(c, vec3(0.299, 0.587, 0.114));",
@@ -350,7 +346,7 @@
     gl.linkProgram(prog);
     if(!gl.getProgramParameter(prog, gl.LINK_STATUS) && !gl.isContextLost()) throw new Error(gl.getProgramInfoLog(prog));
     gl.useProgram(prog);
-    ["uView","uX0","uW","uH","uCy","uA","uP","uTex","uCrop","uRes","uEdge","uAlpha","uDim","uReveal","uFocus","uFrameW","uBlurPx","uEdgeL","uEdgeR"]
+    ["uView","uX0","uW","uH","uCy","uA","uP","uTex","uCrop","uRes","uEdge","uAlpha","uDim","uReveal","uFocus","uZone","uK","uScr","uFx0","uFw","uFcy","uFh","uFa","uFp"]
       .forEach(function(n){ U[n] = gl.getUniformLocation(prog, n); });
     var v = [];
     for(var s = 0; s <= SEG; s++){ v.push(s/SEG, 0, s/SEG, 1); }
@@ -390,7 +386,7 @@
   if(!gl){ useStrip(); return; }
 
   /* ---------- Layout: frame sizes and the bend ---------- */
-  var W = 0, H = 0, dpr = 1, cy = 0, baseH = 0, gap = 0, A = 1, P = 3.4, blurPx = 80;
+  var W = 0, H = 0, dpr = 1, cy = 0, baseH = 0, gap = 0, A = 1, P = 3.4, zone = 160, K = 3.2;
   var inst = [], L = 1;   /* instances: {w: work, s: track start, len: width} — the list repeats if it is too short */
   function bend(sx){ var u = Math.max(0, Math.min(1.25, sx/W)); return 1 + A*Math.pow(u, P); }
   function layout(){
@@ -405,7 +401,8 @@
     baseH = narrow ? Math.min(H*0.21, W*0.44) : mid ? Math.min(H*0.27, W*0.3) : Math.min(H*0.34, W*0.215);
     baseH = Math.min(baseH, (H - 150)/(1 + A));
     gap = Math.max(8, Math.min(12, W*0.0075));
-    blurPx = Math.max(40, Math.min(110, W*0.065));
+    zone = Math.max(48, Math.min(200, W*0.11));   /* width of the liquid edge on each side */
+    K = 3.2;                                        /* how hard it drags: ~25x stretch at the very edge */
     cy = H*0.49;
     inst = []; var s = 0, rep = 0;
     do{
@@ -627,10 +624,11 @@
   function uploadVideo(w){
     var v = w.video;
     if(v.readyState < 2 || !v.videoWidth) return false;
-    if(!w.vtex){ w.vtex = newTex(false); }
+    if(!w.vtex){ w.vtex = newTex(isGL2); }
     else gl.bindTexture(gl.TEXTURE_2D, w.vtex);
     try{ gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, v); }
     catch(err){ w.vState = -1; return false; }               /* e.g. a cross-origin refusal: keep the cover */
+    if(isGL2) gl.generateMipmap(gl.TEXTURE_2D);              /* no shimmer when a 720p video is drawn small */
     w.vcrop = cropFor(w, v.videoWidth, v.videoHeight);
     return true;
   }
@@ -732,10 +730,10 @@
   function render(t){
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.uniform2f(U.uView, W, H); gl.uniform2f(U.uRes, canvas.width, canvas.height);
+    gl.uniform2f(U.uView, W, H); gl.uniform2f(U.uScr, W, H); gl.uniform2f(U.uRes, canvas.width, canvas.height);
     gl.uniform1f(U.uCy, cy); gl.uniform1f(U.uA, A); gl.uniform1f(U.uP, P);
-    gl.uniform1f(U.uH, baseH); gl.uniform1f(U.uBlurPx, blurPx);
-    gl.uniform1f(U.uEdgeL, 0.13); gl.uniform1f(U.uEdgeR, 0.86);
+    gl.uniform1f(U.uH, baseH); gl.uniform1f(U.uZone, zone); gl.uniform1f(U.uK, K);
+    gl.uniform1f(U.uFcy, cy); gl.uniform1f(U.uFh, baseH); gl.uniform1f(U.uFa, A); gl.uniform1f(U.uFp, P);
     gl.activeTexture(gl.TEXTURE0);
     for(var k = 0; k < inst.length; k++){
       var p = inst[k], x0 = x0Of(k);
@@ -749,7 +747,7 @@
       }
       gl.bindTexture(gl.TEXTURE_2D, tex || blankTex);
       gl.uniform4f(U.uCrop, crop[0], crop[1], crop[2], crop[3]);
-      gl.uniform1f(U.uX0, x0); gl.uniform1f(U.uW, p.len); gl.uniform1f(U.uFrameW, p.len);
+      gl.uniform1f(U.uX0, x0); gl.uniform1f(U.uW, p.len); gl.uniform1f(U.uFx0, x0); gl.uniform1f(U.uFw, p.len);
       gl.uniform1f(U.uAlpha, alpha);
       gl.uniform1f(U.uDim, w.dim); gl.uniform1f(U.uFocus, w.focus);
       gl.uniform1f(U.uReveal, reveal(w, t));
