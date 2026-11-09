@@ -7,10 +7,13 @@
 <!--
   CURVED CAROUSEL LANDING — draft for shan-huai.com (standalone; not linked from index.html)
 
-  A looping row of project frames on a gently concave curve, drawn by a small WebGL
-  renderer (no libraries). Scroll, drag or swipe to browse; clicking a frame opens the
-  project at its normal site URL (/project/…, /live/…, …), which index.html's router
-  deep-links. Frames keep each image's own aspect ratio, so widths vary.
+  A looping row of project frames on an asymmetric bend (flat on the left, rising toward
+  the right edge) with a horizontal streak blur at both screen edges, drawn by a small
+  WebGL renderer. Scroll, drag or swipe to browse; clicking a frame opens the project at
+  its normal site URL (/project/…, /live/…, …), which index.html's router deep-links.
+  Every frame is cropped to 3:4 (portrait) or 4:3 (landscape). Projects with a
+  data-stream id play their Cloudflare Stream video inside the bend (hls.js is loaded
+  only when one comes near; Safari/iOS use native HLS); the still cover shows until then.
 
   - The project list is the <ol class="works"> below: real links, in newest-first order.
     The script reads everything (href, size, thumbnail) from those links.
@@ -51,18 +54,6 @@
   a{color:inherit}
   .mono{font-family:"IBM Plex Mono",monospace;font-weight:400;letter-spacing:.04em}
 
-  /* Aperture cursor (desktop only), as on index.html */
-  #cursor-aperture{position:fixed;top:0;left:0;width:24px;height:24px;margin:-12px 0 0 -12px;
-    pointer-events:none;z-index:9999;
-    background:url('/images/system/aperuture_cursor.png') center/contain no-repeat;
-    filter:invert(1);mix-blend-mode:difference;will-change:transform;display:none;opacity:0;
-    transition:scale .3s cubic-bezier(.2,.7,.2,1),opacity .2s}
-  #cursor-aperture.hover{scale:1.75}
-  #cursor-aperture.is-on{opacity:1}
-  @media(hover:hover) and (pointer:fine){
-    html.gl, html.gl *{cursor:none !important}
-    html.gl #cursor-aperture{display:block}
-  }
 
   /* ---------- Top bar ---------- */
   .top{position:fixed;top:0;left:0;right:0;z-index:20;pointer-events:none;
@@ -102,6 +93,7 @@
     -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
   .stage canvas{display:block;width:100%;height:100%}
   html:not(.gl) .stage{display:none}
+  html.gl .stage{cursor:grab}
   html.gl .stage.is-over{cursor:pointer}
   html.gl .stage.is-dragging{cursor:grabbing}
 
@@ -119,7 +111,8 @@
     scrollbar-width:thin;scrollbar-color:var(--line) transparent}
   html:not(.gl) .works li{flex:none;scroll-snap-align:start}
   html:not(.gl) .work{display:block;text-decoration:none}
-  html:not(.gl) .work img{display:block;height:min(52vh,60vw);width:auto;background:#151516}
+  html:not(.gl) .work img{display:block;height:min(52vh,60vw);width:auto;aspect-ratio:4 / 3;object-fit:cover;background:#151516}
+  html:not(.gl) .work.is-port img{aspect-ratio:3 / 4}
   html:not(.gl) .work:focus-visible{outline-offset:3px}
   .work-name{display:block;font-family:"Cormorant Garamond",serif;font-weight:300;font-size:19px;margin-top:10px}
   .work-meta{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-top:3px}
@@ -169,7 +162,6 @@
     <span class="l-bar"></span>
   </div>
   <div id="veil" aria-hidden="true"></div>
-  <div id="cursor-aperture" aria-hidden="true"></div>
 
   <header class="top">
     <a class="brand" href="/" aria-label="Shan-Huai — home"><img src="/images/system/shanhuailogoinversed_white.png" alt="" width="1918" height="3696"></a>
@@ -188,15 +180,15 @@
     <div class="stage" aria-hidden="true"><canvas></canvas></div>
 
     <ol class="works" aria-label="Selected work, newest first">
-      <li><a class="work" href="/project/sub" data-nav="proj-sub" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-sub.webp" width="1200" height="800" alt="SUB"><span class="work-name">SUB</span><span class="work-meta">Branding — Local Remote · 2026</span></a></li>
-      <li><a class="work" href="/project/heysong-sarsaparilla" data-nav="proj-heysong" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-heysong.webp" width="1422" height="800" alt="黑松沙士"><span class="work-name">黑松沙士</span><span class="work-meta">Branding — Local Remote · 2026</span></a></li>
-      <li><a class="work" href="/project/frometo" data-nav="proj-frometo" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-frometo.webp" width="1422" height="800" alt="FROMETO"><span class="work-name">FROMETO</span><span class="work-meta">Branding — Local Remote · 2026</span></a></li>
+      <li><a class="work" href="/project/sub" data-nav="proj-sub" data-stream="e997d71eb8270f43dddcebf6eeefa9fa" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-sub.webp" width="1200" height="800" alt="SUB"><span class="work-name">SUB</span><span class="work-meta">Branding — Local Remote · 2026</span></a></li>
+      <li><a class="work" href="/project/heysong-sarsaparilla" data-nav="proj-heysong" data-stream="0b36c9ded9204e7376cbc535b745884f" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-heysong.webp" width="1422" height="800" alt="黑松沙士"><span class="work-name">黑松沙士</span><span class="work-meta">Branding — Local Remote · 2026</span></a></li>
+      <li><a class="work" href="/project/frometo" data-nav="proj-frometo" data-stream="5d5a347fdc546fa2904564d13861d576" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-frometo.webp" width="1422" height="800" alt="FROMETO"><span class="work-name">FROMETO</span><span class="work-meta">Branding — Local Remote · 2026</span></a></li>
       <li><a class="work" href="/project/local-local-park" data-nav="proj-locallocalpark" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-locallocalpark.webp" width="1200" height="800" alt="Local Local Park"><span class="work-name">Local Local Park</span><span class="work-meta">Branding — Local Remote · 2026</span></a></li>
       <li><a class="work" href="/live/cornelius" data-nav="gig-cornelius" data-cat="Live" data-meta="Chillout Music Festival · 2025"><img data-src="/images/carousel/gig-cornelius.webp" width="533" height="800" alt="Cornelius"><span class="work-name">Cornelius</span><span class="work-meta">Live — Chillout Music Festival · 2025</span></a></li>
       <li><a class="work" href="/live/someshiit-sam" data-nav="gig-someshiitsam" data-cat="Live" data-meta="Chillout Music Festival · 2025"><img data-src="/images/carousel/gig-someshiitsam.webp" width="533" height="800" alt="someshiit 山姆"><span class="work-name">someshiit 山姆</span><span class="work-meta">Live — Chillout Music Festival · 2025</span></a></li>
       <li><a class="work" href="/wedding/julian-and-judy" data-nav="julianjudy" data-cat="Wedding" data-meta="Engagement Session · 2025"><img data-src="/images/carousel/julianjudy.webp" width="1200" height="800" alt="Julian and Judy"><span class="work-name">Julian and Judy</span><span class="work-meta">Wedding — Engagement Session · 2025</span></a></li>
       <li><a class="work" href="/live/elephant-gym" data-nav="gig-elephantgym" data-cat="Live" data-meta="Bristol · 2024"><img data-src="/images/carousel/gig-elephantgym.webp" width="533" height="800" alt="Elephant Gym"><span class="work-name">Elephant Gym</span><span class="work-meta">Live — Bristol · 2024</span></a></li>
-      <li><a class="work" href="/archive/girlfriend" data-nav="girlfriend" data-cat="Archive" data-meta="PDP Year 2 Music Video · 2024"><img data-src="/images/carousel/girlfriend.webp" width="1422" height="800" alt="Girlfriend"><span class="work-name">Girlfriend</span><span class="work-meta">Archive — PDP Year 2 Music Video · 2024</span></a></li>
+      <li><a class="work" href="/archive/girlfriend" data-nav="girlfriend" data-stream="bd75fdf49d96c125ba7dc1fcdc705fd5" data-cat="Archive" data-meta="PDP Year 2 Music Video · 2024"><img data-src="/images/carousel/girlfriend.webp" width="1422" height="800" alt="Girlfriend"><span class="work-name">Girlfriend</span><span class="work-meta">Archive — PDP Year 2 Music Video · 2024</span></a></li>
       <li><a class="work" href="/project/butoh-experiment" data-nav="proj-butoh" data-cat="Performance" data-meta="Central Saint Martins · 2023"><img data-src="/images/carousel/proj-butoh.webp" width="533" height="800" alt="Butoh Experiment"><span class="work-name">Butoh Experiment</span><span class="work-meta">Performance — Central Saint Martins · 2023</span></a></li>
       <li><a class="work" href="/photojournalism/kenya-slum" data-nav="pj-kenyaslum" data-cat="Photo-Journalism" data-meta="Nairobi · 2023"><img data-src="/images/carousel/pj-kenyaslum.webp" width="1200" height="800" alt="Kenya Slum"><span class="work-name">Kenya Slum</span><span class="work-meta">Photo-Journalism — Nairobi · 2023</span></a></li>
       <li><a class="work" href="/portraiture/untitled-sketch" data-nav="pt-untitledsketch" data-cat="Portraiture" data-meta="Taipei · 2023"><img data-src="/images/carousel/pt-untitledsketch.webp" width="533" height="800" alt="Untitled Sketch"><span class="work-name">Untitled Sketch</span><span class="work-meta">Portraiture — Taipei · 2023</span></a></li>
@@ -222,9 +214,14 @@
   "use strict";
   var doc = document.documentElement;
   var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var finePointer = matchMedia("(hover:hover) and (pointer:fine)").matches;
   var links = Array.prototype.slice.call(document.querySelectorAll(".works .work"));
   var N = links.length;
+
+  /* every frame is 3:4 (portrait) or 4:3 (landscape), centre-cropped */
+  links.forEach(function(a){
+    var img = a.querySelector("img");
+    if(+img.getAttribute("width") < +img.getAttribute("height")) a.classList.add("is-port");
+  });
 
   /* ---------- Shared: data-nav delegation (leave with a short fade) ---------- */
   var leaving = false, leaveWork = -1;
@@ -244,7 +241,9 @@
   });
 
   /* ---------- Fallback / reduced motion: a plain, natively scrolling strip ---------- */
+  var stripOn = false;
   function useStrip(){
+    if(stripOn) return; stripOn = true;
     doc.classList.remove("gl");
     doc.classList.add("no-loader");
     links.forEach(function(a){
@@ -270,44 +269,70 @@
   var countEl = document.querySelector(".count");
   var loaderEl = document.getElementById("loader");
   var lCount = loaderEl.querySelector(".l-count"), lBar = loaderEl.querySelector(".l-bar");
-  var cursorEl = document.getElementById("cursor-aperture");
 
   var works = links.map(function(a, i){
     var img = a.querySelector("img");
+    var src = (+img.getAttribute("width")) / (+img.getAttribute("height"));
     return {
       i:i, a:a, name: img.alt, cat: a.getAttribute("data-cat"), meta: a.getAttribute("data-meta"),
-      src: img.getAttribute("data-src"), aspect: (+img.getAttribute("width")) / (+img.getAttribute("height")),
-      img:null, state:0 /*0 none,1 loading,2 decoded,3 uploaded*/, tex:null,
+      src: img.getAttribute("data-src"), stream: a.getAttribute("data-stream"),
+      aspect: src >= 1 ? 4/3 : 3/4,
+      img:null, state:0 /*0 none,1 loading,2 decoded,3 uploaded,-1 failed*/, tex:null, crop:[0,0,1,1],
+      video:null, vtex:null, vcrop:null, vState:0 /*0 none,1 starting,2 playing,-1 failed*/, vFresh:false, vAlpha:0,
       alpha:0, dim:0, focus:0, revealAt:0
     };
   });
+  /* centre crop of a source (sw×sh) to the frame's 3:4 / 4:3: [offsetU, offsetV, scaleU, scaleV] */
+  function cropFor(w, sw, sh){
+    var s = sw/sh, t = w.aspect;
+    if(!sw || !sh) return [0,0,1,1];
+    if(s > t){ var k = t/s; return [(1-k)/2, 0, k, 1]; }
+    var m = s/t; return [0, (1-m)/2, 1, m];
+  }
 
-  var gl = null, prog = null, buf = null, blankTex = null, U = {}, SEG = 40;
+  var gl = null, prog = null, buf = null, blankTex = null, U = {}, SEG = 48, isGL2 = false;
   var VS = [
     "attribute vec2 aUV;",
-    "uniform vec2 uView; uniform float uR, uD, uX0, uW, uH, uCy, uMaxT;",
+    "uniform vec2 uView; uniform float uX0, uW, uH, uCy, uA, uP;",
     "varying vec2 vUV;",
     "void main(){",
-    "  float th = clamp((uX0 + aUV.x*uW)/uR, -uMaxT, uMaxT);",
-    "  float X = uR*sin(th);",
-    "  float depth = uD - uR*(1.0 - cos(th));",
-    "  float w = depth/uD;",
-    "  float Y = (aUV.y - 0.5)*uH;",
-    /* homogeneous w = depth/D gives the perspective divide and perspective-correct UVs */
-    "  gl_Position = vec4(2.0*X/uView.x, (1.0 - 2.0*uCy/uView.y)*w - 2.0*Y/uView.y, 0.0, w);",
+    "  float x = uView.x*0.5 + uX0 + aUV.x*uW;",          /* widths stay constant across the screen… */
+    "  float u = clamp(x/uView.x, 0.0, 1.25);",
+    "  float s = 1.0 + uA*pow(u, uP);",                    /* …height is flat on the left and rises to the right */
+    "  float y = uCy + (aUV.y - 0.5)*uH*s;",
+    "  gl_Position = vec4(x/uView.x*2.0 - 1.0, 1.0 - y/uView.y*2.0, 0.0, 1.0);",
     "  vUV = aUV;",
     "}"].join("\n");
   var FS = [
     "precision mediump float;",
-    "uniform sampler2D uTex; uniform float uAlpha, uDim, uReveal, uFocus; uniform vec2 uEdge;",
+    "uniform sampler2D uTex; uniform vec4 uCrop; uniform vec2 uRes, uEdge;",
+    "uniform float uAlpha, uDim, uReveal, uFocus, uFrameW, uBlurPx, uEdgeL, uEdgeR;",
     "varying vec2 vUV;",
+    "vec3 tex(vec2 uv){ return texture2D(uTex, uCrop.xy + clamp(uv, 0.0, 1.0)*uCrop.zw).rgb; }",
     "void main(){",
+    "  float sx = gl_FragCoord.x/uRes.x;",
+    /* streak blur near the screen edges: horizontal taps pulled from the inner side */
+    "  float bl = smoothstep(uEdgeL, 0.0, sx), br = smoothstep(uEdgeR, 1.0, sx);",
+    "  float amt = max(bl*bl, br*br);",
+    "  float dir = bl > br ? 1.0 : -1.0;",
+    "  vec3 c;",
+    "  if(amt < 0.003){ c = tex(vUV); }",
+    "  else {",
+    "    float spread = amt*uBlurPx/uFrameW;",
+    "    vec3 acc = vec3(0.0); float ws = 0.0;",
+    "    for(int i = 0; i < 16; i++){",
+    "      float t = float(i)/15.0;",
+    "      float wt = 1.0 - 0.65*t;",
+    "      acc += tex(vUV + vec2((t*1.2 - 0.2)*spread*dir, 0.0))*wt; ws += wt;",
+    "    }",
+    "    c = acc/ws;",
+    "  }",
     "  vec3 ink = vec3(0.043, 0.043, 0.047);",
-    "  vec3 c = mix(vec3(0.082, 0.082, 0.086), texture2D(uTex, vUV).rgb, uAlpha);",
+    "  c = mix(vec3(0.082, 0.082, 0.086), c, uAlpha);",
     "  float l = dot(c, vec3(0.299, 0.587, 0.114));",
-    "  c = mix(c, vec3(l), uDim*0.9);",          /* frames you are not pointing at go grey… */
-    "  c = mix(c, ink, uDim*0.55);",              /* …and recede into the dark */
-    "  c = mix(ink, c, uReveal);",                /* intro: frames develop up from black */
+    "  c = mix(c, vec3(l), uDim*0.9);",                     /* frames you are not pointing at go grey… */
+    "  c = mix(c, ink, uDim*0.55);",                        /* …and recede into the dark */
+    "  c = mix(ink, c, uReveal);",                          /* intro: frames develop up from black */
     "  vec2 e = min(vUV, 1.0 - vUV)/uEdge;",
     "  c = mix(c, vec3(0.929, 0.918, 0.89), step(min(e.x, e.y), 1.0)*uFocus);", /* keyboard focus ring */
     "  gl_FragColor = vec4(c, 1.0);",
@@ -325,7 +350,8 @@
     gl.linkProgram(prog);
     if(!gl.getProgramParameter(prog, gl.LINK_STATUS) && !gl.isContextLost()) throw new Error(gl.getProgramInfoLog(prog));
     gl.useProgram(prog);
-    ["uView","uR","uD","uX0","uW","uH","uCy","uMaxT","uTex","uAlpha","uDim","uReveal","uFocus","uEdge"].forEach(function(n){ U[n] = gl.getUniformLocation(prog, n); });
+    ["uView","uX0","uW","uH","uCy","uA","uP","uTex","uCrop","uRes","uEdge","uAlpha","uDim","uReveal","uFocus","uFrameW","uBlurPx","uEdgeL","uEdgeR"]
+      .forEach(function(n){ U[n] = gl.getUniformLocation(prog, n); });
     var v = [];
     for(var s = 0; s <= SEG; s++){ v.push(s/SEG, 0, s/SEG, 1); }
     buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
@@ -338,18 +364,22 @@
     gl.clearColor(11/255, 11/255, 12/255, 1);
     gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
   }
-  function upload(w){
+  function newTex(mips){
     var t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, w.img);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    if(isGL2){ gl.generateMipmap(gl.TEXTURE_2D); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); }
-    else gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); /* NPOT in WebGL1: no mipmaps */
-    w.tex = t; w.state = 3;
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, mips ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR);
+    return t;
+  }
+  function upload(w){
+    w.tex = newTex(isGL2);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, w.img);
+    if(isGL2) gl.generateMipmap(gl.TEXTURE_2D);  /* NPOT in WebGL1: no mipmaps */
+    w.crop = cropFor(w, w.img.naturalWidth, w.img.naturalHeight);
+    w.state = 3;
   }
 
-  var isGL2 = false;
   try{
     var attrs = { antialias:true, alpha:false, depth:false, stencil:false, premultipliedAlpha:false, powerPreference:"default" };
     gl = canvas.getContext("webgl2", attrs);
@@ -359,63 +389,52 @@
   }catch(err){ gl = null; }
   if(!gl){ useStrip(); return; }
 
-  /* ---------- Layout: frame sizes and the curve ---------- */
-  var W = 0, H = 0, dpr = 1, R = 1, D = 1, maxT = 1, edgeT = 1, cy = 0, baseH = 0, gap = 0;
+  /* ---------- Layout: frame sizes and the bend ---------- */
+  var W = 0, H = 0, dpr = 1, cy = 0, baseH = 0, gap = 0, A = 1, P = 3.4, blurPx = 80;
   var inst = [], L = 1;   /* instances: {w: work, s: track start, len: width} — the list repeats if it is too short */
-  function sxAt(t){ return D*R*Math.sin(t) / (D - R*(1 - Math.cos(t))); }
-  function solveT(x){ /* screen x (from centre) → angle on the curve; sxAt is monotonic */
-    var lo = -maxT, hi = maxT;
-    for(var k = 0; k < 28; k++){ var m = (lo + hi)/2; if(sxAt(m) < x) lo = m; else hi = m; }
-    return (lo + hi)/2;
-  }
+  function bend(sx){ var u = Math.max(0, Math.min(1.25, sx/W)); return 1 + A*Math.pow(u, P); }
   function layout(){
     var oldL = L;
     W = stage.clientWidth; H = stage.clientHeight;
     if(!W || !H) return;
     dpr = Math.min(window.devicePixelRatio || 1, W*H > 2.4e6 ? 1.5 : 2);
     canvas.width = Math.round(W*dpr); canvas.height = Math.round(H*dpr);
-    /* curve: radius R and camera-to-wall distance D (px). Narrower screens get a gentler bend. */
-    var rk = W < 760 ? 0.78 : W < 1100 ? 0.62 : 0.52;
-    var dk = W < 760 ? 0.46 : W < 1100 ? 0.38 : 0.33;
-    R = W*rk; D = W*dk;
-    maxT = Math.acos(1 - 0.82*D/R);             /* keep every vertex well in front of the camera */
-    var lo = 0, hi = maxT;
-    for(var k = 0; k < 28; k++){ var m = (lo + hi)/2; if(sxAt(m) < W/2) lo = m; else hi = m; }
-    edgeT = lo;
-    var edgeScale = D/(D - R*(1 - Math.cos(edgeT)));
-    baseH = W < 760 ? Math.min(H*0.25, W*0.46) : W < 1100 ? Math.min(H*0.27, W*0.33) : Math.min(H*0.35, W*0.23);
-    baseH = Math.min(baseH, (H - 170)/edgeScale);
-    gap = Math.max(10, Math.min(16, W*0.009));
-    cy = H*0.5 + (W < 760 ? -10 : 4);
-    inst = []; var s = 0, rep = 0, span = 2*edgeT*R;
+    var narrow = W < 760, mid = W < 1100;
+    A = narrow ? 0.85 : 1.05;       /* right edge ≈ 1.85–2× the left */
+    P = narrow ? 3.0 : 3.4;
+    baseH = narrow ? Math.min(H*0.21, W*0.44) : mid ? Math.min(H*0.27, W*0.3) : Math.min(H*0.34, W*0.215);
+    baseH = Math.min(baseH, (H - 150)/(1 + A));
+    gap = Math.max(8, Math.min(12, W*0.0075));
+    blurPx = Math.max(40, Math.min(110, W*0.065));
+    cy = H*0.49;
+    inst = []; var s = 0, rep = 0;
     do{
       for(var i = 0; i < N; i++){ var len = baseH*works[i].aspect; inst.push({ w:works[i], s:s, len:len }); s += len + gap; }
       rep++;
-    }while(s < span*3 + 2*baseH*2 && rep < 8);
+    }while(s < W*3 && rep < 8);
     L = s;
-    if(!placed){ placed = true; pos = target = centreOf(0); } /* open on the newest project, centred */
+    /* open with the newest project at the left edge, so the row reads left → right into the bend */
+    if(!placed){ placed = true; pos = target = inst[0].s + W/2 - gap*2; }
     else if(oldL > 1){ pos = pos/oldL*L; target = target/oldL*L; }
     dirty = true;
   }
   function wrap(x){ return ((x % L) + L*1.5) % L - L/2; } /* → [-L/2, L/2) */
+  function x0Of(k){ return wrap(inst[k].s - pos); }       /* left edge, relative to screen centre */
+  function onScreen(x0, len){ return x0 + len > -W/2 && x0 < W/2; }
 
   /* ---------- Motion state ---------- */
   var pos = 0, target = 0, drift = 0, lastInput = -1e9, dirty = true, placed = false;
-  var DRIFT = 16;                      /* px/s, slow and calm */
+  var DRIFT = 18;                      /* px/s, slow and calm */
   var pointer = { in:false, x:0, y:0, type:"mouse" };
-  var drag = null, hoverInst = -1, focusWork = -1, capWork = -2, cursorShown = false;
+  var drag = null, hoverInst = -1, focusWork = -1, capWork = -2;
 
   function centreOf(k){ return inst[k].s + inst[k].len/2; }
-
+  /* exact inverse of the vertex shader: x is linear, height depends on screen x */
   function hitTest(px, py){
-    var t = solveT(px - W/2);
-    if(Math.abs(t) >= edgeT + 0.2) return -1;
-    var tx = t*R, scale = D/(D - R*(1 - Math.cos(t)));
+    var tx = px - W/2;
     for(var k = 0; k < inst.length; k++){
-      var x0 = wrap(inst[k].s - pos);
-      if(tx >= x0 && tx <= x0 + inst[k].len){
-        return Math.abs(py - cy) <= baseH*scale/2 ? k : -1;
-      }
+      var x0 = x0Of(k);
+      if(tx >= x0 && tx <= x0 + inst[k].len) return Math.abs(py - cy) <= baseH*bend(px)/2 ? k : -1;
     }
     return -1;
   }
@@ -442,10 +461,6 @@
   window.addEventListener("pointermove", function(e){
     pointer.x = e.clientX; pointer.y = e.clientY; pointer.type = e.pointerType;
     pointer.in = e.target === canvas;
-    if(finePointer && e.pointerType === "mouse"){
-      cursorEl.style.transform = "translate3d(" + e.clientX + "px," + e.clientY + "px,0)";
-      if(!cursorShown){ cursorShown = true; cursorEl.classList.add("is-on"); }
-    }
     if(!drag || e.pointerId !== drag.id) return;
     var dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
     var th = drag.type === "mouse" ? 6 : 10;   /* drag threshold: beyond this it is never a click */
@@ -507,7 +522,7 @@
     a.addEventListener("blur", function(){ if(focusWork === i) focusWork = -1; dirty = true; });
   });
 
-  /* ---------- Textures: visible frames first, then neighbours as they approach ---------- */
+  /* ---------- Still covers: visible frames first, then neighbours as they approach ---------- */
   var loading = 0, MAXLOAD = 3, uploadQ = [], lastSched = 0;
   function startLoad(w){
     w.state = 1; loading++;
@@ -519,24 +534,105 @@
     img.onerror = function(){ loading--; w.state = -1; };
     img.src = w.src;
   }
+  function distOff(k){ /* px between instance k and the screen (0 if on screen) */
+    var x0 = x0Of(k), x1 = x0 + inst[k].len;
+    return x1 < -W/2 ? -W/2 - x1 : x0 > W/2 ? x0 - W/2 : 0;
+  }
   function schedule(){
-    if(loading >= MAXLOAD) return;
-    var reach = (edgeT*R)*2.2, cand = [];   /* on screen, plus about one screen either side */
-    for(var k = 0; k < inst.length; k++){
-      var w = inst[k].w; if(w.state !== 0) continue;
-      var x0 = wrap(inst[k].s - pos), d = x0 > 0 ? x0 : Math.max(0, -(x0 + inst[k].len));
-      if(d < reach) cand.push([d, w]);
+    var cand = [], k, w;
+    for(k = 0; k < inst.length; k++){
+      w = inst[k].w; if(w.state !== 0) continue;
+      var d = distOff(k); if(d < W*0.5) cand.push([d, w]);   /* on screen, plus half a screen either side */
     }
     cand.sort(function(p, q){ return p[0] - q[0]; });
     for(var c = 0; c < cand.length && loading < MAXLOAD; c++){ if(cand[c][1].state === 0) startLoad(cand[c][1]); }
+    if(introDone) scheduleVideos();
   }
   function visibleWorks(){
     var out = [];
-    for(var k = 0; k < inst.length; k++){
-      var x0 = wrap(inst[k].s - pos);
-      if((x0 + inst[k].len)/R > -edgeT && x0/R < edgeT && out.indexOf(inst[k].w) < 0) out.push(inst[k].w);
-    }
+    for(var k = 0; k < inst.length; k++){ if(distOff(k) === 0 && out.indexOf(inst[k].w) < 0) out.push(inst[k].w); }
     return out;
+  }
+
+  /* ---------- Live video inside the bend (Cloudflare Stream) ---------- */
+  var STREAM = "https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/";
+  var hlsState = 0, hlsWaiters = [];      /* 0 not loaded, 1 loading, 2 ready, -1 failed */
+  var useHlsJs = !!(window.MediaSource || window.ManagedMediaSource);
+  var vidBox = null;
+  function withHls(cb){
+    if(!useHlsJs){ cb(); return; }
+    if(hlsState === 2 || hlsState === -1){ cb(); return; }
+    hlsWaiters.push(cb);
+    if(hlsState === 1) return;
+    hlsState = 1;
+    var sc = document.createElement("script");
+    sc.src = "https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.13/hls.min.js"; /* same pinned build as index.html */
+    sc.async = true;
+    sc.onload = function(){ hlsState = window.Hls && window.Hls.isSupported() ? 2 : -1; hlsWaiters.splice(0).forEach(function(f){ f(); }); };
+    sc.onerror = function(){ hlsState = -1; hlsWaiters.splice(0).forEach(function(f){ f(); }); };
+    document.head.appendChild(sc);
+  }
+  function startVideo(w){
+    w.vState = 1;
+    withHls(function(){
+      if(!vidBox){
+        /* kept in the DOM, tiny and invisible, so browsers treat it as an on-page muted video */
+        vidBox = document.createElement("div"); vidBox.setAttribute("aria-hidden", "true");
+        vidBox.style.cssText = "position:fixed;left:0;bottom:0;width:2px;height:2px;overflow:hidden;opacity:0.01;pointer-events:none;z-index:-1";
+        document.body.appendChild(vidBox);
+      }
+      var v = document.createElement("video");
+      v.muted = true; v.defaultMuted = true; v.loop = true; v.playsInline = true;
+      v.setAttribute("muted", ""); v.setAttribute("playsinline", ""); v.crossOrigin = "anonymous"; v.preload = "auto";
+      v.style.cssText = "width:2px;height:2px";
+      vidBox.appendChild(v);
+      w.video = v;
+      var m3u8 = STREAM + w.stream + "/manifest/video.m3u8";
+      var capH = W < 760 ? 480 : 720;                       /* a small rendition is plenty inside a frame */
+      if(useHlsJs && hlsState === 2){
+        var h = new window.Hls({ enableWorker:true, capLevelToPlayerSize:false, maxBufferLength:12 });
+        h.on(window.Hls.Events.MANIFEST_PARSED, function(ev, data){
+          var best = 0; (data.levels || h.levels).forEach(function(l, i){ if(l.height <= capH && l.height >= (h.levels[best].height || 0)) best = i; });
+          h.autoLevelCapping = best; h.startLevel = best; h.nextLevel = best;
+          playV(w);
+        });
+        h.on(window.Hls.Events.ERROR, function(ev, data){ if(data && data.fatal){ w.vState = -1; try{ h.destroy(); }catch(e){} } });
+        h.loadSource(m3u8); h.attachMedia(v); w.hls = h;
+      }else if(v.canPlayType("application/vnd.apple.mpegurl")){
+        v.src = m3u8; playV(w);                              /* Safari / iOS: native HLS */
+      }else{ w.vState = -1; return; }
+      var mark = function(){ w.vFresh = true; dirty = true; if(v.requestVideoFrameCallback) v.requestVideoFrameCallback(mark); };
+      if(v.requestVideoFrameCallback) v.requestVideoFrameCallback(mark);
+      v.addEventListener("playing", function(){ w.vState = 2; });
+      v.addEventListener("error", function(){ w.vState = -1; });
+    });
+  }
+  function playV(w){
+    var p = w.video.play();
+    if(p && p.catch) p.catch(function(){ /* autoplay refused (e.g. iOS Low Power Mode): stay on the cover */ w.vState = -1; });
+  }
+  function scheduleVideos(){
+    for(var i = 0; i < N; i++){
+      var w = works[i]; if(!w.stream || w.vState === -1) continue;
+      var near = 1e9;
+      for(var k = 0; k < inst.length; k++){ if(inst[k].w === w){ near = Math.min(near, distOff(k)); } }
+      if(near < W*0.35){
+        if(w.vState === 0) startVideo(w);
+        else if(w.video && w.video.paused && !document.hidden) playV(w);
+      }else if(w.video && !w.video.paused && near > W*0.6){
+        w.video.pause();                                   /* off screen: stop decoding */
+      }
+    }
+  }
+  function uploadVideo(w){
+    var v = w.video;
+    if(v.readyState < 2 || !v.videoWidth) return false;
+    if(!w.vtex){ w.vtex = newTex(false); }
+    else gl.bindTexture(gl.TEXTURE_2D, w.vtex);
+    try{ gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, v); }
+    catch(err){ w.vState = -1; return false; }               /* e.g. a cross-origin refusal: keep the cover */
+    w.vcrop = cropFor(w, v.videoWidth, v.videoHeight);
+    return true;
   }
 
   /* ---------- Intro loader (once per session) ---------- */
@@ -548,17 +644,19 @@
     try{ sessionStorage.setItem("shc-intro-seen", "1"); }catch(e){}
     loaderEl.classList.add("is-done");
     setTimeout(function(){ loaderEl.style.display = "none"; }, 500);
-    /* frames develop outward from the centre */
+    /* frames develop left → right */
     var at = now() + 120;
-    var order = inst.map(function(p, k){ return k; }).sort(function(a, b){ return Math.abs(wrap(centreOf(a) - pos)) - Math.abs(wrap(centreOf(b) - pos)); });
-    order.forEach(function(k, rank){ var w = inst[k].w; if(!w.revealAt) w.revealAt = at + Math.min(rank, 8)*70; });
+    var order = inst.map(function(p, k){ return k; }).sort(function(a, b){ return x0Of(a) - x0Of(b); })
+      .filter(function(k){ return distOff(k) === 0; });
+    order.forEach(function(k, rank){ var w = inst[k].w; if(!w.revealAt) w.revealAt = at + rank*80; });
+    works.forEach(function(w){ if(!w.revealAt) w.revealAt = at; });
     dirty = true;
   }
   function tickIntro(t){
     if(introDone) return;
-    if(!firstVisible) firstVisible = visibleWorks();
-    var ready = 0; firstVisible.forEach(function(w){ if(w.state === 3 || w.state === -1) ready++; });
-    var real = firstVisible.length ? ready/firstVisible.length : 1;
+    if(!firstVisible && inst.length) firstVisible = visibleWorks();
+    var ready = 0; (firstVisible || []).forEach(function(w){ if(w.state === 3 || w.state === -1) ready++; });
+    var real = firstVisible && firstVisible.length ? ready/firstVisible.length : 1;
     var el = t - t0, pct = Math.min(real, el/MIN_MS);
     if(el > MAX_MS) pct = 1;
     shownPct += (pct - shownPct)*0.25; if(pct >= 1 && shownPct > 0.995) shownPct = 1;
@@ -580,31 +678,31 @@
 
   /* ---------- Frame loop ---------- */
   var raf = 0, lastT = 0, running = false;
-  function ease(k, dt, tau){ return 1 - Math.exp(-dt/tau) ; }
+  function ease(dt, tau){ return 1 - Math.exp(-dt/tau); }
   function loop(t){
     raf = requestAnimationFrame(loop);
     var dt = Math.min(0.05, Math.max(0, (t - lastT)/1000)); lastT = t;
+    tickIntro(t);                       /* runs even before the first layout, so the loader can't stall */
     if(!W || !inst.length) return;
-    tickIntro(t);
 
     /* hover (mouse only), recomputed every frame because frames move under the pointer */
     var hov = -1;
     if(pointer.in && pointer.type === "mouse" && !(drag && drag.active) && !leaving) hov = hitTest(pointer.x, pointer.y);
-    if(hov !== hoverInst){ hoverInst = hov; stage.classList.toggle("is-over", hov >= 0); cursorEl.classList.toggle("hover", hov >= 0); dirty = true; }
+    if(hov !== hoverInst){ hoverInst = hov; stage.classList.toggle("is-over", hov >= 0); dirty = true; }
 
     /* drift: pauses on hover, focus, drag and for a moment after any input, then eases back */
     var hold = !introDone || leaving || hoverInst >= 0 || focusWork >= 0 || (drag && drag.active) || (t - lastInput < 1400);
-    drift += ((hold ? 0 : 1) - drift)*ease(1, dt, 0.7);
+    drift += ((hold ? 0 : 1) - drift)*ease(dt, 0.7);
     target += DRIFT*drift*dt;
 
     var prev = pos;
-    pos += (target - pos)*ease(1, dt, drag && drag.active ? 0.05 : 0.16);
+    pos += (target - pos)*ease(dt, drag && drag.active ? 0.05 : 0.16);
     if(Math.abs(target - pos) < 0.01) pos = target;
     if(pos !== prev) dirty = true;
 
     /* per-work animated values */
     var hw = hoverInst >= 0 ? inst[hoverInst].w.i : -1;
-    var a6 = ease(1, dt, 0.18), af = ease(1, dt, 0.12);
+    var a6 = ease(dt, 0.18), af = ease(dt, 0.12);
     for(var i = 0; i < N; i++){
       var w = works[i];
       var dimT = leaving ? (i === leaveWork ? 0 : 1) : (hw >= 0 && hw !== i ? 1 : 0);
@@ -616,7 +714,7 @@
     if(useLoader && introDone && t < revealEnd()) dirty = true;
 
     if(t - lastSched > 90){ lastSched = t; schedule(); }
-    if(uploadQ.length){ var u = uploadQ.shift(); if(u.state === 2) upload(u); dirty = true; } /* one upload per frame */
+    if(uploadQ.length){ var u = uploadQ.shift(); if(u.state === 2) upload(u); dirty = true; } /* one cover upload per frame */
 
     var capW = hw >= 0 ? hw : focusWork >= 0 ? focusWork : inst[centreInst()].w.i;
     setCaption(capW);
@@ -634,28 +732,41 @@
   function render(t){
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.uniform2f(U.uView, W, H);
-    gl.uniform1f(U.uR, R); gl.uniform1f(U.uD, D); gl.uniform1f(U.uCy, cy); gl.uniform1f(U.uMaxT, maxT);
-    gl.uniform1f(U.uH, baseH);
+    gl.uniform2f(U.uView, W, H); gl.uniform2f(U.uRes, canvas.width, canvas.height);
+    gl.uniform1f(U.uCy, cy); gl.uniform1f(U.uA, A); gl.uniform1f(U.uP, P);
+    gl.uniform1f(U.uH, baseH); gl.uniform1f(U.uBlurPx, blurPx);
+    gl.uniform1f(U.uEdgeL, 0.13); gl.uniform1f(U.uEdgeR, 0.86);
     gl.activeTexture(gl.TEXTURE0);
     for(var k = 0; k < inst.length; k++){
-      var p = inst[k], x0 = wrap(p.s - pos);
-      if((x0 + p.len)/R < -edgeT - 0.02 || x0/R > edgeT + 0.02) continue;   /* off screen */
-      var w = p.w;
-      gl.bindTexture(gl.TEXTURE_2D, w.tex || blankTex);
-      gl.uniform1f(U.uX0, x0); gl.uniform1f(U.uW, p.len);
-      gl.uniform1f(U.uAlpha, w.tex ? w.alpha : 0);
+      var p = inst[k], x0 = x0Of(k);
+      if(!onScreen(x0, p.len)) continue;
+      var w = p.w, tex = w.tex, crop = w.crop, alpha = w.tex ? w.alpha : 0;
+      if(w.video && w.vState === 2){
+        if(w.vFresh || !w.vtex || !w.video.requestVideoFrameCallback){
+          if(uploadVideo(w)) w.vFresh = false;
+        }
+        if(w.vtex){ tex = w.vtex; crop = w.vcrop; alpha = 1; }
+      }
+      gl.bindTexture(gl.TEXTURE_2D, tex || blankTex);
+      gl.uniform4f(U.uCrop, crop[0], crop[1], crop[2], crop[3]);
+      gl.uniform1f(U.uX0, x0); gl.uniform1f(U.uW, p.len); gl.uniform1f(U.uFrameW, p.len);
+      gl.uniform1f(U.uAlpha, alpha);
       gl.uniform1f(U.uDim, w.dim); gl.uniform1f(U.uFocus, w.focus);
       gl.uniform1f(U.uReveal, reveal(w, t));
       gl.uniform2f(U.uEdge, 2/p.len, 2/baseH);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, (SEG + 1)*2);
     }
+    /* keep rendering while a visible video is playing */
+    for(var j = 0; j < N; j++){ if(works[j].vState === 2 && works[j].video && !works[j].video.paused){ dirty = true; break; } }
   }
   function start(){ if(running) return; running = true; lastT = performance.now(); dirty = true; raf = requestAnimationFrame(loop); }
   function stop(){ running = false; cancelAnimationFrame(raf); }
 
-  /* pause when the tab is hidden */
-  document.addEventListener("visibilitychange", function(){ if(document.hidden) stop(); else if(!lost) start(); });
+  /* pause (rendering and videos) while the tab is hidden */
+  document.addEventListener("visibilitychange", function(){
+    if(document.hidden){ stop(); works.forEach(function(w){ if(w.video && !w.video.paused) w.video.pause(); }); }
+    else if(!lost){ start(); lastSched = 0; }
+  });
 
   /* resize: observe, but apply in the next animation frame */
   var resizeQueued = false;
@@ -667,13 +778,13 @@
   else window.addEventListener("resize", queueLayout);
   window.addEventListener("orientationchange", queueLayout);
 
-  /* WebGL context loss: keep the decoded images, rebuild GPU state on restore */
+  /* WebGL context loss: keep the decoded images and videos, rebuild GPU state on restore */
   var lost = false, lostTimer = 0;
   canvas.addEventListener("webglcontextlost", function(e){
     e.preventDefault(); lost = true; stop();
-    works.forEach(function(w){ w.tex = null; if(w.state === 3) w.state = 2; });
+    works.forEach(function(w){ w.tex = null; w.vtex = null; if(w.state === 3) w.state = 2; });
     uploadQ = works.filter(function(w){ return w.state === 2; });
-    lostTimer = setTimeout(function(){ if(lost) useStrip(); }, 4000); /* not coming back → plain strip */
+    lostTimer = setTimeout(function(){ if(lost){ works.forEach(function(w){ if(w.video) w.video.pause(); }); useStrip(); } }, 4000); /* not coming back → plain strip */
   });
   canvas.addEventListener("webglcontextrestored", function(){
     clearTimeout(lostTimer); lost = false;
@@ -687,14 +798,15 @@
 
   /* test hook (read-only snapshot), used by the draft's checks */
   window.__carousel = function(){
-    return { pos:pos, target:target, L:L, W:W, H:H, dpr:dpr, baseH:baseH, R:R, D:D, edgeT:edgeT, cy:cy,
+    return { pos:pos, target:target, L:L, W:W, H:H, dpr:dpr, baseH:baseH, A:A, P:P, cy:cy,
       hover:hoverInst >= 0 ? inst[hoverInst].w.i : -1, focus:focusWork, caption:capWork, intro:introDone, gl2:isGL2,
       loaded: works.filter(function(w){ return w.state === 3; }).length,
       requested: works.filter(function(w){ return w.state !== 0; }).length,
-      frames: inst.map(function(p, k){ var x0 = wrap(p.s - pos); return { k:k, work:p.w.i, x0:x0, len:p.len, aspect:p.w.aspect }; })
-        .filter(function(f){ return (f.x0 + f.len)/R > -edgeT && f.x0/R < edgeT; }),
+      videos: works.filter(function(w){ return w.stream; }).map(function(w){ return { i:w.i, state:w.vState, paused: w.video ? w.video.paused : null, t: w.video ? +w.video.currentTime.toFixed(2) : 0, h: w.video ? w.video.videoHeight : 0, tex: !!w.vtex }; }),
+      frames: inst.map(function(p, k){ return { k:k, work:p.w.i, x0:x0Of(k), len:p.len, aspect:p.w.aspect }; })
+        .filter(function(f){ return onScreen(f.x0, f.len); }),
       screenOf: function(k){ /* screen-space centre of instance k (for tests) */
-        var x0 = wrap(inst[k].s - pos), tc = (x0 + inst[k].len/2)/R; return { x: W/2 + sxAt(tc), y: cy };
+        var x = W/2 + x0Of(k) + inst[k].len/2; return { x:x, y:cy, h: baseH*bend(x) };
       }
     };
   };
