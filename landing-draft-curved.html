@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="robots" content="noindex" />
+<!--
+  CURVED CAROUSEL LANDING — draft for shan-huai.com (standalone; not linked from index.html)
+
+  A looping row of project frames on a gently concave curve, drawn by a small WebGL
+  renderer (no libraries). Scroll, drag or swipe to browse; clicking a frame opens the
+  project at its normal site URL (/project/…, /live/…, …), which index.html's router
+  deep-links. Frames keep each image's own aspect ratio, so widths vary.
+
+  - The project list is the <ol class="works"> below: real links, in newest-first order.
+    The script reads everything (href, size, thumbnail) from those links.
+  - Thumbnails: /images/carousel/<nav>.webp, 800px tall (generated from the landing images).
+  - No WebGL, or prefers-reduced-motion → the same list is shown as a plain horizontal strip.
+  - The intro loader runs once per browser session (sessionStorage).
+-->
+<title>Shan-Huai Chiang</title>
+<link rel="icon" type="image/png" href="/images/system/favicon.png" />
+<link rel="apple-touch-icon" href="/images/system/apple-touch-icon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ink:#0B0B0C;
+    --paper:#EDEAE3;
+    --grey:#7E7E79;
+    --line:rgba(237,234,227,0.14);
+    --edge:rgba(237,234,227,0.55);
+    --px:clamp(16px,2.6vw,40px);
+    --py:clamp(14px,2vw,26px);
+    --logo:clamp(40px,3.6vw,52px);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    background:var(--ink);color:var(--paper);
+    font-family:"DM Sans",system-ui,sans-serif;
+    overflow:hidden;overscroll-behavior:none;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* faint film grain, as on the live site */
+  body::after{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.04;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  a{color:inherit}
+  .mono{font-family:"IBM Plex Mono",monospace;font-weight:400;letter-spacing:.04em}
+
+  /* Aperture cursor (desktop only), as on index.html */
+  #cursor-aperture{position:fixed;top:0;left:0;width:24px;height:24px;margin:-12px 0 0 -12px;
+    pointer-events:none;z-index:9999;
+    background:url('/images/system/aperuture_cursor.png') center/contain no-repeat;
+    filter:invert(1);mix-blend-mode:difference;will-change:transform;display:none;opacity:0;
+    transition:scale .3s cubic-bezier(.2,.7,.2,1),opacity .2s}
+  #cursor-aperture.hover{scale:1.75}
+  #cursor-aperture.is-on{opacity:1}
+  @media(hover:hover) and (pointer:fine){
+    html.gl, html.gl *{cursor:none !important}
+    html.gl #cursor-aperture{display:block}
+  }
+
+  /* ---------- Top bar ---------- */
+  .top{position:fixed;top:0;left:0;right:0;z-index:20;pointer-events:none;
+    display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+    padding:calc(var(--py) + env(safe-area-inset-top,0px)) calc(var(--px) + env(safe-area-inset-right,0px)) 0 calc(var(--px) + env(safe-area-inset-left,0px))}
+  .top > *{pointer-events:auto}
+  .brand{justify-self:start;display:flex;align-items:center;line-height:0;text-decoration:none}
+  .brand img{height:var(--logo);width:auto;display:block;opacity:.92;transition:opacity .2s}
+  .brand:hover img{opacity:1}
+  .practice{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--grey);white-space:nowrap}
+  .draft-tag{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);background:var(--paper);
+    padding:2px 5px;margin-left:12px;vertical-align:1px}
+  .links{justify-self:end;display:flex;gap:clamp(14px,1.8vw,26px);list-style:none}
+  .links a{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.1em;text-transform:lowercase;
+    text-decoration:none;color:var(--edge);transition:color .2s}
+  .links a:hover,.links a:focus-visible{color:var(--paper)}
+  a:focus-visible{outline:1px solid var(--paper);outline-offset:4px}
+
+  /* ---------- Bottom bar: intro · current caption · counter ---------- */
+  .foot{position:fixed;left:0;right:0;bottom:0;z-index:20;pointer-events:none;
+    display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:20px;
+    padding:0 calc(var(--px) + env(safe-area-inset-right,0px)) calc(var(--py) + env(safe-area-inset-bottom,0px)) calc(var(--px) + env(safe-area-inset-left,0px))}
+  .intro{max-width:44ch;font-size:13px;line-height:1.45;color:var(--paper)}
+  .intro .hint{color:var(--grey)}
+  .cap{justify-self:center;text-align:center;width:min(46vw,520px);height:44px;contain:strict;
+    display:flex;flex-direction:column;justify-content:flex-end;align-items:center;
+    transition:opacity .35s ease}
+  .cap-name{font-family:"Cormorant Garamond",serif;font-weight:300;font-size:22px;line-height:1.1;letter-spacing:-.01em;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .cap-meta{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-top:4px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .count{justify-self:end;font-size:12px;color:var(--edge);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+  html:not(.gl) .cap, html:not(.gl) .count{display:none}
+
+  /* ---------- WebGL stage ---------- */
+  .stage{position:fixed;inset:0;z-index:1;touch-action:pan-y;
+    -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  .stage canvas{display:block;width:100%;height:100%}
+  html:not(.gl) .stage{display:none}
+  html.gl .stage.is-over{cursor:pointer}
+  html.gl .stage.is-dragging{cursor:grabbing}
+
+  /* ---------- Project list ----------
+     In WebGL mode these are the keyboard/screen-reader links (visually hidden; focusing
+     one turns the carousel to it). Without WebGL, or with reduced motion, they are the
+     visible, natively scrolling strip. */
+  .works{list-style:none}
+  html.gl .works{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  html:not(.gl) body{overflow:auto}
+  html:not(.gl) .page{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:center;
+    padding:calc(var(--logo) + var(--py)*2 + 24px) 0 calc(var(--py) + 96px)}
+  html:not(.gl) .works{display:flex;gap:clamp(10px,1vw,16px);overflow-x:auto;overscroll-behavior-x:contain;
+    scroll-snap-type:x proximity;scroll-padding-inline:var(--px);padding:0 var(--px) 14px;
+    scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+  html:not(.gl) .works li{flex:none;scroll-snap-align:start}
+  html:not(.gl) .work{display:block;text-decoration:none}
+  html:not(.gl) .work img{display:block;height:min(52vh,60vw);width:auto;background:#151516}
+  html:not(.gl) .work:focus-visible{outline-offset:3px}
+  .work-name{display:block;font-family:"Cormorant Garamond",serif;font-weight:300;font-size:19px;margin-top:10px}
+  .work-meta{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-top:3px}
+  html:not(.gl) .work:hover .work-name{font-style:italic}
+
+  /* ---------- Intro loader (first visit per session) ---------- */
+  #loader{position:fixed;inset:0;z-index:40;background:var(--ink);
+    display:flex;align-items:flex-end;justify-content:space-between;
+    padding:calc(var(--py) + 8px) var(--px);transition:opacity .45s ease}
+  #loader.is-done{opacity:0;pointer-events:none}
+  #loader .l-word{font-family:"Cormorant Garamond",serif;font-weight:300;font-size:clamp(26px,3.2vw,40px);line-height:.9}
+  #loader .l-count{font-size:clamp(13px,1vw,14px);color:var(--edge);font-variant-numeric:tabular-nums}
+  #loader .l-bar{position:absolute;left:0;bottom:0;height:1px;width:100%;background:var(--edge);
+    transform-origin:0 50%;transform:scaleX(0)}
+  html.no-loader #loader{display:none}
+
+  /* leaving for a project page */
+  #veil{position:fixed;inset:0;z-index:45;background:var(--ink);opacity:0;pointer-events:none;transition:opacity .32s ease}
+  body.is-leaving #veil{opacity:1}
+
+  @media (max-width:1060px){
+    .top{grid-template-columns:auto 1fr}
+    .practice{display:none}
+    .links{grid-column:2}
+  }
+  @media (max-width:760px){
+    .foot{grid-template-columns:1fr auto;row-gap:14px}
+    .intro{grid-column:1 / -1;max-width:none;font-size:12.5px}
+    .cap{justify-self:start;text-align:left;align-items:flex-start;width:auto;max-width:72vw;contain:layout paint}
+    .cap-name{font-size:20px}
+  }
+</style>
+<script>
+  /* Decide the mode before first paint: reduced motion → strip; repeat visit → no loader. */
+  (function(){
+    var d=document.documentElement, reduce=matchMedia("(prefers-reduced-motion: reduce)").matches, seen=false;
+    try{ seen = sessionStorage.getItem("shc-intro-seen")==="1"; }catch(e){}
+    if(reduce || seen) d.classList.add("no-loader");
+    if(!reduce) d.classList.add("gl"); /* removed again if WebGL is unavailable */
+  })();
+</script>
+</head>
+<body>
+  <div id="loader" aria-hidden="true">
+    <span class="l-word">Shan-Huai</span>
+    <span class="l-count mono">000</span>
+    <span class="l-bar"></span>
+  </div>
+  <div id="veil" aria-hidden="true"></div>
+  <div id="cursor-aperture" aria-hidden="true"></div>
+
+  <header class="top">
+    <a class="brand" href="/" aria-label="Shan-Huai — home"><img src="/images/system/shanhuailogoinversed_white.png" alt="" width="1918" height="3696"></a>
+    <span class="practice mono">Moving Image · Photography · Art Direction<span class="draft-tag">draft</span></span>
+    <nav aria-label="Site">
+      <ul class="links">
+        <li><a href="/personal">personal</a></li>
+        <li><a href="/about">bio</a></li>
+        <li><a href="https://www.instagram.com/shanhuai.c/" target="_blank" rel="noopener">instagram</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="page">
+    <h1 class="mono" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)">Shan-Huai Chiang — selected work</h1>
+    <div class="stage" aria-hidden="true"><canvas></canvas></div>
+
+    <ol class="works" aria-label="Selected work, newest first">
+      <li><a class="work" href="/project/sub" data-nav="proj-sub" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-sub.webp" width="1200" height="800" alt="SUB"><span class="work-name">SUB</span><span class="work-meta">Branding — Local Remote · 2026</span></a></li>
+      <li><a class="work" href="/project/heysong-sarsaparilla" data-nav="proj-heysong" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-heysong.webp" width="1422" height="800" alt="黑松沙士"><span class="work-name">黑松沙士</span><span class="work-meta">Branding — Local Remote · 2026</span></a></li>
+      <li><a class="work" href="/project/frometo" data-nav="proj-frometo" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-frometo.webp" width="1422" height="800" alt="FROMETO"><span class="work-name">FROMETO</span><span class="work-meta">Branding — Local Remote · 2026</span></a></li>
+      <li><a class="work" href="/project/local-local-park" data-nav="proj-locallocalpark" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-locallocalpark.webp" width="1200" height="800" alt="Local Local Park"><span class="work-name">Local Local Park</span><span class="work-meta">Branding — Local Remote · 2026</span></a></li>
+      <li><a class="work" href="/live/cornelius" data-nav="gig-cornelius" data-cat="Live" data-meta="Chillout Music Festival · 2025"><img data-src="/images/carousel/gig-cornelius.webp" width="533" height="800" alt="Cornelius"><span class="work-name">Cornelius</span><span class="work-meta">Live — Chillout Music Festival · 2025</span></a></li>
+      <li><a class="work" href="/live/someshiit-sam" data-nav="gig-someshiitsam" data-cat="Live" data-meta="Chillout Music Festival · 2025"><img data-src="/images/carousel/gig-someshiitsam.webp" width="533" height="800" alt="someshiit 山姆"><span class="work-name">someshiit 山姆</span><span class="work-meta">Live — Chillout Music Festival · 2025</span></a></li>
+      <li><a class="work" href="/wedding/julian-and-judy" data-nav="julianjudy" data-cat="Wedding" data-meta="Engagement Session · 2025"><img data-src="/images/carousel/julianjudy.webp" width="1200" height="800" alt="Julian and Judy"><span class="work-name">Julian and Judy</span><span class="work-meta">Wedding — Engagement Session · 2025</span></a></li>
+      <li><a class="work" href="/live/elephant-gym" data-nav="gig-elephantgym" data-cat="Live" data-meta="Bristol · 2024"><img data-src="/images/carousel/gig-elephantgym.webp" width="533" height="800" alt="Elephant Gym"><span class="work-name">Elephant Gym</span><span class="work-meta">Live — Bristol · 2024</span></a></li>
+      <li><a class="work" href="/archive/girlfriend" data-nav="girlfriend" data-cat="Archive" data-meta="PDP Year 2 Music Video · 2024"><img data-src="/images/carousel/girlfriend.webp" width="1422" height="800" alt="Girlfriend"><span class="work-name">Girlfriend</span><span class="work-meta">Archive — PDP Year 2 Music Video · 2024</span></a></li>
+      <li><a class="work" href="/project/butoh-experiment" data-nav="proj-butoh" data-cat="Performance" data-meta="Central Saint Martins · 2023"><img data-src="/images/carousel/proj-butoh.webp" width="533" height="800" alt="Butoh Experiment"><span class="work-name">Butoh Experiment</span><span class="work-meta">Performance — Central Saint Martins · 2023</span></a></li>
+      <li><a class="work" href="/photojournalism/kenya-slum" data-nav="pj-kenyaslum" data-cat="Photo-Journalism" data-meta="Nairobi · 2023"><img data-src="/images/carousel/pj-kenyaslum.webp" width="1200" height="800" alt="Kenya Slum"><span class="work-name">Kenya Slum</span><span class="work-meta">Photo-Journalism — Nairobi · 2023</span></a></li>
+      <li><a class="work" href="/portraiture/untitled-sketch" data-nav="pt-untitledsketch" data-cat="Portraiture" data-meta="Taipei · 2023"><img data-src="/images/carousel/pt-untitledsketch.webp" width="533" height="800" alt="Untitled Sketch"><span class="work-name">Untitled Sketch</span><span class="work-meta">Portraiture — Taipei · 2023</span></a></li>
+      <li><a class="work" href="/live/hillsong" data-nav="gig-hillsong" data-cat="Live" data-meta="London · 2022"><img data-src="/images/carousel/gig-hillsong.webp" width="533" height="800" alt="Hillsong"><span class="work-name">Hillsong</span><span class="work-meta">Live — London · 2022</span></a></li>
+      <li><a class="work" href="/photojournalism/slava-ukraini" data-nav="pj-slavaukraini" data-cat="Photo-Journalism" data-meta="London · 2022"><img data-src="/images/carousel/pj-slavaukraini.webp" width="533" height="800" alt="Slava Ukraini"><span class="work-name">Slava Ukraini</span><span class="work-meta">Photo-Journalism — London · 2022</span></a></li>
+      <li><a class="work" href="/project/zero-case-policy" data-nav="proj-zerocase" data-cat="Photography" data-meta="Performance · 2021"><img data-src="/images/carousel/proj-zerocase.webp" width="533" height="800" alt="Zero-Case Policy"><span class="work-name">Zero-Case Policy</span><span class="work-meta">Photography — Performance · 2021</span></a></li>
+      <li><a class="work" href="/portraiture/duality-within" data-nav="pt-dualitywithin" data-cat="Portraiture" data-meta="Portrait · 2021"><img data-src="/images/carousel/pt-dualitywithin.webp" width="533" height="800" alt="Duality Within"><span class="work-name">Duality Within</span><span class="work-meta">Portraiture — Portrait · 2021</span></a></li>
+      <li><a class="work" href="/portraiture/in-mood-for-smoke" data-nav="pt-inmoodforsmoke" data-cat="Portraiture" data-meta="Portrait · 2021"><img data-src="/images/carousel/pt-inmoodforsmoke.webp" width="539" height="800" alt="In Mood For Smoke"><span class="work-name">In Mood For Smoke</span><span class="work-meta">Portraiture — Portrait · 2021</span></a></li>
+      <li><a class="work" href="/wedding/daniel-and-juny" data-nav="danieljuny" data-cat="Wedding" data-meta="Taiwan · 2021"><img data-src="/images/carousel/danieljuny.webp" width="533" height="800" alt="Daniel and Juny"><span class="work-name">Daniel and Juny</span><span class="work-meta">Wedding — Taiwan · 2021</span></a></li>
+      <li><a class="work" href="/live/mosaic" data-nav="gig-mosaic" data-cat="Live" data-meta="Hollywood · 2018–2020"><img data-src="/images/carousel/gig-mosaic.webp" width="533" height="800" alt="Mosaic"><span class="work-name">Mosaic</span><span class="work-meta">Live — Hollywood · 2018–2020</span></a></li>
+      <li><a class="work" href="/photojournalism/the-umbrella-movement" data-nav="pj-hkprotest" data-cat="Photo-Journalism" data-meta="Hong Kong · 2019"><img data-src="/images/carousel/pj-hkprotest.webp" width="1200" height="800" alt="The Umbrella Movement"><span class="work-name">The Umbrella Movement</span><span class="work-meta">Photo-Journalism — Hong Kong · 2019</span></a></li>
+    </ol>
+  </main>
+
+  <footer class="foot">
+    <p class="intro">Shan-Huai Chiang — based in Taipei, working at Local Remote as an Image Maker. <span class="hint">Drag, swipe or scroll to browse.</span></p>
+    <div class="cap" aria-live="polite"><span class="cap-name"></span><span class="cap-meta mono"></span></div>
+    <span class="count mono" aria-hidden="true"></span>
+  </footer>
+
+<script>
+(function(){
+  "use strict";
+  var doc = document.documentElement;
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var finePointer = matchMedia("(hover:hover) and (pointer:fine)").matches;
+  var links = Array.prototype.slice.call(document.querySelectorAll(".works .work"));
+  var N = links.length;
+
+  /* ---------- Shared: data-nav delegation (leave with a short fade) ---------- */
+  var leaving = false, leaveWork = -1;
+  document.addEventListener("click", function(e){
+    var a = e.target.closest && e.target.closest("a[data-nav]");
+    if(!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    if(reduce || !doc.classList.contains("gl")) return; /* plain navigation */
+    e.preventDefault();
+    if(leaving) return;
+    leaving = true; leaveWork = links.indexOf(a);
+    document.body.classList.add("is-leaving");
+    var href = a.href;
+    setTimeout(function(){ location.assign(href); }, 340);
+  });
+  window.addEventListener("pageshow", function(e){
+    if(e.persisted){ leaving = false; leaveWork = -1; document.body.classList.remove("is-leaving"); }
+  });
+
+  /* ---------- Fallback / reduced motion: a plain, natively scrolling strip ---------- */
+  function useStrip(){
+    doc.classList.remove("gl");
+    doc.classList.add("no-loader");
+    links.forEach(function(a){
+      var img = a.querySelector("img");
+      if(img && !img.getAttribute("src")){ img.loading = "lazy"; img.decoding = "async"; img.src = img.getAttribute("data-src"); }
+    });
+    var strip = document.querySelector(".works");
+    /* a vertical mouse wheel scrolls the strip sideways (direct, no easing) */
+    strip.addEventListener("wheel", function(e){
+      if(e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      if(strip.scrollWidth <= strip.clientWidth) return;
+      strip.scrollLeft += e.deltaY * (e.deltaMode === 1 ? 16 : 1);
+      e.preventDefault();
+    }, { passive:false });
+  }
+  if(reduce){ useStrip(); return; }
+
+  /* ---------- WebGL carousel ---------- */
+  var stage = document.querySelector(".stage");
+  var canvas = stage.querySelector("canvas");
+  var capEl = document.querySelector(".cap");
+  var capName = capEl.querySelector(".cap-name"), capMeta = capEl.querySelector(".cap-meta");
+  var countEl = document.querySelector(".count");
+  var loaderEl = document.getElementById("loader");
+  var lCount = loaderEl.querySelector(".l-count"), lBar = loaderEl.querySelector(".l-bar");
+  var cursorEl = document.getElementById("cursor-aperture");
+
+  var works = links.map(function(a, i){
+    var img = a.querySelector("img");
+    return {
+      i:i, a:a, name: img.alt, cat: a.getAttribute("data-cat"), meta: a.getAttribute("data-meta"),
+      src: img.getAttribute("data-src"), aspect: (+img.getAttribute("width")) / (+img.getAttribute("height")),
+      img:null, state:0 /*0 none,1 loading,2 decoded,3 uploaded*/, tex:null,
+      alpha:0, dim:0, focus:0, revealAt:0
+    };
+  });
+
+  var gl = null, prog = null, buf = null, blankTex = null, U = {}, SEG = 40;
+  var VS = [
+    "attribute vec2 aUV;",
+    "uniform vec2 uView; uniform float uR, uD, uX0, uW, uH, uCy, uMaxT;",
+    "varying vec2 vUV;",
+    "void main(){",
+    "  float th = clamp((uX0 + aUV.x*uW)/uR, -uMaxT, uMaxT);",
+    "  float X = uR*sin(th);",
+    "  float depth = uD - uR*(1.0 - cos(th));",
+    "  float w = depth/uD;",
+    "  float Y = (aUV.y - 0.5)*uH;",
+    /* homogeneous w = depth/D gives the perspective divide and perspective-correct UVs */
+    "  gl_Position = vec4(2.0*X/uView.x, (1.0 - 2.0*uCy/uView.y)*w - 2.0*Y/uView.y, 0.0, w);",
+    "  vUV = aUV;",
+    "}"].join("\n");
+  var FS = [
+    "precision mediump float;",
+    "uniform sampler2D uTex; uniform float uAlpha, uDim, uReveal, uFocus; uniform vec2 uEdge;",
+    "varying vec2 vUV;",
+    "void main(){",
+    "  vec3 ink = vec3(0.043, 0.043, 0.047);",
+    "  vec3 c = mix(vec3(0.082, 0.082, 0.086), texture2D(uTex, vUV).rgb, uAlpha);",
+    "  float l = dot(c, vec3(0.299, 0.587, 0.114));",
+    "  c = mix(c, vec3(l), uDim*0.9);",          /* frames you are not pointing at go grey… */
+    "  c = mix(c, ink, uDim*0.55);",              /* …and recede into the dark */
+    "  c = mix(ink, c, uReveal);",                /* intro: frames develop up from black */
+    "  vec2 e = min(vUV, 1.0 - vUV)/uEdge;",
+    "  c = mix(c, vec3(0.929, 0.918, 0.89), step(min(e.x, e.y), 1.0)*uFocus);", /* keyboard focus ring */
+    "  gl_FragColor = vec4(c, 1.0);",
+    "}"].join("\n");
+
+  function compile(type, src){
+    var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+    if(!gl.getShaderParameter(s, gl.COMPILE_STATUS) && !gl.isContextLost()) throw new Error(gl.getShaderInfoLog(s));
+    return s;
+  }
+  function initGL(){
+    prog = gl.createProgram();
+    gl.attachShader(prog, compile(gl.VERTEX_SHADER, VS));
+    gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FS));
+    gl.linkProgram(prog);
+    if(!gl.getProgramParameter(prog, gl.LINK_STATUS) && !gl.isContextLost()) throw new Error(gl.getProgramInfoLog(prog));
+    gl.useProgram(prog);
+    ["uView","uR","uD","uX0","uW","uH","uCy","uMaxT","uTex","uAlpha","uDim","uReveal","uFocus","uEdge"].forEach(function(n){ U[n] = gl.getUniformLocation(prog, n); });
+    var v = [];
+    for(var s = 0; s <= SEG; s++){ v.push(s/SEG, 0, s/SEG, 1); }
+    buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(v), gl.STATIC_DRAW);
+    var loc = gl.getAttribLocation(prog, "aUV");
+    gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    blankTex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, blankTex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([21,21,22,255]));
+    gl.uniform1i(U.uTex, 0);
+    gl.clearColor(11/255, 11/255, 12/255, 1);
+    gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
+  }
+  function upload(w){
+    var t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, w.img);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    if(isGL2){ gl.generateMipmap(gl.TEXTURE_2D); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); }
+    else gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); /* NPOT in WebGL1: no mipmaps */
+    w.tex = t; w.state = 3;
+  }
+
+  var isGL2 = false;
+  try{
+    var attrs = { antialias:true, alpha:false, depth:false, stencil:false, premultipliedAlpha:false, powerPreference:"default" };
+    gl = canvas.getContext("webgl2", attrs);
+    if(gl) isGL2 = true; else gl = canvas.getContext("webgl", attrs) || canvas.getContext("experimental-webgl", attrs);
+    if(!gl) throw new Error("no webgl");
+    initGL();
+  }catch(err){ gl = null; }
+  if(!gl){ useStrip(); return; }
+
+  /* ---------- Layout: frame sizes and the curve ---------- */
+  var W = 0, H = 0, dpr = 1, R = 1, D = 1, maxT = 1, edgeT = 1, cy = 0, baseH = 0, gap = 0;
+  var inst = [], L = 1;   /* instances: {w: work, s: track start, len: width} — the list repeats if it is too short */
+  function sxAt(t){ return D*R*Math.sin(t) / (D - R*(1 - Math.cos(t))); }
+  function solveT(x){ /* screen x (from centre) → angle on the curve; sxAt is monotonic */
+    var lo = -maxT, hi = maxT;
+    for(var k = 0; k < 28; k++){ var m = (lo + hi)/2; if(sxAt(m) < x) lo = m; else hi = m; }
+    return (lo + hi)/2;
+  }
+  function layout(){
+    var oldL = L;
+    W = stage.clientWidth; H = stage.clientHeight;
+    if(!W || !H) return;
+    dpr = Math.min(window.devicePixelRatio || 1, W*H > 2.4e6 ? 1.5 : 2);
+    canvas.width = Math.round(W*dpr); canvas.height = Math.round(H*dpr);
+    /* curve: radius R and camera-to-wall distance D (px). Narrower screens get a gentler bend. */
+    var rk = W < 760 ? 0.78 : W < 1100 ? 0.62 : 0.52;
+    var dk = W < 760 ? 0.46 : W < 1100 ? 0.38 : 0.33;
+    R = W*rk; D = W*dk;
+    maxT = Math.acos(1 - 0.82*D/R);             /* keep every vertex well in front of the camera */
+    var lo = 0, hi = maxT;
+    for(var k = 0; k < 28; k++){ var m = (lo + hi)/2; if(sxAt(m) < W/2) lo = m; else hi = m; }
+    edgeT = lo;
+    var edgeScale = D/(D - R*(1 - Math.cos(edgeT)));
+    baseH = W < 760 ? Math.min(H*0.25, W*0.46) : W < 1100 ? Math.min(H*0.27, W*0.33) : Math.min(H*0.35, W*0.23);
+    baseH = Math.min(baseH, (H - 170)/edgeScale);
+    gap = Math.max(10, Math.min(16, W*0.009));
+    cy = H*0.5 + (W < 760 ? -10 : 4);
+    inst = []; var s = 0, rep = 0, span = 2*edgeT*R;
+    do{
+      for(var i = 0; i < N; i++){ var len = baseH*works[i].aspect; inst.push({ w:works[i], s:s, len:len }); s += len + gap; }
+      rep++;
+    }while(s < span*3 + 2*baseH*2 && rep < 8);
+    L = s;
+    if(oldL > 1){ pos = pos/oldL*L; target = target/oldL*L; }
+    dirty = true;
+  }
+  function wrap(x){ return ((x % L) + L*1.5) % L - L/2; } /* → [-L/2, L/2) */
+
+  /* ---------- Motion state ---------- */
+  var pos = 0, target = 0, drift = 0, lastInput = -1e9, dirty = true;
+  var DRIFT = 16;                      /* px/s, slow and calm */
+  var pointer = { in:false, x:0, y:0, type:"mouse" };
+  var drag = null, hoverInst = -1, focusWork = -1, capWork = -2, cursorShown = false;
+
+  function centreOf(k){ return inst[k].s + inst[k].len/2; }
+
+  function hitTest(px, py){
+    var t = solveT(px - W/2);
+    if(Math.abs(t) >= edgeT + 0.2) return -1;
+    var tx = t*R, scale = D/(D - R*(1 - Math.cos(t)));
+    for(var k = 0; k < inst.length; k++){
+      var x0 = wrap(inst[k].s - pos);
+      if(tx >= x0 && tx <= x0 + inst[k].len){
+        return Math.abs(py - cy) <= baseH*scale/2 ? k : -1;
+      }
+    }
+    return -1;
+  }
+  function nearestInstOf(wi){
+    var best = -1, bd = 1e9;
+    for(var k = 0; k < inst.length; k++){ if(inst[k].w.i !== wi) continue; var d = Math.abs(wrap(centreOf(k) - target)); if(d < bd){ bd = d; best = k; } }
+    return best;
+  }
+  function centreInst(){
+    var best = 0, bd = 1e9;
+    for(var k = 0; k < inst.length; k++){ var d = Math.abs(wrap(centreOf(k) - pos)); if(d < bd){ bd = d; best = k; } }
+    return best;
+  }
+  function glideTo(k){ target += wrap(centreOf(k) - target); lastInput = performance.now(); }
+
+  /* ---------- Input ---------- */
+  function now(){ return performance.now(); }
+  stage.addEventListener("pointerdown", function(e){
+    if(e.button !== 0 || leaving) return;
+    pointer.type = e.pointerType;
+    drag = { id:e.pointerId, x0:e.clientX, y0:e.clientY, t0:target, active:false, samples:[[now(), e.clientX]],
+             hit: hitTest(e.clientX, e.clientY), type:e.pointerType };
+  });
+  window.addEventListener("pointermove", function(e){
+    pointer.x = e.clientX; pointer.y = e.clientY; pointer.type = e.pointerType;
+    pointer.in = e.target === canvas;
+    if(finePointer && e.pointerType === "mouse"){
+      cursorEl.style.transform = "translate3d(" + e.clientX + "px," + e.clientY + "px,0)";
+      if(!cursorShown){ cursorShown = true; cursorEl.classList.add("is-on"); }
+    }
+    if(!drag || e.pointerId !== drag.id) return;
+    var dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
+    var th = drag.type === "mouse" ? 6 : 10;   /* drag threshold: beyond this it is never a click */
+    if(!drag.active){
+      if(Math.abs(dx) < th && Math.abs(dy) < th) return;
+      if(drag.type !== "mouse" && Math.abs(dy) > Math.abs(dx)){ drag = null; return; } /* vertical: leave it to the page */
+      drag.active = true;
+      try{ stage.setPointerCapture(e.pointerId); }catch(err){}
+      stage.classList.add("is-dragging");
+    }
+    target = drag.t0 - dx;
+    drag.samples.push([now(), e.clientX]);
+    if(drag.samples.length > 8) drag.samples.shift();
+    lastInput = now();
+  });
+  function endDrag(e, cancelled){
+    if(!drag || e.pointerId !== drag.id) return;
+    var d = drag; drag = null;
+    stage.classList.remove("is-dragging");
+    if(d.active){
+      /* release velocity from the last ~100ms of movement → a light, short throw */
+      var s = d.samples, t1 = s[s.length-1][0], j = s.length - 1;
+      while(j > 0 && t1 - s[j-1][0] < 100) j--;
+      var dt = (t1 - s[j][0])/1000, v = dt > 0.008 ? (s[s.length-1][1] - s[j][1])/dt : 0;
+      if(now() - t1 > 80) v = 0;                      /* paused before letting go */
+      v = Math.max(-3200, Math.min(3200, v));
+      target -= v*0.26;
+      lastInput = now();
+    }else if(!cancelled && d.hit >= 0 && hitTest(e.clientX, e.clientY) === d.hit){
+      var a = inst[d.hit].w.a;
+      if(e.metaKey || e.ctrlKey) window.open(a.href, "_blank", "noopener");
+      else a.click();                                  /* same delegated data-nav path as keyboard */
+    }
+  }
+  window.addEventListener("pointerup", function(e){ endDrag(e, false); });
+  window.addEventListener("pointercancel", function(e){ endDrag(e, true); });
+  document.addEventListener("pointerleave", function(){ pointer.in = false; });
+  window.addEventListener("blur", function(){ pointer.in = false; });
+
+  window.addEventListener("wheel", function(e){
+    if(e.ctrlKey || leaving) return;                  /* pinch-zoom */
+    var d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    if(e.deltaMode === 1) d *= 16; else if(e.deltaMode === 2) d *= H;
+    target += Math.max(-260, Math.min(260, d*1.1));
+    lastInput = now();
+  }, { passive:true });
+
+  document.addEventListener("keydown", function(e){
+    if(e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+    if(e.altKey || e.metaKey || e.ctrlKey) return;
+    var dir = e.key === "ArrowRight" ? 1 : -1;
+    var active = document.activeElement, li = links.indexOf(active);
+    if(li >= 0){ links[(li + dir + N) % N].focus(); e.preventDefault(); return; } /* focus handler glides */
+    var c = centreInst(); glideTo((c + dir + inst.length) % inst.length);
+    e.preventDefault();
+  });
+  links.forEach(function(a, i){
+    a.addEventListener("focus", function(){ focusWork = i; var k = nearestInstOf(i); if(k >= 0) glideTo(k); dirty = true; });
+    a.addEventListener("blur", function(){ if(focusWork === i) focusWork = -1; dirty = true; });
+  });
+
+  /* ---------- Textures: visible frames first, then neighbours as they approach ---------- */
+  var loading = 0, MAXLOAD = 3, uploadQ = [], lastSched = 0;
+  function startLoad(w){
+    w.state = 1; loading++;
+    var img = new Image(); img.decoding = "async";
+    img.onload = function(){
+      var done = function(){ loading--; w.img = img; w.state = 2; uploadQ.push(w); };
+      if(img.decode) img.decode().then(done, done); else done();
+    };
+    img.onerror = function(){ loading--; w.state = -1; };
+    img.src = w.src;
+  }
+  function schedule(){
+    if(loading >= MAXLOAD) return;
+    var reach = (edgeT*R)*2.2, cand = [];   /* on screen, plus about one screen either side */
+    for(var k = 0; k < inst.length; k++){
+      var w = inst[k].w; if(w.state !== 0) continue;
+      var x0 = wrap(inst[k].s - pos), d = x0 > 0 ? x0 : Math.max(0, -(x0 + inst[k].len));
+      if(d < reach) cand.push([d, w]);
+    }
+    cand.sort(function(p, q){ return p[0] - q[0]; });
+    for(var c = 0; c < cand.length && loading < MAXLOAD; c++){ if(cand[c][1].state === 0) startLoad(cand[c][1]); }
+  }
+  function visibleWorks(){
+    var out = [];
+    for(var k = 0; k < inst.length; k++){
+      var x0 = wrap(inst[k].s - pos);
+      if((x0 + inst[k].len)/R > -edgeT && x0/R < edgeT && out.indexOf(inst[k].w) < 0) out.push(inst[k].w);
+    }
+    return out;
+  }
+
+  /* ---------- Intro loader (once per session) ---------- */
+  var useLoader = !doc.classList.contains("no-loader");
+  var t0 = now(), introDone = !useLoader, firstVisible = null, shownPct = 0;
+  var MIN_MS = 800, MAX_MS = 1600;
+  function finishIntro(){
+    introDone = true;
+    try{ sessionStorage.setItem("shc-intro-seen", "1"); }catch(e){}
+    loaderEl.classList.add("is-done");
+    setTimeout(function(){ loaderEl.style.display = "none"; }, 500);
+    /* frames develop outward from the centre */
+    var at = now() + 120;
+    var order = inst.map(function(p, k){ return k; }).sort(function(a, b){ return Math.abs(wrap(centreOf(a) - pos)) - Math.abs(wrap(centreOf(b) - pos)); });
+    order.forEach(function(k, rank){ var w = inst[k].w; if(!w.revealAt) w.revealAt = at + Math.min(rank, 8)*70; });
+    dirty = true;
+  }
+  function tickIntro(t){
+    if(introDone) return;
+    if(!firstVisible) firstVisible = visibleWorks();
+    var ready = 0; firstVisible.forEach(function(w){ if(w.state === 3 || w.state === -1) ready++; });
+    var real = firstVisible.length ? ready/firstVisible.length : 1;
+    var el = t - t0, pct = Math.min(real, el/MIN_MS);
+    if(el > MAX_MS) pct = 1;
+    shownPct += (pct - shownPct)*0.25; if(pct >= 1 && shownPct > 0.995) shownPct = 1;
+    var n = Math.round(shownPct*100);
+    lCount.textContent = (n < 10 ? "00" : n < 100 ? "0" : "") + n;
+    lBar.style.transform = "scaleX(" + shownPct.toFixed(3) + ")";
+    if(shownPct >= 1) finishIntro();
+  }
+
+  /* ---------- Caption ---------- */
+  function setCaption(wi){
+    if(wi === capWork) return;
+    capWork = wi;
+    var w = works[wi];
+    capName.textContent = w.name;
+    capMeta.textContent = w.cat + " — " + w.meta;
+    countEl.textContent = (wi < 9 ? "0" : "") + (wi + 1) + " / " + (N < 10 ? "0" : "") + N;
+  }
+
+  /* ---------- Frame loop ---------- */
+  var raf = 0, lastT = 0, running = false;
+  function ease(k, dt, tau){ return 1 - Math.exp(-dt/tau) ; }
+  function loop(t){
+    raf = requestAnimationFrame(loop);
+    var dt = Math.min(0.05, Math.max(0, (t - lastT)/1000)); lastT = t;
+    if(!W) return;
+    tickIntro(t);
+
+    /* hover (mouse only), recomputed every frame because frames move under the pointer */
+    var hov = -1;
+    if(pointer.in && pointer.type === "mouse" && !(drag && drag.active) && !leaving) hov = hitTest(pointer.x, pointer.y);
+    if(hov !== hoverInst){ hoverInst = hov; stage.classList.toggle("is-over", hov >= 0); cursorEl.classList.toggle("hover", hov >= 0); dirty = true; }
+
+    /* drift: pauses on hover, focus, drag and for a moment after any input, then eases back */
+    var hold = !introDone || leaving || hoverInst >= 0 || focusWork >= 0 || (drag && drag.active) || (t - lastInput < 1400);
+    drift += ((hold ? 0 : 1) - drift)*ease(1, dt, 0.7);
+    target += DRIFT*drift*dt;
+
+    var prev = pos;
+    pos += (target - pos)*ease(1, dt, drag && drag.active ? 0.05 : 0.16);
+    if(Math.abs(target - pos) < 0.01) pos = target;
+    if(pos !== prev) dirty = true;
+
+    /* per-work animated values */
+    var hw = hoverInst >= 0 ? inst[hoverInst].w.i : -1;
+    var a6 = ease(1, dt, 0.18), af = ease(1, dt, 0.12);
+    for(var i = 0; i < N; i++){
+      var w = works[i];
+      var dimT = leaving ? (i === leaveWork ? 0 : 1) : (hw >= 0 && hw !== i ? 1 : 0);
+      if(Math.abs(w.dim - dimT) > 0.002){ w.dim += (dimT - w.dim)*a6; dirty = true; } else w.dim = dimT;
+      var fT = focusWork === i ? 1 : 0;
+      if(Math.abs(w.focus - fT) > 0.002){ w.focus += (fT - w.focus)*af; dirty = true; } else w.focus = fT;
+      if(w.state === 3 && w.alpha < 1){ w.alpha = Math.min(1, w.alpha + dt/0.35); dirty = true; }
+    }
+    if(useLoader && introDone && t < revealEnd()) dirty = true;
+
+    if(t - lastSched > 90){ lastSched = t; schedule(); }
+    if(uploadQ.length){ var u = uploadQ.shift(); if(u.state === 2) upload(u); dirty = true; } /* one upload per frame */
+
+    var capW = hw >= 0 ? hw : focusWork >= 0 ? focusWork : inst[centreInst()].w.i;
+    setCaption(capW);
+
+    if(dirty){ render(t); dirty = false; }
+  }
+  var _revealEnd = 0;
+  function revealEnd(){ if(!_revealEnd){ works.forEach(function(w){ _revealEnd = Math.max(_revealEnd, w.revealAt + 700); }); } return _revealEnd; }
+  function reveal(w, t){
+    if(!useLoader) return 1;
+    if(!introDone || !w.revealAt) return 0;
+    var k = Math.max(0, Math.min(1, (t - w.revealAt)/650));
+    return 1 - Math.pow(1 - k, 3);
+  }
+  function render(t){
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform2f(U.uView, W, H);
+    gl.uniform1f(U.uR, R); gl.uniform1f(U.uD, D); gl.uniform1f(U.uCy, cy); gl.uniform1f(U.uMaxT, maxT);
+    gl.uniform1f(U.uH, baseH);
+    gl.activeTexture(gl.TEXTURE0);
+    for(var k = 0; k < inst.length; k++){
+      var p = inst[k], x0 = wrap(p.s - pos);
+      if((x0 + p.len)/R < -edgeT - 0.02 || x0/R > edgeT + 0.02) continue;   /* off screen */
+      var w = p.w;
+      gl.bindTexture(gl.TEXTURE_2D, w.tex || blankTex);
+      gl.uniform1f(U.uX0, x0); gl.uniform1f(U.uW, p.len);
+      gl.uniform1f(U.uAlpha, w.tex ? w.alpha : 0);
+      gl.uniform1f(U.uDim, w.dim); gl.uniform1f(U.uFocus, w.focus);
+      gl.uniform1f(U.uReveal, reveal(w, t));
+      gl.uniform2f(U.uEdge, 2/p.len, 2/baseH);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, (SEG + 1)*2);
+    }
+  }
+  function start(){ if(running) return; running = true; lastT = performance.now(); dirty = true; raf = requestAnimationFrame(loop); }
+  function stop(){ running = false; cancelAnimationFrame(raf); }
+
+  /* pause when the tab is hidden */
+  document.addEventListener("visibilitychange", function(){ if(document.hidden) stop(); else if(!lost) start(); });
+
+  /* resize: observe, but apply in the next animation frame */
+  var resizeQueued = false;
+  function queueLayout(){
+    if(resizeQueued) return; resizeQueued = true;
+    requestAnimationFrame(function(){ resizeQueued = false; layout(); });
+  }
+  if(window.ResizeObserver) new ResizeObserver(queueLayout).observe(stage);
+  else window.addEventListener("resize", queueLayout);
+  window.addEventListener("orientationchange", queueLayout);
+
+  /* WebGL context loss: keep the decoded images, rebuild GPU state on restore */
+  var lost = false, lostTimer = 0;
+  canvas.addEventListener("webglcontextlost", function(e){
+    e.preventDefault(); lost = true; stop();
+    works.forEach(function(w){ w.tex = null; if(w.state === 3) w.state = 2; });
+    uploadQ = works.filter(function(w){ return w.state === 2; });
+    lostTimer = setTimeout(function(){ if(lost) useStrip(); }, 4000); /* not coming back → plain strip */
+  });
+  canvas.addEventListener("webglcontextrestored", function(){
+    clearTimeout(lostTimer); lost = false;
+    try{ initGL(); }catch(err){ useStrip(); return; }
+    uploadQ = works.filter(function(w){ return w.state === 2; });
+    if(!document.hidden) start();
+  });
+
+  layout();
+  /* open on the newest project, centred */
+  pos = target = centreOf(0);
+  schedule();
+  start();
+
+  /* test hook (read-only snapshot), used by the draft's checks */
+  window.__carousel = function(){
+    return { pos:pos, target:target, L:L, W:W, H:H, dpr:dpr, baseH:baseH, R:R, D:D, edgeT:edgeT, cy:cy,
+      hover:hoverInst >= 0 ? inst[hoverInst].w.i : -1, focus:focusWork, caption:capWork, intro:introDone, gl2:isGL2,
+      loaded: works.filter(function(w){ return w.state === 3; }).length,
+      requested: works.filter(function(w){ return w.state !== 0; }).length,
+      frames: inst.map(function(p, k){ var x0 = wrap(p.s - pos); return { k:k, work:p.w.i, x0:x0, len:p.len, aspect:p.w.aspect }; })
+        .filter(function(f){ return (f.x0 + f.len)/R > -edgeT && f.x0/R < edgeT; }),
+      screenOf: function(k){ /* screen-space centre of instance k (for tests) */
+        var x0 = wrap(inst[k].s - pos), tc = (x0 + inst[k].len/2)/R; return { x: W/2 + sxAt(tc), y: cy };
+      }
+    };
+  };
+})();
+</script>
+</body>
+</html>
