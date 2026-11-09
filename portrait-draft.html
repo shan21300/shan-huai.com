@@ -72,9 +72,6 @@
   .modeBtn[aria-checked="true"] .sw::before{transform:translateX(16px)}
   .modeBtn:focus-visible{outline:none}
   .modeBtn:focus-visible .sw{outline:1px solid var(--paper);outline-offset:3px}
-  .st-count{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.04em;color:var(--edge);display:none}
-  .st-count b{font-weight:400;color:var(--paper)}
-  body.mode-index .st-count{display:inline}
   /* Logo only appears inside the open menu (the overlay's own .menu-logo); hidden in the header. */
   header .brandBtn{display:none}
   .brandBtn{position:absolute;left:50%;top:calc(var(--hy) + env(safe-area-inset-top,0px));transform:translateX(-50%);
@@ -83,7 +80,6 @@
   .logo-img:hover{opacity:1}
   @media(max-width:768px){
     :root{--hdr:56px;--hx:20px}
-    body.mode-index .st-count{display:none}
   }
 
   /* ---------- Menu overlay (same look as index.html) ---------- */
@@ -167,35 +163,45 @@
   .vg-stage{position:fixed;inset:0;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;cursor:grab;z-index:1}
   .vg-stage.is-dragging{cursor:grabbing}
   .vg-item{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;visibility:hidden}
-  .vg-hit{display:block;width:100%;height:100%;padding:0;border:0;background:none;color:inherit;cursor:pointer;outline:none}
+  /* Hover, as in the reference: the hovered image grows to 1.02 (.7s, soft ease-out) and
+     every other image dims to .7 (.45s); a "view" pill replaces the cursor over images. */
+  .vg-hit{display:block;width:100%;height:100%;padding:0;border:0;background:none;color:inherit;cursor:pointer;outline:none;
+    transform-origin:50% 50%;transition:opacity .45s ease,transform .7s cubic-bezier(.16,.84,.24,1)}
+  .vg-stage.has-hover .vg-hit{opacity:.7}
+  .vg-stage.has-hover .vg-item.hov .vg-hit{opacity:1;transform:scale(1.02)}
+  .vg-stage.pill-on .vg-hit{cursor:none}
   .vg-stage.is-dragging .vg-hit{cursor:grabbing}
   .vg-media{display:block;position:relative;width:100%;height:100%;overflow:hidden;background:#151516;
-    transform-origin:0 50%;will-change:transform;border-radius:4px}
+    transform-origin:50% 50%;will-change:transform;border-radius:4px}
+  .vg-pill{position:fixed;left:0;top:0;z-index:35;pointer-events:none;padding:5px 10px 4px;border-radius:999px;
+    background:var(--paper);color:var(--ink);font-family:"IBM Plex Mono",monospace;font-size:9px;line-height:1;
+    letter-spacing:.14em;text-transform:uppercase;opacity:0;transform:translate3d(-100px,-100px,0);
+    transition:opacity .2s ease;will-change:transform}
+  .vg-pill.on{opacity:1}
   .vg-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;
     -webkit-user-drag:none;opacity:0;transition:opacity .6s ease}
   .vg-media img.is-loaded{opacity:1}
   .vg-hit:focus-visible .vg-media{outline:1px solid var(--paper);outline-offset:4px}
   .vg-titles{position:fixed;left:var(--sp);top:0;z-index:10;width:0;height:0}
   .vg-tl{position:absolute;left:0;top:0;display:block;padding:0;border:0;background:none;color:var(--paper);
-    font-family:"Cormorant Garamond",serif;font-weight:300;font-size:30px;line-height:1;letter-spacing:-.005em;
-    white-space:nowrap;text-align:left;transform-origin:0 0;will-change:transform,opacity;cursor:pointer}
+    font-family:"Cormorant Garamond",serif;font-weight:300;font-size:30px;line-height:1.08;letter-spacing:-.005em;
+    white-space:nowrap;text-align:left;transform-origin:0 0;will-change:transform,opacity;cursor:pointer;
+    max-width:var(--tlw,none);overflow:hidden;text-overflow:ellipsis}
   .vg-tl:focus-visible{outline:1px solid var(--paper);outline-offset:3px}
-  .vg-info{position:absolute;left:0;top:0;width:max-content;will-change:transform,opacity}
+  .vg-info{position:absolute;left:0;top:0;width:max-content;max-width:var(--tlw,none);will-change:transform,opacity}
   .vg-info .m{display:block;font-size:11px;color:var(--edge);text-transform:uppercase}
   .vg-info .go{display:inline-block;margin-top:8px;font-size:11px;text-transform:uppercase;
     text-decoration:none;border-bottom:1px solid var(--edge);padding-bottom:2px}
   .vg-info .go:hover{border-color:var(--paper)}
-  .vg-bar{display:none}
   .vg-hint{position:fixed;right:var(--sp);bottom:calc(var(--sp) * .7);font-size:11px;color:var(--grey);text-transform:uppercase;z-index:20}
   :root{--sp:clamp(16px,3.2vw,48px)}
+  /* Phones keep the reference's layout: title list on the left, images on one centre line. */
   @media (max-width:719px){
-    .vg-titles,.vg-hint{display:none !important}
-    body.mode-index .vg-bar{display:block;position:fixed;left:0;right:0;bottom:0;z-index:25;
-      padding:40px 16px calc(16px + env(safe-area-inset-bottom,0px));
-      background:linear-gradient(to top,rgba(11,11,12,.95) 55%,rgba(11,11,12,0))}
-    .vg-bar .t{display:block;font-family:"Cormorant Garamond",serif;font-weight:300;font-size:34px;line-height:1;text-decoration:none}
-    .vg-bar .row{display:flex;justify-content:space-between;align-items:baseline;margin-top:8px;font-size:11px;text-transform:uppercase;color:var(--edge)}
-    .vg-bar .go{color:var(--paper);text-decoration:none;border-bottom:1px solid var(--edge)}
+    .vg-hint{display:none !important}
+    .vg-tl{font-size:19px}
+    .vg-info .m,.vg-info .go{font-size:9px;letter-spacing:.08em}
+    .vg-info .m{white-space:normal}
+    .vg-info .go{margin-top:6px}
   }
 
   /* ================= Viewer (shared) ================= */
@@ -228,7 +234,7 @@
   }
 
   @media (prefers-reduced-motion: reduce){
-    .tile,.tile .sharp,.tile .blur,.tile .cap,.viewer,.v-img,.hud-hint,#menu,.vg-media img,.modeBtn .sw,.modeBtn .sw::before,.modeBtn .opt{transition:none !important}
+    .tile,.tile .sharp,.tile .blur,.tile .cap,.viewer,.v-img,.hud-hint,#menu,.vg-media img,.vg-hit,.vg-pill,.modeBtn .sw,.modeBtn .sw::before,.modeBtn .opt{transition:none !important}
   }
 </style>
 </head>
@@ -238,7 +244,6 @@
       <button class="hdr-btn modeBtn" data-act="mode" role="switch" aria-checked="false" aria-label="Index view">
         <span class="opt opt-wall on" aria-hidden="true">wall</span><span class="sw" aria-hidden="true"></span><span class="opt opt-index" aria-hidden="true">index</span>
       </button>
-      <span class="st-count" aria-hidden="true"><b id="st-n">01</b> / <span id="st-total">00</span></span>
     </div>
     <button class="brandBtn" data-nav="landing" aria-label="Home"><img src="/images/system/shanhuailogoinversed_white.png" alt="Shan-Huai" class="logo-img"></button>
     <button class="hdr-btn menuBtn" data-menu-open aria-label="Menu" aria-controls="menu" aria-expanded="false">menu</button>
@@ -271,10 +276,7 @@
           <a class="go mono" id="vg-info-go" href="/" data-nav="landing">Open project →</a>
         </div>
       </nav>
-      <div class="vg-bar" id="vg-bar" aria-live="polite">
-        <a class="t" id="vg-bar-t" href="/" data-nav="landing"></a>
-        <div class="row mono"><span id="vg-bar-m"></span><a class="go" id="vg-bar-go" href="/" data-nav="landing">Open →</a></div>
-      </div>
+      <span class="vg-pill" id="vg-pill" aria-hidden="true">view</span>
       <span class="vg-hint mono" aria-hidden="true">Scroll · Drag · ↑ ↓</span>
     </div>
 
@@ -370,6 +372,8 @@
   items.forEach(function(it){
     it.thumb = "/images/wall-thumbs/" + it.nav + ".jpg";
     it.year = it.meta.split("·").pop().trim();
+    // "Category · meta", without repeating the category when the meta already starts with it
+    it.label = it.meta.toLowerCase().indexOf(it.cat.toLowerCase()) === 0 ? it.meta : it.cat + " · " + it.meta;
   });
   var NI = items.length;
   if(!NI) return;
@@ -810,7 +814,8 @@
      its own viewer/menu/video/autoplay removed — it shares this page's viewer and menu)
      ===================================================================== */
   var Stack = (function(){
-    var CONFIG = { loop:true, tau:110, stretchMax:0.06, stretchGain:0.018, parallax:7, swellMax:0.08, swellRadius:190 };
+    // swellMax 0: the reference doesn't swell neighbours near the cursor; hover is handled below.
+    var CONFIG = { loop:true, tau:110, stretchMax:0.06, stretchGain:0.018, parallax:7, swellMax:0, swellRadius:190 };
     var N = NI;
     var vstage = document.getElementById("vg-stage");
     var titlesEl = document.getElementById("vg-titles");
@@ -833,25 +838,27 @@
         img.addEventListener("load", function(){ img.classList.add("is-loaded"); });
         return it;
       });
-      document.getElementById("st-total").textContent = pad2(N);
     }
     var L = {};
     function measure(){
       if(!built || mode !== "index") return;
       var vw = window.innerWidth, vh = window.innerHeight, mobile = vw < 720;
-      var pad = mobile ? 16 : clamp(vw * 0.032, 16, 48);
+      var pad = mobile ? 14 : clamp(vw * 0.032, 16, 48);
       L.mobile = mobile; L.vw = vw; L.vh = vh;
+      // Title column on every width (as in the reference); phones cap it and ellipsise long names.
+      var cap = mobile ? vw * 0.36 : vw * 0.3;
+      titlesEl.style.setProperty("--tlw", mobile ? Math.round(cap) + "px" : "none");
       var titlesW = 0;
-      if(!mobile){
-        sItems.forEach(function(it){ titlesW = Math.max(titlesW, it.tl.offsetWidth); });
-        titlesW = Math.max(titlesW, infoEl.offsetWidth);
-      }
-      L.mediaX = mobile ? pad : pad + Math.min(titlesW, vw * 0.3) + clamp(vw * 0.04, 32, 64);
-      L.maxW = mobile ? vw - pad * 2 : vw - L.mediaX - pad;
-      L.Amax = mobile ? Math.min(vh * 0.46, 520) : Math.min(vh * 0.58, 720);
-      L.Cbase = L.Amax * (mobile ? 0.36 : 0.30);
-      L.gap = mobile ? 12 : 16;
-      L.centerY = mobile ? vh * 0.43 : vh * 0.52;
+      sItems.forEach(function(it){ titlesW = Math.max(titlesW, it.tl.offsetWidth); });
+      titlesW = Math.max(titlesW, infoEl.offsetWidth);
+      L.colLeft = pad + Math.min(titlesW, cap) + (mobile ? 14 : clamp(vw * 0.04, 32, 64));
+      L.maxW = vw - L.colLeft - pad;
+      L.axis = L.colLeft + L.maxW / 2;          // every image is centred on this vertical line
+      L.Amax = mobile ? Math.min(vh * 0.5, 520) : Math.min(vh * 0.58, 720);
+      L.Cbase = L.Amax * (mobile ? 0.34 : 0.30);
+      L.gap = mobile ? 10 : 16;
+      L.centerY = vh * 0.52;
+      L.tlk = mobile ? 19 / 30 : 1;              // title metrics scale with the phone font size
       L.pitch = L.Cbase + L.gap;
       sItems.forEach(function(it){
         it.A = Math.min(L.Amax, L.maxW / it.ratio);
@@ -922,24 +929,26 @@
         if(!it.shown){ it.el.style.visibility = "visible"; it.shown = true; }
         var sw = 1;
         if(allowSwell && it.t < 0.5){
-          var cy = y + it.h / 2, right = L.mediaX + it.A * it.ratio * it.s + 160;
-          if(mouse.x > L.mediaX - 80 && mouse.x < right){
+          var cy = y + it.h / 2, half = it.A * it.ratio * it.s / 2;
+          if(mouse.x > L.axis - half - 80 && mouse.x < L.axis + half + 80){
             var f = Math.max(0, 1 - Math.abs(mouse.y - cy) / CONFIG.swellRadius);
             sw = 1 + CONFIG.swellMax * f * f * (1 - it.t * 2);
           }
         }
         it.swell += (sw - it.swell) * 0.18;
         if(Math.abs(sw - it.swell) < 0.0005) it.swell = sw; else swellBusy = true;
-        it.el.style.transform = "translate3d(" + L.mediaX + "px," + y + "px,0) scale(" + it.s + ")";
+        it.el.style.transform = "translate3d(" + (L.axis - it.A * it.ratio * it.s / 2) + "px," + y + "px,0) scale(" + it.s + ")";
         it.media.style.transform = "translate3d(0," + (par / it.s) + "px,0) scale(" + it.swell + "," + (it.swell * stretch) + ")";
       }
       var ai = mod(Math.round(p), N);
       if(ai !== activeIdx) setActive(ai);
-      if(!L.mobile) renderTitles(ai);
+      renderTitles(ai);
+      if(fine && mouse.inside && ++hoverTick % 4 === 0) updateHover();   // items move under a still cursor
       return swellBusy;
     }
-    var TL_LINE = 21, TL_ACTIVE = 40, TL_INFO = 62, TL_MIN = 0.46;
+    var TL_MIN = 0.46;
     function renderTitles(ai){
+      var TL_LINE = 21 * L.tlk, TL_ACTIVE = 40 * L.tlk, TL_INFO = L.mobile ? 60 : 62;
       var y = 0, aY = 0, i, it;
       for(i = 0; i < N; i++){
         it = sItems[i]; it.tlY = y;
@@ -958,8 +967,6 @@
       infoEl.style.transform = "translate3d(0," + (aa.tlY + off + TL_ACTIVE * (TL_MIN + (1 - TL_MIN) * aa.t) + 6) + "px,0)";
       infoEl.style.opacity = clamp((aa.t - 0.5) * 2, 0, 1);
     }
-    var nEl = document.getElementById("st-n");
-    var barT = document.getElementById("vg-bar-t"), barM = document.getElementById("vg-bar-m"), barGo = document.getElementById("vg-bar-go");
     var infoM = document.getElementById("vg-info-m"), infoGo = document.getElementById("vg-info-go");
     function setActive(i){
       if(activeIdx >= 0){
@@ -969,10 +976,29 @@
       activeIdx = i;
       var it = sItems[i], w = it.w;
       it.el.classList.add("is-active"); it.hit.setAttribute("aria-current", "true"); it.tl.setAttribute("aria-current", "true");
-      nEl.textContent = pad2(i + 1);
-      barT.textContent = w.name; barM.textContent = infoM.textContent = w.cat + " · " + w.meta;
-      barT.href = barGo.href = infoGo.href = ROUTES[w.nav] || "/";
-      barT.setAttribute("data-nav", w.nav); barGo.setAttribute("data-nav", w.nav); infoGo.setAttribute("data-nav", w.nav);
+      infoM.textContent = w.label;
+      infoGo.href = ROUTES[w.nav] || "/"; infoGo.setAttribute("data-nav", w.nav);
+    }
+
+    /* ---------- Hover (mouse only): grow the hovered image, dim the rest, "view" pill ---------- */
+    var pill = document.getElementById("vg-pill"), hovIt = null, hoverTick = 0, pillRaf = 0;
+    function setHover(it){
+      if(it === hovIt) return;
+      if(hovIt) hovIt.el.classList.remove("hov");
+      hovIt = it;
+      if(it) it.el.classList.add("hov");
+      vstage.classList.toggle("has-hover", !!it);
+      vstage.classList.toggle("pill-on", !!it);
+      pill.classList.toggle("on", !!it);
+    }
+    function updateHover(){
+      if(!fine || !mouse.inside || dragging || mode !== "index" || viewerOpen || menuOpen){ setHover(null); return; }
+      var el = document.elementFromPoint(mouse.x, mouse.y), hit = el && el.closest ? el.closest(".vg-hit") : null;
+      setHover(hit ? sItems[+hit.getAttribute("data-i")] : null);
+    }
+    function movePill(){
+      pillRaf = 0;
+      pill.style.transform = "translate3d(" + (mouse.x - pill.offsetWidth / 2) + "px," + (mouse.y - pill.offsetHeight / 2) + "px,0)";
     }
 
     // wheel / drag (gated to index mode and no overlays)
@@ -995,11 +1021,16 @@
     });
     window.addEventListener("pointermove", function(e){
       if(mode !== "index") return;
-      if(e.pointerType === "mouse"){ mouse.x = e.clientX; mouse.y = e.clientY; mouse.inside = true; kick(); }
+      if(e.pointerType === "mouse"){
+        mouse.x = e.clientX; mouse.y = e.clientY; mouse.inside = true;
+        updateHover();
+        if(!pillRaf) pillRaf = requestAnimationFrame(movePill);
+        kick();
+      }
       if(!drag || e.pointerId !== drag.id) return;
       var dy = e.clientY - drag.y0;
       if(!drag.moved && Math.abs(dy) > 6){
-        drag.moved = true; dragging = true; vstage.classList.add("is-dragging");
+        drag.moved = true; dragging = true; vstage.classList.add("is-dragging"); setHover(null);
         try{ vstage.setPointerCapture(e.pointerId); }catch(err){}
         clearTimeout(snapTimer);
       }
@@ -1024,7 +1055,7 @@
     }
     window.addEventListener("pointerup", endDrag);
     window.addEventListener("pointercancel", endDrag);
-    document.documentElement.addEventListener("mouseleave", function(){ mouse.inside = false; kick(); });
+    document.documentElement.addEventListener("mouseleave", function(){ mouse.inside = false; setHover(null); kick(); });
     vstage.addEventListener("scroll", function(){ vstage.scrollTop = 0; vstage.scrollLeft = 0; });
     vstage.addEventListener("focusin", function(e){
       var hit = e.target.closest(".vg-hit");
@@ -1064,11 +1095,12 @@
       if(document.fonts && document.fonts.ready) document.fonts.ready.then(scheduleMeasure);
     }
     // focus once the stack has painted (hidden items can't take focus)
+    function clearHover(){ setHover(null); }
     function focusActive(){ requestAnimationFrame(function(){ requestAnimationFrame(function(){
       var it = sItems[mod(Math.round(target), N)]; if(it) it.hit.focus({ preventScroll:true }); }); }); }
     function hitFor(i){ var it = sItems[mod(i, N)]; return it ? it.hit : null; }
     function current(){ return activeIdx; }
-    return { show:show, click:click, key:key, goTo:goTo, kick:kick, focusActive:focusActive, current:current, hitFor:hitFor,
+    return { show:show, click:click, key:key, goTo:goTo, kick:kick, focusActive:focusActive, current:current, hitFor:hitFor, clearHover:clearHover,
       stats:function(){ return { built:built, p:p, target:target, active:activeIdx, items:sItems.length }; } };
   })();
 
@@ -1084,6 +1116,7 @@
     modeBtn.querySelector(".opt-index").classList.toggle("on", m === "index");
     modeBtn.setAttribute("aria-checked", m === "index" ? "true" : "false");
     if(hovT) unhover(hovT, true);
+    Stack.clearHover();
     if(m === "index"){
       // open the index on whatever cover is nearest the wall's centre
       var start = W ? itemAt(Math.round(camX / CW), Math.round(camY / CH)) : 0;
@@ -1110,7 +1143,7 @@
     vImg.width = it.w; vImg.height = it.h;
     vImg.src = it.thumb;
     vImg.alt = it.name + " — cover";
-    vTitle.textContent = it.name; vMeta.textContent = it.cat + " · " + it.meta;
+    vTitle.textContent = it.name; vMeta.textContent = it.label;
     vCount.textContent = pad2(vi + 1) + " / " + pad2(NI);
     vLink.href = ROUTES[it.nav] || "/"; vLink.setAttribute("data-nav", it.nav);
     var full = new Image(); full.decoding = "async"; full.src = it.full;
@@ -1123,7 +1156,7 @@
     clearTimeout(vHideT);
     vOpener = opener || document.activeElement;
     showItem(i);
-    V.hidden = false; viewerOpen = true; if(hovT) unhover(hovT, true);
+    V.hidden = false; viewerOpen = true; if(hovT) unhover(hovT, true); Stack.clearHover();
     requestAnimationFrame(function(){ V.classList.add("open"); });
     V.querySelector(".v-close").focus();
   }
@@ -1142,7 +1175,7 @@
 
   /* ---------- Menu ---------- */
   var menu = document.getElementById("menu"), menuBtn = document.querySelector("[data-menu-open]");
-  function openMenu(){ menu.classList.add("open"); menuOpen = true; menuBtn.setAttribute("aria-expanded", "true"); menu.querySelector(".menu-close").focus(); }
+  function openMenu(){ Stack.clearHover(); menu.classList.add("open"); menuOpen = true; menuBtn.setAttribute("aria-expanded", "true"); menu.querySelector(".menu-close").focus(); }
   function closeMenu(){ menu.classList.remove("open"); menuOpen = false; menuBtn.setAttribute("aria-expanded", "false"); dirty = true; Stack.kick(); menuBtn.focus(); }
 
   /* ---------- One delegated click handler (data-nav / data-act) ---------- */
