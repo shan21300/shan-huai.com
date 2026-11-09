@@ -893,8 +893,12 @@
   /* About: slightly larger body on wide screens */
   #about .about p{font-size:clamp(17px,1.2vw,20px);line-height:1.75;max-width:60ch}
   .proj-page .pinfo{right:clamp(70px,7vw,96px)} /* clear the thumbnail rail */
+  /* isolation + translateZ give the frosted card its own compositing layer, so the
+     blend-mode cursor (#cursor-aperture, mix-blend-mode:difference) passing nearby no
+     longer forces partial re-blurs that show up as vertical streaks tracking the cursor. */
   .pinfo-card{background:rgba(11,11,12,0.62);backdrop-filter:blur(16px);
     -webkit-backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:20px;
+    isolation:isolate;transform:translateZ(0);-webkit-transform:translateZ(0);
     overflow:hidden;transition:max-height .5s cubic-bezier(.4,0,.1,1),border-radius .35s cubic-bezier(.4,0,.1,1)}
   .pinfo-head{display:flex;align-items:center;gap:14px;justify-content:space-between;
     padding:13px 16px;cursor:grab;user-select:none;touch-action:none}
