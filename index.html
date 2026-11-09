@@ -1157,22 +1157,25 @@
       background:linear-gradient(to top,rgba(11,11,12,.55),transparent)}
   }
 
-  /* ===== Curved carousel home (#landing) — from landing-draft-curved.html =====
-     Home only: logo top-left is the menu button (stays there, black, over the open menu),
-     no "menu" text button, native cursors, no page scroll. Other pages are unchanged. */
+  /* ===== Header on every page: the logo sits top-left and is the menu button. It stays
+     put over the open menu (black on the light menu, white on the dark one), so the old
+     "menu" / "close" buttons and the centred menu logo are hidden; "home" is in the menu.
+     ===== Curved carousel home (#landing) — from landing-draft-curved.html: native
+     cursors and no page scroll on the home page. */
   :root{--cc-px:clamp(16px,2.6vw,40px);--cc-py:clamp(14px,2vw,26px);--cc-logo:clamp(40px,3.6vw,52px)}
   html.cc-gl body.on-landing{overflow:hidden;overscroll-behavior:none}
   body.on-landing header::before{display:none}
-  body.on-landing .menuBtn{display:none}
-  body.on-landing .brandBtn{left:calc(var(--cc-px) + env(safe-area-inset-left,0px));top:calc(var(--cc-py) + env(safe-area-inset-top,0px));transform:none}
-  body.on-landing .brandBtn .logo-img{height:var(--cc-logo);transition:opacity .35s ease}
-  .brandBtn .logo-img-b{display:none}
-  body.on-landing .brandBtn .logo-img-b{display:block;position:absolute;left:0;top:0;height:var(--cc-logo);width:auto;opacity:0;transition:opacity .35s ease}
-  body.on-landing.menu-is-open .brandBtn .logo-img{opacity:0}
-  body.on-landing.menu-is-open .brandBtn .logo-img-b{opacity:.92}
-  body.on-landing.menu-is-open header{z-index:80}
-  body.on-landing #menu .menu-logo,body.on-landing #menu .menu-close{display:none}
-  body.on-landing .brandBtn:focus-visible{outline:1px solid var(--edge);outline-offset:6px}
+  header .menuBtn{display:none}
+  header .brandBtn{left:calc(var(--cc-px) + env(safe-area-inset-left,0px));top:calc(var(--cc-py) + env(safe-area-inset-top,0px));transform:none}
+  header .brandBtn .logo-img{height:var(--cc-logo);transition:opacity .35s ease}
+  header .brandBtn .logo-img-b{display:block;position:absolute;left:0;top:0;height:var(--cc-logo);width:auto;opacity:0;transition:opacity .35s ease}
+  body.menu-is-open:not(.menu-inv) .brandBtn .logo-img{opacity:0}
+  body.menu-is-open:not(.menu-inv) .brandBtn .logo-img-b{opacity:.92}
+  body.menu-is-open header{z-index:80;transform:none}
+  body.menu-is-open header::before{display:none}   /* no dark header band over the open menu */
+  #menu .menu-logo,#menu .menu-close{display:none}
+  body.on-landing #menu .m-home{display:none}
+  header .brandBtn:focus-visible{outline:1px solid var(--edge);outline-offset:6px}
   @media(hover:hover) and (pointer:fine){
     body.on-landing #cursor-aperture{display:none !important}
     body.on-landing,body.on-landing *{cursor:auto !important}
@@ -1226,7 +1229,7 @@
 
   <header>
     <span class="header-spacer" aria-hidden="true"></span>
-    <button class="brandBtn" data-nav="landing" aria-label="Home"><img src="/images/system/shanhuailogoinversed_white.png" alt="Shan-Huai" class="logo-img"><img src="/images/system/shanhuailogoinversed_black.png" alt="" class="logo-img-b" loading="lazy" aria-hidden="true"></button>
+    <button class="brandBtn" aria-label="Open menu" aria-expanded="false" aria-controls="menu"><img src="/images/system/shanhuailogoinversed_white.png" alt="Shan-Huai" class="logo-img"><img src="/images/system/shanhuailogoinversed_black.png" alt="" class="logo-img-b" loading="lazy" aria-hidden="true"></button>
     <button class="menuBtn" data-menu-open aria-label="Menu">menu</button>
   </header>
 
@@ -3404,6 +3407,7 @@
     <div class="menu-cats">
       <!-- Navigation is Commercial / Personal for now. The earlier page links stay below,
            hidden (not deleted), so they can be brought back by removing "hidden". -->
+      <button class="m-link m-home" data-nav="landing">home</button>
       <span class="m-link m-soon" aria-disabled="true">commercial</span>
       <a class="m-link" href="/personal">personal</a>
       <button class="m-link" data-nav="projects" hidden>project</button>
@@ -3593,8 +3597,8 @@
       var endScale=restH/bigH;                        // shrink factor to reach resting size
       var startY=(window.innerHeight/2)-bigCY;        // centred on screen
       var endY=restCY-bigCY;                          // resting spot in the header
-      // Home page: the logo rests top-left (no CSS centring), so it also travels sideways.
-      var onHome=document.body.classList.contains("on-landing");
+      // The logo rests top-left (no CSS centring), so it also travels sideways.
+      var onHome=true;
       var bigCX=bigRect.left+bigRect.width/2, restCX=rest.left+rest.width/2;
       var startX=onHome ? (window.innerWidth/2)-bigCX : 0, endX=onHome ? restCX-bigCX : 0;
 
@@ -3844,13 +3848,14 @@
     var curEl = document.getElementById(current);
     var inverted = !!(curEl && curEl.classList.contains("hs-layout"));
     menuEl.classList.toggle("menu-inverted", inverted);
+    document.body.classList.toggle("menu-inv", inverted);   // dark menu: the logo stays white
     var menuLogoImg = document.querySelector(".menu-logo-img");
     if(menuLogoImg) menuLogoImg.src = inverted
       ? "/images/system/shanhuailogoinversed_white.png"
       : "/images/system/shanhuailogoinversed_black.png";
     menuEl.classList.add("open");
     document.body.classList.add("menu-is-open");
-    if(current==="landing"){         // home: the page behind can't be tabbed into; focus the first link
+    {                                // the page behind can't be tabbed into; focus the first link
       var mainEl=document.querySelector("main"); if(mainEl) mainEl.setAttribute("inert","");
       setTimeout(function(){         // first visible item ("close" and the menu logo are hidden here)
         var c=menuEl.querySelectorAll("a[href],button");
@@ -3878,14 +3883,13 @@
   document.querySelectorAll("#menu [data-nav]").forEach(function(el){
     el.addEventListener("click",function(){ swap(el.getAttribute("data-nav")); closeMenu(); });
   });
-  // Home page: the logo (top-left there) opens / closes the menu instead of linking home
+  // The logo (top-left on every page) opens / closes the menu; "home" is a menu item
   var brandToggle=document.querySelector("header .brandBtn");
   if(brandToggle) brandToggle.addEventListener("click",function(){
-    if(current!=="landing") return;
     if(document.body.classList.contains("menu-is-open")) closeMenu(); else openMenu();
   });
   document.addEventListener("keydown",function(e){
-    if(e.key==="Escape" && current==="landing" && document.body.classList.contains("menu-is-open")){
+    if(e.key==="Escape" && document.body.classList.contains("menu-is-open")){
       e.preventDefault(); closeMenu(); if(brandToggle) brandToggle.focus({preventScroll:true});
     }
   });
@@ -4686,19 +4690,13 @@
     e.preventDefault();
   }, true);
 
-  /* the logo is the menu button on the home page: keep its label truthful */
+  /* the logo is the menu button on every page: keep its label truthful */
   var brandBtn = document.querySelector("header .brandBtn");
   function syncBrand(){
     if(!brandBtn) return;
-    if(body.classList.contains("on-landing")){
-      var open = body.classList.contains("menu-is-open");
-      brandBtn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
-      brandBtn.setAttribute("aria-expanded", open ? "true" : "false");
-      brandBtn.setAttribute("aria-controls", "menu");
-    }else{
-      brandBtn.setAttribute("aria-label", "Home");
-      brandBtn.removeAttribute("aria-expanded"); brandBtn.removeAttribute("aria-controls");
-    }
+    var open = body.classList.contains("menu-is-open");
+    brandBtn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    brandBtn.setAttribute("aria-expanded", open ? "true" : "false");
   }
   syncBrand();
   new MutationObserver(syncBrand).observe(body, { attributes:true, attributeFilter:["class"] });
