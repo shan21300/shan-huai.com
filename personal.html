@@ -271,14 +271,8 @@
       <div class="stage" id="stage" aria-hidden="true"></div>
       <div class="vignette" aria-hidden="true"></div>
     </div>
-    <div class="hud">
-      <span class="hud-meta" id="hud-meta"></span>
-      <p class="hud-hint" id="wall-help">
-        <span class="fine">drag · hold to zoom out · click to open</span>
-        <span class="coarse">drag · pinch to zoom out · tap to open</span>
-        <span class="sr-only">. Keyboard: arrow keys move between projects, Enter opens one.</span>
-      </p>
-    </div>
+    <!-- No on-screen labels at the bottom; the instructions stay for screen readers only. -->
+    <p class="sr-only" id="wall-help">Drag to explore; click a cover to expand it, click it again to open the project. Keyboard: arrow keys move between projects, Enter opens one.</p>
 
     <!-- STACK INDEX -->
     <div class="stack-view" id="stack-view">
@@ -290,7 +284,6 @@
         </div>
       </nav>
       <span class="vg-pill" id="vg-pill" aria-hidden="true">view</span>
-      <span class="vg-hint mono" aria-hidden="true">Scroll · Drag · ↑ ↓</span>
     </div>
 
     <p class="sr-only" aria-live="polite" id="live"></p>
@@ -395,7 +388,6 @@
   var NI = items.length;
   if(!NI) return;
   var cats = {}; items.forEach(function(it){ cats[it.cat] = 1; });
-  document.getElementById("hud-meta").textContent = NI + " projects · live · photo-journalism · portraiture · wedding";
 
   function mod(a, n){ return ((a % n) + n) % n; }
   function pad2(n){ return (n < 10 ? "0" : "") + n; }
