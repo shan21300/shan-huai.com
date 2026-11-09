@@ -410,8 +410,8 @@
       rep++;
     }while(s < W*3 && rep < 8);
     L = s;
-    /* open with the newest project at the left edge, so the row reads left → right into the bend */
-    if(!placed){ placed = true; pos = target = inst[0].s + W/2 - gap*2; }
+    /* open with the newest project centred (the oldest ones loop in on its left) */
+    if(!placed){ placed = true; pos = target = centreOf(0); }
     else if(oldL > 1){ pos = pos/oldL*L; target = target/oldL*L; }
     dirty = true;
   }
