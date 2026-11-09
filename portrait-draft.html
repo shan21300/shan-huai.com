@@ -638,9 +638,12 @@
     var wasPinch = !!pinch; pinch = null;
     if(zoomHeld || wasPinch || zoomTarget !== 1){ setZoomTarget(1, lastX, lastY); }
     if(dragging && !reduce && e.type === "pointerup"){
-      // velocity over the last ~90 ms of samples
-      var now = e.timeStamp, a = null, b = samples[samples.length - 1];
-      for(var i = samples.length - 1; i >= 0; i--){ if(now - samples[i].t <= 90) a = samples[i]; else break; }
+      // velocity over the ~100 ms before the LAST move (not before release, so sparse
+      // move events still fling); a finger that rested >100 ms before lifting throws nothing
+      var b = samples[samples.length - 1], a = null;
+      if(b && e.timeStamp - b.t <= 100){
+        for(var i = samples.length - 2; i >= 0; i--){ if(b.t - samples[i].t <= 100 || !a) a = samples[i]; else break; }
+      }
       if(a && b && b.t > a.t){
         vx = (b.x - a.x) / (b.t - a.t); vy = (b.y - a.y) / (b.t - a.t);
         var sp = Math.hypot(vx, vy); if(sp > VMAX){ vx *= VMAX / sp; vy *= VMAX / sp; }
