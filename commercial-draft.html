@@ -73,6 +73,7 @@
     text-shadow:0 1px 12px rgba(0,0,0,.5)}
   .hdr-btn:hover,.hdr-btn[aria-expanded="true"]{opacity:1}
   body.menu-is-open header{z-index:80}
+  body.index-open header{z-index:65}      /* logo + "close" stay usable above the index list */
   body.menu-is-open .hdr-right{visibility:hidden}
   body.menu-is-open .brandBtn .logo-img{opacity:0}
   body.menu-is-open .brandBtn .logo-img-b{opacity:.92}
@@ -121,7 +122,6 @@
     z-index:20;width:min(78vw,680px);pointer-events:none;text-shadow:0 1px 18px rgba(0,0,0,.45)}
   .ct-cap-in{transition:opacity .2s ease,transform .2s ease}
   .ct-cap.is-out .ct-cap-in{opacity:0;transform:translateY(6px)}
-  .ct-num{font-size:10.5px;letter-spacing:.14em;color:var(--edge);display:block;margin-bottom:10px}
   .ct-title{font-family:"Cormorant Garamond",serif;font-weight:300;font-size:clamp(36px,5vw,72px);line-height:1;letter-spacing:-.02em;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-bottom:.08em}
   .ct-meta{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(237,234,227,.74);margin-top:10px;
@@ -133,10 +133,11 @@
   /* ---------- Timeline ---------- */
   .ct-tl{position:fixed;left:0;right:0;bottom:0;z-index:20;padding-bottom:var(--tl-pad)}
   .ct-bar{position:relative;height:30px;display:flex;align-items:center;justify-content:space-between;
-    padding:0 calc(var(--cc-px) + env(safe-area-inset-left,0px));font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--edge)}
+    padding:0 calc(var(--cc-px) + env(safe-area-inset-left,0px));font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:rgba(237,234,227,.7);
+    text-shadow:0 1px 10px rgba(0,0,0,.55)}
   .ct-tc{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:13ch;text-align:center;color:var(--paper);
     font-variant-numeric:tabular-nums;letter-spacing:.08em;contain:layout paint}
-  .ct-count{font-variant-numeric:tabular-nums}
+  .ct-count{font-variant-numeric:tabular-nums;margin-left:auto}
   .ct-view{position:relative;height:calc(var(--ruler) + var(--clip-h));overflow:hidden;touch-action:none;
     cursor:grab;-webkit-user-select:none;user-select:none}
   .ct-view.is-dragging,.ct-view.is-dragging *{cursor:grabbing}
@@ -199,7 +200,7 @@
 </head>
 <body>
   <header>
-    <button class="brandBtn" data-act="menu-toggle" aria-label="Open menu" aria-controls="menu" aria-expanded="false"><img src="/images/system/shanhuailogoinversed_white.png" alt="Shan-Huai" class="logo-img"><img src="/images/system/shanhuailogoinversed_black.png" alt="" class="logo-img-b" aria-hidden="true" loading="lazy"></button>
+    <button class="brandBtn" data-act="menu-toggle" aria-label="Open menu" aria-controls="menu" aria-expanded="false"><img src="/images/system/shanhuailogoinversed_white.png" alt="Shan-Huai" class="logo-img"><img data-src="/images/system/shanhuailogoinversed_black.png" alt="" class="logo-img-b" aria-hidden="true"></button>
     <div class="hdr-right">
       <button class="hdr-btn" data-act="index" aria-controls="ct-index" aria-expanded="false">index</button>
     </div>
@@ -215,7 +216,6 @@
 
     <div class="ct-cap" id="ct-cap">
       <div class="ct-cap-in">
-        <span class="ct-num mono" id="ct-num">01 / 04</span>
         <h2 class="ct-title" id="ct-title">SUB</h2>
         <p class="ct-meta mono" id="ct-meta">Branding — Local Remote · 2026</p>
         <a class="ct-open mono" id="ct-open" href="/project/sub" data-nav="proj-sub">view project ↗</a>
@@ -313,7 +313,7 @@
   var tl = document.getElementById("ct-tl");
   var hit = document.getElementById("ct-hit");
   var cap = document.getElementById("ct-cap");
-  var elNum = document.getElementById("ct-num"), elTitle = document.getElementById("ct-title"),
+  var elTitle = document.getElementById("ct-title"),
       elMeta = document.getElementById("ct-meta"), elOpen = document.getElementById("ct-open"),
       elTc = document.getElementById("ct-tc"), elCount = document.getElementById("ct-count"),
       elLive = document.getElementById("ct-live");
@@ -562,7 +562,6 @@
   var capT = 0, capWant = 0, prevClearT = 0;
   function fillCaption(i){
     var p = P[i];
-    elNum.textContent = pad(i + 1) + " / " + pad(N);
     elTitle.textContent = p.title;
     if(p.lang) elTitle.setAttribute("lang", p.lang); else elTitle.removeAttribute("lang");
     elMeta.textContent = [p.cat, p.meta].filter(Boolean).join(" — ");
@@ -700,12 +699,12 @@
     li.appendChild(a); indexList.appendChild(li);
   });
   function openIndex(){
-    indexOpen = true; indexEl.hidden = false; indexBtn.setAttribute("aria-expanded", "true"); indexBtn.textContent = "close";
+    indexOpen = true; indexEl.hidden = false; body.classList.add("index-open"); indexBtn.setAttribute("aria-expanded", "true"); indexBtn.textContent = "close";
     [].forEach.call(indexList.querySelectorAll("a"), function(a, i){ if(i === active) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current"); });
     var f = indexList.querySelectorAll("a")[active] || indexList.querySelector("a"); if(f) f.focus();
   }
   function closeIndex(){
-    indexOpen = false; indexEl.hidden = true; indexBtn.setAttribute("aria-expanded", "false"); indexBtn.textContent = "index";
+    indexOpen = false; indexEl.hidden = true; body.classList.remove("index-open"); indexBtn.setAttribute("aria-expanded", "false"); indexBtn.textContent = "index";
     indexBtn.focus();
   }
 
@@ -713,6 +712,8 @@
   var menu = document.getElementById("menu"), menuBtn = document.querySelector("header .brandBtn");
   function openMenu(){
     if(indexOpen) closeIndex();
+    var lb = menuBtn.querySelector(".logo-img-b");                 /* the black logo is only needed on the open menu */
+    if(lb && !lb.src && lb.getAttribute("data-src")) lb.src = lb.getAttribute("data-src");
     menu.classList.add("open"); menuOpen = true; body.classList.add("menu-is-open");
     menuBtn.setAttribute("aria-expanded", "true"); menuBtn.setAttribute("aria-label", "Home");
     var f = menu.querySelector("a[href],button"); if(f) f.focus();
