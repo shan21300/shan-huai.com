@@ -3,20 +3,19 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="robots" content="noindex" />
-<title>Live · Photo-Journalism · Portraiture · Wedding — Shan-Huai (draft)</title>
+<title>Personal — Shan-Huai</title>
 <link rel="icon" type="image/png" href="/images/system/favicon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <script>document.documentElement.classList.add("js");</script>
 <!--
-  DRAFT — the covers of every Live, Photo-Journalism, Portraiture and Wedding project
+  PERSONAL — the covers of every Live, Photo-Journalism, Portraiture and Wedding project
   (plus Butoh Experiment and Zero-Case Policy), shown two ways:
     · WALL  — a draggable, infinite, curved grid of fixed cells (default)
     · INDEX — the Stack Index format (vertical media stack + left title index)
   The header's left button switches between them (#index in the URL opens the index).
-  Standalone page; not wired into index.html or the site navigation.
+  Standalone page served at /personal (personal.html); linked from the site menu.
   Data: the JSON block #projects (site order: newest first, same rule as the site).
 -->
 <style>
@@ -97,6 +96,10 @@
     font-family:"Cormorant Garamond";font-weight:300;font-size:clamp(30px,3.9vw,53px);line-height:1.1;letter-spacing:-.02em;
     text-transform:lowercase;text-decoration:none}
   .m-link:hover,.m-sub:hover,.menu-mini a:hover{font-style:italic}
+  .m-link[aria-current="page"]{font-style:italic}
+  .m-link.m-soon{cursor:default}
+  .m-link.m-soon:hover{font-style:normal}
+  #menu [hidden]{display:none !important}
   #menu :focus-visible{outline-color:var(--ink)}
   .menu-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:26px;flex-wrap:wrap;margin-top:auto}
   .menu-mini{display:flex;gap:clamp(16px,2vw,30px);flex-wrap:wrap;align-items:flex-end}
@@ -217,6 +220,9 @@
   .viewer[hidden]{display:none}
   .viewer.open{opacity:1}
   .v-fig{grid-row:2;display:flex;align-items:center;justify-content:center;min-height:0;padding:clamp(8px,2vh,24px) clamp(56px,8vw,120px)}
+  /* Clicking the expanded image opens its project page. */
+  .v-imglink{display:flex;align-items:center;justify-content:center;max-width:100%;max-height:100%;height:100%;cursor:pointer;outline:none}
+  .v-imglink:focus-visible .v-img{outline:1px solid var(--paper);outline-offset:4px}
   .v-img{max-width:100%;max-height:100%;width:auto;height:auto;display:block;object-fit:contain;border-radius:4px;transition:filter .3s ease}
   .v-img.lowres{filter:blur(6px)}
   .v-bar{grid-row:3;display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;
@@ -257,7 +263,7 @@
   </header>
 
   <main>
-    <h1 class="sr-only">Live, photo-journalism, portraiture and wedding</h1>
+    <h1 class="sr-only">Personal</h1>
 
     <!-- WALL -->
     <div class="wall" id="wall" tabindex="0" role="region" aria-roledescription="image wall"
@@ -297,18 +303,18 @@
   {"nav":"gig-someshiitsam","name":"someshiit 山姆","cat":"Live","meta":"Chillout Music Festival · 2025","full":"/images/Concerts/someshiitSam_chillout_-01.jpg","w":1333,"h":2000},
   {"nav":"julianjudy","name":"Julian and Judy","cat":"Wedding","meta":"Engagement Session · 2025","full":"/images/wedding-engagement/Julian%26Judy_engagement-06.jpg","w":2000,"h":1333},
   {"nav":"gig-elephantgym","name":"Elephant Gym","cat":"Live","meta":"Bristol · 2024","full":"/images/Concerts/elephantgym_bristol-10.jpg","w":1333,"h":2000},
-  {"nav":"proj-butoh","name":"Butoh Experiment","cat":"Performance","meta":"Performance · 2023","full":"/images/projects/butoh_nigel_-1.jpg","w":1333,"h":2000},
+  {"nav":"proj-butoh","name":"Butoh Experiment","cat":"Performance","meta":"London · 2023","full":"/images/projects/butoh_nigel_-1.jpg","w":1333,"h":2000},
   {"nav":"pj-kenyaslum","name":"Kenya Slum","cat":"Photo-Journalism","meta":"Nairobi · 2023","full":"/images/Photo-Journalism/kenya_2023_-05.jpg","w":2000,"h":1333},
   {"nav":"pt-untitledsketch","name":"Untitled Sketch","cat":"Portraiture","meta":"Taipei · 2023","full":"/images/portraiture/rooftop_motion-cover.jpg","w":1333,"h":2000},
   {"nav":"gig-hillsong","name":"Hillsong","cat":"Live","meta":"London · 2022","full":"/images/Concerts/Hillsong_London-10.jpg","w":1333,"h":2000},
   {"nav":"pj-slavaukraini","name":"Slava Ukraini","cat":"Photo-Journalism","meta":"London · 2022","full":"/images/Photo-Journalism/Slava-Ukrani-11.jpg","w":1333,"h":2000},
-  {"nav":"pt-0821tingting","name":"@0821tingting","cat":"Portraiture","meta":"Portrait · 2022","full":"/images/portraiture/0821tingting_2021-16.jpg","w":1333,"h":2000},
-  {"nav":"pt-dualitywithin","name":"Duality Within","cat":"Portraiture","meta":"Portrait · 2021","full":"/images/portraiture/duality_within_2021-21.jpg","w":1333,"h":2000},
+  {"nav":"pt-0821tingting","name":"@0821tingting","cat":"Portraiture","meta":"Taipei · 2022","full":"/images/portraiture/0821tingting_2021-16.jpg","w":1333,"h":2000},
+  {"nav":"pt-dualitywithin","name":"Duality Within","cat":"Portraiture","meta":"Shanghai · 2021","full":"/images/portraiture/duality_within_2021-21.jpg","w":1333,"h":2000},
   {"nav":"gig-thehope","name":"The Hope","cat":"Live","meta":"Taipei · 2021","full":"/images/Concerts/TheHope_Taipei_2021_cover.jpg","w":1333,"h":2000},
-  {"nav":"pt-inmoodforsmoke","name":"In Mood For Smoke","cat":"Portraiture","meta":"Portrait · 2021","full":"/images/portraiture/In-mood-for-smoke_2021-3.jpg","w":1348,"h":2000},
+  {"nav":"pt-inmoodforsmoke","name":"In Mood For Smoke","cat":"Portraiture","meta":"Shanghai · 2021","full":"/images/portraiture/In-mood-for-smoke_2021-3.jpg","w":1348,"h":2000},
   {"nav":"danieljuny","name":"Daniel and Juny","cat":"Wedding","meta":"Taiwan · 2021","full":"/images/wedding-engagement/DJ-Juny_engagement-04.jpg","w":1333,"h":2000},
-  {"nav":"proj-zerocase","name":"Zero-Case Policy","cat":"Photography","meta":"Performance · 2021","full":"/images/projects/0-case-policy-5.jpg","w":1333,"h":2000},
-  {"nav":"pt-tatiana","name":"Tatiana","cat":"Portraiture","meta":"Portrait · 2020","full":"/images/portraiture/tatiana_2021-08.jpg","w":1333,"h":2000},
+  {"nav":"proj-zerocase","name":"Zero-Case Policy","cat":"Photography","meta":"London · 2021","full":"/images/projects/0-case-policy-5.jpg","w":1333,"h":2000},
+  {"nav":"pt-tatiana","name":"Tatiana","cat":"Portraiture","meta":"Taipei · 2020","full":"/images/portraiture/tatiana_2021-08.jpg","w":1333,"h":2000},
   {"nav":"gig-mosaic","name":"Mosaic","cat":"Live","meta":"Hollywood · 2018–2020","full":"/images/Concerts/Mosaic_02.jpg","w":1333,"h":2000},
   {"nav":"pj-hkprotest","name":"The Umbrella Movement","cat":"Photo-Journalism","meta":"Hong Kong · 2019","full":"/images/Photo-Journalism/hkProt-06.jpg","w":2000,"h":1333}
 ]
@@ -320,7 +326,7 @@
   </main>
 
   <div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Cover viewer" hidden>
-    <figure class="v-fig"><img class="v-img" id="v-img" alt="" draggable="false"></figure>
+    <figure class="v-fig"><a class="v-imglink" id="v-imglink" href="/" data-nav="landing"><img class="v-img" id="v-img" alt="" draggable="false"></a></figure>
     <div class="v-bar">
       <div class="v-cap"><span class="v-title" id="v-title"></span><span class="v-meta" id="v-meta"></span></div>
       <div class="v-right"><span class="v-count" id="v-count" aria-live="polite"></span><a class="v-link" id="v-link" href="/">view project &rarr;</a></div>
@@ -334,15 +340,19 @@
     <button class="menu-close" data-act="menu-close" aria-label="Close menu">close</button>
     <button class="menu-logo" data-nav="landing" aria-label="Home"><img src="/images/system/shanhuailogoinversed_black.png" alt="Shan-Huai" class="menu-logo-img"></button>
     <div class="menu-cats">
-      <button class="m-link" data-nav="projects">project</button>
-      <button class="m-link" data-nav="live">live</button>
-      <button class="m-link" data-nav="photojournalism">photo-journalism</button>
-      <button class="m-link" data-nav="portraiture">portraiture</button>
-      <button class="m-link" data-nav="wedding">wedding</button>
-      <button class="m-link" data-nav="archive">archive</button>
+      <!-- Navigation is Commercial / Personal for now. The earlier page links stay below,
+           hidden (not deleted), so they can be brought back by removing "hidden". -->
+      <span class="m-link m-soon" aria-disabled="true">commercial</span>
+      <a class="m-link" href="/personal" aria-current="page">personal</a>
+      <button class="m-link" data-nav="projects" hidden>project</button>
+      <button class="m-link" data-nav="live" hidden>live</button>
+      <button class="m-link" data-nav="photojournalism" hidden>photo-journalism</button>
+      <button class="m-link" data-nav="portraiture" hidden>portraiture</button>
+      <button class="m-link" data-nav="wedding" hidden>wedding</button>
+      <button class="m-link" data-nav="archive" hidden>archive</button>
     </div>
     <div class="menu-foot">
-      <div class="menu-sec"><button class="m-sub" data-nav="about">bio</button></div>
+      <div class="menu-sec"><button class="m-sub" data-nav="about" hidden>bio</button></div>
       <div class="menu-mini">
         <a href="https://www.instagram.com/th3.editor" target="_blank" rel="noopener">instagram</a>
         <a href="https://www.linkedin.com/in/shan-huai-chiang" target="_blank" rel="noopener">linkedin</a>
@@ -710,7 +720,15 @@
     }
     if(e.type === "pointerup" && !moved && !zoomHeld && !wasPinch && e.timeStamp - downT < TAP_MAX_MS){
       var t = tileAt(e.clientX, e.clientY);
-      if(t){ setKf(t.key); openViewer(t.idx, wall); }
+      if(t){
+        setKf(t.key); openViewer(t.idx, wall);
+        // The browser's own click for this tap/click arrives next — on touch it lands at the
+        // tap point, i.e. on the viewer's image link. Swallow that one click so opening the
+        // viewer never also opens the project.
+        var eat = function(ev){ ev.stopPropagation(); ev.preventDefault(); document.removeEventListener("click", eat, true); };
+        document.addEventListener("click", eat, true);
+        setTimeout(function(){ document.removeEventListener("click", eat, true); }, 600);
+      }
     }
     dragging = false; zoomHeld = false;
     if(e.pointerType === "mouse") updateHover();
@@ -1005,11 +1023,11 @@
     }
 
     /* ---------- Hover (mouse only): grow the hovered image, dim the rest, cursor pill ----------
-       The pill says what a click will do: "view" on the open image (opens the viewer),
-       "go to" on any other image (scrolls the index to it). */
+       The pill says what a click will do: "view project" on the open image (opens its
+       project page), "go to" on any other image (scrolls the index to it). */
     var pill = document.getElementById("vg-pill"), hovIt = null, hoverTick = 0, pillRaf = 0, pillTxt = "view";
     function pillLabel(){
-      var t = hovIt && hovIt === sItems[activeIdx] ? "view" : "go to";
+      var t = hovIt && hovIt === sItems[activeIdx] ? "view project" : "go to";
       if(t !== pillTxt){ pill.textContent = t; pillTxt = t; if(!pillRaf) pillRaf = requestAnimationFrame(movePill); }
     }
     function setHover(it){
@@ -1099,7 +1117,7 @@
       if(hit){
         if(suppressClick) return true;
         var i = +hit.getAttribute("data-i");
-        if(i === activeIdx && Math.abs(target - Math.round(target)) < 0.01 && Math.abs(p - target) < 0.25) openViewer(i, hit);
+        if(i === activeIdx && Math.abs(target - Math.round(target)) < 0.01 && Math.abs(p - target) < 0.25) go(sItems[i].w.nav);
         else goTo(i);
         return true;
       }
@@ -1111,7 +1129,7 @@
       else if(k === "ArrowUp" || k === "PageUp" || k === "k") step(-1);
       else if(k === "Home") goTo(0);
       else if(k === "End") goTo(N - 1);
-      else if((k === "Enter" || k === " ") && !e.target.closest("button,a")) openViewer(activeIdx, null);
+      else if((k === "Enter" || k === " ") && !e.target.closest("button,a")){ e.preventDefault(); go(sItems[activeIdx].w.nav); return; }
       else handled = false;
       if(handled){
         e.preventDefault();
@@ -1164,7 +1182,7 @@
      ===================================================================== */
   var V = document.getElementById("viewer"), vImg = document.getElementById("v-img");
   var vTitle = document.getElementById("v-title"), vMeta = document.getElementById("v-meta");
-  var vCount = document.getElementById("v-count"), vLink = document.getElementById("v-link");
+  var vCount = document.getElementById("v-count"), vLink = document.getElementById("v-link"), vImgLink = document.getElementById("v-imglink");
   var vi = -1, vOpener = null, vHideT = 0;
   function showItem(i){
     vi = mod(i, NI);
@@ -1176,6 +1194,8 @@
     vTitle.textContent = it.name; vMeta.textContent = it.label;
     vCount.textContent = pad2(vi + 1) + " / " + pad2(NI);
     vLink.href = ROUTES[it.nav] || "/"; vLink.setAttribute("data-nav", it.nav);
+    vImgLink.setAttribute("href", ROUTES[it.nav] || "/"); vImgLink.setAttribute("data-nav", it.nav);
+    vImgLink.setAttribute("aria-label", "Open project: " + it.name);
     var full = new Image(); full.decoding = "async"; full.src = it.full;
     var swapIn = function(){ if(vi === want){ vImg.src = it.full; vImg.classList.remove("lowres"); } };
     if(full.decode) full.decode().then(swapIn, swapIn); else full.onload = swapIn;
@@ -1200,7 +1220,12 @@
   V.addEventListener("pointerdown", function(e){ if(e.pointerType !== "mouse") swipe = { x:e.clientX, y:e.clientY }; });
   V.addEventListener("pointerup", function(e){
     if(!swipe) return; var dx = e.clientX - swipe.x, dy = e.clientY - swipe.y; swipe = null;
-    if(Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.3) showItem(vi + (dx < 0 ? 1 : -1));
+    if(Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.3){
+      showItem(vi + (dx < 0 ? 1 : -1));
+      var eat = function(ev){ ev.stopPropagation(); ev.preventDefault(); };
+      document.addEventListener("click", eat, true);
+      setTimeout(function(){ document.removeEventListener("click", eat, true); }, 0);
+    }
   });
 
   /* ---------- Menu ---------- */

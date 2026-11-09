@@ -145,6 +145,11 @@
     font-family:"Cormorant Garamond";font-weight:300;font-size:clamp(30px,3.9vw,53px);line-height:1.1;
     letter-spacing:-.02em;text-transform:lowercase;transition:opacity .3s ease}
   .m-link:hover{font-style:italic}
+  /* "commercial" is a placeholder until its page exists; hidden menu links stay hidden */
+  a.m-link{text-decoration:none}
+  .m-link.m-soon{cursor:default}
+  .m-link.m-soon:hover{font-style:normal}
+  #menu [hidden]{display:none !important}
   .menu-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:26px;flex-wrap:wrap;margin-top:auto}
   .menu-sec{display:flex;gap:clamp(22px,3vw,48px)}
   .m-sub{background:none;border:none;color:var(--ink);cursor:pointer;
@@ -3386,16 +3391,20 @@
     <button class="menu-close" aria-label="Close">close</button>
     <button class="menu-logo" data-nav="landing" aria-label="Home"><img loading="lazy" src="/images/system/shanhuailogoinversed_black.png" alt="Shan-Huai" class="menu-logo-img"></button>
     <div class="menu-cats">
-      <button class="m-link" data-nav="projects">project</button>
-      <button class="m-link" data-nav="live">live</button>
-      <button class="m-link" data-nav="photojournalism">photo-journalism</button>
-      <button class="m-link" data-nav="portraiture">portraiture</button>
-      <button class="m-link" data-nav="wedding">wedding</button>
-      <button class="m-link" data-nav="archive">archive</button>
+      <!-- Navigation is Commercial / Personal for now. The earlier page links stay below,
+           hidden (not deleted), so they can be brought back by removing "hidden". -->
+      <span class="m-link m-soon" aria-disabled="true">commercial</span>
+      <a class="m-link" href="/personal">personal</a>
+      <button class="m-link" data-nav="projects" hidden>project</button>
+      <button class="m-link" data-nav="live" hidden>live</button>
+      <button class="m-link" data-nav="photojournalism" hidden>photo-journalism</button>
+      <button class="m-link" data-nav="portraiture" hidden>portraiture</button>
+      <button class="m-link" data-nav="wedding" hidden>wedding</button>
+      <button class="m-link" data-nav="archive" hidden>archive</button>
     </div>
     <div class="menu-foot">
       <div class="menu-sec">
-        <button class="m-sub" data-nav="about">bio</button>
+        <button class="m-sub" data-nav="about" hidden>bio</button>
       </div>
       <div class="menu-mini">
         <a href="https://www.instagram.com/th3.editor" target="_blank" rel="noopener">instagram</a>
