@@ -4861,6 +4861,15 @@
     zone = Math.max(48, Math.min(200, W*0.11));   /* width of the liquid edge on each side */
     K = 3.2;                                        /* how hard it drags: ~25x stretch at the very edge */
     cy = H*0.49;
+    /* phones: lift the caption halfway between the curve's lowest point (right edge, where
+       frames are tallest) and its usual spot at the bottom; other sizes keep the CSS position */
+    capEl.style.bottom = "";
+    if(narrow){
+      var curveBottom = cy + baseH*(1 + A)/2;
+      var c = capEl.getBoundingClientRect(), capH = c.height || 44;
+      var mid = (curveBottom + (c.top + capH/2))/2;              /* caption centre goes here */
+      capEl.style.bottom = Math.max(0, H - mid - capH/2) + "px";
+    }
     inst = []; var s = 0, rep = 0;
     do{
       for(var i = 0; i < N; i++){ var len = baseH*works[i].aspect; inst.push({ w:works[i], s:s, len:len }); s += len + gap; }
