@@ -4,17 +4,20 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="robots" content="noindex" />
-<title>Portraiture — Shan-Huai (draft wall)</title>
+<title>Live · Photo-Journalism · Portraiture · Wedding — Shan-Huai (draft)</title>
 <link rel="icon" type="image/png" href="/images/system/favicon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <script>document.documentElement.classList.add("js");</script>
 <!--
-  DRAFT — Portraiture as a draggable, infinite, curved image wall.
+  DRAFT — the covers of every Live, Photo-Journalism, Portraiture and Wedding project
+  (plus Butoh Experiment), shown two ways:
+    · WALL  — a draggable, infinite, curved grid of fixed cells (default)
+    · INDEX — the Stack Index format (vertical media stack + left title index)
+  The header's left button switches between them (#index in the URL opens the index).
   Standalone page; not wired into index.html or the site navigation.
-  Data source: the JSON block #portraits (site order). Without JS a plain list of
-  the series links is shown instead.
+  Data: the JSON block #projects (site order: newest first, same rule as the site).
 -->
 <style>
   :root{
@@ -24,39 +27,51 @@
     --line:rgba(237,234,227,0.14);
     --edge:rgba(237,234,227,0.55);
     --hdr:clamp(75px,7.5vw,102px);
+    --hx:clamp(48px,8vw,110px);
+    --hy:clamp(14px,2vw,26px);
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{height:100%}
   body{background:var(--ink);color:var(--paper);font-family:"DM Sans",system-ui,sans-serif;
     -webkit-font-smoothing:antialiased;overflow-x:hidden}
-  html.js body{overflow:hidden}
+  html.js body{overflow:hidden;overscroll-behavior:none}
   .mono{font-family:"IBM Plex Mono",monospace;font-weight:400;letter-spacing:.04em}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   button{font:inherit;color:inherit}
+  a{color:inherit}
   :focus-visible{outline:1px solid var(--paper);outline-offset:4px}
   /* faint film grain, as on the live site */
   body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.04;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 
   /* ---------- Site header (same geometry as index.html) ---------- */
-  header{position:fixed;top:0;left:0;right:0;z-index:40;display:flex;align-items:center;justify-content:space-between;
-    padding:calc(clamp(14px,2vw,23px) + env(safe-area-inset-top,0px)) calc(clamp(48px,8vw,110px) + env(safe-area-inset-right,0px)) clamp(48px,6vw,90px) calc(clamp(48px,8vw,110px) + env(safe-area-inset-left,0px));
-    pointer-events:none}
+  header{position:fixed;top:0;left:0;right:0;z-index:40;pointer-events:none;
+    height:calc(var(--hy) + var(--hdr) + 48px + env(safe-area-inset-top,0px))}
   /* Gradient only: the site's backdrop-filter blur would re-render every frame over a moving wall */
   header::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
-    background:linear-gradient(to bottom,rgba(11,11,12,.82) 0%,rgba(11,11,12,.5) 45%,transparent 100%)}
-  .header-spacer{width:0}
-  .brandBtn{position:absolute;left:50%;top:clamp(14px,2vw,26px);transform:translateX(-50%);
+    background:linear-gradient(to bottom,rgba(11,11,12,.85) 0%,rgba(11,11,12,.5) 45%,transparent 100%)}
+  .hdr-btn{position:absolute;top:calc(var(--hy) + env(safe-area-inset-top,0px));height:var(--hdr);
+    display:flex;align-items:center;gap:14px;background:none;border:none;color:var(--paper);cursor:pointer;
+    font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.12em;text-transform:lowercase;
+    padding:4px 0;pointer-events:auto;opacity:.9}
+  .hdr-btn:hover{opacity:1}
+  .menuBtn{right:calc(var(--hx) + env(safe-area-inset-right,0px))}
+  .hdr-left{position:absolute;left:calc(var(--hx) + env(safe-area-inset-left,0px));top:calc(var(--hy) + env(safe-area-inset-top,0px));
+    height:var(--hdr);display:flex;align-items:center;gap:16px;pointer-events:auto}
+  .hdr-left .hdr-btn{position:static;height:auto}
+  .modeBtn .opt{opacity:.45;transition:opacity .2s}
+  .modeBtn .opt.on{opacity:1}
+  .modeBtn .sep{opacity:.35}
+  .st-count{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.04em;color:var(--edge);display:none}
+  .st-count b{font-weight:400;color:var(--paper)}
+  body.mode-index .st-count{display:inline}
+  .brandBtn{position:absolute;left:50%;top:calc(var(--hy) + env(safe-area-inset-top,0px));transform:translateX(-50%);
     background:none;border:none;cursor:pointer;padding:0;line-height:0;pointer-events:auto}
   .logo-img{height:var(--hdr);width:auto;display:block;opacity:.9;transition:opacity .2s}
   .logo-img:hover{opacity:1}
-  .menuBtn{position:absolute;right:clamp(48px,8vw,110px);top:clamp(14px,2vw,26px);background:none;border:none;
-    color:var(--paper);cursor:pointer;font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.12em;
-    text-transform:lowercase;padding:4px 0;pointer-events:auto;opacity:.9;display:flex;align-items:center;height:var(--hdr)}
-  .menuBtn:hover{opacity:1}
   @media(max-width:768px){
-    :root{--hdr:56px}
-    .menuBtn{right:20px}
+    :root{--hdr:56px;--hx:20px}
+    body.mode-index .st-count{display:none}
   }
 
   /* ---------- Menu overlay (same look as index.html) ---------- */
@@ -64,80 +79,116 @@
     padding:clamp(70px,10vh,120px) clamp(20px,4vw,48px) clamp(28px,4vw,48px);
     display:flex;flex-direction:column;opacity:0;visibility:hidden;transition:opacity .35s ease,visibility 0s linear .35s}
   #menu.open{opacity:1;visibility:visible;transition:opacity .35s ease}
-  .menu-close{position:absolute;top:clamp(14px,2vw,26px);right:clamp(48px,8vw,110px);background:none;border:none;color:var(--ink);
+  .menu-close{position:absolute;top:calc(var(--hy) + env(safe-area-inset-top,0px));right:var(--hx);background:none;border:none;color:var(--ink);
     cursor:pointer;font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.12em;text-transform:lowercase;
     padding:4px 0;opacity:.9;display:flex;align-items:center;height:var(--hdr)}
-  .menu-logo{position:absolute;left:50%;top:clamp(14px,2vw,26px);transform:translateX(-50%);background:none;border:none;cursor:pointer;padding:0;line-height:0}
+  .menu-logo{position:absolute;left:50%;top:calc(var(--hy) + env(safe-area-inset-top,0px));transform:translateX(-50%);background:none;border:none;cursor:pointer;padding:0;line-height:0}
   .menu-logo-img{height:var(--hdr);width:auto;display:block;opacity:.9}
   .menu-cats{display:flex;flex-direction:column;align-items:flex-start;gap:clamp(24px,3vh,44px);margin:auto 0}
   .m-link,.m-sub,.menu-mini a{display:block;background:none;border:none;color:var(--ink);cursor:pointer;text-align:left;width:fit-content;
     font-family:"Cormorant Garamond";font-weight:300;font-size:clamp(30px,3.9vw,53px);line-height:1.1;letter-spacing:-.02em;
     text-transform:lowercase;text-decoration:none}
   .m-link:hover,.m-sub:hover,.menu-mini a:hover{font-style:italic}
-  .m-link[aria-current="page"]{font-style:italic}
+  #menu :focus-visible{outline-color:var(--ink)}
   .menu-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:26px;flex-wrap:wrap;margin-top:auto}
   .menu-mini{display:flex;gap:clamp(16px,2vw,30px);flex-wrap:wrap;align-items:flex-end}
-  @media(max-width:768px){.menu-close{right:20px}}
 
-  /* ---------- The wall ---------- */
+  /* ---------- Mode switching ---------- */
+  .stack-view{display:none}
+  body.mode-index .stack-view{display:block}
+  body.mode-index .wall,body.mode-index .hud{display:none}
+
+  /* ================= WALL ================= */
   .wall{position:fixed;inset:0;z-index:1;overflow:hidden;background:var(--ink);
     touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;outline:none}
   .wall.grabbing{cursor:grabbing}
   html:not(.js) .wall,html:not(.js) .hud{display:none}
-  html.js .nojs{display:none}
   .stage{position:absolute;inset:0;perspective:1000px;perspective-origin:50% 50%}
-  /* Each tile is a grid CELL: hairline top/left border (adjacent cells abut, so the
-     borders draw the grid, as in the reference), the uncropped image inset by --pad.
-     Columns are staggered, so horizontal lines step from column to column. */
-  .stage{--pad:20px;--radius:4px}   /* reference image radius: 4px */
+  /* A fixed grid of identical cells (rows × columns), as in the reference: hairline
+     top/left borders on abutting cells draw the grid; the cover sits uncropped in the
+     image box (sized per image by JS) and the caption runs along the bottom. */
   .tile{position:absolute;left:0;top:0;transform-origin:50% 50%;will-change:transform,opacity;
     border-top:1px solid var(--line);border-left:1px solid var(--line);
     background:rgba(0,0,0,.1);overflow:hidden;visibility:hidden;contain:layout style;
     transition:background-color .3s ease,box-shadow .3s ease}
-  .tile::before{content:"";position:absolute;left:var(--pad);top:var(--pad);right:var(--pad);bottom:var(--pad);background:#151516;border-radius:var(--radius)}
+  .tile .frame{position:absolute;border-radius:4px;background:#151516;overflow:hidden}   /* reference radius: 4px */
   .tile img{position:absolute;display:block;pointer-events:none;-webkit-user-drag:none;user-select:none}
-  .tile .sharp{left:var(--pad);top:var(--pad);width:calc(100% - 2*var(--pad));height:calc(100% - 2*var(--pad));border-radius:var(--radius);
-    opacity:0;transition:opacity .45s ease}
+  .tile .sharp{inset:0;width:100%;height:100%;opacity:0;transition:opacity .45s ease}
   .tile.ready .sharp{opacity:1}
   .tile.instant .sharp{transition:none}
+  .tile .cap{position:absolute;left:var(--pad);right:var(--pad);bottom:var(--pad);display:flex;justify-content:space-between;
+    align-items:baseline;gap:8px;font-family:"IBM Plex Mono",monospace;font-size:var(--capfs);line-height:1.2;
+    letter-spacing:.06em;color:#808080;white-space:nowrap}
+  .tile .cap-n{font-weight:500;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .tile .cap-y{flex:none}
   /* Hover "glass": the cell lifts to a faint white tint (reference: rgba(255,255,255,.1)
-     over .3s) and a 30px-blurred copy of the photo fills the cell behind the sharp image,
-     so the pane glows in the photo's own colours like frosted glass. Only the hovered
-     cell ever gets a src + filter (display:none everywhere else). */
+     over .3s) and a 30px-blurred copy of the cover fills the cell behind the sharp image.
+     Only the hovered cell ever gets a src + filter (display:none everywhere else). */
   .tile .blur{left:-15%;top:-15%;width:130%;height:130%;object-fit:cover;filter:blur(30px) saturate(1.2);
     opacity:0;display:none;transition:opacity .35s ease}
   .tile.blur-on .blur{display:block}
   .tile.hov{background:rgba(237,234,227,.07);box-shadow:inset 0 0 0 1px rgba(237,234,227,.10),inset 0 1px 0 rgba(237,234,227,.22)}
   .tile.hov .blur{opacity:.42}
+  .tile.hov .cap{color:var(--paper)}
+  .tile .cap{transition:color .3s ease}
   .tile.kfocus{box-shadow:inset 0 0 0 1px var(--paper)}
   .vignette{position:absolute;inset:0;pointer-events:none;
     background:radial-gradient(ellipse at center,transparent 38%,rgba(11,11,12,.25) 62%,rgba(11,11,12,.85) 92%,var(--ink) 100%)}
 
-  /* ---------- Page info / controls over the wall ---------- */
   .hud{position:fixed;left:0;right:0;bottom:0;z-index:30;pointer-events:none;
     display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
     padding:0 clamp(20px,4vw,48px) calc(clamp(18px,3vh,30px) + env(safe-area-inset-bottom,0px))}
-  .hud > *{pointer-events:auto}
-  .hud-title,.hud-hint{text-shadow:0 1px 14px rgba(11,11,12,.85)}
-  .hud-title{display:flex;flex-direction:column;gap:6px}
-  .hud-name{font-family:"Cormorant Garamond";font-weight:300;font-size:clamp(30px,3.4vw,48px);line-height:1;letter-spacing:-.02em;text-transform:lowercase}
-  .hud-meta,.hud-hint{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey)}
-  .hud-right{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+  .hud > *{pointer-events:none}   /* labels only: drags/taps pass through to the wall */
+  .hud-meta,.hud-hint{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);
+    text-shadow:0 1px 14px rgba(11,11,12,.85)}
   .hud-hint{transition:opacity .6s ease}
   .hud-hint.dim{opacity:0}
-  .hud-meta{white-space:nowrap}
-  @media(max-width:600px){
-    .hud-hint{position:absolute;left:clamp(20px,4vw,48px);right:clamp(20px,4vw,48px);bottom:100%;margin-bottom:12px;text-align:left}
-  }
+  @media(max-width:600px){ .hud{flex-direction:column;align-items:flex-start;gap:8px} }
   @media(hover:none),(pointer:coarse){.hud-hint .fine{display:none}}
   @media(hover:hover) and (pointer:fine){.hud-hint .coarse{display:none}}
 
-  .nojs{list-style:none;padding:calc(var(--hdr) + 60px) clamp(20px,4vw,48px);font-family:"Cormorant Garamond";font-weight:300;font-size:clamp(28px,3.4vw,46px);line-height:1.3}
+  .nojs{list-style:none;padding:calc(var(--hdr) + 80px) clamp(20px,4vw,48px);font-family:"Cormorant Garamond";font-weight:300;font-size:clamp(28px,3.4vw,46px);line-height:1.3}
   .nojs a{color:var(--paper);text-decoration:none}
+  html.js .nojs{display:none}
 
-  /* ---------- Viewer ---------- */
+  /* ================= STACK INDEX (ported from stack-index.html) ================= */
+  .vg-stage{position:fixed;inset:0;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;cursor:grab;z-index:1}
+  .vg-stage.is-dragging{cursor:grabbing}
+  .vg-item{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;visibility:hidden}
+  .vg-hit{display:block;width:100%;height:100%;padding:0;border:0;background:none;color:inherit;cursor:pointer;outline:none}
+  .vg-stage.is-dragging .vg-hit{cursor:grabbing}
+  .vg-media{display:block;position:relative;width:100%;height:100%;overflow:hidden;background:#151516;
+    transform-origin:0 50%;will-change:transform;border-radius:4px}
+  .vg-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;
+    -webkit-user-drag:none;opacity:0;transition:opacity .6s ease}
+  .vg-media img.is-loaded{opacity:1}
+  .vg-hit:focus-visible .vg-media{outline:1px solid var(--paper);outline-offset:4px}
+  .vg-titles{position:fixed;left:var(--sp);top:0;z-index:10;width:0;height:0}
+  .vg-tl{position:absolute;left:0;top:0;display:block;padding:0;border:0;background:none;color:var(--paper);
+    font-family:"Cormorant Garamond",serif;font-weight:300;font-size:30px;line-height:1;letter-spacing:-.005em;
+    white-space:nowrap;text-align:left;transform-origin:0 0;will-change:transform,opacity;cursor:pointer}
+  .vg-tl:focus-visible{outline:1px solid var(--paper);outline-offset:3px}
+  .vg-info{position:absolute;left:0;top:0;width:max-content;will-change:transform,opacity}
+  .vg-info .m{display:block;font-size:11px;color:var(--edge);text-transform:uppercase}
+  .vg-info .go{display:inline-block;margin-top:8px;font-size:11px;text-transform:uppercase;
+    text-decoration:none;border-bottom:1px solid var(--edge);padding-bottom:2px}
+  .vg-info .go:hover{border-color:var(--paper)}
+  .vg-bar{display:none}
+  .vg-hint{position:fixed;right:var(--sp);bottom:calc(var(--sp) * .7);font-size:11px;color:var(--grey);text-transform:uppercase;z-index:20}
+  :root{--sp:clamp(16px,3.2vw,48px)}
+  @media (max-width:719px){
+    .vg-titles,.vg-hint{display:none !important}
+    body.mode-index .vg-bar{display:block;position:fixed;left:0;right:0;bottom:0;z-index:25;
+      padding:40px 16px calc(16px + env(safe-area-inset-bottom,0px));
+      background:linear-gradient(to top,rgba(11,11,12,.95) 55%,rgba(11,11,12,0))}
+    .vg-bar .t{display:block;font-family:"Cormorant Garamond",serif;font-weight:300;font-size:34px;line-height:1;text-decoration:none}
+    .vg-bar .row{display:flex;justify-content:space-between;align-items:baseline;margin-top:8px;font-size:11px;text-transform:uppercase;color:var(--edge)}
+    .vg-bar .go{color:var(--paper);text-decoration:none;border-bottom:1px solid var(--edge)}
+  }
+
+  /* ================= Viewer (shared) ================= */
   .viewer{position:fixed;inset:0;z-index:60;background:rgba(11,11,12,.97);display:grid;
-    grid-template-rows:var(--hdr) 1fr auto;opacity:0;transition:opacity .25s ease;touch-action:pan-y}
+    grid-template-rows:calc(var(--hy) + var(--hdr)) 1fr auto;opacity:0;transition:opacity .25s ease;touch-action:pan-y}
   .viewer[hidden]{display:none}
   .viewer.open{opacity:1}
   .v-fig{grid-row:2;display:flex;align-items:center;justify-content:center;min-height:0;padding:clamp(8px,2vh,24px) clamp(56px,8vw,120px)}
@@ -155,118 +206,105 @@
   .v-btn{position:absolute;background:none;border:none;color:var(--paper);cursor:pointer;opacity:.85;
     font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.12em;text-transform:lowercase;padding:12px}
   .v-btn:hover{opacity:1}
-  .v-close{top:clamp(14px,2vw,26px);right:clamp(36px,8vw,98px);height:var(--hdr);display:flex;align-items:center}
+  .v-close{top:calc(var(--hy) + env(safe-area-inset-top,0px));right:calc(var(--hx) - 12px);height:var(--hdr);display:flex;align-items:center}
   .v-prev,.v-next{top:50%;transform:translateY(-50%)}
   .v-prev{left:clamp(4px,2vw,30px)}
   .v-next{right:clamp(4px,2vw,30px)}
   @media(max-width:768px){
     .v-fig{padding:8px 12px}
     .v-prev,.v-next{top:auto;bottom:calc(64px + env(safe-area-inset-bottom,0px));transform:none}
-    .v-close{right:8px}
   }
 
   @media (prefers-reduced-motion: reduce){
-    .tile .sharp,.tile .blur,.viewer,.v-img,.hud-hint,#menu{transition:none !important}
+    .tile,.tile .sharp,.tile .blur,.tile .cap,.viewer,.v-img,.hud-hint,#menu,.vg-media img{transition:none !important}
   }
 </style>
 </head>
 <body>
   <header>
-    <span class="header-spacer" aria-hidden="true"></span>
+    <div class="hdr-left">
+      <button class="hdr-btn modeBtn" data-act="mode" aria-label="Switch view (wall or index)" aria-pressed="false">
+        <span class="opt opt-wall on">wall</span><span class="sep" aria-hidden="true">/</span><span class="opt opt-index">index</span>
+      </button>
+      <span class="st-count" aria-hidden="true"><b id="st-n">01</b> / <span id="st-total">00</span></span>
+    </div>
     <button class="brandBtn" data-nav="landing" aria-label="Home"><img src="/images/system/shanhuailogoinversed_white.png" alt="Shan-Huai" class="logo-img"></button>
-    <button class="menuBtn" data-menu-open aria-label="Menu" aria-controls="menu" aria-expanded="false">menu</button>
+    <button class="hdr-btn menuBtn" data-menu-open aria-label="Menu" aria-controls="menu" aria-expanded="false">menu</button>
   </header>
 
-  <main id="portraiture">
-    <h1 class="sr-only">Portraiture</h1>
+  <main>
+    <h1 class="sr-only">Live, photo-journalism, portraiture and wedding</h1>
 
+    <!-- WALL -->
     <div class="wall" id="wall" tabindex="0" role="region" aria-roledescription="image wall"
-         aria-label="Portraiture wall" aria-describedby="wall-help">
+         aria-label="Project wall" aria-describedby="wall-help">
       <div class="stage" id="stage" aria-hidden="true"></div>
       <div class="vignette" aria-hidden="true"></div>
     </div>
-
     <div class="hud">
-      <div class="hud-title">
-        <span class="hud-name" aria-hidden="true">portraiture</span>
-        <span class="hud-meta" id="hud-meta"></span>
+      <span class="hud-meta" id="hud-meta"></span>
+      <p class="hud-hint" id="wall-help">
+        <span class="fine">drag · hold to zoom out · click to open</span>
+        <span class="coarse">drag · pinch to zoom out · tap to open</span>
+        <span class="sr-only">. Keyboard: arrow keys move between projects, Enter opens one.</span>
+      </p>
+    </div>
+
+    <!-- STACK INDEX -->
+    <div class="stack-view" id="stack-view">
+      <div class="vg-stage" id="vg-stage" aria-label="Project index" role="list"></div>
+      <nav class="vg-titles" id="vg-titles" aria-label="Projects">
+        <div class="vg-info" id="vg-info">
+          <span class="m mono" id="vg-info-m"></span>
+          <a class="go mono" id="vg-info-go" href="/" data-nav="landing">Open project →</a>
+        </div>
+      </nav>
+      <div class="vg-bar" id="vg-bar" aria-live="polite">
+        <a class="t" id="vg-bar-t" href="/" data-nav="landing"></a>
+        <div class="row mono"><span id="vg-bar-m"></span><a class="go" id="vg-bar-go" href="/" data-nav="landing">Open →</a></div>
       </div>
-      <div class="hud-right">
-        <p class="hud-hint" id="wall-help">
-          <span class="fine">drag · hold to zoom out · click to open</span>
-          <span class="coarse">drag · pinch to zoom out · tap to open</span>
-          <span class="sr-only">. Keyboard: arrow keys move between portraits, Enter opens one.</span>
-        </p>
-      </div>
+      <span class="vg-hint mono" aria-hidden="true">Scroll · Drag · ↑ ↓</span>
     </div>
 
     <p class="sr-only" aria-live="polite" id="live"></p>
 
-    <!-- Portrait data, in site order (newest series first). The wall scatters it; the viewer's
-         prev/next follow this order. -->
-    <script type="application/json" id="portraits">
-  [{"name":"Butoh Experiment","meta":"Performance · 2023","nav":"proj-butoh","images":[
-    {"full":"/images/projects/butoh_nigel_-2.jpg","thumb":"/images/projects/thumbs/butoh_nigel_-2.jpg","w":1600,"h":2000},
-    {"full":"/images/projects/butoh_nigel_-3.jpg","thumb":"/images/projects/thumbs/butoh_nigel_-3.jpg","w":1600,"h":2000},
-    {"full":"/images/projects/butoh_nigel_-4.jpg","thumb":"/images/projects/thumbs/butoh_nigel_-4.jpg","w":1334,"h":2000},
-    {"full":"/images/projects/butoh_nigel_-5.jpg","thumb":"/images/projects/thumbs/butoh_nigel_-5.jpg","w":1600,"h":2000},
-    {"full":"/images/projects/butoh_nigel_-6.jpg","thumb":"/images/projects/thumbs/butoh_nigel_-6.jpg","w":1600,"h":2000},
-    {"full":"/images/projects/butoh_nigel_-7.jpg","thumb":"/images/projects/thumbs/butoh_nigel_-7.jpg","w":1600,"h":2000},
-    {"full":"/images/projects/butoh_nigel_-8.jpg","thumb":"/images/projects/thumbs/butoh_nigel_-8.jpg","w":1600,"h":2000},
-    {"full":"/images/projects/butoh_nigel_-9.jpg","thumb":"/images/projects/thumbs/butoh_nigel_-9.jpg","w":1280,"h":1600},
-    {"full":"/images/projects/butoh_nigel_-1.jpg","thumb":"/images/projects/thumbs/butoh_nigel_-1.jpg","w":1333,"h":2000}]},
-  {"name":"Untitled Sketch","meta":"Taipei · 2023","nav":"pt-untitledsketch","images":[{"full":"/images/portraiture/rooftop_motion-cover.jpg","thumb":"/images/portraiture/thumbs/rooftop_motion-cover.jpg","w":1333,"h":2000},
-    {"full":"/images/portraiture/rooftop_motion-1.jpg","thumb":"/images/portraiture/thumbs/rooftop_motion-1.jpg","w":1600,"h":2000},
-    {"full":"/images/portraiture/rooftop_motion-2.jpg","thumb":"/images/portraiture/thumbs/rooftop_motion-2.jpg","w":1600,"h":2000},
-    {"full":"/images/portraiture/rooftop_motion-3.jpg","thumb":"/images/portraiture/thumbs/rooftop_motion-3.jpg","w":1600,"h":2000},
-    {"full":"/images/portraiture/rooftop_motion-4.jpg","thumb":"/images/portraiture/thumbs/rooftop_motion-4.jpg","w":1600,"h":2000},
-    {"full":"/images/portraiture/rooftop_motion-5.jpg","thumb":"/images/portraiture/thumbs/rooftop_motion-5.jpg","w":1600,"h":2000},
-    {"full":"/images/portraiture/rooftop_motion-6.jpg","thumb":"/images/portraiture/thumbs/rooftop_motion-6.jpg","w":1600,"h":2000},
-    {"full":"/images/portraiture/rooftop_motion-7.jpg","thumb":"/images/portraiture/thumbs/rooftop_motion-7.jpg","w":1600,"h":2000},
-    {"full":"/images/portraiture/rooftop_motion-8.jpg","thumb":"/images/portraiture/thumbs/rooftop_motion-8.jpg","w":1600,"h":2000}]},
-  {"name":"@0821tingting","meta":"Portrait · 2022","nav":"pt-0821tingting","images":[{"full":"/images/portraiture/0821tingting_2021-15.jpg","thumb":"/images/portraiture/thumbs/0821tingting_2021-15.jpg","w":1333,"h":2000},
-    {"full":"/images/portraiture/0821tingting_2021-16.jpg","thumb":"/images/portraiture/thumbs/0821tingting_2021-16.jpg","w":1333,"h":2000},
-    {"full":"/images/portraiture/0821tingting_2021-17.jpg","thumb":"/images/portraiture/thumbs/0821tingting_2021-17.jpg","w":1333,"h":2000},
-    {"full":"/images/portraiture/0821tingting_2021-18.jpg","thumb":"/images/portraiture/thumbs/0821tingting_2021-18.jpg","w":1125,"h":2000},
-    {"full":"/images/portraiture/0821tingting_2021-19.jpg","thumb":"/images/portraiture/thumbs/0821tingting_2021-19.jpg","w":1125,"h":2000},
-    {"full":"/images/portraiture/0821tingting_2021-20.jpg","thumb":"/images/portraiture/thumbs/0821tingting_2021-20.jpg","w":1333,"h":2000},
-    {"full":"/images/portraiture/0821tingting_2021-21.jpg","thumb":"/images/portraiture/thumbs/0821tingting_2021-21.jpg","w":1333,"h":2000},
-    {"full":"/images/portraiture/0821tingting_2021-22.jpg","thumb":"/images/portraiture/thumbs/0821tingting_2021-22.jpg","w":1333,"h":2000}]},
-  {"name":"Duality Within","meta":"Portrait · 2021","nav":"pt-dualitywithin","images":[{"full":"/images/portraiture/duality_within_2021-21.jpg","thumb":"/images/portraiture/thumbs/duality_within_2021-21.jpg","w":1333,"h":2000},
-    {"full":"/images/portraiture/duality_within_2021-1.jpg","thumb":"/images/portraiture/thumbs/duality_within_2021-1.jpg","w":1600,"h":2000},
-    {"full":"/images/portraiture/duality_within_2021-2.jpg","thumb":"/images/portraiture/thumbs/duality_within_2021-2.jpg","w":1600,"h":2000},
-    {"full":"/images/portraiture/duality_within_2021-3.jpg","thumb":"/images/portraiture/thumbs/duality_within_2021-3.jpg","w":1600,"h":2000},
-    {"full":"/images/portraiture/duality_within_2021-4.jpg","thumb":"/images/portraiture/thumbs/duality_within_2021-4.jpg","w":1600,"h":2000},
-    {"full":"/images/portraiture/duality_within_2021-5.jpg","thumb":"/images/portraiture/thumbs/duality_within_2021-5.jpg","w":1600,"h":2000},
-    {"full":"/images/portraiture/duality_within_2021-6.jpg","thumb":"/images/portraiture/thumbs/duality_within_2021-6.jpg","w":1600,"h":2000},
-    {"full":"/images/portraiture/duality_within_2021-7.jpg","thumb":"/images/portraiture/thumbs/duality_within_2021-7.jpg","w":1600,"h":2000},
-    {"full":"/images/portraiture/duality_within_2021-8.jpg","thumb":"/images/portraiture/thumbs/duality_within_2021-8.jpg","w":1600,"h":2000},
-    {"full":"/images/portraiture/duality_within_2021-9.jpg","thumb":"/images/portraiture/thumbs/duality_within_2021-9.jpg","w":1600,"h":2000},
-    {"full":"/images/portraiture/duality_within_2021-10.jpg","thumb":"/images/portraiture/thumbs/duality_within_2021-10.jpg","w":1600,"h":2000}]},
-  {"name":"In Mood For Smoke","meta":"Portrait · 2021","nav":"pt-inmoodforsmoke","images":[{"full":"/images/portraiture/In-mood-for-smoke_2021-1.jpg","thumb":"/images/portraiture/thumbs/In-mood-for-smoke_2021-1.jpg","w":1333,"h":2000},
-    {"full":"/images/portraiture/In-mood-for-smoke_2021-2.jpg","thumb":"/images/portraiture/thumbs/In-mood-for-smoke_2021-2.jpg","w":1333,"h":2000},
-    {"full":"/images/portraiture/In-mood-for-smoke_2021-3.jpg","thumb":"/images/portraiture/thumbs/In-mood-for-smoke_2021-3.jpg","w":1348,"h":2000},
-    {"full":"/images/portraiture/In-mood-for-smoke_2021-4.jpg","thumb":"/images/portraiture/thumbs/In-mood-for-smoke_2021-4.jpg","w":1333,"h":2000},
-    {"full":"/images/portraiture/In-mood-for-smoke_2021-5.jpg","thumb":"/images/portraiture/thumbs/In-mood-for-smoke_2021-5.jpg","w":1333,"h":2000},
-    {"full":"/images/portraiture/In-mood-for-smoke_2021-6.jpg","thumb":"/images/portraiture/thumbs/In-mood-for-smoke_2021-6.jpg","w":1333,"h":2000},
-    {"full":"/images/portraiture/In-mood-for-smoke_2021-7.jpg","thumb":"/images/portraiture/thumbs/In-mood-for-smoke_2021-7.jpg","w":1333,"h":2000}]},
-  {"name":"Tatiana","meta":"Portrait · 2020","nav":"pt-tatiana","images":[{"full":"/images/portraiture/tatiana_2021-08.jpg","thumb":"/images/portraiture/thumbs/tatiana_2021-08.jpg","w":1333,"h":2000},
-    {"full":"/images/portraiture/tatiana_2021-09.jpg","thumb":"/images/portraiture/thumbs/tatiana_2021-09.jpg","w":1333,"h":2000},
-    {"full":"/images/portraiture/tatiana_2021-11.jpg","thumb":"/images/portraiture/thumbs/tatiana_2021-11.jpg","w":1333,"h":2000},
-    {"full":"/images/portraiture/tatiana_2021-12.jpg","thumb":"/images/portraiture/thumbs/tatiana_2021-12.jpg","w":1333,"h":2000},
-    {"full":"/images/portraiture/tatiana_2021-14.jpg","thumb":"/images/portraiture/thumbs/tatiana_2021-14.jpg","w":1333,"h":2000}]}]
+    <!-- Project covers, in site order (newest first, same data-date rule as the site's
+         galleries). name/meta/cover come from each category listing in index.html. -->
+    <script type="application/json" id="projects">
+[
+  {"nav":"gig-cornelius","name":"Cornelius","cat":"Live","meta":"Chillout Music Festival · 2025","full":"/images/Concerts/cornelius_chillout_-2.jpg","w":1333,"h":2000},
+  {"nav":"gig-someshiitsam","name":"someshiit 山姆","cat":"Live","meta":"Chillout Music Festival · 2025","full":"/images/Concerts/someshiitSam_chillout_-01.jpg","w":1333,"h":2000},
+  {"nav":"julianjudy","name":"Julian and Judy","cat":"Wedding","meta":"Engagement Session · 2025","full":"/images/wedding-engagement/Julian%26Judy_engagement-06.jpg","w":2000,"h":1333},
+  {"nav":"gig-elephantgym","name":"Elephant Gym","cat":"Live","meta":"Bristol · 2024","full":"/images/Concerts/elephantgym_bristol-10.jpg","w":1333,"h":2000},
+  {"nav":"proj-butoh","name":"Butoh Experiment","cat":"Performance","meta":"Performance · 2023","full":"/images/projects/butoh_nigel_-1.jpg","w":1333,"h":2000},
+  {"nav":"pj-kenyaslum","name":"Kenya Slum","cat":"Photo-Journalism","meta":"Nairobi · 2023","full":"/images/Photo-Journalism/kenya_2023_-05.jpg","w":2000,"h":1333},
+  {"nav":"pt-untitledsketch","name":"Untitled Sketch","cat":"Portraiture","meta":"Taipei · 2023","full":"/images/portraiture/rooftop_motion-cover.jpg","w":1333,"h":2000},
+  {"nav":"gig-hillsong","name":"Hillsong","cat":"Live","meta":"London · 2022","full":"/images/Concerts/Hillsong_London-10.jpg","w":1333,"h":2000},
+  {"nav":"pj-slavaukraini","name":"Slava Ukraini","cat":"Photo-Journalism","meta":"London · 2022","full":"/images/Photo-Journalism/Slava-Ukrani-11.jpg","w":1333,"h":2000},
+  {"nav":"pt-0821tingting","name":"@0821tingting","cat":"Portraiture","meta":"Portrait · 2022","full":"/images/portraiture/0821tingting_2021-16.jpg","w":1333,"h":2000},
+  {"nav":"pt-dualitywithin","name":"Duality Within","cat":"Portraiture","meta":"Portrait · 2021","full":"/images/portraiture/duality_within_2021-21.jpg","w":1333,"h":2000},
+  {"nav":"gig-thehope","name":"The Hope","cat":"Live","meta":"Taipei · 2021","full":"/images/Concerts/TheHope_Taipei_2021_cover.jpg","w":1333,"h":2000},
+  {"nav":"pt-inmoodforsmoke","name":"In Mood For Smoke","cat":"Portraiture","meta":"Portrait · 2021","full":"/images/portraiture/In-mood-for-smoke_2021-3.jpg","w":1348,"h":2000},
+  {"nav":"danieljuny","name":"Daniel and Juny","cat":"Wedding","meta":"Taiwan · 2021","full":"/images/wedding-engagement/DJ-Juny_engagement-04.jpg","w":1333,"h":2000},
+  {"nav":"pt-tatiana","name":"Tatiana","cat":"Portraiture","meta":"Portrait · 2020","full":"/images/portraiture/tatiana_2021-08.jpg","w":1333,"h":2000},
+  {"nav":"gig-mosaic","name":"Mosaic","cat":"Live","meta":"Hollywood · 2018–2020","full":"/images/Concerts/Mosaic_02.jpg","w":1333,"h":2000},
+  {"nav":"pj-hkprotest","name":"The Umbrella Movement","cat":"Photo-Journalism","meta":"Hong Kong · 2019","full":"/images/Photo-Journalism/hkProt-06.jpg","w":2000,"h":1333}
+]
     </script>
-    <noscript><ul class="nojs"><li><a href="/project/butoh-experiment">Butoh Experiment</a></li><li><a href="/portraiture/untitled-sketch">Untitled Sketch</a></li><li><a href="/portraiture/0821tingting">@0821tingting</a></li><li><a href="/portraiture/duality-within">Duality Within</a></li><li><a href="/portraiture/in-mood-for-smoke">In Mood For Smoke</a></li><li><a href="/portraiture/tatiana">Tatiana</a></li></ul></noscript>
+    <noscript><ul class="nojs">
+      <li><a href="/live">live</a></li><li><a href="/photojournalism">photo-journalism</a></li>
+      <li><a href="/portraiture">portraiture</a></li><li><a href="/wedding">wedding</a></li>
+    </ul></noscript>
   </main>
 
-  <div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Portrait viewer" hidden>
+  <div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Cover viewer" hidden>
     <figure class="v-fig"><img class="v-img" id="v-img" alt="" draggable="false"></figure>
     <div class="v-bar">
       <div class="v-cap"><span class="v-title" id="v-title"></span><span class="v-meta" id="v-meta"></span></div>
-      <div class="v-right"><span class="v-count" id="v-count" aria-live="polite"></span><a class="v-link" id="v-link" href="/portraiture">view project &rarr;</a></div>
+      <div class="v-right"><span class="v-count" id="v-count" aria-live="polite"></span><a class="v-link" id="v-link" href="/">view project &rarr;</a></div>
     </div>
-    <button class="v-btn v-prev" data-act="prev" aria-label="Previous portrait">prev</button>
-    <button class="v-btn v-next" data-act="next" aria-label="Next portrait">next</button>
+    <button class="v-btn v-prev" data-act="prev" aria-label="Previous project">prev</button>
+    <button class="v-btn v-next" data-act="next" aria-label="Next project">next</button>
     <button class="v-btn v-close" data-act="close" aria-label="Close viewer">close</button>
   </div>
 
@@ -277,7 +315,7 @@
       <button class="m-link" data-nav="projects">project</button>
       <button class="m-link" data-nav="live">live</button>
       <button class="m-link" data-nav="photojournalism">photo-journalism</button>
-      <button class="m-link" data-nav="portraiture" aria-current="page">portraiture</button>
+      <button class="m-link" data-nav="portraiture">portraiture</button>
       <button class="m-link" data-nav="wedding">wedding</button>
       <button class="m-link" data-nav="archive">archive</button>
     </div>
@@ -296,135 +334,147 @@
   "use strict";
 
   /* ================= Routing: same data-nav ids as index.html ================= */
-  // The draft is standalone, so instead of swap() a data-nav click goes to the real
-  // URL for that section; the live site's router then renders it.
+  // Standalone draft: a data-nav click goes to the real URL; the live site's router renders it.
   var ROUTES = {
     "landing":"/","projects":"/projects","live":"/live","photojournalism":"/photojournalism",
     "portraiture":"/portraiture","wedding":"/wedding","archive":"/archive","about":"/about","contact":"/contact",
+    "proj-butoh":"/project/butoh-experiment",
+    "gig-cornelius":"/live/cornelius","gig-someshiitsam":"/live/someshiit-sam",
+    "gig-elephantgym":"/live/elephant-gym","gig-hillsong":"/live/hillsong",
+    "gig-thehope":"/live/the-hope","gig-mosaic":"/live/mosaic",
+    "pj-kenyaslum":"/photojournalism/kenya-slum","pj-slavaukraini":"/photojournalism/slava-ukraini",
+    "pj-hkprotest":"/photojournalism/the-umbrella-movement",
     "pt-0821tingting":"/portraiture/0821tingting","pt-dualitywithin":"/portraiture/duality-within",
     "pt-inmoodforsmoke":"/portraiture/in-mood-for-smoke","pt-tatiana":"/portraiture/tatiana",
     "pt-untitledsketch":"/portraiture/untitled-sketch",
-    "proj-butoh":"/project/butoh-experiment"
+    "julianjudy":"/wedding/julian-and-judy","danieljuny":"/wedding/daniel-and-juny"
   };
   function go(target){ var url = ROUTES[target]; if(url) location.href = url; }
 
-  /* ================= Data (embedded JSON, site order) ================= */
-  var items = [], SERIES = JSON.parse(document.getElementById("portraits").textContent);
-  SERIES.forEach(function(g){
-    g.images.forEach(function(im, i){
-      items.push({ thumb: im.thumb, full: im.full, w: im.w, h: im.h,
-        name: g.name, meta: g.meta, nav: g.nav, n: i + 1, of: g.images.length });
-    });
+  /* ================= Data ================= */
+  var items = JSON.parse(document.getElementById("projects").textContent);
+  items.forEach(function(it){
+    it.thumb = "/images/wall-thumbs/" + it.nav + ".jpg";
+    it.year = it.meta.split("·").pop().trim();
   });
   var NI = items.length;
   if(!NI) return;
-  var groups = SERIES.length;
-  document.getElementById("hud-meta").textContent = NI + " images · " + groups + " series";
+  var cats = {}; items.forEach(function(it){ cats[it.cat] = 1; });
+  document.getElementById("hud-meta").textContent = NI + " projects · live · photo-journalism · portraiture · wedding";
 
-  /* ================= Tunables (from the reference capture) ================= */
-  var COLS        = 8;      // column templates; wall repeats every COLS columns
-  var CURVE_DEG   = 15;     // rotateX at the top/bottom edge of the viewport (reference ≈ 20)
-  var CURVE_R     = 1.45;   // translateZ = R·H·(1−cosθ)  (reference R ≈ 1.46·H)
-  var FADE        = 0.30;   // opacity drop at the edge (reference 0.32, floor .68)
-  var FADE_MIN    = 0.66;
-  var PAR         = 0.08;   // reverse parallax: px of wall per px of cursor offset (reference ≈ 0.1)
-  var PAR_TAU     = 200;    // ms, exponential ease (≈ 8%/frame)
-  var THRESH      = 6;      // px before a press becomes a drag (reference 3–8)
-  var FRICTION    = 0.95;   // per 60fps frame
-  var VMAX        = 4;      // px/ms throw cap
-  var VSTOP       = 0.012;  // px/ms: below this inertia ends (no endless drift)
-  var HOLD_MS     = 170;    // still press → zoom out
-  var ZOOM_OUT    = 0.78;
-  var ZOOM_OUT_TAU= 110;    // ms (≈400 ms to settle, as in reference)
-  var ZOOM_IN_TAU = 170;    // ms (≈700 ms to settle)
-  var PINCH_MIN   = 0.5, PINCH_MAX = 1.2;
-  var GLIDE_TAU   = 130;    // keyboard glide
-  var MARGIN      = 110;    // px of off-screen tiles kept around the viewport
+  function mod(a, n){ return ((a % n) + n) % n; }
+  function pad2(n){ return (n < 10 ? "0" : "") + n; }
+  function clamp(v, a, b){ return v < a ? a : v > b ? b : v; }
 
   var mqReduce = window.matchMedia("(prefers-reduced-motion: reduce)");
   var mqFine   = window.matchMedia("(hover:hover) and (pointer:fine)");
   var reduce = mqReduce.matches, fine = mqFine.matches;
-  function onMQ(){
-    reduce = mqReduce.matches; fine = mqFine.matches;
-    if(reduce){ vx = vy = 0; s = zoomTarget; glide = null; }
-    dirty = true;
-  }
-  if(mqReduce.addEventListener){ mqReduce.addEventListener("change", onMQ); mqFine.addEventListener("change", onMQ); }
 
-  /* ================= State ================= */
+  var mode = "wall", viewerOpen = false, menuOpen = false;
+  var liveEl = document.getElementById("live");
+
+  /* =====================================================================
+     WALL
+     ===================================================================== */
+  var CURVE_DEG = 15, CURVE_R = 1.45, FADE = 0.30, FADE_MIN = 0.66;
+  var PAR = 0.08, PAR_TAU = 200, THRESH = 6, FRICTION = 0.95, VMAX = 4, VSTOP = 0.012;
+  var HOLD_MS = 170, ZOOM_OUT = 0.78, ZOOM_OUT_TAU = 110, ZOOM_IN_TAU = 170;
+  var PINCH_MIN = 0.5, PINCH_MAX = 1.2, GLIDE_TAU = 130, MARGIN = 110, TAP_MAX_MS = 500;
+
   var wall = document.getElementById("wall"), stage = document.getElementById("stage");
-  var liveEl = document.getElementById("live"), hint = document.getElementById("wall-help");
-  var W = 0, H = 0, colW = 0, gap = 0, pitch = 0, cols = [];
+  var hint = document.getElementById("wall-help");
+  var W = 0, H = 0, CW = 0, CH = 0, PADC = 0, CAPH = 0, BOXW = 0, BOXH = 0, K = 1;
   var camX = 0, camY = 0, s = 1, zoomTarget = 1;
-  var px = 0, py = 0, ptx = 0, pty = 0;          // parallax (current / target)
-  var mx = -1, my = -1, mouseIn = false;           // last mouse position
-  var vx = 0, vy = 0, glide = null;
-  var anchorX = 0, anchorY = 0;                    // zoom anchor (screen)
-  var dirty = true, paused = false, layoutQueued = false;
+  var px = 0, py = 0, ptx = 0, pty = 0, mx = -1, my = -1, mouseIn = false;
+  var vx = 0, vy = 0, glide = null, anchorX = 0, anchorY = 0;
+  var dirty = true, layoutQueued = false;
+  function wallPaused(){ return mode !== "wall" || viewerOpen || menuOpen; }
 
-  /* ================= Layout: staggered, uncropped, wraps both ways ================= */
-  // COLS columns of abutting grid cells. Each column is a vertical stack of cells sized to
-  // their (uncropped) image + padding; its own height is its vertical period, so every
-  // column wraps seamlessly on its own; columns repeat every COLS·pitch horizontally.
-  // Images are placed in a fixed scattered order (see scatterOrder) so that cells next
-  // to each other — above, below, left, right, and across both wrap seams — come from
-  // different series wherever the counts allow.
+  // Grid → item: cell (c, r) shows ORDER[(c + r·K) mod N]. Each row is the same scattered
+  // sequence shifted by K, so the wall tiles seamlessly in both directions with no gaps.
   function rng(seed){ return function(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; var t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
-  function scatterOrder(){
-    var rand = rng(20251109), pool = items.map(function(_, i){ return i; });
-    for(var i = pool.length - 1; i > 0; i--){ var j = Math.floor(rand() * (i + 1)), t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
-    var grid = [], rows = Math.ceil(NI / COLS), k, row;
-    for(k = 0; k < COLS; k++) grid.push([]);
-    var proj = function(i){ return i == null ? null : items[i].nav; };
-    for(row = 0; row < rows; row++) for(k = 0; k < COLS; k++){
-      if(!pool.length) break;
-      var bad = {}, L = grid[mod(k - 1, COLS)], Rt = grid[mod(k + 1, COLS)];
-      [grid[k][row - 1], L[row - 1], L[row], L[row + 1], Rt[row - 1], Rt[row], Rt[row + 1],
-       row === rows - 1 ? grid[k][0] : null].forEach(function(n){ var p = proj(n); if(p) bad[p] = 1; });
-      var pick = 0;
-      for(var q = 0; q < pool.length; q++){ if(!bad[proj(pool[q])]){ pick = q; break; } }
-      grid[k].push(pool.splice(pick, 1)[0]);
+  // K: the row shift that pushes repeats of the same cover as far apart as possible.
+  function pickK(){
+    if(NI < 4) return 1;
+    var best = 1, bestD = -1;
+    for(var k = 2; k <= NI - 2; k++){
+      if([k - 1, k, k + 1].some(function(o){ return mod(o, NI) === 1 || mod(o, NI) === NI - 1 || mod(o, NI) === 0; })) continue;
+      var dmin = Infinity;
+      for(var b = 0; b <= NI; b++) for(var a = -NI; a <= NI; a++){
+        if(!a && !b) continue;
+        if(mod(a + b * k, NI) !== 0) continue;
+        var d = (a * CW) * (a * CW) + (b * CH) * (b * CH);
+        if(d < dmin) dmin = d;
+      }
+      if(dmin > bestD){ bestD = dmin; best = k; }
     }
-    return grid;
+    return best;
   }
-  var ORDER = scatterOrder();
+  // ORDER: a fixed scatter that keeps cells of the same category apart, found by seeded
+  // hill-climbing. Side-by-side (offset 1) and stacked (K) pairs cost 3, corner-touching
+  // diagonals (K±1) cost 1: with 6 Live covers in 17, some diagonal contact is unavoidable.
+  var ORDER = null;
+  function scatter(){
+    var rand = rng(20251109), offs = [1, K, K - 1, K + 1], wts = [3, 3, 1, 1];
+    function cost(o){
+      var c = 0;
+      for(var i = 0; i < NI; i++) for(var j = 0; j < offs.length; j++)
+        if(items[o[i]].cat === items[o[mod(i + offs[j], NI)]].cat) c += wts[j];
+      return c;
+    }
+    var best = null, bestC = Infinity;
+    for(var restart = 0; restart < 40 && bestC > 0; restart++){
+      var o = items.map(function(_, i){ return i; });
+      for(var i = NI - 1; i > 0; i--){ var j = Math.floor(rand() * (i + 1)), t = o[i]; o[i] = o[j]; o[j] = t; }
+      var c = cost(o), improved = true;
+      while(improved && c > 0){
+        improved = false;
+        for(var a = 0; a < NI && c > 0; a++) for(var b = a + 1; b < NI; b++){
+          var t2 = o[a]; o[a] = o[b]; o[b] = t2;
+          var c2 = cost(o);
+          if(c2 < c){ c = c2; improved = true; } else { t2 = o[a]; o[a] = o[b]; o[b] = t2; }
+        }
+      }
+      if(c < bestC){ bestC = c; best = o.slice(); }
+    }
+    return best;
+  }
+  function itemAt(c, r){ return ORDER[mod(c + r * K, NI)]; }
+
   function computeLayout(){
-    var r = wall.getBoundingClientRect();
-    var oldPitch = pitch;
-    W = r.width; H = r.height;
-    colW = Math.round(Math.max(88, Math.min(200, W * 0.11)));   // image width (≈⅔ of the first draft)
-    gap = Math.round(colW * 0.13);                                // cell padding around the image
-    pitch = colW + 2 * gap + 1;                                   // cell width incl. 1px grid line
-    stage.style.setProperty("--pad", gap + "px");
-    cols = [];
-    for(var k = 0; k < COLS; k++) cols.push({ items:[], off:[], hs:[], period:0, phase:0 });
-    ORDER.forEach(function(list, k){
-      var c = cols[k];
-      list.forEach(function(i){
-        var it = items[i], h = Math.round(colW * it.h / it.w) + 2 * gap + 1;   // cell height
-        c.items.push(i); c.off.push(c.period); c.hs.push(h); c.period += h;
-      });
-    });
-    cols.forEach(function(c, k){ c.phase = Math.round((((k * 0.382) % 1) - 0.5) * pitch); });
-    if(oldPitch){ camX *= pitch / oldPitch; camY *= pitch / oldPitch; }
-    else { var c0 = cols[0]; camX = 0; camY = c0.phase + c0.hs[0] / 2; } // newest portrait centred
+    var rect = wall.getBoundingClientRect();
+    var oldCW = CW, oldCH = CH;
+    W = rect.width; H = rect.height;
+    CW = Math.round(clamp(W * 0.14, 112, 240));      // cell width  (≈201px at 1440w)
+    CH = Math.round(CW * 1.3);                         // cell height
+    PADC = Math.round(CW * 0.1);                        // cell padding (reference: 10%)
+    CAPH = Math.round(clamp(CW * 0.11, 14, 24));       // caption band
+    BOXW = CW - 1 - 2 * PADC;                           // image box (1px = grid line)
+    BOXH = CH - 1 - 2 * PADC - CAPH;
+    stage.style.setProperty("--pad", PADC + "px");
+    stage.style.setProperty("--capfs", clamp(CW * 0.05, 8.5, 12).toFixed(1) + "px");
+    var newK = pickK();
+    if(!ORDER || newK !== K){ K = newK; ORDER = scatter(); }
+    if(oldCW){ camX *= CW / oldCW; camY *= CH / oldCH; }
     releaseAll();
     dirty = true;
   }
-  function mod(a, n){ return ((a % n) + n) % n; }
-  function itemCenter(c, r, j){
-    var col = cols[mod(c, COLS)];
-    return { x: c * pitch, y: col.phase + r * col.period + col.off[j] + col.hs[j] / 2 };
-  }
+  function itemCenter(c, r){ return { x: c * CW, y: r * CH }; }
 
-  /* ================= Tile pool (recycled) ================= */
+  /* ---------- Tile pool (recycled) ---------- */
   var live = new Map(), free = [], byEl = new WeakMap(), poolSize = 0, gen = 0;
   function createTile(){
     var el = document.createElement("div"); el.className = "tile";
     var blur = document.createElement("img"); blur.className = "blur"; blur.alt = ""; blur.draggable = false;
+    var frame = document.createElement("div"); frame.className = "frame";
     var img = document.createElement("img"); img.className = "sharp"; img.alt = ""; img.draggable = false; img.decoding = "async";
-    el.appendChild(blur); el.appendChild(img); stage.appendChild(el);
-    var t = { el:el, img:img, blur:blur, key:null, idx:-1, w:0, h:0, op:-1, src:"", blurT:0, kf:false };
+    frame.appendChild(img);
+    var cap = document.createElement("div"); cap.className = "cap";
+    var cn = document.createElement("span"); cn.className = "cap-n";
+    var cy = document.createElement("span"); cy.className = "cap-y";
+    cap.appendChild(cn); cap.appendChild(cy);
+    el.appendChild(blur); el.appendChild(frame); el.appendChild(cap); stage.appendChild(el);
+    var t = { el:el, img:img, blur:blur, frame:frame, cn:cn, cy:cy, key:null, idx:-1, cw:0, op:-1, src:"", blurT:0, kf:false };
     byEl.set(el, t); poolSize++;
     return t;
   }
@@ -438,7 +488,6 @@
   }
   function releaseAll(){ live.forEach(function(t){ release(t); }); }
 
-  // decoded-image cache: a tile only gets an already-decoded src where possible
   var cache = [];
   function preload(i){
     var c = cache[i]; if(c) return c;
@@ -448,17 +497,25 @@
     if(im.decode) im.decode().then(done, done); else im.onload = im.onerror = done;
     return c;
   }
-  function assign(t, idx, key, h){
+  function assign(t, idx, key){
     t.key = key; live.set(key, t);
-    if(t.w !== pitch){ t.el.style.width = pitch + "px"; t.w = pitch; }
-    if(t.h !== h){ t.el.style.height = h + "px"; t.h = h; }   // cell = exact image aspect + padding
-    if(t.idx !== idx){
+    if(t.cw !== CW){                                   // cell size: only on (re)layout
+      t.el.style.width = CW + "px"; t.el.style.height = CH + "px"; t.cw = CW; t.idx = -1;
+    }
+    if(t.idx !== idx){                                 // new cover in a recycled cell
       t.idx = idx; unhover(t, true);
-      var it = items[idx], src = it.thumb;
+      var it = items[idx];
+      var sc = Math.min(BOXW / it.w, BOXH / it.h);     // fit, never crop
+      var iw = Math.round(it.w * sc), ih = Math.round(it.h * sc);
+      var fs = t.frame.style;
+      fs.width = iw + "px"; fs.height = ih + "px";
+      fs.left = (PADC + Math.round((BOXW - iw) / 2)) + "px";
+      fs.top = (PADC + Math.round((BOXH - ih) / 2)) + "px";
+      t.cn.textContent = it.name; t.cy.textContent = it.year;
       t.el.classList.remove("ready", "instant");
       var pc = preload(idx);
-      t.img.src = src; t.src = src;
-      if(pc.ready){ t.el.classList.add("ready", "instant"); }
+      t.img.src = it.thumb; t.src = it.thumb;
+      if(pc.ready) t.el.classList.add("ready", "instant");
       else {
         var fin = function(){ if(t.idx === idx){ t.el.classList.remove("instant"); t.el.classList.add("ready"); } };
         if(t.img.decode) t.img.decode().then(fin, fin); else t.img.onload = fin;
@@ -467,58 +524,43 @@
     t.el.style.visibility = "visible";
   }
 
-  /* ================= Per-frame placement ================= */
-  var kfKey = null, kfPos = null;   // keyboard focus {c,r,j}
+  /* ---------- Per-frame placement ---------- */
+  var kfKey = null, kfPos = null;
   function layoutFrame(){
     gen++;
     var hw = (W / 2 + MARGIN + Math.abs(px)) / s, hh = (H / 2 + MARGIN + Math.abs(py)) / s;
-    var x0 = camX - hw, x1 = camX + hw, y0 = camY - hh, y1 = camY + hh;
-    var cA = Math.ceil((x0 - pitch / 2) / pitch), cB = Math.floor((x1 + pitch / 2) / pitch);
+    var cA = Math.ceil((camX - hw - CW / 2) / CW), cB = Math.floor((camX + hw + CW / 2) / CW);
+    var rA = Math.ceil((camY - hh - CH / 2) / CH), rB = Math.floor((camY + hh + CH / 2) / CH);
     var halfH = H / 2, R = CURVE_R * H, d2r = Math.PI / 180;
-    for(var c = cA; c <= cB; c++){
-      var col = cols[mod(c, COLS)], P = col.period;
-      var rA = Math.floor((y0 - col.phase) / P) - 1, rB = Math.floor((y1 - col.phase) / P);
-      for(var r = rA; r <= rB; r++){
-        for(var j = 0; j < col.items.length; j++){
-          var h = col.hs[j], top = col.phase + r * P + col.off[j];
-          if(top + h < y0 || top > y1) continue;
-          var key = c + "|" + r + "|" + j, t = live.get(key);
-          if(!t){ t = acquire(); assign(t, col.items[j], key, h); }
-          t.seen = gen;
-          var sx = W / 2 + (c * pitch - camX) * s + px;
-          var sy = halfH + (top + h / 2 - camY) * s + py;
-          var nd = (sy - halfH) / halfH; if(nd > 1.6) nd = 1.6; else if(nd < -1.6) nd = -1.6;
-          var th = CURVE_DEG * nd;                         // rotateX follows distance from centre
-          var z = R * (1 - Math.cos(th * d2r));            // edges bend toward the viewer
-          t.el.style.transform = "translate3d(" + (sx - pitch / 2).toFixed(2) + "px," + (sy - h / 2).toFixed(2) + "px," +
-            z.toFixed(2) + "px) rotateX(" + th.toFixed(3) + "deg) scale(" + s.toFixed(4) + ")";
-          var op = Math.max(FADE_MIN, 1 - FADE * Math.min(1, Math.abs(nd)));
-          if(Math.abs(op - t.op) > 0.004){ t.el.style.opacity = op.toFixed(3); t.op = op; }
-          var isKf = key === kfKey;
-          if(isKf !== t.kf){ t.el.classList.toggle("kfocus", isKf); t.kf = isKf; }
-        }
+    for(var r = rA; r <= rB; r++){
+      var sy = halfH + (r * CH - camY) * s + py;
+      var nd = clamp((sy - halfH) / halfH, -1.6, 1.6);
+      var th = CURVE_DEG * nd, z = R * (1 - Math.cos(th * d2r));
+      var op = Math.max(FADE_MIN, 1 - FADE * Math.min(1, Math.abs(nd)));
+      var tail = "px," + z.toFixed(2) + "px) rotateX(" + th.toFixed(3) + "deg) scale(" + s.toFixed(4) + ")";
+      var ty = (sy - CH / 2).toFixed(2);
+      for(var c = cA; c <= cB; c++){
+        var key = c + "|" + r, t = live.get(key);
+        if(!t){ t = acquire(); assign(t, itemAt(c, r), key); }
+        t.seen = gen;
+        var sx = W / 2 + (c * CW - camX) * s + px;
+        t.el.style.transform = "translate3d(" + (sx - CW / 2).toFixed(2) + "px," + ty + tail;
+        if(Math.abs(op - t.op) > 0.004){ t.el.style.opacity = op.toFixed(3); t.op = op; }
+        var isKf = key === kfKey;
+        if(isKf !== t.kf){ t.el.classList.toggle("kfocus", isKf); t.kf = isKf; }
       }
     }
     live.forEach(function(t){ if(t.seen !== gen) release(t); });
   }
-
-  // decode the ring just outside the viewport ahead of time (throttled)
   var lastPre = 0;
   function preloadAround(now){
     if(now - lastPre < 150) return; lastPre = now;
     var hw = (W + 2 * MARGIN) / s, hh = (H + 2 * MARGIN) / s;
-    var cA = Math.floor((camX - hw) / pitch), cB = Math.ceil((camX + hw) / pitch);
-    for(var c = cA; c <= cB; c++){
-      var col = cols[mod(c, COLS)], P = col.period;
-      var rA = Math.floor((camY - hh - col.phase) / P) - 1, rB = Math.floor((camY + hh - col.phase) / P);
-      for(var r = rA; r <= rB; r++) for(var j = 0; j < col.items.length; j++){
-        var top = col.phase + r * P + col.off[j];
-        if(top + col.hs[j] > camY - hh && top < camY + hh) preload(col.items[j]);
-      }
-    }
+    for(var r = Math.floor((camY - hh) / CH); r <= Math.ceil((camY + hh) / CH); r++)
+      for(var c = Math.floor((camX - hw) / CW); c <= Math.ceil((camX + hw) / CW); c++) preload(itemAt(c, r));
   }
 
-  /* ================= Hover: blurred copy, hovered tile only ================= */
+  /* ---------- Hover: glass cell, hovered tile only ---------- */
   var hovT = null;
   function hover(t){
     if(t === hovT) return;
@@ -543,18 +585,16 @@
     return el ? byEl.get(el) || null : null;
   }
   function updateHover(){
-    if(!fine || !mouseIn || pointerDown || paused){ if(hovT) unhover(hovT); return; }
+    if(!fine || !mouseIn || pointerDown || wallPaused()){ if(hovT) unhover(hovT); return; }
     hover(tileAt(mx, my));
   }
 
-  /* ================= Pointer input ================= */
+  /* ---------- Pointer input ---------- */
   var pointers = new Map(), pointerDown = false, dragging = false, moved = false, zoomHeld = false;
   var startX = 0, startY = 0, lastX = 0, lastY = 0, samples = [], holdTimer = 0, downT = 0;
-  var TAP_MAX_MS = 500;   // a press longer than this (e.g. a touch long-press) is not a click
   var pinch = null, pType = "mouse";
-
   function stopMotion(){ vx = vy = 0; glide = null; }
-  function setZoomTarget(z, ax, ay){ zoomTarget = z; anchorX = ax; anchorY = ay; if(reduce){ applyZoom(z); } }
+  function setZoomTarget(z, ax, ay){ zoomTarget = z; anchorX = ax; anchorY = ay; if(reduce) applyZoom(z); }
   function applyZoom(ns){
     // keep the world point under the anchor fixed: world = cam + (screen − C − parallax)/s
     var ax = anchorX - W / 2 - px, ay = anchorY - H / 2 - py;
@@ -562,7 +602,11 @@
     s = ns; dirty = true;
   }
   function dimHint(){ if(!hint.classList.contains("dim")) hint.classList.add("dim"); }
-
+  function pinchPts(){
+    var a = [], it = pointers.values(), v;
+    while(!(v = it.next()).done) a.push(v.value);
+    return { d: Math.max(1, Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y)), mx:(a[0].x + a[1].x) / 2, my:(a[0].y + a[1].y) / 2 };
+  }
   wall.addEventListener("pointerdown", function(e){
     if(e.pointerType === "mouse" && e.button !== 0) return;
     try{ wall.setPointerCapture(e.pointerId); }catch(_){}
@@ -582,18 +626,9 @@
       }
     } else if(pointers.size === 2){
       clearTimeout(holdTimer); moved = true; dragging = false;
-      var p = pinchPts();
-      pinch = { d0: p.d, s0: s, mx: p.mx, my: p.my };
-      anchorX = p.mx; anchorY = p.my;
+      var q = pinchPts(); pinch = { d0:q.d, s0:s, mx:q.mx, my:q.my }; anchorX = q.mx; anchorY = q.my;
     }
   });
-
-  function pinchPts(){
-    var a = [], it = pointers.values(), v;
-    while(!(v = it.next()).done) a.push(v.value);
-    return { d: Math.max(1, Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y)), mx:(a[0].x + a[1].x) / 2, my:(a[0].y + a[1].y) / 2 };
-  }
-
   wall.addEventListener("pointermove", function(e){
     if(e.pointerType === "mouse"){ mx = e.clientX; my = e.clientY; mouseIn = true; }
     var p = pointers.get(e.pointerId);
@@ -601,9 +636,9 @@
     p.x = e.clientX; p.y = e.clientY;
     if(pointers.size >= 2 && pinch){
       var q = pinchPts();
-      camX -= (q.mx - pinch.mx) / s; camY -= (q.my - pinch.my) / s;   // two-finger pan
+      camX -= (q.mx - pinch.mx) / s; camY -= (q.my - pinch.my) / s;
       pinch.mx = q.mx; pinch.my = q.my; anchorX = q.mx; anchorY = q.my;
-      var ns = Math.min(PINCH_MAX, Math.max(PINCH_MIN, pinch.s0 * q.d / pinch.d0));
+      var ns = clamp(pinch.s0 * q.d / pinch.d0, PINCH_MIN, PINCH_MAX);
       applyZoom(ns); zoomTarget = ns; dimHint();
       return;
     }
@@ -612,21 +647,19 @@
       if(Math.hypot(e.clientX - startX, e.clientY - startY) < THRESH){ lastX = e.clientX; lastY = e.clientY; return; }
       dragging = true; moved = true; clearTimeout(holdTimer);
       wall.classList.add("grabbing"); dimHint();
-      lastX = startX; lastY = startY;                 // keep the grabbed point under the pointer
+      lastX = startX; lastY = startY;
     }
-    var dx = e.clientX - lastX, dy = e.clientY - lastY;
-    camX -= dx / s; camY -= dy / s;
+    camX -= (e.clientX - lastX) / s; camY -= (e.clientY - lastY) / s;
     lastX = e.clientX; lastY = e.clientY;
     if(zoomHeld){ anchorX = lastX; anchorY = lastY; }
     samples.push({ x:e.clientX, y:e.clientY, t:e.timeStamp });
     if(samples.length > 8) samples.shift();
     dirty = true;
   });
-
   function endPointer(e){
     if(!pointers.has(e.pointerId)) return;
     pointers.delete(e.pointerId);
-    if(pointers.size === 1){                           // pinch → one finger: continue as drag, no jump
+    if(pointers.size === 1){
       var rest = pointers.values().next().value;
       lastX = startX = rest.x; lastY = startY = rest.y; dragging = true; pinch = null;
       samples = [{ x:rest.x, y:rest.y, t:e.timeStamp }];
@@ -637,10 +670,9 @@
     pointerDown = false;
     wall.classList.remove("grabbing");
     var wasPinch = !!pinch; pinch = null;
-    if(zoomHeld || wasPinch || zoomTarget !== 1){ setZoomTarget(1, lastX, lastY); }
+    if(zoomHeld || wasPinch || zoomTarget !== 1) setZoomTarget(1, lastX, lastY);
     if(dragging && !reduce && e.type === "pointerup"){
-      // velocity over the ~100 ms before the LAST move (not before release, so sparse
-      // move events still fling); a finger that rested >100 ms before lifting throws nothing
+      // velocity over the ~100 ms before the LAST move; a finger that rested >100 ms throws nothing
       var b = samples[samples.length - 1], a = null;
       if(b && e.timeStamp - b.t <= 100){
         for(var i = samples.length - 2; i >= 0; i--){ if(b.t - samples[i].t <= 100 || !a) a = samples[i]; else break; }
@@ -662,8 +694,6 @@
   wall.addEventListener("pointercancel", endPointer);
   wall.addEventListener("pointerleave", function(e){ if(e.pointerType === "mouse" && !pointerDown){ mouseIn = false; if(hovT) unhover(hovT); } });
   wall.addEventListener("contextmenu", function(e){ e.preventDefault(); });
-
-  // trackpad / wheel pans the wall
   wall.addEventListener("wheel", function(e){
     e.preventDefault();
     var k = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? H : 1;
@@ -673,54 +703,29 @@
     dirty = true; dimHint();
   }, { passive:false });
 
-  /* ================= Keyboard ================= */
+  /* ---------- Keyboard on the wall ---------- */
   function setKf(key){
     kfKey = key;
     if(!key){ kfPos = null; return; }
-    var p = key.split("|"); kfPos = { c:+p[0], r:+p[1], j:+p[2] };
-    dirty = true;
+    var p = key.split("|"); kfPos = { c:+p[0], r:+p[1] }; dirty = true;
   }
-  function kfItem(){ return kfPos ? cols[mod(kfPos.c, COLS)].items[kfPos.j] : -1; }
-  function nearestCentreKey(){
-    var best = null, bd = Infinity;
-    live.forEach(function(t){
-      var p = t.key.split("|"), c = itemCenter(+p[0], +p[1], +p[2]);
-      var d = Math.hypot(c.x - camX, c.y - camY);
-      if(d < bd){ bd = d; best = t.key; }
-    });
-    return best;
-  }
+  function kfItem(){ return kfPos ? itemAt(kfPos.c, kfPos.r) : -1; }
   function centreOn(pos){
-    // land the item at the viewport centre including the parallax offset it will have
-    var c = itemCenter(pos.c, pos.r, pos.j);
-    var tx = c.x + ptx / s, ty = c.y + pty / s;
+    var c = itemCenter(pos.c, pos.r), tx = c.x + ptx / s, ty = c.y + pty / s;
     stopMotion();
     if(reduce){ camX = tx; camY = ty; dirty = true; } else glide = { x:tx, y:ty };
   }
   function announce(){
     var i = kfItem(); if(i < 0) return;
     var it = items[i];
-    liveEl.textContent = it.name + ", " + it.n + " of " + it.of + ". Press Enter to open.";
+    liveEl.textContent = it.name + ", " + it.cat + ", " + it.year + ". Press Enter to open.";
   }
+  function nearestKey(){ return Math.round(camX / CW) + "|" + Math.round(camY / CH); }
   function moveFocus(dir){
-    if(!kfPos){ setKf(nearestCentreKey()); if(kfPos){ centreOn(kfPos); announce(); } return; }
-    var c = kfPos.c, r = kfPos.r, j = kfPos.j;
-    if(dir === "up" || dir === "down"){
-      var col = cols[mod(c, COLS)], L = col.items.length;
-      j += dir === "down" ? 1 : -1;
-      if(j >= L){ j = 0; r++; } else if(j < 0){ j = L - 1; r--; }
-    } else {
-      var y = itemCenter(c, r, j).y;
-      c += dir === "right" ? 1 : -1;
-      var col2 = cols[mod(c, COLS)], best = null, bd = Infinity;
-      var r0 = Math.floor((y - col2.phase) / col2.period);
-      for(var rr = r0 - 1; rr <= r0 + 1; rr++) for(var jj = 0; jj < col2.items.length; jj++){
-        var d = Math.abs(itemCenter(c, rr, jj).y - y);
-        if(d < bd){ bd = d; best = [rr, jj]; }
-      }
-      r = best[0]; j = best[1];
-    }
-    setKf(c + "|" + r + "|" + j); centreOn(kfPos); announce();
+    if(!kfPos){ setKf(nearestKey()); centreOn(kfPos); announce(); return; }
+    var c = kfPos.c, r = kfPos.r;
+    if(dir === "left") c--; else if(dir === "right") c++; else if(dir === "up") r--; else if(dir === "down") r++;
+    setKf(c + "|" + r); centreOn(kfPos); announce();
   }
   wall.addEventListener("keydown", function(e){
     var map = { ArrowLeft:"left", ArrowRight:"right", ArrowUp:"up", ArrowDown:"down" };
@@ -731,134 +736,42 @@
       var i = kfItem(); if(i >= 0) openViewer(i, wall);
     }
   });
-  wall.addEventListener("focus", function(){
-    if(!kfPos){ setKf(nearestCentreKey()); }
-    announce(); dirty = true;
-  });
+  wall.addEventListener("focus", function(){ if(!kfPos) setKf(nearestKey()); announce(); dirty = true; });
   wall.addEventListener("blur", function(){ setKf(null); });
 
-  /* ================= Viewer ================= */
-  var V = document.getElementById("viewer"), vImg = document.getElementById("v-img");
-  var vTitle = document.getElementById("v-title"), vMeta = document.getElementById("v-meta");
-  var vCount = document.getElementById("v-count"), vLink = document.getElementById("v-link");
-  var vi = -1, vOpener = null, vHideT = 0;
-  function pad(n){ return (n < 10 ? "0" : "") + n; }
-  function showItem(i){
-    vi = mod(i, NI);
-    var it = items[vi], want = vi;
-    vImg.classList.add("lowres");
-    vImg.width = it.w; vImg.height = it.h;
-    vImg.src = it.thumb;                               // instant (cached) preview…
-    vImg.alt = it.name + ", " + it.n + " of " + it.of;
-    vTitle.textContent = it.name; vMeta.textContent = it.meta;
-    vCount.textContent = pad(vi + 1) + " / " + pad(NI);
-    if(it.nav && ROUTES[it.nav]){ vLink.hidden = false; vLink.href = ROUTES[it.nav]; vLink.setAttribute("data-nav", it.nav); }
-    else { vLink.hidden = true; }
-    var full = new Image(); full.decoding = "async"; full.src = it.full;   // …then the full-size file
-    var swapIn = function(){ if(vi === want){ vImg.src = it.full; vImg.classList.remove("lowres"); } };
-    if(full.decode) full.decode().then(swapIn, swapIn); else full.onload = swapIn;
-    [vi + 1, vi - 1].forEach(function(n){ var im = new Image(); im.src = items[mod(n, NI)].full; });
-  }
-  function openViewer(i, opener){
-    clearTimeout(vHideT);
-    vOpener = opener || document.activeElement;
-    showItem(i);
-    V.hidden = false; paused = true; if(hovT) unhover(hovT, true);
-    requestAnimationFrame(function(){ V.classList.add("open"); });
-    V.querySelector(".v-close").focus();
-  }
-  function closeViewer(){
-    V.classList.remove("open"); paused = false; dirty = true;
-    vHideT = setTimeout(function(){ V.hidden = true; }, reduce ? 0 : 260);
-    if(vOpener && vOpener.focus) vOpener.focus({ preventScroll:true });
-  }
-  // swipe between portraits on touch
-  var swipe = null;
-  V.addEventListener("pointerdown", function(e){ if(e.pointerType !== "mouse") swipe = { x:e.clientX, y:e.clientY }; });
-  V.addEventListener("pointerup", function(e){
-    if(!swipe) return; var dx = e.clientX - swipe.x, dy = e.clientY - swipe.y; swipe = null;
-    if(Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.3) showItem(vi + (dx < 0 ? 1 : -1));
-  });
-
-  /* ================= Menu ================= */
-  var menu = document.getElementById("menu"), menuBtn = document.querySelector("[data-menu-open]");
-  function openMenu(){ menu.classList.add("open"); menuBtn.setAttribute("aria-expanded", "true"); paused = true; menu.querySelector(".menu-close").focus(); }
-  function closeMenu(){ menu.classList.remove("open"); menuBtn.setAttribute("aria-expanded", "false"); paused = !V.hidden; dirty = true; menuBtn.focus(); }
-
-  /* ================= One delegated click handler (data-nav / data-act) ================= */
-  var ACTS = {
-    "prev": function(){ showItem(vi - 1); },
-    "next": function(){ showItem(vi + 1); },
-    "close": closeViewer,
-    "menu-close": closeMenu
-  };
-  document.addEventListener("click", function(e){
-    var n = e.target.closest("[data-nav]");
-    if(n){ e.preventDefault(); go(n.getAttribute("data-nav")); return; }
-    var a = e.target.closest("[data-act]");
-    if(a && ACTS[a.getAttribute("data-act")]){ e.preventDefault(); ACTS[a.getAttribute("data-act")](a, e); return; }
-    if(e.target.closest("[data-menu-open]")){ openMenu(); }
-  });
-
-  // global keys: viewer + menu (Esc, arrows, focus trap)
-  function trap(container, e){
-    var f = [].filter.call(container.querySelectorAll("button,a[href]"), function(x){ return !x.hidden && x.offsetParent !== null; });
-    if(!f.length) return;
-    var first = f[0], last = f[f.length - 1];
-    if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
-    else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
-  }
-  document.addEventListener("keydown", function(e){
-    if(!V.hidden){
-      if(e.key === "Escape"){ e.preventDefault(); closeViewer(); }
-      else if(e.key === "ArrowLeft"){ e.preventDefault(); showItem(vi - 1); }
-      else if(e.key === "ArrowRight"){ e.preventDefault(); showItem(vi + 1); }
-      else if(e.key === "Tab") trap(V, e);
-      return;
-    }
-    if(menu.classList.contains("open")){
-      if(e.key === "Escape"){ e.preventDefault(); closeMenu(); }
-      else if(e.key === "Tab") trap(menu, e);
-      return;
-    }
-  });
-
-  /* ================= Resize (ResizeObserver → next frame) ================= */
   if(window.ResizeObserver){
     new ResizeObserver(function(){
       if(layoutQueued) return; layoutQueued = true;
-      requestAnimationFrame(function(){ layoutQueued = false; computeLayout(); });
+      requestAnimationFrame(function(){ layoutQueued = false; if(wall.offsetWidth) computeLayout(); });
     }).observe(wall);
-  } else window.addEventListener("resize", function(){ requestAnimationFrame(computeLayout); });
+  }
   document.addEventListener("mouseleave", function(){ mouseIn = false; });
 
-  /* ================= Main loop (requestAnimationFrame) ================= */
+  /* ---------- Main loop ---------- */
   var last = performance.now(), hoverTick = 0;
   function frame(now){
     requestAnimationFrame(frame);
     var dt = Math.min(64, now - last); last = now;
-    if(paused || document.hidden || !W) return;
+    if(wallPaused() || document.hidden || !W) return;
     var changed = false;
-
-    if(!pointerDown && (vx || vy)){                   // throw inertia
+    if(!pointerDown && (vx || vy)){
       camX -= vx * dt / s; camY -= vy * dt / s;
       var f = Math.pow(FRICTION, dt / 16.667); vx *= f; vy *= f;
       if(Math.hypot(vx, vy) < VSTOP) vx = vy = 0;
       changed = true;
     }
-    if(glide){                                         // keyboard glide
+    if(glide){
       var g = 1 - Math.exp(-dt / GLIDE_TAU);
       camX += (glide.x - camX) * g; camY += (glide.y - camY) * g;
       if(Math.abs(glide.x - camX) < 0.25 && Math.abs(glide.y - camY) < 0.25){ camX = glide.x; camY = glide.y; glide = null; }
       changed = true;
     }
-    if(s !== zoomTarget && !pinch){                    // eased, anchored zoom
+    if(s !== zoomTarget && !pinch){
       var tau = zoomTarget < s ? ZOOM_OUT_TAU : ZOOM_IN_TAU;
       var ns = reduce ? zoomTarget : s + (zoomTarget - s) * (1 - Math.exp(-dt / tau));
       if(Math.abs(zoomTarget - ns) < 0.0006) ns = zoomTarget;
       applyZoom(ns); changed = true;
     }
-    // reverse-axis cursor parallax (mouse only); frozen while pressed so drags stay 1:1
     if(!pointerDown){
       if(fine && !reduce && mouseIn){ ptx = -PAR * (mx - W / 2); pty = -PAR * (my - H / 2); }
       else { ptx = 0; pty = 0; }
@@ -874,17 +787,407 @@
     }
     if(changed || dirty){
       layoutFrame(); dirty = false; preloadAround(now);
-      // things moved under a still cursor: re-check the hovered tile now and then
       if(fine && mouseIn && !pointerDown && ++hoverTick % 6 === 0) updateHover();
     }
   }
 
+  /* =====================================================================
+     STACK INDEX (ported from stack-index.html on draft/vertical-gallery-landing;
+     its own viewer/menu/video/autoplay removed — it shares this page's viewer and menu)
+     ===================================================================== */
+  var Stack = (function(){
+    var CONFIG = { loop:true, tau:110, stretchMax:0.06, stretchGain:0.018, parallax:7, swellMax:0.08, swellRadius:190 };
+    var N = NI;
+    var vstage = document.getElementById("vg-stage");
+    var titlesEl = document.getElementById("vg-titles");
+    var infoEl = document.getElementById("vg-info");
+    var built = false, sItems = [];
+    function build(){
+      built = true;
+      sItems = items.map(function(w, i){
+        var el = document.createElement("div");
+        el.className = "vg-item"; el.setAttribute("role", "listitem");
+        el.innerHTML = '<button class="vg-hit" type="button" data-i="' + i + '"><span class="vg-media"><img alt="" decoding="async" draggable="false"></span></button>';
+        el.querySelector(".vg-hit").setAttribute("aria-label", pad2(i + 1) + " " + w.name);
+        var tl = document.createElement("button");
+        tl.type = "button"; tl.className = "vg-tl"; tl.setAttribute("data-ti", i); tl.textContent = w.name;
+        titlesEl.insertBefore(tl, infoEl);
+        vstage.appendChild(el);
+        var img = el.querySelector("img"); img.alt = w.name;
+        var it = { w:w, el:el, tl:tl, media:el.querySelector(".vg-media"), img:img, hit:el.querySelector(".vg-hit"),
+          ratio:w.w / w.h, A:0, C:0, swell:1, shown:false };
+        img.addEventListener("load", function(){ img.classList.add("is-loaded"); });
+        return it;
+      });
+      document.getElementById("st-total").textContent = pad2(N);
+    }
+    var L = {};
+    function measure(){
+      if(!built || mode !== "index") return;
+      var vw = window.innerWidth, vh = window.innerHeight, mobile = vw < 720;
+      var pad = mobile ? 16 : clamp(vw * 0.032, 16, 48);
+      L.mobile = mobile; L.vw = vw; L.vh = vh;
+      var titlesW = 0;
+      if(!mobile){
+        sItems.forEach(function(it){ titlesW = Math.max(titlesW, it.tl.offsetWidth); });
+        titlesW = Math.max(titlesW, infoEl.offsetWidth);
+      }
+      L.mediaX = mobile ? pad : pad + Math.min(titlesW, vw * 0.3) + clamp(vw * 0.04, 32, 64);
+      L.maxW = mobile ? vw - pad * 2 : vw - L.mediaX - pad;
+      L.Amax = mobile ? Math.min(vh * 0.46, 520) : Math.min(vh * 0.58, 720);
+      L.Cbase = L.Amax * (mobile ? 0.36 : 0.30);
+      L.gap = mobile ? 12 : 16;
+      L.centerY = mobile ? vh * 0.43 : vh * 0.52;
+      L.pitch = L.Cbase + L.gap;
+      sItems.forEach(function(it){
+        it.A = Math.min(L.Amax, L.maxW / it.ratio);
+        it.C = Math.min(L.Cbase, it.A, (L.maxW * 0.62) / it.ratio);
+        it.el.style.width = (it.A * it.ratio) + "px";
+        it.el.style.height = it.A + "px";
+      });
+      kick();
+    }
+    var measureQueued = false;
+    function scheduleMeasure(){
+      if(measureQueued) return; measureQueued = true;
+      requestAnimationFrame(function(){ measureQueued = false; measure(); });
+    }
+    new ResizeObserver(scheduleMeasure).observe(document.documentElement);
+
+    var p = 0, target = 0, vel = 0, raf = 0, lastT = 0, dragging = false;
+    var mouse = { x:-1e4, y:-1e4, inside:false };
+    var activeIdx = -1;
+    function setTarget(t){ target = t; kick(); }
+    function goTo(i){
+      var base = Math.round(target), delta = mod(i - base + N / 2, N) - N / 2;
+      setTarget(base + delta);
+    }
+    function step(dir){ setTarget(Math.round(target) + dir); }
+    function kick(){ if(!raf && mode === "index") raf = requestAnimationFrame(frame); }
+    function smooth(t){ return t * t * (3 - 2 * t); }
+    function frame(now){
+      raf = 0;
+      if(mode !== "index") return;
+      var dt = lastT ? Math.min(64, now - lastT) : 16; lastT = now;
+      var prev = p;
+      if(dragging || reduce) p = target;
+      else { p += (target - p) * (1 - Math.exp(-dt / CONFIG.tau)); if(Math.abs(target - p) < 0.0004) p = target; }
+      var v = (p - prev) / dt;
+      vel += (v - vel) * 0.35; if(Math.abs(vel) < 1e-6) vel = 0;
+      var swellBusy = render();
+      if(p !== target || vel !== 0 || swellBusy) kick(); else lastT = 0;
+    }
+    var order = items.map(function(_, i){ return i; });
+    function render(){
+      var swellBusy = false;
+      var stretch = reduce ? 1 : 1 + Math.min(CONFIG.stretchMax, Math.abs(vel * L.pitch) * CONFIG.stretchGain);
+      var allowSwell = !reduce && !L.mobile && fine && mouse.inside && !dragging;
+      var i, it, d;
+      for(i = 0; i < N; i++){
+        it = sItems[i]; d = mod(i - p + N / 2, N) - N / 2;
+        it.d = d; it.t = smooth(Math.max(0, 1 - Math.abs(d)));
+        it.h = it.C + (it.A - it.C) * it.t; it.s = it.h / it.A;
+      }
+      order.sort(function(a, b){ return sItems[a].d - sItems[b].d; });
+      var acc = 0, a = -1, k;
+      for(k = 0; k < N; k++){ it = sItems[order[k]]; it.top = acc; acc += it.h + L.gap; if(it.d <= 0) a = k; }
+      var ref;
+      if(a < 0) ref = sItems[order[0]].top + sItems[order[0]].h / 2;
+      else {
+        var A1 = sItems[order[a]], B1 = sItems[order[a + 1]], ca = A1.top + A1.h / 2;
+        ref = B1 ? ca + (B1.top + B1.h / 2 - ca) * (-A1.d) : ca;
+      }
+      var off = L.centerY - ref;
+      for(i = 0; i < N; i++){
+        it = sItems[i];
+        var par = reduce ? 0 : clamp(it.d, -3, 3) * CONFIG.parallax;
+        var y = it.top + off;
+        var visible = y < L.vh + 40 && y + it.h > -40;
+        if(Math.abs(it.d) < 5 && !it.img.getAttribute("src")) it.img.src = it.w.full;
+        if(!visible){ if(it.shown){ it.el.style.visibility = "hidden"; it.shown = false; } continue; }
+        if(!it.shown){ it.el.style.visibility = "visible"; it.shown = true; }
+        var sw = 1;
+        if(allowSwell && it.t < 0.5){
+          var cy = y + it.h / 2, right = L.mediaX + it.A * it.ratio * it.s + 160;
+          if(mouse.x > L.mediaX - 80 && mouse.x < right){
+            var f = Math.max(0, 1 - Math.abs(mouse.y - cy) / CONFIG.swellRadius);
+            sw = 1 + CONFIG.swellMax * f * f * (1 - it.t * 2);
+          }
+        }
+        it.swell += (sw - it.swell) * 0.18;
+        if(Math.abs(sw - it.swell) < 0.0005) it.swell = sw; else swellBusy = true;
+        it.el.style.transform = "translate3d(" + L.mediaX + "px," + y + "px,0) scale(" + it.s + ")";
+        it.media.style.transform = "translate3d(0," + (par / it.s) + "px,0) scale(" + it.swell + "," + (it.swell * stretch) + ")";
+      }
+      var ai = mod(Math.round(p), N);
+      if(ai !== activeIdx) setActive(ai);
+      if(!L.mobile) renderTitles(ai);
+      return swellBusy;
+    }
+    var TL_LINE = 21, TL_ACTIVE = 40, TL_INFO = 62, TL_MIN = 0.46;
+    function renderTitles(ai){
+      var y = 0, aY = 0, i, it;
+      for(i = 0; i < N; i++){
+        it = sItems[i]; it.tlY = y;
+        y += TL_LINE + (TL_ACTIVE - TL_LINE) * it.t + TL_INFO * it.t;
+        if(i === ai) aY = it.tlY;
+      }
+      var off;
+      if(y <= L.vh - 160) off = (L.vh - y) / 2 + 20;
+      else off = Math.max(L.vh - 40 - y, Math.min(90, L.centerY - aY - TL_ACTIVE / 2));
+      for(i = 0; i < N; i++){
+        it = sItems[i];
+        it.tl.style.transform = "translate3d(0," + (it.tlY + off) + "px,0) scale(" + (TL_MIN + (1 - TL_MIN) * it.t) + ")";
+        it.tl.style.opacity = 0.42 + 0.58 * it.t;
+      }
+      var aa = sItems[ai];
+      infoEl.style.transform = "translate3d(0," + (aa.tlY + off + TL_ACTIVE * (TL_MIN + (1 - TL_MIN) * aa.t) + 6) + "px,0)";
+      infoEl.style.opacity = clamp((aa.t - 0.5) * 2, 0, 1);
+    }
+    var nEl = document.getElementById("st-n");
+    var barT = document.getElementById("vg-bar-t"), barM = document.getElementById("vg-bar-m"), barGo = document.getElementById("vg-bar-go");
+    var infoM = document.getElementById("vg-info-m"), infoGo = document.getElementById("vg-info-go");
+    function setActive(i){
+      if(activeIdx >= 0){
+        var o = sItems[activeIdx];
+        o.el.classList.remove("is-active"); o.hit.removeAttribute("aria-current"); o.tl.removeAttribute("aria-current");
+      }
+      activeIdx = i;
+      var it = sItems[i], w = it.w;
+      it.el.classList.add("is-active"); it.hit.setAttribute("aria-current", "true"); it.tl.setAttribute("aria-current", "true");
+      nEl.textContent = pad2(i + 1);
+      barT.textContent = w.name; barM.textContent = infoM.textContent = w.cat + " · " + w.meta;
+      barT.href = barGo.href = infoGo.href = ROUTES[w.nav] || "/";
+      barT.setAttribute("data-nav", w.nav); barGo.setAttribute("data-nav", w.nav); infoGo.setAttribute("data-nav", w.nav);
+    }
+
+    // wheel / drag (gated to index mode and no overlays)
+    function active(){ return mode === "index" && !viewerOpen && !menuOpen; }
+    var snapTimer = 0;
+    window.addEventListener("wheel", function(e){
+      if(!active()) return;
+      e.preventDefault();
+      var dy = e.deltaY;
+      if(e.deltaMode === 1) dy *= 32; else if(e.deltaMode === 2) dy *= L.vh;
+      if(Math.abs(e.deltaX) > Math.abs(dy)) dy = e.deltaX;
+      setTarget(target + dy / L.pitch);
+      clearTimeout(snapTimer);
+      snapTimer = setTimeout(function(){ setTarget(Math.round(target)); }, 140);
+    }, { passive:false });
+    var drag = null, suppressClick = false;
+    vstage.addEventListener("pointerdown", function(e){
+      if(e.button !== 0 || !active()) return;
+      drag = { id:e.pointerId, y0:e.clientY, t0:target, moved:false, hist:[[e.timeStamp, e.clientY]] };
+    });
+    window.addEventListener("pointermove", function(e){
+      if(mode !== "index") return;
+      if(e.pointerType === "mouse"){ mouse.x = e.clientX; mouse.y = e.clientY; mouse.inside = true; kick(); }
+      if(!drag || e.pointerId !== drag.id) return;
+      var dy = e.clientY - drag.y0;
+      if(!drag.moved && Math.abs(dy) > 6){
+        drag.moved = true; dragging = true; vstage.classList.add("is-dragging");
+        try{ vstage.setPointerCapture(e.pointerId); }catch(err){}
+        clearTimeout(snapTimer);
+      }
+      if(drag.moved){
+        drag.hist.push([e.timeStamp, e.clientY]); if(drag.hist.length > 6) drag.hist.shift();
+        setTarget(drag.t0 - dy / L.pitch);
+      }
+    });
+    function endDrag(e){
+      if(!drag || (e && e.pointerId !== drag.id)) return;
+      if(drag.moved){
+        var h = drag.hist, a = h[0], b = h[h.length - 1];
+        var v = (b[0] - a[0]) > 0 ? (b[1] - a[1]) / (b[0] - a[0]) : 0;
+        if(e && e.timeStamp - b[0] > 90) v = 0;
+        dragging = false;
+        var fling = reduce ? 0 : clamp((v * 160) / L.pitch, -4, 4);
+        setTarget(Math.round(target - fling));
+        suppressClick = true; setTimeout(function(){ suppressClick = false; }, 0);
+        vstage.classList.remove("is-dragging");
+      }
+      drag = null;
+    }
+    window.addEventListener("pointerup", endDrag);
+    window.addEventListener("pointercancel", endDrag);
+    document.documentElement.addEventListener("mouseleave", function(){ mouse.inside = false; kick(); });
+    vstage.addEventListener("scroll", function(){ vstage.scrollTop = 0; vstage.scrollLeft = 0; });
+    vstage.addEventListener("focusin", function(e){
+      var hit = e.target.closest(".vg-hit");
+      if(hit && hit.matches(":focus-visible")) goTo(+hit.getAttribute("data-i"));
+    });
+
+    function click(e){       // called from the page's single delegated click handler
+      var tl = e.target.closest(".vg-tl");
+      if(tl){ goTo(+tl.getAttribute("data-ti")); return true; }
+      var hit = e.target.closest(".vg-hit");
+      if(hit){
+        if(suppressClick) return true;
+        var i = +hit.getAttribute("data-i");
+        if(i === activeIdx && Math.abs(target - Math.round(target)) < 0.01 && Math.abs(p - target) < 0.25) openViewer(i, hit);
+        else goTo(i);
+        return true;
+      }
+      return false;
+    }
+    function key(e){
+      var k = e.key, handled = true;
+      if(k === "ArrowDown" || k === "PageDown" || k === "j") step(1);
+      else if(k === "ArrowUp" || k === "PageUp" || k === "k") step(-1);
+      else if(k === "Home") goTo(0);
+      else if(k === "End") goTo(N - 1);
+      else if((k === "Enter" || k === " ") && !e.target.closest("button,a")) openViewer(activeIdx, null);
+      else handled = false;
+      if(handled){
+        e.preventDefault();
+        if(vstage.contains(document.activeElement)) sItems[mod(Math.round(target), N)].hit.focus({ preventScroll:true });
+      }
+    }
+    function show(startIdx){
+      if(!built) build();
+      if(startIdx != null){ target = p = startIdx; }
+      measure();
+      if(document.fonts && document.fonts.ready) document.fonts.ready.then(scheduleMeasure);
+    }
+    // focus once the stack has painted (hidden items can't take focus)
+    function focusActive(){ requestAnimationFrame(function(){ requestAnimationFrame(function(){
+      var it = sItems[mod(Math.round(target), N)]; if(it) it.hit.focus({ preventScroll:true }); }); }); }
+    function hitFor(i){ var it = sItems[mod(i, N)]; return it ? it.hit : null; }
+    function current(){ return activeIdx; }
+    return { show:show, click:click, key:key, goTo:goTo, kick:kick, focusActive:focusActive, current:current, hitFor:hitFor,
+      stats:function(){ return { built:built, p:p, target:target, active:activeIdx, items:sItems.length }; } };
+  })();
+
+  /* =====================================================================
+     Mode switch (wall ⇄ index) — #index in the URL opens the index
+     ===================================================================== */
+  var modeBtn = document.querySelector(".modeBtn");
+  function setMode(m, fromUser){
+    if(m === mode) return;
+    mode = m;
+    document.body.classList.toggle("mode-index", m === "index");
+    modeBtn.querySelector(".opt-wall").classList.toggle("on", m === "wall");
+    modeBtn.querySelector(".opt-index").classList.toggle("on", m === "index");
+    modeBtn.setAttribute("aria-pressed", m === "index" ? "true" : "false");
+    if(hovT) unhover(hovT, true);
+    if(m === "index"){
+      // open the index on whatever cover is nearest the wall's centre
+      var start = W ? itemAt(Math.round(camX / CW), Math.round(camY / CH)) : 0;
+      Stack.show(start);
+      if(fromUser) Stack.focusActive();
+    } else {
+      dirty = true;
+      if(fromUser) wall.focus({ preventScroll:true });
+    }
+    if(fromUser && history.replaceState) history.replaceState(null, "", m === "index" ? "#index" : location.pathname + location.search);
+  }
+
+  /* =====================================================================
+     Viewer (shared by both views)
+     ===================================================================== */
+  var V = document.getElementById("viewer"), vImg = document.getElementById("v-img");
+  var vTitle = document.getElementById("v-title"), vMeta = document.getElementById("v-meta");
+  var vCount = document.getElementById("v-count"), vLink = document.getElementById("v-link");
+  var vi = -1, vOpener = null, vHideT = 0;
+  function showItem(i){
+    vi = mod(i, NI);
+    var it = items[vi], want = vi;
+    vImg.classList.add("lowres");
+    vImg.width = it.w; vImg.height = it.h;
+    vImg.src = it.thumb;
+    vImg.alt = it.name + " — cover";
+    vTitle.textContent = it.name; vMeta.textContent = it.cat + " · " + it.meta;
+    vCount.textContent = pad2(vi + 1) + " / " + pad2(NI);
+    vLink.href = ROUTES[it.nav] || "/"; vLink.setAttribute("data-nav", it.nav);
+    var full = new Image(); full.decoding = "async"; full.src = it.full;
+    var swapIn = function(){ if(vi === want){ vImg.src = it.full; vImg.classList.remove("lowres"); } };
+    if(full.decode) full.decode().then(swapIn, swapIn); else full.onload = swapIn;
+    [vi + 1, vi - 1].forEach(function(n){ var im = new Image(); im.src = items[mod(n, NI)].full; });
+  }
+  function openViewer(i, opener){
+    if(i < 0) return;
+    clearTimeout(vHideT);
+    vOpener = opener || document.activeElement;
+    showItem(i);
+    V.hidden = false; viewerOpen = true; if(hovT) unhover(hovT, true);
+    requestAnimationFrame(function(){ V.classList.add("open"); });
+    V.querySelector(".v-close").focus();
+  }
+  function closeViewer(){
+    V.classList.remove("open"); viewerOpen = false; dirty = true;
+    vHideT = setTimeout(function(){ V.hidden = true; }, reduce ? 0 : 260);
+    if(mode === "index"){ Stack.goTo(vi); Stack.kick(); if(vOpener && vOpener.closest && vOpener.closest(".vg-stage")) vOpener = Stack.hitFor(vi); }
+    if(vOpener && vOpener.focus) vOpener.focus({ preventScroll:true });
+  }
+  var swipe = null;
+  V.addEventListener("pointerdown", function(e){ if(e.pointerType !== "mouse") swipe = { x:e.clientX, y:e.clientY }; });
+  V.addEventListener("pointerup", function(e){
+    if(!swipe) return; var dx = e.clientX - swipe.x, dy = e.clientY - swipe.y; swipe = null;
+    if(Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.3) showItem(vi + (dx < 0 ? 1 : -1));
+  });
+
+  /* ---------- Menu ---------- */
+  var menu = document.getElementById("menu"), menuBtn = document.querySelector("[data-menu-open]");
+  function openMenu(){ menu.classList.add("open"); menuOpen = true; menuBtn.setAttribute("aria-expanded", "true"); menu.querySelector(".menu-close").focus(); }
+  function closeMenu(){ menu.classList.remove("open"); menuOpen = false; menuBtn.setAttribute("aria-expanded", "false"); dirty = true; Stack.kick(); menuBtn.focus(); }
+
+  /* ---------- One delegated click handler (data-nav / data-act) ---------- */
+  var ACTS = {
+    "prev": function(){ showItem(vi - 1); },
+    "next": function(){ showItem(vi + 1); },
+    "close": closeViewer,
+    "menu-close": closeMenu,
+    "mode": function(){ setMode(mode === "wall" ? "index" : "wall", true); }
+  };
+  document.addEventListener("click", function(e){
+    var n = e.target.closest("[data-nav]");
+    if(n){
+      if(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault(); go(n.getAttribute("data-nav")); return;
+    }
+    var a = e.target.closest("[data-act]");
+    if(a && ACTS[a.getAttribute("data-act")]){ e.preventDefault(); ACTS[a.getAttribute("data-act")](a, e); return; }
+    if(e.target.closest("[data-menu-open]")){ openMenu(); return; }
+    if(mode === "index" && !viewerOpen && !menuOpen) Stack.click(e);
+  });
+
+  /* ---------- Global keys ---------- */
+  function trap(container, e){
+    var f = [].filter.call(container.querySelectorAll("button,a[href]"), function(x){ return !x.hidden && x.offsetParent !== null; });
+    if(!f.length) return;
+    var first = f[0], lastEl = f[f.length - 1];
+    if(e.shiftKey && document.activeElement === first){ e.preventDefault(); lastEl.focus(); }
+    else if(!e.shiftKey && document.activeElement === lastEl){ e.preventDefault(); first.focus(); }
+  }
+  document.addEventListener("keydown", function(e){
+    if(viewerOpen){
+      if(e.key === "Escape"){ e.preventDefault(); closeViewer(); }
+      else if(e.key === "ArrowLeft"){ e.preventDefault(); showItem(vi - 1); }
+      else if(e.key === "ArrowRight"){ e.preventDefault(); showItem(vi + 1); }
+      else if(e.key === "Tab") trap(V, e);
+      return;
+    }
+    if(menuOpen){
+      if(e.key === "Escape"){ e.preventDefault(); closeMenu(); }
+      else if(e.key === "Tab") trap(menu, e);
+      return;
+    }
+    if(mode === "index") Stack.key(e);
+  });
+  function onMQ(){ reduce = mqReduce.matches; fine = mqFine.matches; if(reduce){ vx = vy = 0; s = zoomTarget; glide = null; } dirty = true; Stack.kick(); }
+  if(mqReduce.addEventListener){ mqReduce.addEventListener("change", onMQ); mqFine.addEventListener("change", onMQ); }
+
+  /* ---------- Boot ---------- */
   computeLayout();
+  camX = 0; camY = 0;                          // cell (0,0) — ORDER[0] — at the centre
   requestAnimationFrame(frame);
+  if(location.hash === "#index") setMode("index", false);
 
   // test/debug hook for the draft (read-only numbers)
   window.__portraitWall = {
-    stats: function(){ return { pool: poolSize, live: live.size, inDom: stage.children.length, camX: camX, camY: camY, s: s, px: px, py: py, vx: vx, vy: vy, pitch: pitch, colW: colW, cols: COLS, reduce: reduce, fine: fine }; }
+    stats: function(){ return { mode: mode, pool: poolSize, live: live.size, inDom: stage.children.length, camX: camX, camY: camY, s: s, px: px, py: py, vx: vx, vy: vy, cw: CW, ch: CH, k: K, n: NI, reduce: reduce, fine: fine }; },
+    order: function(){ return ORDER.slice(); },
+    stack: function(){ return Stack.stats(); }
   };
 })();
 </script>
