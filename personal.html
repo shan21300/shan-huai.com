@@ -346,7 +346,6 @@
     <div class="menu-cats">
       <!-- Navigation is Commercial / Personal for now. The earlier page links stay below,
            hidden (not deleted), so they can be brought back by removing "hidden". -->
-      <button class="m-link m-home" data-nav="landing">home</button>
       <span class="m-link m-soon" aria-disabled="true">commercial</span>
       <a class="m-link" href="/personal" aria-current="page">personal</a>
       <button class="m-link" data-nav="projects" hidden>project</button>
@@ -1234,7 +1233,7 @@
   var menu = document.getElementById("menu"), menuBtn = document.querySelector("header .brandBtn");   /* the logo */
   function firstMenuItem(){ var c = menu.querySelectorAll("a[href],button"); for(var i = 0; i < c.length; i++){ if(c[i].offsetParent) return c[i]; } return null; }
   function openMenu(){ Stack.clearHover(); menu.classList.add("open"); menuOpen = true; document.body.classList.add("menu-is-open");
-    menuBtn.setAttribute("aria-expanded", "true"); menuBtn.setAttribute("aria-label", "Close menu");
+    menuBtn.setAttribute("aria-expanded", "true"); menuBtn.setAttribute("aria-label", "Home");
     var f = firstMenuItem(); if(f) f.focus(); }
   function closeMenu(){ menu.classList.remove("open"); menuOpen = false; document.body.classList.remove("menu-is-open");
     menuBtn.setAttribute("aria-expanded", "false"); menuBtn.setAttribute("aria-label", "Open menu");
@@ -1246,7 +1245,7 @@
     "next": function(){ showItem(vi + 1); },
     "close": closeViewer,
     "menu-close": closeMenu,
-    "menu-toggle": function(){ if(menuOpen) closeMenu(); else openMenu(); },
+    "menu-toggle": function(){ if(menuOpen) go("landing"); else openMenu(); },   /* inside the open menu the logo is home */
     "mode": function(){ setMode(mode === "wall" ? "index" : "wall", true); }
   };
   document.addEventListener("click", function(e){
@@ -1258,6 +1257,8 @@
     var a = e.target.closest("[data-act]");
     if(a && ACTS[a.getAttribute("data-act")]){ e.preventDefault(); ACTS[a.getAttribute("data-act")](a, e); return; }
     if(e.target.closest("[data-menu-open]")){ openMenu(); return; }
+    /* a click / tap on an empty part of the open menu closes it (there is no "close" button) */
+    if(menuOpen && e.target.closest("#menu") && !e.target.closest("a,button,.m-soon")){ closeMenu(); return; }
     if(mode === "index" && !viewerOpen && !menuOpen) Stack.click(e);
   });
 

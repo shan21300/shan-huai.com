@@ -1174,7 +1174,6 @@
   body.menu-is-open header{z-index:80;transform:none}
   body.menu-is-open header::before{display:none}   /* no dark header band over the open menu */
   #menu .menu-logo,#menu .menu-close{display:none}
-  body.on-landing #menu .m-home{display:none}
   header .brandBtn:focus-visible{outline:1px solid var(--edge);outline-offset:6px}
   @media(hover:hover) and (pointer:fine){
     body.on-landing #cursor-aperture{display:none !important}
@@ -3404,7 +3403,6 @@
     <div class="menu-cats">
       <!-- Navigation is Commercial / Personal for now. The earlier page links stay below,
            hidden (not deleted), so they can be brought back by removing "hidden". -->
-      <button class="m-link m-home" data-nav="landing">home</button>
       <span class="m-link m-soon" aria-disabled="true">commercial</span>
       <a class="m-link" href="/personal">personal</a>
       <button class="m-link" data-nav="projects" hidden>project</button>
@@ -3880,10 +3878,18 @@
   document.querySelectorAll("#menu [data-nav]").forEach(function(el){
     el.addEventListener("click",function(){ swap(el.getAttribute("data-nav")); closeMenu(); });
   });
-  // The logo (top-left on every page) opens / closes the menu; "home" is a menu item
+  // The logo (top-left on every page) opens the menu; inside the open menu it is the home
+  // button (on the home page itself that just closes the menu)
   var brandToggle=document.querySelector("header .brandBtn");
   if(brandToggle) brandToggle.addEventListener("click",function(){
-    if(document.body.classList.contains("menu-is-open")) closeMenu(); else openMenu();
+    if(!document.body.classList.contains("menu-is-open")){ openMenu(); return; }
+    if(current!=="landing") swap("landing");
+    closeMenu();
+  });
+  // a click / tap on an empty part of the open menu closes it (there is no "close" button)
+  menuEl.addEventListener("click",function(e){
+    if(e.target.closest("a,button,.m-soon")) return;
+    closeMenu();
   });
   document.addEventListener("keydown",function(e){
     if(e.key==="Escape" && document.body.classList.contains("menu-is-open")){
@@ -4687,12 +4693,12 @@
     e.preventDefault();
   }, true);
 
-  /* the logo is the menu button on every page: keep its label truthful */
+  /* the logo opens the menu, and is the home button inside it: keep its label truthful */
   var brandBtn = document.querySelector("header .brandBtn");
   function syncBrand(){
     if(!brandBtn) return;
     var open = body.classList.contains("menu-is-open");
-    brandBtn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    brandBtn.setAttribute("aria-label", !open ? "Open menu" : body.classList.contains("on-landing") ? "Close menu" : "Home");
     brandBtn.setAttribute("aria-expanded", open ? "true" : "false");
   }
   syncBrand();
