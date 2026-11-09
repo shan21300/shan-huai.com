@@ -1156,6 +1156,62 @@
       padding:8px clamp(12px,4vw,20px) calc(8px + env(safe-area-inset-bottom,0px));
       background:linear-gradient(to top,rgba(11,11,12,.55),transparent)}
   }
+
+  /* ===== Curved carousel home (#landing) — from landing-draft-curved.html =====
+     Home only: logo top-left is the menu button (stays there, black, over the open menu),
+     no "menu" text button, native cursors, no page scroll. Other pages are unchanged. */
+  :root{--cc-px:clamp(16px,2.6vw,40px);--cc-py:clamp(14px,2vw,26px);--cc-logo:clamp(40px,3.6vw,52px)}
+  html.cc-gl body.on-landing{overflow:hidden;overscroll-behavior:none}
+  body.on-landing header::before{display:none}
+  body.on-landing .menuBtn{display:none}
+  body.on-landing .brandBtn{left:calc(var(--cc-px) + env(safe-area-inset-left,0px));top:calc(var(--cc-py) + env(safe-area-inset-top,0px));transform:none}
+  body.on-landing .brandBtn .logo-img{height:var(--cc-logo);transition:opacity .35s ease}
+  .brandBtn .logo-img-b{display:none}
+  body.on-landing .brandBtn .logo-img-b{display:block;position:absolute;left:0;top:0;height:var(--cc-logo);width:auto;opacity:0;transition:opacity .35s ease}
+  body.on-landing.menu-is-open .brandBtn .logo-img{opacity:0}
+  body.on-landing.menu-is-open .brandBtn .logo-img-b{opacity:.92}
+  body.on-landing.menu-is-open header{z-index:80}
+  body.on-landing #menu .menu-logo,body.on-landing #menu .menu-close{display:none}
+  body.on-landing .brandBtn:focus-visible{outline:1px solid var(--edge);outline-offset:6px}
+  @media(hover:hover) and (pointer:fine){
+    body.on-landing #cursor-aperture{display:none !important}
+    body.on-landing,body.on-landing *{cursor:auto !important}
+    body.on-landing a,body.on-landing button{cursor:pointer !important}
+    body.on-landing .m-soon{cursor:default !important}
+    html.cc-gl body.on-landing .cc-stage{cursor:grab !important}
+    html.cc-gl body.on-landing .cc-stage.is-over{cursor:pointer !important}
+    html.cc-gl body.on-landing .cc-stage.is-dragging{cursor:grabbing !important}
+  }
+  #landing .cc-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  #landing .cc-stage{position:fixed;inset:0;z-index:1;touch-action:pan-y;
+    -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  #landing .cc-stage canvas{display:block;width:100%;height:100%}
+  html:not(.cc-gl) #landing .cc-stage{display:none}
+  #landing .cc-cap{position:fixed;left:50%;bottom:calc(var(--cc-py) + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
+    z-index:20;pointer-events:none;text-align:center;width:min(80vw,520px);height:44px;contain:strict;
+    display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+  html:not(.cc-gl) #landing .cc-cap{display:none}
+  #landing .cc-cap-name{font-family:"Cormorant Garamond",serif;font-weight:300;font-size:22px;line-height:1.1;letter-spacing:-.01em;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  #landing .cc-cap-meta{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-top:4px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  /* the project links: hidden in WebGL mode (keyboard focus turns the carousel to them);
+     without WebGL or with reduced motion they are a plain, natively scrolling strip */
+  #landing .cc-works{list-style:none}
+  html.cc-gl #landing .cc-works{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  html.cc-strip #landing.is-active{display:flex;flex-direction:column;justify-content:center;
+    padding:calc(var(--cc-logo) + var(--cc-py)*2 + 24px) 0 calc(var(--cc-py) + 48px)}
+  html.cc-strip #landing .cc-works{display:flex;gap:clamp(10px,1vw,16px);overflow-x:auto;overscroll-behavior-x:contain;
+    scroll-snap-type:x proximity;scroll-padding-inline:var(--cc-px);padding:0 var(--cc-px) 14px;
+    scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+  html.cc-strip #landing .cc-works li{flex:none;scroll-snap-align:start}
+  html.cc-strip #landing .cc-work{display:block;text-decoration:none;color:inherit}
+  html.cc-strip #landing .cc-work img{display:block;height:min(52vh,60vw);width:auto;aspect-ratio:4 / 3;object-fit:cover;background:#151516}
+  html.cc-strip #landing .cc-work.is-port img{aspect-ratio:3 / 4}
+  #landing .cc-work-name{display:block;font-family:"Cormorant Garamond",serif;font-weight:300;font-size:19px;margin-top:10px}
+  #landing .cc-work-meta{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-top:3px}
+  html.cc-strip #landing .cc-work:hover .cc-work-name{font-style:italic}
+  @media (max-width:760px){ #landing .cc-cap-name{font-size:20px} }
 </style>
 </head>
 <body>
@@ -1170,86 +1226,41 @@
 
   <header>
     <span class="header-spacer" aria-hidden="true"></span>
-    <button class="brandBtn" data-nav="landing" aria-label="Home"><img src="/images/system/shanhuailogoinversed_white.png" alt="Shan-Huai" class="logo-img"></button>
+    <button class="brandBtn" data-nav="landing" aria-label="Home"><img src="/images/system/shanhuailogoinversed_white.png" alt="Shan-Huai" class="logo-img"><img src="/images/system/shanhuailogoinversed_black.png" alt="" class="logo-img-b" loading="lazy" aria-hidden="true"></button>
     <button class="menuBtn" data-menu-open aria-label="Menu">menu</button>
   </header>
 
   <main>
-    <!-- LANDING -->
-    <section class="page is-active" id="landing" data-sw='[{&quot;name&quot;: &quot;SUB&quot;, &quot;meta&quot;: &quot;Local Remote · 2026&quot;, &quot;detail&quot;: &quot;Local Remote · 2026&quot;, &quot;cat&quot;: &quot;Branding&quot;, &quot;logo&quot;: &quot;/images/projects/SUB_title.png&quot;}, {&quot;name&quot;: &quot;黑松沙士&quot;, &quot;meta&quot;: &quot;Local Remote · 2026&quot;, &quot;detail&quot;: &quot;Local Remote · 2026&quot;, &quot;cat&quot;: &quot;Branding&quot;, &quot;logo&quot;: &quot;/images/projects/黑松title.png&quot;}, {&quot;name&quot;: &quot;FROMETO&quot;, &quot;meta&quot;: &quot;Local Remote · 2026&quot;, &quot;detail&quot;: &quot;Local Remote · 2026&quot;, &quot;cat&quot;: &quot;Branding&quot;, &quot;logo&quot;: &quot;/images/projects/FRM_title.png&quot;}, {&quot;name&quot;: &quot;Local Local Park&quot;, &quot;meta&quot;: &quot;Local Remote · 2026&quot;, &quot;detail&quot;: &quot;Local Remote · 2026&quot;, &quot;cat&quot;: &quot;Branding&quot;, &quot;logo&quot;: &quot;/images/projects/LLP_title.png&quot;}, {&quot;name&quot;: &quot;Butoh Experiment&quot;, &quot;meta&quot;: &quot;Performance · 2023&quot;, &quot;detail&quot;: &quot;Central Saint Martins · 2023&quot;, &quot;cat&quot;: &quot;Performance&quot;, &quot;year&quot;: &quot;2023&quot;}, {&quot;name&quot;: &quot;Zero-Case Policy&quot;, &quot;meta&quot;: &quot;Performance · 2021&quot;, &quot;detail&quot;: &quot;London · 2024&quot;, &quot;cat&quot;: &quot;Photography&quot;, &quot;year&quot;: &quot;2021&quot;}, {&quot;name&quot;: &quot;Cornelius&quot;, &quot;meta&quot;: &quot;Chillout Music Festival · 2025&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2025&quot;}, {&quot;name&quot;: &quot;someshiit 山姆&quot;, &quot;meta&quot;: &quot;Chillout Music Festival · 2025&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2025&quot;}, {&quot;name&quot;: &quot;Elephant Gym&quot;, &quot;meta&quot;: &quot;Bristol · 2024&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2024&quot;}, {&quot;name&quot;: &quot;Hillsong&quot;, &quot;meta&quot;: &quot;London · 2022&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2022&quot;}, {&quot;name&quot;: &quot;Mosaic&quot;, &quot;meta&quot;: &quot;Hollywood · 2018–2020&quot;, &quot;cat&quot;: &quot;Live&quot;, &quot;year&quot;: &quot;2018–2020&quot;}, {&quot;name&quot;: &quot;Kenya Slum&quot;, &quot;meta&quot;: &quot;Nairobi · 2023&quot;, &quot;cat&quot;: &quot;Photo-Journalism&quot;, &quot;year&quot;: &quot;2023&quot;}, {&quot;name&quot;: &quot;Slava Ukraini&quot;, &quot;meta&quot;: &quot;London · 2022&quot;, &quot;cat&quot;: &quot;Photo-Journalism&quot;, &quot;year&quot;: &quot;2022&quot;}, {&quot;name&quot;: &quot;The Umbrella Movement&quot;, &quot;meta&quot;: &quot;Hong Kong · 2019&quot;, &quot;cat&quot;: &quot;Photo-Journalism&quot;, &quot;year&quot;: &quot;2019&quot;}, {&quot;name&quot;: &quot;Untitled Sketch&quot;, &quot;meta&quot;: &quot;Taipei · 2023&quot;, &quot;cat&quot;: &quot;Portraiture&quot;, &quot;year&quot;: &quot;2023&quot;}, {&quot;name&quot;: &quot;Duality Within&quot;, &quot;meta&quot;: &quot;Portrait · 2021&quot;, &quot;cat&quot;: &quot;Portraiture&quot;, &quot;year&quot;: &quot;2021&quot;}, {&quot;name&quot;: &quot;In Mood For Smoke&quot;, &quot;meta&quot;: &quot;Portrait · 2021&quot;, &quot;cat&quot;: &quot;Portraiture&quot;, &quot;year&quot;: &quot;2021&quot;}, {&quot;name&quot;: &quot;Julian and Judy&quot;, &quot;meta&quot;: &quot;Engagement Session · 2025&quot;, &quot;cat&quot;: &quot;Wedding&quot;, &quot;year&quot;: &quot;2025&quot;}, {&quot;name&quot;: &quot;Daniel and Juny&quot;, &quot;meta&quot;: &quot;Taiwan · 2021&quot;, &quot;cat&quot;: &quot;Wedding&quot;, &quot;year&quot;: &quot;2021&quot;}, {&quot;name&quot;: &quot;Girlfriend&quot;, &quot;meta&quot;: &quot;PDP Year 2 Music Video · 2024&quot;, &quot;cat&quot;: &quot;Archive&quot;, &quot;year&quot;: &quot;2024&quot;}]'>
-      <div class="sw-scroll proj-scroll" style="height:835vh">
-        <div class="proj-viewport sw-viewport">
-          <div class="sw-caption">
-            <span class="sw-eyebrow">Selected Works</span>
-            <span class="sw-name" data-sw="name"><img class="sw-name-logo" src="/images/projects/SUB_title.png" alt="SUB"></span>
-            <span class="sw-meta" data-sw="meta">Local Remote · 2026</span>
-          </div>
-          <div class="proj-stage sw-stage">
-            <div class="frame show" data-nav="proj-sub" data-video="e997d71eb8270f43dddcebf6eeefa9fa"><span class="sw-media"><img src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/e997d71eb8270f43dddcebf6eeefa9fa/thumbnails/thumbnail.jpg?width=1280" alt="SUB" loading="eager"></span></div>
-            <div class="frame" data-nav="proj-heysong" data-video="0b36c9ded9204e7376cbc535b745884f"><span class="sw-media"><img src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/0b36c9ded9204e7376cbc535b745884f/thumbnails/thumbnail.jpg?width=1280" alt="黑松沙士" loading="eager"></span></div>
-            <div class="frame" data-nav="proj-frometo" data-video="5d5a347fdc546fa2904564d13861d576"><span class="sw-media"><img src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/5d5a347fdc546fa2904564d13861d576/thumbnails/thumbnail.jpg?width=1280" alt="FROMETO" loading="lazy"></span></div>
-            <div class="frame" data-nav="proj-locallocalpark"><img src="/images/projects/LLP_1.avif" alt="Local Local Park" loading="lazy"></div>
-            <div class="frame" data-nav="proj-butoh"><img src="/images/projects/butoh_nigel_-1.jpg" alt="Butoh Experiment" loading="lazy"></div>
-            <div class="frame" data-nav="proj-zerocase"><img src="/images/projects/0-case-policy-5.jpg" alt="Zero-Case Policy" loading="lazy"></div>
-            <div class="frame" data-nav="gig-cornelius"><img src="/images/Concerts/cornelius_chillout_-2.jpg" alt="Cornelius" loading="lazy"></div>
-            <div class="frame" data-nav="gig-someshiitsam"><img src="/images/Concerts/someshiitSam_chillout_-01.jpg" alt="someshiit 山姆" loading="lazy"></div>
-            <div class="frame" data-nav="gig-elephantgym"><img src="/images/Concerts/elephantgym_bristol-10.jpg" alt="Elephant Gym" loading="lazy"></div>
-            <div class="frame" data-nav="gig-hillsong"><img src="/images/Concerts/Hillsong_London-10.jpg" alt="Hillsong" loading="lazy"></div>
-            <div class="frame" data-nav="gig-mosaic"><img src="/images/Concerts/Mosaic_02.jpg" alt="Mosaic" loading="lazy"></div>
-            <div class="frame" data-nav="pj-kenyaslum"><img src="/images/Photo-Journalism/kenya_2023_-05.jpg" alt="Kenya Slum" loading="lazy"></div>
-            <div class="frame" data-nav="pj-slavaukraini"><img src="/images/Photo-Journalism/Slava-Ukrani-11.jpg" alt="Slava Ukraini" loading="lazy"></div>
-            <div class="frame" data-nav="pj-hkprotest"><img src="/images/Photo-Journalism/hkProt-06.jpg" alt="The Umbrella Movement" loading="lazy"></div>
-            <div class="frame" data-nav="pt-untitledsketch"><img src="/images/portraiture/rooftop_motion-cover.jpg" alt="Untitled Sketch" loading="lazy"></div>
-            <div class="frame" data-nav="pt-dualitywithin"><img src="/images/portraiture/duality_within_2021-21.jpg" alt="Duality Within" loading="lazy"></div>
-            <div class="frame" data-nav="pt-inmoodforsmoke"><img src="/images/portraiture/In-mood-for-smoke_2021-3.jpg" alt="In Mood For Smoke" loading="lazy"></div>
-            <div class="frame" data-nav="julianjudy"><img src="/images/wedding-engagement/Julian%26Judy_engagement-06.jpg" alt="Julian and Judy" loading="lazy"></div>
-            <div class="frame" data-nav="danieljuny"><img src="/images/wedding-engagement/DJ-Juny_engagement-04.jpg" alt="Daniel and Juny" loading="lazy"></div>
-            <div class="frame" data-nav="girlfriend" data-video="bd75fdf49d96c125ba7dc1fcdc705fd5"><span class="sw-media"><img src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/bd75fdf49d96c125ba7dc1fcdc705fd5/thumbnails/thumbnail.jpg?width=1280" alt="Girlfriend" loading="lazy"></span></div>
-          </div>
-        </div>
-      </div>
-      <div class="pinfo sw-pinfo">
-        <div class="pinfo-card">
-          <div class="pinfo-head">
-            <div class="pinfo-tabs"><span class="pinfo-tab is-on" data-view="info">Info</span></div>
-            <span class="pinfo-toggle" role="switch" aria-label="Toggle floater" aria-checked="false"></span>
-          </div>
-          <div class="pinfo-body">
-            <div class="pinfo-scroll">
-              <div class="pinfo-view is-on" data-view="info">
-                <div class="pinfo-credits">
-                  <div class="pinfo-ck">Work</div><div class="pinfo-cv" data-sw="name">—</div>
-                  <div class="pinfo-ck">Category</div><div class="pinfo-cv" data-sw="cat">—</div>
-                  <div class="pinfo-ck">Details</div><div class="pinfo-cv" data-sw="meta">—</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <nav class="rail sw-rail" aria-label="thumbnails">
-        <button class="rt active" data-idx="0"><img class="rt-img" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/e997d71eb8270f43dddcebf6eeefa9fa/thumbnails/thumbnail.jpg?width=240" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="1"><img class="rt-img" src="/images/projects/黑松-04.jpg" alt=""></button>
-        <button class="rt" data-idx="2"><img class="rt-img" src="/images/projects/FRM_9.avif" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="3"><img class="rt-img" src="/images/projects/LLP_1.avif" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="4"><img class="rt-img" src="/images/projects/butoh_nigel_-1.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="5"><img class="rt-img" src="/images/projects/0-case-policy-5.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="6"><img class="rt-img" src="/images/Concerts/cornelius_chillout_-2.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="7"><img class="rt-img" src="/images/Concerts/someshiitSam_chillout_-01.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="8"><img class="rt-img" src="/images/Concerts/elephantgym_bristol-10.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="9"><img class="rt-img" src="/images/Concerts/Hillsong_London-10.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="10"><img class="rt-img" src="/images/Concerts/Mosaic_02.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="11"><img class="rt-img" src="/images/Photo-Journalism/kenya_2023_-05.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="12"><img class="rt-img" src="/images/Photo-Journalism/Slava-Ukrani-11.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="13"><img class="rt-img" src="/images/Photo-Journalism/hkProt-06.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="14"><img class="rt-img" src="/images/portraiture/rooftop_motion-cover.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="15"><img class="rt-img" src="/images/portraiture/duality_within_2021-21.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="16"><img class="rt-img" src="/images/portraiture/In-mood-for-smoke_2021-3.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="17"><img class="rt-img" src="/images/wedding-engagement/Julian%26Judy_engagement-06.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="18"><img class="rt-img" src="/images/wedding-engagement/DJ-Juny_engagement-04.jpg" alt="" loading="lazy"></button>
-        <button class="rt" data-idx="19"><img class="rt-img" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/bd75fdf49d96c125ba7dc1fcdc705fd5/thumbnails/thumbnail.jpg?width=240" alt="" loading="lazy"></button>
-        <div class="rail-cursor"></div>
-      </nav>
+    <!-- LANDING: curved carousel (from landing-draft-curved.html; the previous Selected Works
+         home is kept, unchanged, in landing-page_old.html). Projects are the real links in
+         .cc-works below, newest first; the script further down draws them in WebGL. -->
+    <section class="page is-active" id="landing">
+      <script>document.documentElement.classList.add(matchMedia("(prefers-reduced-motion: reduce)").matches ? "cc-strip" : "cc-gl");</script>
+      <h1 class="cc-sr">Shan-Huai Chiang — selected work</h1>
+      <div class="cc-stage" aria-hidden="true"><canvas></canvas></div>
+      <ol class="cc-works" aria-label="Selected work, newest first">
+        <li><a class="cc-work" href="/project/sub" data-nav="proj-sub" data-stream="e997d71eb8270f43dddcebf6eeefa9fa" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-sub.webp" width="1200" height="800" alt="SUB"><span class="cc-work-name">SUB</span><span class="cc-work-meta">Branding — Local Remote · 2026</span></a></li>
+        <li><a class="cc-work" href="/project/heysong-sarsaparilla" data-nav="proj-heysong" data-stream="0b36c9ded9204e7376cbc535b745884f" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-heysong.webp" width="1422" height="800" alt="黑松沙士"><span class="cc-work-name">黑松沙士</span><span class="cc-work-meta">Branding — Local Remote · 2026</span></a></li>
+        <li><a class="cc-work" href="/project/frometo" data-nav="proj-frometo" data-stream="5d5a347fdc546fa2904564d13861d576" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-frometo.webp" width="1422" height="800" alt="FROMETO"><span class="cc-work-name">FROMETO</span><span class="cc-work-meta">Branding — Local Remote · 2026</span></a></li>
+        <li><a class="cc-work" href="/project/local-local-park" data-nav="proj-locallocalpark" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-locallocalpark.webp" width="1200" height="800" alt="Local Local Park"><span class="cc-work-name">Local Local Park</span><span class="cc-work-meta">Branding — Local Remote · 2026</span></a></li>
+        <li><a class="cc-work" href="/live/cornelius" data-nav="gig-cornelius" data-cat="Live" data-meta="Chillout Music Festival · 2025"><img data-src="/images/carousel/gig-cornelius.webp" width="533" height="800" alt="Cornelius"><span class="cc-work-name">Cornelius</span><span class="cc-work-meta">Live — Chillout Music Festival · 2025</span></a></li>
+        <li><a class="cc-work" href="/live/someshiit-sam" data-nav="gig-someshiitsam" data-cat="Live" data-meta="Chillout Music Festival · 2025"><img data-src="/images/carousel/gig-someshiitsam.webp" width="533" height="800" alt="someshiit 山姆"><span class="cc-work-name">someshiit 山姆</span><span class="cc-work-meta">Live — Chillout Music Festival · 2025</span></a></li>
+        <li><a class="cc-work" href="/wedding/julian-and-judy" data-nav="julianjudy" data-cat="Wedding" data-meta="Engagement Session · 2025"><img data-src="/images/carousel/julianjudy.webp" width="1200" height="800" alt="Julian and Judy"><span class="cc-work-name">Julian and Judy</span><span class="cc-work-meta">Wedding — Engagement Session · 2025</span></a></li>
+        <li><a class="cc-work" href="/live/elephant-gym" data-nav="gig-elephantgym" data-cat="Live" data-meta="Bristol · 2024"><img data-src="/images/carousel/gig-elephantgym.webp" width="533" height="800" alt="Elephant Gym"><span class="cc-work-name">Elephant Gym</span><span class="cc-work-meta">Live — Bristol · 2024</span></a></li>
+        <li><a class="cc-work" href="/archive/girlfriend" data-nav="girlfriend" data-stream="bd75fdf49d96c125ba7dc1fcdc705fd5" data-cat="Archive" data-meta="PDP Year 2 Music Video · 2024"><img data-src="/images/carousel/girlfriend.webp" width="1422" height="800" alt="Girlfriend"><span class="cc-work-name">Girlfriend</span><span class="cc-work-meta">Archive — PDP Year 2 Music Video · 2024</span></a></li>
+        <li><a class="cc-work" href="/project/butoh-experiment" data-nav="proj-butoh" data-cat="Performance" data-meta="Central Saint Martins · 2023"><img data-src="/images/carousel/proj-butoh.webp" width="533" height="800" alt="Butoh Experiment"><span class="cc-work-name">Butoh Experiment</span><span class="cc-work-meta">Performance — Central Saint Martins · 2023</span></a></li>
+        <li><a class="cc-work" href="/photojournalism/kenya-slum" data-nav="pj-kenyaslum" data-cat="Photo-Journalism" data-meta="Nairobi · 2023"><img data-src="/images/carousel/pj-kenyaslum.webp" width="1200" height="800" alt="Kenya Slum"><span class="cc-work-name">Kenya Slum</span><span class="cc-work-meta">Photo-Journalism — Nairobi · 2023</span></a></li>
+        <li><a class="cc-work" href="/portraiture/untitled-sketch" data-nav="pt-untitledsketch" data-cat="Portraiture" data-meta="Taipei · 2023"><img data-src="/images/carousel/pt-untitledsketch.webp" width="533" height="800" alt="Untitled Sketch"><span class="cc-work-name">Untitled Sketch</span><span class="cc-work-meta">Portraiture — Taipei · 2023</span></a></li>
+        <li><a class="cc-work" href="/live/hillsong" data-nav="gig-hillsong" data-cat="Live" data-meta="London · 2022"><img data-src="/images/carousel/gig-hillsong.webp" width="533" height="800" alt="Hillsong"><span class="cc-work-name">Hillsong</span><span class="cc-work-meta">Live — London · 2022</span></a></li>
+        <li><a class="cc-work" href="/photojournalism/slava-ukraini" data-nav="pj-slavaukraini" data-cat="Photo-Journalism" data-meta="London · 2022"><img data-src="/images/carousel/pj-slavaukraini.webp" width="533" height="800" alt="Slava Ukraini"><span class="cc-work-name">Slava Ukraini</span><span class="cc-work-meta">Photo-Journalism — London · 2022</span></a></li>
+        <li><a class="cc-work" href="/project/zero-case-policy" data-nav="proj-zerocase" data-cat="Photography" data-meta="Performance · 2021"><img data-src="/images/carousel/proj-zerocase.webp" width="533" height="800" alt="Zero-Case Policy"><span class="cc-work-name">Zero-Case Policy</span><span class="cc-work-meta">Photography — Performance · 2021</span></a></li>
+        <li><a class="cc-work" href="/portraiture/duality-within" data-nav="pt-dualitywithin" data-cat="Portraiture" data-meta="Portrait · 2021"><img data-src="/images/carousel/pt-dualitywithin.webp" width="533" height="800" alt="Duality Within"><span class="cc-work-name">Duality Within</span><span class="cc-work-meta">Portraiture — Portrait · 2021</span></a></li>
+        <li><a class="cc-work" href="/portraiture/in-mood-for-smoke" data-nav="pt-inmoodforsmoke" data-cat="Portraiture" data-meta="Portrait · 2021"><img data-src="/images/carousel/pt-inmoodforsmoke.webp" width="539" height="800" alt="In Mood For Smoke"><span class="cc-work-name">In Mood For Smoke</span><span class="cc-work-meta">Portraiture — Portrait · 2021</span></a></li>
+        <li><a class="cc-work" href="/wedding/daniel-and-juny" data-nav="danieljuny" data-cat="Wedding" data-meta="Taiwan · 2021"><img data-src="/images/carousel/danieljuny.webp" width="533" height="800" alt="Daniel and Juny"><span class="cc-work-name">Daniel and Juny</span><span class="cc-work-meta">Wedding — Taiwan · 2021</span></a></li>
+        <li><a class="cc-work" href="/live/mosaic" data-nav="gig-mosaic" data-cat="Live" data-meta="Hollywood · 2018–2020"><img data-src="/images/carousel/gig-mosaic.webp" width="533" height="800" alt="Mosaic"><span class="cc-work-name">Mosaic</span><span class="cc-work-meta">Live — Hollywood · 2018–2020</span></a></li>
+        <li><a class="cc-work" href="/photojournalism/the-umbrella-movement" data-nav="pj-hkprotest" data-cat="Photo-Journalism" data-meta="Hong Kong · 2019"><img data-src="/images/carousel/pj-hkprotest.webp" width="1200" height="800" alt="The Umbrella Movement"><span class="cc-work-name">The Umbrella Movement</span><span class="cc-work-meta">Photo-Journalism — Hong Kong · 2019</span></a></li>
+      </ol>
+      <div class="cc-cap" aria-live="polite"><span class="cc-cap-name"></span><span class="cc-cap-meta mono"></span></div>
     </section>
 
     <!-- BRANDING -->
@@ -3582,6 +3593,10 @@
       var endScale=restH/bigH;                        // shrink factor to reach resting size
       var startY=(window.innerHeight/2)-bigCY;        // centred on screen
       var endY=restCY-bigCY;                          // resting spot in the header
+      // Home page: the logo rests top-left (no CSS centring), so it also travels sideways.
+      var onHome=document.body.classList.contains("on-landing");
+      var bigCX=bigRect.left+bigRect.width/2, restCX=rest.left+rest.width/2;
+      var startX=onHome ? (window.innerWidth/2)-bigCX : 0, endX=onHome ? restCX-bigCX : 0;
 
       // Lift the header (and its logo) ABOVE the black loader so the logo animates ON
       // the black, then the LOADER itself fades out to reveal whatever page is behind it.
@@ -3590,7 +3605,7 @@
       // x:0 stops GSAP stacking its own translate on top of the CSS translateX(-50%)
       // (which would land the shrink half a logo-width off before snapping to centre).
       gsap.set(header,{zIndex:70});                   // above loader (z-index 60)
-      gsap.set(brand,{x:0, xPercent:-50, y:startY, scale:1, opacity:0, transformOrigin:"50% 50%", willChange:"transform,opacity"});
+      gsap.set(brand,{x:startX, xPercent:onHome?0:-50, y:startY, scale:1, opacity:0, transformOrigin:"50% 50%", willChange:"transform,opacity"});
       gsap.set(menuBtn,{opacity:0});
 
       var tl=gsap.timeline();
@@ -3599,7 +3614,7 @@
       // 2) big logo fades in, centred, on the black
       tl.to(brand,{opacity:1,duration:.5,ease:"power2.out"}, "-=0.1");
       // 3) it shrinks + rises to its header spot (~0.9s, medium)
-      tl.to(brand,{y:endY,scale:endScale,duration:.9,ease:"power3.inOut"}, "+=0.15");
+      tl.to(brand,{x:endX,y:endY,scale:endScale,duration:.9,ease:"power3.inOut"}, "+=0.15");
       // 4) the black loader fades out -> the page content reveals from black as the logo
       //    lands, and the menu button fades in at the same time
       tl.to(loader,{opacity:0,duration:.6,ease:"power2.out",onComplete:removeLoader}, "-=0.35");
@@ -3834,12 +3849,22 @@
       ? "/images/system/shanhuailogoinversed_white.png"
       : "/images/system/shanhuailogoinversed_black.png";
     menuEl.classList.add("open");
+    document.body.classList.add("menu-is-open");
+    if(current==="landing"){         // home: the page behind can't be tabbed into; focus the first link
+      var mainEl=document.querySelector("main"); if(mainEl) mainEl.setAttribute("inert","");
+      setTimeout(function(){         // first visible item ("close" and the menu logo are hidden here)
+        var c=menuEl.querySelectorAll("a[href],button");
+        for(var i=0;i<c.length;i++){ if(c[i].offsetParent){ c[i].focus({preventScroll:true}); break; } }
+      }, 60);
+    }
     if(reduce || !hasGSAP) return;
     gsap.fromTo(menuEl,{opacity:0},{opacity:1,duration:.4,ease:"power2.out"});
     gsap.fromTo(".m-link",{y:26,opacity:0},{y:0,opacity:1,duration:.6,stagger:.06,ease:"power3.out",delay:.05});
     gsap.fromTo(".menu-foot > *",{y:14,opacity:0},{y:0,opacity:1,duration:.5,stagger:.08,ease:"power3.out",delay:.22});
   }
   function closeMenu(cb){
+    document.body.classList.remove("menu-is-open");
+    var mainEl=document.querySelector("main"); if(mainEl) mainEl.removeAttribute("inert");
     if(reduce || !hasGSAP){ menuEl.classList.remove("open"); if(cb)cb(); return; }
     gsap.to(menuEl,{opacity:0,duration:.35,ease:"power2.in",onComplete:function(){
       menuEl.classList.remove("open"); if(cb)cb();
@@ -3852,6 +3877,17 @@
   // menu links: swap page behind the opaque overlay, then fade the menu to reveal it
   document.querySelectorAll("#menu [data-nav]").forEach(function(el){
     el.addEventListener("click",function(){ swap(el.getAttribute("data-nav")); closeMenu(); });
+  });
+  // Home page: the logo (top-left there) opens / closes the menu instead of linking home
+  var brandToggle=document.querySelector("header .brandBtn");
+  if(brandToggle) brandToggle.addEventListener("click",function(){
+    if(current!=="landing") return;
+    if(document.body.classList.contains("menu-is-open")) closeMenu(); else openMenu();
+  });
+  document.addEventListener("keydown",function(e){
+    if(e.key==="Escape" && current==="landing" && document.body.classList.contains("menu-is-open")){
+      e.preventDefault(); closeMenu(); if(brandToggle) brandToggle.focus({preventScroll:true});
+    }
   });
   // header logo -> landing (with fade transition, same as menu close)
   document.querySelectorAll("header [data-nav]").forEach(function(el){
@@ -4106,6 +4142,7 @@
   
   /* ===== Selected Works landing driver ===== */
   (function(){
+  (function(){ // the old home carousel (now in landing-page_old.html); exits when its markup isn't here
     var land=document.getElementById("landing");
     if(!land || !land.hasAttribute("data-sw")) return;
     var data=[];
@@ -4233,6 +4270,7 @@
     // initialize + re-init when returning to landing
     requestAnimationFrame(update);
     window._swUpdate=update;
+  })();
 
     // ===== Floater vertical drag handler (all floaters) =====
     var activeDrag = null; // track which floater is being dragged
@@ -4617,6 +4655,606 @@
     requestAnimationFrame(function(t){ prev=t; tick(t); });
   });
 })();
+</script>
+<script>
+(function(){
+  "use strict";
+  /* ===== Curved carousel home (#landing) — ported from landing-draft-curved.html =====
+     The site's own pieces stay in charge: the intro loader, the header and menu, and the
+     [data-nav] → go() → swap() navigation (frames click the matching link). This only
+     draws the carousel and pauses itself whenever the home page isn't showing. */
+  var doc = document.documentElement, body = document.body;
+  var land = document.getElementById("landing");
+  if(!land || !land.querySelector(".cc-stage")) return;
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var links = Array.prototype.slice.call(land.querySelectorAll(".cc-works .cc-work"));
+  var N = links.length;
+  function live(){ return body.classList.contains("on-landing") && !body.classList.contains("menu-is-open"); }
+
+  /* every frame is 3:4 (portrait) or 4:3 (landscape), centre-cropped */
+  links.forEach(function(a){
+    var img = a.querySelector("img");
+    if(+img.getAttribute("width") < +img.getAttribute("height")) a.classList.add("is-port");
+  });
+
+  /* A plain click on a project link runs the site's own handler (go → swap, no reload);
+     the href is for modifier-clicks (new tab), crawlers and no-JS. */
+  document.addEventListener("click", function(e){
+    var a = e.target.closest && e.target.closest("#landing a[data-nav]");
+    if(!a) return;
+    if(e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey){ e.stopPropagation(); return; }
+    e.preventDefault();
+  }, true);
+
+  /* the logo is the menu button on the home page: keep its label truthful */
+  var brandBtn = document.querySelector("header .brandBtn");
+  function syncBrand(){
+    if(!brandBtn) return;
+    if(body.classList.contains("on-landing")){
+      var open = body.classList.contains("menu-is-open");
+      brandBtn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+      brandBtn.setAttribute("aria-expanded", open ? "true" : "false");
+      brandBtn.setAttribute("aria-controls", "menu");
+    }else{
+      brandBtn.setAttribute("aria-label", "Home");
+      brandBtn.removeAttribute("aria-expanded"); brandBtn.removeAttribute("aria-controls");
+    }
+  }
+  syncBrand();
+  new MutationObserver(syncBrand).observe(body, { attributes:true, attributeFilter:["class"] });
+
+  /* ---------- Fallback / reduced motion: a plain, natively scrolling strip ---------- */
+  var stripOn = false;
+  function useStrip(){
+    if(stripOn) return; stripOn = true;
+    doc.classList.remove("cc-gl"); doc.classList.add("cc-strip");
+    links.forEach(function(a){
+      var img = a.querySelector("img");
+      if(img && !img.getAttribute("src")){ img.loading = "lazy"; img.decoding = "async"; img.src = img.getAttribute("data-src"); }
+    });
+    var strip = land.querySelector(".cc-works");
+    /* a vertical mouse wheel scrolls the strip sideways (direct, no easing) */
+    strip.addEventListener("wheel", function(e){
+      if(e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      if(strip.scrollWidth <= strip.clientWidth) return;
+      strip.scrollLeft += e.deltaY * (e.deltaMode === 1 ? 16 : 1);
+      e.preventDefault();
+    }, { passive:false });
+  }
+  if(reduce){ useStrip(); return; }
+
+  /* ---------- WebGL carousel ---------- */
+  var stage = land.querySelector(".cc-stage");
+  var canvas = stage.querySelector("canvas");
+  var capEl = land.querySelector(".cc-cap");
+  var capName = capEl.querySelector(".cc-cap-name"), capMeta = capEl.querySelector(".cc-cap-meta");
+
+  var works = links.map(function(a, i){
+    var img = a.querySelector("img");
+    var src = (+img.getAttribute("width")) / (+img.getAttribute("height"));
+    return {
+      i:i, a:a, name: img.alt, cat: a.getAttribute("data-cat"), meta: a.getAttribute("data-meta"),
+      src: img.getAttribute("data-src"), stream: a.getAttribute("data-stream"),
+      aspect: src >= 1 ? 4/3 : 3/4,
+      img:null, state:0 /*0 none,1 loading,2 decoded,3 uploaded,-1 failed*/, tex:null, crop:[0,0,1,1],
+      video:null, vtex:null, vcrop:null, vState:0 /*0 none,1 starting,2 playing,-1 failed*/, vFresh:false, vAlpha:0,
+      alpha:0, dim:0, focus:0, revealAt:0
+    };
+  });
+  /* centre crop of a source (sw×sh) to the frame's 3:4 / 4:3: [offsetU, offsetV, scaleU, scaleV] */
+  function cropFor(w, sw, sh){
+    var s = sw/sh, t = w.aspect;
+    if(!sw || !sh) return [0,0,1,1];
+    if(s > t){ var k = t/s; return [(1-k)/2, 0, k, 1]; }
+    var m = s/t; return [0, (1-m)/2, 1, m];
+  }
+
+  var gl = null, prog = null, buf = null, blankTex = null, U = {}, SEG = 48, isGL2 = false;
+  var VS = [
+    "attribute vec2 aUV;",
+    "uniform vec2 uView; uniform float uX0, uW, uH, uCy, uA, uP;",
+    "varying vec2 vUV;",
+    "void main(){",
+    "  float x = uView.x*0.5 + uX0 + aUV.x*uW;",          /* widths stay constant across the screen… */
+    "  float u = clamp(x/uView.x, 0.0, 1.25);",
+    "  float s = 1.0 + uA*pow(u, uP);",                    /* …height is flat on the left and rises to the right */
+    "  float y = uCy + (aUV.y - 0.5)*uH*s;",
+    "  gl_Position = vec4(x/uView.x*2.0 - 1.0, 1.0 - y/uView.y*2.0, 0.0, 1.0);",
+    "  vUV = aUV;",
+    "}"].join("\n");
+  var FS = [
+    "#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#endif",
+    "uniform sampler2D uTex; uniform vec4 uCrop; uniform vec2 uRes, uEdge, uScr;",
+    "uniform float uAlpha, uDim, uReveal, uFocus, uFx0, uFw, uZone, uK, uFcy, uFh, uFa, uFp;",
+    "varying vec2 vUV;",
+    "void main(){",
+    /* Liquid edge drag: inside the outer zone on each side, the image is sampled from a
+       point pulled back toward the zone's inner line, so content smears outward smoothly
+       (one continuous warp, no blended copies). The frame's outline is untouched. */
+    "  float s = gl_FragCoord.x/uRes.x*uScr.x;",            /* screen x, CSS px */
+    "  float z = uZone, sp = s;",
+    "  if(s < z){ float t = (z - s)/z; sp = z - z*(1.0 - exp(-uK*t))/uK; }",
+    "  else if(s > uScr.x - z){ float t = (s - uScr.x + z)/z; sp = uScr.x - z + z*(1.0 - exp(-uK*t))/uK; }",
+    "  float u = clamp((sp - uScr.x*0.5 - uFx0)/uFw, 0.0, 1.0);",
+    /* vertical position computed per pixel from the same bend as the vertex shader
+       (interpolating it per triangle leaves sawtooth steps that the edge drag magnifies) */
+    "  float yy = (1.0 - gl_FragCoord.y/uRes.y)*uScr.y;",
+    "  float sc = 1.0 + uFa*pow(clamp(s/uScr.x, 0.0, 1.25), uFp);",
+    "  float v = clamp(0.5 + (yy - uFcy)/(uFh*sc), 0.0, 1.0);",
+    "  vec3 c = texture2D(uTex, uCrop.xy + vec2(u, v)*uCrop.zw).rgb;",
+    "  vec3 ink = vec3(0.043, 0.043, 0.047);",
+    "  c = mix(vec3(0.082, 0.082, 0.086), c, uAlpha);",
+    "  float l = dot(c, vec3(0.299, 0.587, 0.114));",
+    "  c = mix(c, vec3(l), uDim*0.9);",                     /* frames you are not pointing at go grey… */
+    "  c = mix(c, ink, uDim*0.55);",                        /* …and recede into the dark */
+    "  c = mix(ink, c, uReveal);",                          /* intro: frames develop up from black */
+    "  vec2 e = min(vUV, 1.0 - vUV)/uEdge;",
+    "  c = mix(c, vec3(0.929, 0.918, 0.89), step(min(e.x, e.y), 1.0)*uFocus);", /* keyboard focus ring */
+    "  gl_FragColor = vec4(c, 1.0);",
+    "}"].join("\n");
+
+  function compile(type, src){
+    var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+    if(!gl.getShaderParameter(s, gl.COMPILE_STATUS) && !gl.isContextLost()) throw new Error(gl.getShaderInfoLog(s));
+    return s;
+  }
+  function initGL(){
+    prog = gl.createProgram();
+    gl.attachShader(prog, compile(gl.VERTEX_SHADER, VS));
+    gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FS));
+    gl.linkProgram(prog);
+    if(!gl.getProgramParameter(prog, gl.LINK_STATUS) && !gl.isContextLost()) throw new Error(gl.getProgramInfoLog(prog));
+    gl.useProgram(prog);
+    ["uView","uX0","uW","uH","uCy","uA","uP","uTex","uCrop","uRes","uEdge","uAlpha","uDim","uReveal","uFocus","uZone","uK","uScr","uFx0","uFw","uFcy","uFh","uFa","uFp"]
+      .forEach(function(n){ U[n] = gl.getUniformLocation(prog, n); });
+    var v = [];
+    for(var s = 0; s <= SEG; s++){ v.push(s/SEG, 0, s/SEG, 1); }
+    buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(v), gl.STATIC_DRAW);
+    var loc = gl.getAttribLocation(prog, "aUV");
+    gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    blankTex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, blankTex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([21,21,22,255]));
+    gl.uniform1i(U.uTex, 0);
+    gl.clearColor(11/255, 11/255, 12/255, 1);
+    gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
+  }
+  function newTex(mips){
+    var t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, mips ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR);
+    return t;
+  }
+  function upload(w){
+    w.tex = newTex(isGL2);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, w.img);
+    if(isGL2) gl.generateMipmap(gl.TEXTURE_2D);  /* NPOT in WebGL1: no mipmaps */
+    w.crop = cropFor(w, w.img.naturalWidth, w.img.naturalHeight);
+    w.state = 3;
+  }
+
+  try{
+    var attrs = { antialias:true, alpha:false, depth:false, stencil:false, premultipliedAlpha:false, powerPreference:"default" };
+    gl = canvas.getContext("webgl2", attrs);
+    if(gl) isGL2 = true; else gl = canvas.getContext("webgl", attrs) || canvas.getContext("experimental-webgl", attrs);
+    if(!gl) throw new Error("no webgl");
+    initGL();
+  }catch(err){ gl = null; }
+  if(!gl){ useStrip(); return; }
+
+  /* ---------- Layout: frame sizes and the bend ---------- */
+  var W = 0, H = 0, dpr = 1, cy = 0, baseH = 0, gap = 0, A = 1, P = 3.4, zone = 160, K = 3.2;
+  var inst = [], L = 1;   /* instances: {w: work, s: track start, len: width} — the list repeats if it is too short */
+  function bend(sx){ var u = Math.max(0, Math.min(1.25, sx/W)); return 1 + A*Math.pow(u, P); }
+  function layout(){
+    var oldL = L;
+    W = stage.clientWidth; H = stage.clientHeight;
+    if(!W || !H) return;
+    dpr = Math.min(window.devicePixelRatio || 1, W*H > 2.4e6 ? 1.5 : 2);
+    canvas.width = Math.round(W*dpr); canvas.height = Math.round(H*dpr);
+    var narrow = W < 760, mid = W < 1100;
+    A = narrow ? 0.85 : 1.05;       /* right edge ≈ 1.85–2× the left */
+    P = narrow ? 3.0 : 3.4;
+    baseH = narrow ? Math.min(H*0.21, W*0.44) : mid ? Math.min(H*0.27, W*0.3) : Math.min(H*0.34, W*0.215);
+    baseH = Math.min(baseH, (H - 150)/(1 + A));
+    gap = Math.max(8, Math.min(12, W*0.0075));
+    zone = Math.max(48, Math.min(200, W*0.11));   /* width of the liquid edge on each side */
+    K = 3.2;                                        /* how hard it drags: ~25x stretch at the very edge */
+    cy = H*0.49;
+    inst = []; var s = 0, rep = 0;
+    do{
+      for(var i = 0; i < N; i++){ var len = baseH*works[i].aspect; inst.push({ w:works[i], s:s, len:len }); s += len + gap; }
+      rep++;
+    }while(s < W*3 && rep < 8);
+    L = s;
+    /* open with the newest project centred (the oldest ones loop in on its left) */
+    if(!placed){ placed = true; pos = target = centreOf(0); }
+    else if(oldL > 1){ pos = pos/oldL*L; target = target/oldL*L; }
+    dirty = true;
+  }
+  function wrap(x){ return ((x % L) + L*1.5) % L - L/2; } /* → [-L/2, L/2) */
+  function x0Of(k){ return wrap(inst[k].s - pos); }       /* left edge, relative to screen centre */
+  function onScreen(x0, len){ return x0 + len > -W/2 && x0 < W/2; }
+
+  /* ---------- Motion state ---------- */
+  var pos = 0, target = 0, drift = 0, lastInput = -1e9, dirty = true, placed = false;
+  var DRIFT = 18;                      /* px/s, slow and calm */
+  var pointer = { in:false, x:0, y:0, type:"mouse" };
+  var drag = null, hoverInst = -1, focusWork = -1, capWork = -2;
+
+  function centreOf(k){ return inst[k].s + inst[k].len/2; }
+  /* exact inverse of the vertex shader: x is linear, height depends on screen x */
+  function hitTest(px, py){
+    var tx = px - W/2;
+    for(var k = 0; k < inst.length; k++){
+      var x0 = x0Of(k);
+      if(tx >= x0 && tx <= x0 + inst[k].len) return Math.abs(py - cy) <= baseH*bend(px)/2 ? k : -1;
+    }
+    return -1;
+  }
+  function nearestInstOf(wi){
+    var best = -1, bd = 1e9;
+    for(var k = 0; k < inst.length; k++){ if(inst[k].w.i !== wi) continue; var d = Math.abs(wrap(centreOf(k) - target)); if(d < bd){ bd = d; best = k; } }
+    return best;
+  }
+  function centreInst(){
+    var best = 0, bd = 1e9;
+    for(var k = 0; k < inst.length; k++){ var d = Math.abs(wrap(centreOf(k) - pos)); if(d < bd){ bd = d; best = k; } }
+    return best;
+  }
+  function glideTo(k){ target += wrap(centreOf(k) - target); lastInput = performance.now(); }
+
+  /* ---------- Input ---------- */
+  function now(){ return performance.now(); }
+  stage.addEventListener("pointerdown", function(e){
+    if(e.button !== 0 || !live()) return;
+    pointer.type = e.pointerType;
+    drag = { id:e.pointerId, x0:e.clientX, y0:e.clientY, t0:target, active:false, samples:[[now(), e.clientX]],
+             hit: hitTest(e.clientX, e.clientY), type:e.pointerType };
+  });
+  window.addEventListener("pointermove", function(e){
+    pointer.x = e.clientX; pointer.y = e.clientY; pointer.type = e.pointerType;
+    pointer.in = e.target === canvas;
+    if(!drag || e.pointerId !== drag.id) return;
+    var dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
+    var th = drag.type === "mouse" ? 6 : 10;   /* drag threshold: beyond this it is never a click */
+    if(!drag.active){
+      if(Math.abs(dx) < th && Math.abs(dy) < th) return;
+      if(drag.type !== "mouse" && Math.abs(dy) > Math.abs(dx)){ drag = null; return; } /* vertical: leave it to the page */
+      drag.active = true;
+      try{ stage.setPointerCapture(e.pointerId); }catch(err){}
+      stage.classList.add("is-dragging");
+    }
+    target = drag.t0 - dx;
+    drag.samples.push([now(), e.clientX]);
+    if(drag.samples.length > 8) drag.samples.shift();
+    lastInput = now();
+  });
+  function endDrag(e, cancelled){
+    if(!drag || e.pointerId !== drag.id) return;
+    var d = drag; drag = null;
+    stage.classList.remove("is-dragging");
+    if(d.active){
+      /* release velocity from the last ~100ms of movement → a light, short throw */
+      var s = d.samples, t1 = s[s.length-1][0], j = s.length - 1;
+      while(j > 0 && t1 - s[j-1][0] < 100) j--;
+      var dt = (t1 - s[j][0])/1000, v = dt > 0.008 ? (s[s.length-1][1] - s[j][1])/dt : 0;
+      if(now() - t1 > 80) v = 0;                      /* paused before letting go */
+      v = Math.max(-3200, Math.min(3200, v));
+      target -= v*0.26;
+      lastInput = now();
+    }else if(!cancelled && d.hit >= 0 && hitTest(e.clientX, e.clientY) === d.hit){
+      var a = inst[d.hit].w.a;
+      if(e.metaKey || e.ctrlKey) window.open(a.href, "_blank", "noopener");
+      else a.click();                                  /* same delegated data-nav path as keyboard */
+    }
+  }
+  window.addEventListener("pointerup", function(e){ endDrag(e, false); });
+  window.addEventListener("pointercancel", function(e){ endDrag(e, true); });
+  document.addEventListener("pointerleave", function(){ pointer.in = false; });
+  window.addEventListener("blur", function(){ pointer.in = false; });
+
+  window.addEventListener("wheel", function(e){
+    if(e.ctrlKey || !live()) return;                  /* pinch-zoom, another page, or menu open */
+    var d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    if(e.deltaMode === 1) d *= 16; else if(e.deltaMode === 2) d *= H;
+    target += Math.max(-260, Math.min(260, d*1.1));
+    lastInput = now();
+  }, { passive:true });
+
+  document.addEventListener("keydown", function(e){
+    if(e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+    if(e.altKey || e.metaKey || e.ctrlKey || !inst.length || !live()) return;
+    var dir = e.key === "ArrowRight" ? 1 : -1;
+    var active = document.activeElement, li = links.indexOf(active);
+    if(li >= 0){ links[(li + dir + N) % N].focus(); e.preventDefault(); return; } /* focus handler glides */
+    var c = centreInst(); glideTo((c + dir + inst.length) % inst.length);
+    e.preventDefault();
+  });
+  links.forEach(function(a, i){
+    a.addEventListener("focus", function(){ focusWork = i; var k = nearestInstOf(i); if(k >= 0) glideTo(k); dirty = true; });
+    a.addEventListener("blur", function(){ if(focusWork === i) focusWork = -1; dirty = true; });
+  });
+
+  /* ---------- Still covers: visible frames first, then neighbours as they approach ---------- */
+  var loading = 0, MAXLOAD = 3, uploadQ = [], lastSched = 0;
+  function startLoad(w){
+    w.state = 1; loading++;
+    var img = new Image(); img.decoding = "async";
+    img.onload = function(){
+      var done = function(){ loading--; w.img = img; w.state = 2; uploadQ.push(w); };
+      if(img.decode) img.decode().then(done, done); else done();
+    };
+    img.onerror = function(){ loading--; w.state = -1; };
+    img.src = w.src;
+  }
+  function distOff(k){ /* px between instance k and the screen (0 if on screen) */
+    var x0 = x0Of(k), x1 = x0 + inst[k].len;
+    return x1 < -W/2 ? -W/2 - x1 : x0 > W/2 ? x0 - W/2 : 0;
+  }
+  function schedule(){
+    var cand = [], k, w;
+    for(k = 0; k < inst.length; k++){
+      w = inst[k].w; if(w.state !== 0) continue;
+      var d = distOff(k); if(d < W*0.5) cand.push([d, w]);   /* on screen, plus half a screen either side */
+    }
+    cand.sort(function(p, q){ return p[0] - q[0]; });
+    for(var c = 0; c < cand.length && loading < MAXLOAD; c++){ if(cand[c][1].state === 0) startLoad(cand[c][1]); }
+    if(introDone) scheduleVideos();
+  }
+  function visibleWorks(){
+    var out = [];
+    for(var k = 0; k < inst.length; k++){ if(distOff(k) === 0 && out.indexOf(inst[k].w) < 0) out.push(inst[k].w); }
+    return out;
+  }
+
+  /* ---------- Live video inside the bend (Cloudflare Stream) ---------- */
+  var STREAM = "https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/";
+  var hlsState = 0, hlsWaiters = [];      /* 0 not loaded, 1 loading, 2 ready, -1 failed */
+  var useHlsJs = !!(window.MediaSource || window.ManagedMediaSource);
+  var vidBox = null;
+  function withHls(cb){
+    if(!useHlsJs){ cb(); return; }
+    if(hlsState === 0 && window.Hls){ hlsState = window.Hls.isSupported() ? 2 : -1; }   /* index.html already loads it */
+    if(hlsState === 2 || hlsState === -1){ cb(); return; }
+    hlsWaiters.push(cb);
+    if(hlsState === 1) return;
+    hlsState = 1;
+    var sc = document.createElement("script");
+    sc.src = "https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.13/hls.min.js"; /* same pinned build as index.html */
+    sc.async = true;
+    sc.onload = function(){ hlsState = window.Hls && window.Hls.isSupported() ? 2 : -1; hlsWaiters.splice(0).forEach(function(f){ f(); }); };
+    sc.onerror = function(){ hlsState = -1; hlsWaiters.splice(0).forEach(function(f){ f(); }); };
+    document.head.appendChild(sc);
+  }
+  function startVideo(w){
+    w.vState = 1;
+    withHls(function(){
+      if(!vidBox){
+        /* kept in the DOM, tiny and invisible, so browsers treat it as an on-page muted video */
+        vidBox = document.createElement("div"); vidBox.setAttribute("aria-hidden", "true");
+        vidBox.style.cssText = "position:fixed;left:0;bottom:0;width:2px;height:2px;overflow:hidden;opacity:0.01;pointer-events:none;z-index:-1";
+        document.body.appendChild(vidBox);
+      }
+      var v = document.createElement("video");
+      v.muted = true; v.defaultMuted = true; v.loop = true; v.playsInline = true;
+      v.setAttribute("muted", ""); v.setAttribute("playsinline", ""); v.crossOrigin = "anonymous"; v.preload = "auto";
+      v.style.cssText = "width:2px;height:2px";
+      vidBox.appendChild(v);
+      w.video = v;
+      var m3u8 = STREAM + w.stream + "/manifest/video.m3u8";
+      var capH = W < 760 ? 480 : 720;                       /* a small rendition is plenty inside a frame */
+      if(useHlsJs && hlsState === 2){
+        var h = new window.Hls({ enableWorker:true, capLevelToPlayerSize:false, maxBufferLength:12 });
+        h.on(window.Hls.Events.MANIFEST_PARSED, function(ev, data){
+          var best = 0; (data.levels || h.levels).forEach(function(l, i){ if(l.height <= capH && l.height >= (h.levels[best].height || 0)) best = i; });
+          h.autoLevelCapping = best; h.startLevel = best; h.nextLevel = best;
+          playV(w);
+        });
+        h.on(window.Hls.Events.ERROR, function(ev, data){ if(data && data.fatal){ w.vState = -1; try{ h.destroy(); }catch(e){} } });
+        h.loadSource(m3u8); h.attachMedia(v); w.hls = h;
+      }else if(v.canPlayType("application/vnd.apple.mpegurl")){
+        v.src = m3u8; playV(w);                              /* Safari / iOS: native HLS */
+      }else{ w.vState = -1; return; }
+      var mark = function(){ w.vFresh = true; dirty = true; if(v.requestVideoFrameCallback) v.requestVideoFrameCallback(mark); };
+      if(v.requestVideoFrameCallback) v.requestVideoFrameCallback(mark);
+      v.addEventListener("playing", function(){ w.vState = 2; });
+      v.addEventListener("error", function(){ w.vState = -1; });
+    });
+  }
+  function playV(w){
+    var p = w.video.play();
+    if(p && p.catch) p.catch(function(){ /* autoplay refused (e.g. iOS Low Power Mode): stay on the cover */ w.vState = -1; });
+  }
+  function scheduleVideos(){
+    for(var i = 0; i < N; i++){
+      var w = works[i]; if(!w.stream || w.vState === -1) continue;
+      var near = 1e9;
+      for(var k = 0; k < inst.length; k++){ if(inst[k].w === w){ near = Math.min(near, distOff(k)); } }
+      if(near < W*0.35){
+        if(w.vState === 0) startVideo(w);
+        else if(w.video && w.video.paused && !document.hidden) playV(w);
+      }else if(w.video && !w.video.paused && near > W*0.6){
+        w.video.pause();                                   /* off screen: stop decoding */
+      }
+    }
+  }
+  function uploadVideo(w){
+    var v = w.video;
+    if(v.readyState < 2 || !v.videoWidth) return false;
+    if(!w.vtex){ w.vtex = newTex(isGL2); }
+    else gl.bindTexture(gl.TEXTURE_2D, w.vtex);
+    try{ gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, v); }
+    catch(err){ w.vState = -1; return false; }               /* e.g. a cross-origin refusal: keep the cover */
+    if(isGL2) gl.generateMipmap(gl.TEXTURE_2D);              /* no shimmer when a 720p video is drawn small */
+    w.vcrop = cropFor(w, v.videoWidth, v.videoHeight);
+    return true;
+  }
+
+  /* The site's own intro loader covers the page; frames are simply there when it lifts. */
+  var useLoader = false, introDone = true;
+
+  /* ---------- Caption ---------- */
+  function setCaption(wi){
+    if(wi === capWork) return;
+    capWork = wi;
+    var w = works[wi];
+    capName.textContent = w.name;
+    capMeta.textContent = w.cat + " — " + w.meta;
+  }
+
+  /* ---------- Frame loop ---------- */
+  var raf = 0, lastT = 0, running = false;
+  function ease(dt, tau){ return 1 - Math.exp(-dt/tau); }
+  function loop(t){
+    raf = requestAnimationFrame(loop);
+    var dt = Math.min(0.05, Math.max(0, (t - lastT)/1000)); lastT = t;
+    if(!W || !inst.length) return;
+
+    /* hover (mouse only), recomputed every frame because frames move under the pointer */
+    var hov = -1;
+    if(pointer.in && pointer.type === "mouse" && !(drag && drag.active)) hov = hitTest(pointer.x, pointer.y);
+    if(hov !== hoverInst){ hoverInst = hov; stage.classList.toggle("is-over", hov >= 0); dirty = true; }
+
+    /* drift: pauses on hover, focus, drag and for a moment after any input, then eases back */
+    var hold = !!document.getElementById("loader") || hoverInst >= 0 || focusWork >= 0 || (drag && drag.active) || (t - lastInput < 1400);
+    drift += ((hold ? 0 : 1) - drift)*ease(dt, 0.7);
+    target += DRIFT*drift*dt;
+
+    var prev = pos;
+    pos += (target - pos)*ease(dt, drag && drag.active ? 0.05 : 0.16);
+    if(Math.abs(target - pos) < 0.01) pos = target;
+    if(pos !== prev) dirty = true;
+
+    /* per-work animated values */
+    var hw = hoverInst >= 0 ? inst[hoverInst].w.i : -1;
+    var a6 = ease(dt, 0.18), af = ease(dt, 0.12);
+    for(var i = 0; i < N; i++){
+      var w = works[i];
+      var dimT = hw >= 0 && hw !== i ? 1 : 0;
+      if(Math.abs(w.dim - dimT) > 0.002){ w.dim += (dimT - w.dim)*a6; dirty = true; } else w.dim = dimT;
+      var fT = focusWork === i ? 1 : 0;
+      if(Math.abs(w.focus - fT) > 0.002){ w.focus += (fT - w.focus)*af; dirty = true; } else w.focus = fT;
+      if(w.state === 3 && w.alpha < 1){ w.alpha = Math.min(1, w.alpha + dt/0.35); dirty = true; }
+    }
+    if(useLoader && introDone && t < revealEnd()) dirty = true;
+
+    if(t - lastSched > 90){ lastSched = t; schedule(); }
+    if(uploadQ.length){ var u = uploadQ.shift(); if(u.state === 2) upload(u); dirty = true; } /* one cover upload per frame */
+
+    var capW = hw >= 0 ? hw : focusWork >= 0 ? focusWork : inst[centreInst()].w.i;
+    setCaption(capW);
+
+    if(dirty){ render(t); dirty = false; }
+  }
+  var _revealEnd = 0;
+  function revealEnd(){ if(!_revealEnd){ works.forEach(function(w){ _revealEnd = Math.max(_revealEnd, w.revealAt + 700); }); } return _revealEnd; }
+  function reveal(w, t){
+    if(!useLoader) return 1;
+    if(!introDone || !w.revealAt) return 0;
+    var k = Math.max(0, Math.min(1, (t - w.revealAt)/650));
+    return 1 - Math.pow(1 - k, 3);
+  }
+  function render(t){
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform2f(U.uView, W, H); gl.uniform2f(U.uScr, W, H); gl.uniform2f(U.uRes, canvas.width, canvas.height);
+    gl.uniform1f(U.uCy, cy); gl.uniform1f(U.uA, A); gl.uniform1f(U.uP, P);
+    gl.uniform1f(U.uH, baseH); gl.uniform1f(U.uZone, zone); gl.uniform1f(U.uK, K);
+    gl.uniform1f(U.uFcy, cy); gl.uniform1f(U.uFh, baseH); gl.uniform1f(U.uFa, A); gl.uniform1f(U.uFp, P);
+    gl.activeTexture(gl.TEXTURE0);
+    for(var k = 0; k < inst.length; k++){
+      var p = inst[k], x0 = x0Of(k);
+      if(!onScreen(x0, p.len)) continue;
+      var w = p.w, tex = w.tex, crop = w.crop, alpha = w.tex ? w.alpha : 0;
+      if(w.video && w.vState === 2){
+        if(w.vFresh || !w.vtex || !w.video.requestVideoFrameCallback){
+          if(uploadVideo(w)) w.vFresh = false;
+        }
+        if(w.vtex){ tex = w.vtex; crop = w.vcrop; alpha = 1; }
+      }
+      gl.bindTexture(gl.TEXTURE_2D, tex || blankTex);
+      gl.uniform4f(U.uCrop, crop[0], crop[1], crop[2], crop[3]);
+      gl.uniform1f(U.uX0, x0); gl.uniform1f(U.uW, p.len); gl.uniform1f(U.uFx0, x0); gl.uniform1f(U.uFw, p.len);
+      gl.uniform1f(U.uAlpha, alpha);
+      gl.uniform1f(U.uDim, w.dim); gl.uniform1f(U.uFocus, w.focus);
+      gl.uniform1f(U.uReveal, reveal(w, t));
+      gl.uniform2f(U.uEdge, 2/p.len, 2/baseH);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, (SEG + 1)*2);
+    }
+    /* keep rendering while a visible video is playing */
+    for(var j = 0; j < N; j++){ if(works[j].vState === 2 && works[j].video && !works[j].video.paused){ dirty = true; break; } }
+  }
+  function start(){ if(running) return; running = true; lastT = performance.now(); dirty = true; raf = requestAnimationFrame(loop); }
+  function stop(){ running = false; cancelAnimationFrame(raf); }
+
+  /* only run while the home page is showing: another page or the open menu pauses
+     rendering and videos (after the menu / curtain has covered the carousel) */
+  var holdT = 0, wasLive = live();
+  new MutationObserver(function(){
+    var on = live(); if(on === wasLive) return; wasLive = on;
+    clearTimeout(holdT);
+    if(!on){
+      holdT = setTimeout(function(){
+        if(live()) return;
+        stop(); works.forEach(function(w){ if(w.video && !w.video.paused) w.video.pause(); });
+      }, 450);
+    }else if(!document.hidden && !lost){ start(); lastSched = 0; }
+  }).observe(body, { attributes:true, attributeFilter:["class"] });
+
+  /* pause (rendering and videos) while the tab is hidden */
+  document.addEventListener("visibilitychange", function(){
+    if(document.hidden){ stop(); works.forEach(function(w){ if(w.video && !w.video.paused) w.video.pause(); }); }
+    else if(!lost && live()){ start(); lastSched = 0; }
+  });
+
+  /* resize: observe, but apply in the next animation frame */
+  var resizeQueued = false;
+  function queueLayout(){
+    if(resizeQueued) return; resizeQueued = true;
+    requestAnimationFrame(function(){ resizeQueued = false; layout(); });
+  }
+  if(window.ResizeObserver) new ResizeObserver(queueLayout).observe(stage);
+  else window.addEventListener("resize", queueLayout);
+  window.addEventListener("orientationchange", queueLayout);
+
+  /* WebGL context loss: keep the decoded images and videos, rebuild GPU state on restore */
+  var lost = false, lostTimer = 0;
+  canvas.addEventListener("webglcontextlost", function(e){
+    e.preventDefault(); lost = true; stop();
+    works.forEach(function(w){ w.tex = null; w.vtex = null; if(w.state === 3) w.state = 2; });
+    uploadQ = works.filter(function(w){ return w.state === 2; });
+    lostTimer = setTimeout(function(){ if(lost){ works.forEach(function(w){ if(w.video) w.video.pause(); }); useStrip(); } }, 4000); /* not coming back → plain strip */
+  });
+  canvas.addEventListener("webglcontextrestored", function(){
+    clearTimeout(lostTimer); lost = false;
+    try{ initGL(); }catch(err){ useStrip(); return; }
+    uploadQ = works.filter(function(w){ return w.state === 2; });
+    if(!document.hidden) start();
+  });
+
+  layout();   /* if the page starts hidden (a deep link to a project), the ResizeObserver lays out later */
+  /* a deep link to a project switches pages right after load: don't start (or fetch) until home shows */
+  if(live() && /^\/(index\.html)?$/.test(location.pathname)) start();
+
+  /* test hook (read-only snapshot), used by the draft's checks */
+  window.__carousel = function(){
+    return { pos:pos, target:target, L:L, W:W, H:H, dpr:dpr, baseH:baseH, A:A, P:P, cy:cy,
+      hover:hoverInst >= 0 ? inst[hoverInst].w.i : -1, focus:focusWork, caption:capWork, intro:introDone, gl2:isGL2,
+      loaded: works.filter(function(w){ return w.state === 3; }).length,
+      requested: works.filter(function(w){ return w.state !== 0; }).length,
+      videos: works.filter(function(w){ return w.stream; }).map(function(w){ return { i:w.i, state:w.vState, paused: w.video ? w.video.paused : null, t: w.video ? +w.video.currentTime.toFixed(2) : 0, h: w.video ? w.video.videoHeight : 0, tex: !!w.vtex }; }),
+      frames: inst.map(function(p, k){ return { k:k, work:p.w.i, x0:x0Of(k), len:p.len, aspect:p.w.aspect }; })
+        .filter(function(f){ return onScreen(f.x0, f.len); }),
+      screenOf: function(k){ /* screen-space centre of instance k (for tests) */
+        var x = W/2 + x0Of(k) + inst[k].len/2; return { x:x, y:cy, h: baseH*bend(x) };
+      }
+    };
+  };
+})();
+
 </script>
 </body>
 </html>
