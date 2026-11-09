@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex" />
+<title>Portraiture — Shan-Huai (draft wall)</title>
+<link rel="icon" type="image/png" href="/images/system/favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script>document.documentElement.classList.add("js");</script>
+<!--
+  DRAFT — Portraiture as a draggable, infinite, curved image wall.
+  Standalone page; not wired into index.html or the site navigation.
+  Data source: the static index (#index) below is the single source of truth for
+  images, order and project metadata. Without JS it is the page; with JS it feeds
+  the wall and doubles as the accessible fallback grid.
+-->
+<style>
+  :root{
+    --ink:#0B0B0C;
+    --paper:#EDEAE3;
+    --grey:#7E7E79;
+    --line:rgba(237,234,227,0.14);
+    --edge:rgba(237,234,227,0.55);
+    --hdr:clamp(75px,7.5vw,102px);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:var(--ink);color:var(--paper);font-family:"DM Sans",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;overflow-x:hidden}
+  html.js body{overflow:hidden}
+  .mono{font-family:"IBM Plex Mono",monospace;font-weight:400;letter-spacing:.04em}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  button{font:inherit;color:inherit}
+  :focus-visible{outline:1px solid var(--paper);outline-offset:4px}
+  /* faint film grain, as on the live site */
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.04;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+  /* ---------- Site header (same geometry as index.html) ---------- */
+  header{position:fixed;top:0;left:0;right:0;z-index:40;display:flex;align-items:center;justify-content:space-between;
+    padding:calc(clamp(14px,2vw,23px) + env(safe-area-inset-top,0px)) calc(clamp(48px,8vw,110px) + env(safe-area-inset-right,0px)) clamp(48px,6vw,90px) calc(clamp(48px,8vw,110px) + env(safe-area-inset-left,0px));
+    pointer-events:none}
+  /* Gradient only: the site's backdrop-filter blur would re-render every frame over a moving wall */
+  header::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+    background:linear-gradient(to bottom,rgba(11,11,12,.82) 0%,rgba(11,11,12,.5) 45%,transparent 100%)}
+  .header-spacer{width:0}
+  .brandBtn{position:absolute;left:50%;top:clamp(14px,2vw,26px);transform:translateX(-50%);
+    background:none;border:none;cursor:pointer;padding:0;line-height:0;pointer-events:auto}
+  .logo-img{height:var(--hdr);width:auto;display:block;opacity:.9;transition:opacity .2s}
+  .logo-img:hover{opacity:1}
+  .menuBtn{position:absolute;right:clamp(48px,8vw,110px);top:clamp(14px,2vw,26px);background:none;border:none;
+    color:var(--paper);cursor:pointer;font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.12em;
+    text-transform:lowercase;padding:4px 0;pointer-events:auto;opacity:.9;display:flex;align-items:center;height:var(--hdr)}
+  .menuBtn:hover{opacity:1}
+  @media(max-width:768px){
+    :root{--hdr:56px}
+    .menuBtn{right:20px}
+  }
+
+  /* ---------- Menu overlay (same look as index.html) ---------- */
+  #menu{position:fixed;inset:0;z-index:70;background:var(--paper);
+    padding:clamp(70px,10vh,120px) clamp(20px,4vw,48px) clamp(28px,4vw,48px);
+    display:flex;flex-direction:column;opacity:0;visibility:hidden;transition:opacity .35s ease,visibility 0s linear .35s}
+  #menu.open{opacity:1;visibility:visible;transition:opacity .35s ease}
+  .menu-close{position:absolute;top:clamp(14px,2vw,26px);right:clamp(48px,8vw,110px);background:none;border:none;color:var(--ink);
+    cursor:pointer;font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.12em;text-transform:lowercase;
+    padding:4px 0;opacity:.9;display:flex;align-items:center;height:var(--hdr)}
+  .menu-logo{position:absolute;left:50%;top:clamp(14px,2vw,26px);transform:translateX(-50%);background:none;border:none;cursor:pointer;padding:0;line-height:0}
+  .menu-logo-img{height:var(--hdr);width:auto;display:block;opacity:.9}
+  .menu-cats{display:flex;flex-direction:column;align-items:flex-start;gap:clamp(24px,3vh,44px);margin:auto 0}
+  .m-link,.m-sub,.menu-mini a{display:block;background:none;border:none;color:var(--ink);cursor:pointer;text-align:left;width:fit-content;
+    font-family:"Cormorant Garamond";font-weight:300;font-size:clamp(30px,3.9vw,53px);line-height:1.1;letter-spacing:-.02em;
+    text-transform:lowercase;text-decoration:none}
+  .m-link:hover,.m-sub:hover,.menu-mini a:hover{font-style:italic}
+  .m-link[aria-current="page"]{font-style:italic}
+  .menu-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:26px;flex-wrap:wrap;margin-top:auto}
+  .menu-mini{display:flex;gap:clamp(16px,2vw,30px);flex-wrap:wrap;align-items:flex-end}
+  @media(max-width:768px){.menu-close{right:20px}}
+
+  /* ---------- The wall ---------- */
+  .wall{position:fixed;inset:0;z-index:1;overflow:hidden;background:var(--ink);
+    touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;outline:none}
+  .wall.grabbing{cursor:grabbing}
+  html:not(.js) .wall,html:not(.js) .hud{display:none}
+  .stage{position:absolute;inset:0;perspective:1000px;perspective-origin:50% 50%}
+  .tile{position:absolute;left:0;top:0;transform-origin:50% 50%;will-change:transform,opacity;
+    background:#151516;visibility:hidden;contain:layout style}
+  .tile img{position:absolute;display:block;pointer-events:none;-webkit-user-drag:none;user-select:none}
+  .tile .sharp{inset:0;width:100%;height:100%;opacity:0;transition:opacity .45s ease}
+  .tile.ready .sharp{opacity:1}
+  .tile.instant .sharp{transition:none}
+  /* Hover "phantom": a blurred copy fades in beneath the sharp image. Only the hovered
+     tile ever gets a src + filter (display:none everywhere else), so it costs one layer. */
+  .tile .blur{inset:-6%;width:112%;height:112%;filter:blur(30px);opacity:0;display:none;transition:opacity .4s ease}
+  .tile.blur-on .blur{display:block}
+  .tile.hov .blur{opacity:.85}
+  .tile.kfocus{outline:1px solid var(--paper);outline-offset:8px}
+  .vignette{position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(ellipse at center,transparent 38%,rgba(11,11,12,.25) 62%,rgba(11,11,12,.85) 92%,var(--ink) 100%)}
+
+  /* ---------- Page info / controls over the wall ---------- */
+  .hud{position:fixed;left:0;right:0;bottom:0;z-index:30;pointer-events:none;
+    display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
+    padding:0 clamp(20px,4vw,48px) calc(clamp(18px,3vh,30px) + env(safe-area-inset-bottom,0px))}
+  .hud > *{pointer-events:auto}
+  .hud-title,.hud-hint{text-shadow:0 1px 14px rgba(11,11,12,.85)}
+  .hud-title{display:flex;flex-direction:column;gap:6px}
+  .hud-name{font-family:"Cormorant Garamond";font-weight:300;font-size:clamp(30px,3.4vw,48px);line-height:1;letter-spacing:-.02em;text-transform:lowercase}
+  .hud-meta,.hud-hint{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey)}
+  .hud-right{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+  .hud-hint{transition:opacity .6s ease}
+  .hud-hint.dim{opacity:0}
+  .hud-btn{background:none;border:1px solid var(--edge);color:var(--paper);border-radius:100px;cursor:pointer;
+    font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:lowercase;padding:6px 16px}
+  .hud-btn:hover{background:rgba(237,234,227,.08)}
+  .hud-meta{white-space:nowrap}
+  @media(max-width:600px){
+    .hud-hint{position:absolute;left:clamp(20px,4vw,48px);right:clamp(20px,4vw,48px);bottom:100%;margin-bottom:12px;text-align:left}
+  }
+  @media(hover:none),(pointer:coarse){.hud-hint .fine{display:none}}
+  @media(hover:hover) and (pointer:fine){.hud-hint .coarse{display:none}}
+
+  /* ---------- Fallback / index grid (no-JS page, and the "index" view with JS) ---------- */
+  .index{padding:calc(var(--hdr) + clamp(40px,6vw,80px)) clamp(20px,4vw,48px) clamp(90px,12vh,140px)}
+  html.js .index{position:fixed;inset:0;z-index:20;overflow-y:auto;background:var(--ink);display:none;overscroll-behavior:contain}
+  html.js body.show-index .index{display:block}
+  .ix-title{font-family:"Cormorant Garamond";font-weight:300;font-size:clamp(40px,6vw,78px);line-height:1;letter-spacing:-.02em;text-transform:lowercase;margin-bottom:clamp(28px,4vw,56px)}
+  html.js .ix-title{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+  .ix-group{margin-bottom:clamp(48px,7vw,96px)}
+  .ix-head{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:18px;font-weight:300}
+  .ix-head a{font-family:"Cormorant Garamond";font-weight:300;font-size:clamp(28px,3.4vw,46px);line-height:1;letter-spacing:-.02em;color:var(--paper);text-decoration:none}
+  .ix-head a:hover{font-style:italic}
+  .ix-meta{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey)}
+  /* uncropped: CSS columns keep each image at its own aspect ratio */
+  .ix-grid{list-style:none;columns:5 160px;column-gap:14px}
+  .ix-grid li{break-inside:avoid;margin-bottom:14px}
+  .ix-item{display:block;line-height:0}
+  .ix-item img{width:100%;height:auto;display:block;background:#151516}
+  .ix-item:hover img{opacity:.85}
+
+  /* ---------- Viewer ---------- */
+  .viewer{position:fixed;inset:0;z-index:60;background:rgba(11,11,12,.97);display:grid;
+    grid-template-rows:var(--hdr) 1fr auto;opacity:0;transition:opacity .25s ease;touch-action:pan-y}
+  .viewer[hidden]{display:none}
+  .viewer.open{opacity:1}
+  .v-fig{grid-row:2;display:flex;align-items:center;justify-content:center;min-height:0;padding:clamp(8px,2vh,24px) clamp(56px,8vw,120px)}
+  .v-img{max-width:100%;max-height:100%;width:auto;height:auto;display:block;object-fit:contain;transition:filter .3s ease}
+  .v-img.lowres{filter:blur(6px)}
+  .v-bar{grid-row:3;display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    padding:0 clamp(20px,4vw,48px) calc(clamp(18px,3vh,30px) + env(safe-area-inset-bottom,0px))}
+  .v-cap{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  .v-title{font-family:"Cormorant Garamond";font-weight:300;font-size:clamp(26px,3vw,40px);line-height:1;letter-spacing:-.02em}
+  .v-meta,.v-count{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey)}
+  .v-right{display:flex;align-items:baseline;gap:20px}
+  .v-link{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:lowercase;color:var(--paper);
+    text-decoration:none;border-bottom:1px solid var(--edge);padding-bottom:2px}
+  .v-link:hover{border-color:var(--paper)}
+  .v-btn{position:absolute;background:none;border:none;color:var(--paper);cursor:pointer;opacity:.85;
+    font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.12em;text-transform:lowercase;padding:12px}
+  .v-btn:hover{opacity:1}
+  .v-close{top:clamp(14px,2vw,26px);right:clamp(36px,8vw,98px);height:var(--hdr);display:flex;align-items:center}
+  .v-prev,.v-next{top:50%;transform:translateY(-50%)}
+  .v-prev{left:clamp(4px,2vw,30px)}
+  .v-next{right:clamp(4px,2vw,30px)}
+  @media(max-width:768px){
+    .v-fig{padding:8px 12px}
+    .v-prev,.v-next{top:auto;bottom:calc(64px + env(safe-area-inset-bottom,0px));transform:none}
+    .v-close{right:8px}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .tile .sharp,.tile .blur,.viewer,.v-img,.hud-hint,#menu{transition:none !important}
+  }
+</style>
+</head>
+<body>
+  <header>
+    <span class="header-spacer" aria-hidden="true"></span>
+    <button class="brandBtn" data-nav="landing" aria-label="Home"><img src="/images/system/shanhuailogoinversed_white.png" alt="Shan-Huai" class="logo-img"></button>
+    <button class="menuBtn" data-menu-open aria-label="Menu" aria-controls="menu" aria-expanded="false">menu</button>
+  </header>
+
+  <main id="portraiture">
+    <h1 class="sr-only">Portraiture</h1>
+
+    <div class="wall" id="wall" tabindex="0" role="region" aria-roledescription="image wall"
+         aria-label="Portraiture wall" aria-describedby="wall-help">
+      <div class="stage" id="stage" aria-hidden="true"></div>
+      <div class="vignette" aria-hidden="true"></div>
+    </div>
+
+    <div class="hud">
+      <div class="hud-title">
+        <span class="hud-name" aria-hidden="true">portraiture</span>
+        <span class="hud-meta" id="hud-meta"></span>
+      </div>
+      <div class="hud-right">
+        <p class="hud-hint" id="wall-help">
+          <span class="fine">drag · hold to zoom out · click to open</span>
+          <span class="coarse">drag · pinch to zoom out · tap to open</span>
+          <span class="sr-only">. Keyboard: arrow keys move between portraits, Enter opens one. The index button lists every portrait.</span>
+        </p>
+        <button class="hud-btn" data-act="index" aria-controls="index" aria-expanded="false">index</button>
+      </div>
+    </div>
+
+    <p class="sr-only" aria-live="polite" id="live"></p>
+
+    <section class="index" id="index" aria-labelledby="ix-title" tabindex="-1">
+      <h2 class="ix-title" id="ix-title">Portraiture</h2>
+      <div class="ix-group" data-name="Untitled Sketch" data-meta="Taipei · 2023" data-proj="pt-untitledsketch">
+        <h3 class="ix-head"><a href="/portraiture/untitled-sketch" data-nav="pt-untitledsketch">Untitled Sketch</a><span class="ix-meta">Taipei · 2023</span></h3>
+        <ul class="ix-grid">
+          <li><a class="ix-item" href="/images/portraiture/rooftop_motion-cover.jpg" data-thumb="/images/portraiture/thumbs/rooftop_motion-cover.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/rooftop_motion-cover.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="Untitled Sketch, 1 of 9"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/rooftop_motion-1.jpg" data-thumb="/images/portraiture/thumbs/rooftop_motion-1.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/rooftop_motion-1.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Untitled Sketch, 2 of 9"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/rooftop_motion-2.jpg" data-thumb="/images/portraiture/thumbs/rooftop_motion-2.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/rooftop_motion-2.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Untitled Sketch, 3 of 9"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/rooftop_motion-3.jpg" data-thumb="/images/portraiture/thumbs/rooftop_motion-3.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/rooftop_motion-3.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Untitled Sketch, 4 of 9"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/rooftop_motion-4.jpg" data-thumb="/images/portraiture/thumbs/rooftop_motion-4.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/rooftop_motion-4.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Untitled Sketch, 5 of 9"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/rooftop_motion-5.jpg" data-thumb="/images/portraiture/thumbs/rooftop_motion-5.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/rooftop_motion-5.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Untitled Sketch, 6 of 9"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/rooftop_motion-6.jpg" data-thumb="/images/portraiture/thumbs/rooftop_motion-6.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/rooftop_motion-6.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Untitled Sketch, 7 of 9"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/rooftop_motion-7.jpg" data-thumb="/images/portraiture/thumbs/rooftop_motion-7.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/rooftop_motion-7.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Untitled Sketch, 8 of 9"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/rooftop_motion-8.jpg" data-thumb="/images/portraiture/thumbs/rooftop_motion-8.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/rooftop_motion-8.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Untitled Sketch, 9 of 9"></a></li>
+        </ul>
+      </div>
+      <div class="ix-group" data-name="@0821tingting" data-meta="Portrait · 2022" data-proj="pt-0821tingting">
+        <h3 class="ix-head"><a href="/portraiture/0821tingting" data-nav="pt-0821tingting">@0821tingting</a><span class="ix-meta">Portrait · 2022</span></h3>
+        <ul class="ix-grid">
+          <li><a class="ix-item" href="/images/portraiture/0821tingting_2021-15.jpg" data-thumb="/images/portraiture/thumbs/0821tingting_2021-15.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/0821tingting_2021-15.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="@0821tingting, 1 of 8"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/0821tingting_2021-16.jpg" data-thumb="/images/portraiture/thumbs/0821tingting_2021-16.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/0821tingting_2021-16.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="@0821tingting, 2 of 8"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/0821tingting_2021-17.jpg" data-thumb="/images/portraiture/thumbs/0821tingting_2021-17.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/0821tingting_2021-17.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="@0821tingting, 3 of 8"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/0821tingting_2021-18.jpg" data-thumb="/images/portraiture/thumbs/0821tingting_2021-18.jpg" data-w="1125" data-h="2000"><img src="/images/portraiture/thumbs/0821tingting_2021-18.jpg" width="1125" height="2000" loading="lazy" decoding="async" alt="@0821tingting, 4 of 8"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/0821tingting_2021-19.jpg" data-thumb="/images/portraiture/thumbs/0821tingting_2021-19.jpg" data-w="1125" data-h="2000"><img src="/images/portraiture/thumbs/0821tingting_2021-19.jpg" width="1125" height="2000" loading="lazy" decoding="async" alt="@0821tingting, 5 of 8"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/0821tingting_2021-20.jpg" data-thumb="/images/portraiture/thumbs/0821tingting_2021-20.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/0821tingting_2021-20.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="@0821tingting, 6 of 8"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/0821tingting_2021-21.jpg" data-thumb="/images/portraiture/thumbs/0821tingting_2021-21.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/0821tingting_2021-21.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="@0821tingting, 7 of 8"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/0821tingting_2021-22.jpg" data-thumb="/images/portraiture/thumbs/0821tingting_2021-22.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/0821tingting_2021-22.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="@0821tingting, 8 of 8"></a></li>
+        </ul>
+      </div>
+      <div class="ix-group" data-name="Duality Within" data-meta="Portrait · 2021" data-proj="pt-dualitywithin">
+        <h3 class="ix-head"><a href="/portraiture/duality-within" data-nav="pt-dualitywithin">Duality Within</a><span class="ix-meta">Portrait · 2021</span></h3>
+        <ul class="ix-grid">
+          <li><a class="ix-item" href="/images/portraiture/duality_within_2021-21.jpg" data-thumb="/images/portraiture/thumbs/duality_within_2021-21.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/duality_within_2021-21.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="Duality Within, 1 of 11"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/duality_within_2021-1.jpg" data-thumb="/images/portraiture/thumbs/duality_within_2021-1.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/duality_within_2021-1.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Duality Within, 2 of 11"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/duality_within_2021-2.jpg" data-thumb="/images/portraiture/thumbs/duality_within_2021-2.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/duality_within_2021-2.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Duality Within, 3 of 11"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/duality_within_2021-3.jpg" data-thumb="/images/portraiture/thumbs/duality_within_2021-3.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/duality_within_2021-3.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Duality Within, 4 of 11"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/duality_within_2021-4.jpg" data-thumb="/images/portraiture/thumbs/duality_within_2021-4.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/duality_within_2021-4.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Duality Within, 5 of 11"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/duality_within_2021-5.jpg" data-thumb="/images/portraiture/thumbs/duality_within_2021-5.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/duality_within_2021-5.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Duality Within, 6 of 11"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/duality_within_2021-6.jpg" data-thumb="/images/portraiture/thumbs/duality_within_2021-6.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/duality_within_2021-6.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Duality Within, 7 of 11"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/duality_within_2021-7.jpg" data-thumb="/images/portraiture/thumbs/duality_within_2021-7.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/duality_within_2021-7.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Duality Within, 8 of 11"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/duality_within_2021-8.jpg" data-thumb="/images/portraiture/thumbs/duality_within_2021-8.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/duality_within_2021-8.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Duality Within, 9 of 11"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/duality_within_2021-9.jpg" data-thumb="/images/portraiture/thumbs/duality_within_2021-9.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/duality_within_2021-9.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Duality Within, 10 of 11"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/duality_within_2021-10.jpg" data-thumb="/images/portraiture/thumbs/duality_within_2021-10.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/duality_within_2021-10.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Duality Within, 11 of 11"></a></li>
+        </ul>
+      </div>
+      <div class="ix-group" data-name="In Mood For Smoke" data-meta="Portrait · 2021" data-proj="pt-inmoodforsmoke">
+        <h3 class="ix-head"><a href="/portraiture/in-mood-for-smoke" data-nav="pt-inmoodforsmoke">In Mood For Smoke</a><span class="ix-meta">Portrait · 2021</span></h3>
+        <ul class="ix-grid">
+          <li><a class="ix-item" href="/images/portraiture/In-mood-for-smoke_2021-1.jpg" data-thumb="/images/portraiture/thumbs/In-mood-for-smoke_2021-1.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/In-mood-for-smoke_2021-1.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="In Mood For Smoke, 1 of 7"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/In-mood-for-smoke_2021-2.jpg" data-thumb="/images/portraiture/thumbs/In-mood-for-smoke_2021-2.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/In-mood-for-smoke_2021-2.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="In Mood For Smoke, 2 of 7"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/In-mood-for-smoke_2021-3.jpg" data-thumb="/images/portraiture/thumbs/In-mood-for-smoke_2021-3.jpg" data-w="1348" data-h="2000"><img src="/images/portraiture/thumbs/In-mood-for-smoke_2021-3.jpg" width="1348" height="2000" loading="lazy" decoding="async" alt="In Mood For Smoke, 3 of 7"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/In-mood-for-smoke_2021-4.jpg" data-thumb="/images/portraiture/thumbs/In-mood-for-smoke_2021-4.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/In-mood-for-smoke_2021-4.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="In Mood For Smoke, 4 of 7"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/In-mood-for-smoke_2021-5.jpg" data-thumb="/images/portraiture/thumbs/In-mood-for-smoke_2021-5.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/In-mood-for-smoke_2021-5.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="In Mood For Smoke, 5 of 7"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/In-mood-for-smoke_2021-6.jpg" data-thumb="/images/portraiture/thumbs/In-mood-for-smoke_2021-6.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/In-mood-for-smoke_2021-6.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="In Mood For Smoke, 6 of 7"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/In-mood-for-smoke_2021-7.jpg" data-thumb="/images/portraiture/thumbs/In-mood-for-smoke_2021-7.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/In-mood-for-smoke_2021-7.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="In Mood For Smoke, 7 of 7"></a></li>
+        </ul>
+      </div>
+      <div class="ix-group" data-name="Tatiana" data-meta="Portrait · 2020" data-proj="pt-tatiana">
+        <h3 class="ix-head"><a href="/portraiture/tatiana" data-nav="pt-tatiana">Tatiana</a><span class="ix-meta">Portrait · 2020</span></h3>
+        <ul class="ix-grid">
+          <li><a class="ix-item" href="/images/portraiture/tatiana_2021-08.jpg" data-thumb="/images/portraiture/thumbs/tatiana_2021-08.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/tatiana_2021-08.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="Tatiana, 1 of 5"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/tatiana_2021-09.jpg" data-thumb="/images/portraiture/thumbs/tatiana_2021-09.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/tatiana_2021-09.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="Tatiana, 2 of 5"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/tatiana_2021-11.jpg" data-thumb="/images/portraiture/thumbs/tatiana_2021-11.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/tatiana_2021-11.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="Tatiana, 3 of 5"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/tatiana_2021-12.jpg" data-thumb="/images/portraiture/thumbs/tatiana_2021-12.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/tatiana_2021-12.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="Tatiana, 4 of 5"></a></li>
+          <li><a class="ix-item" href="/images/portraiture/tatiana_2021-14.jpg" data-thumb="/images/portraiture/thumbs/tatiana_2021-14.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/tatiana_2021-14.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="Tatiana, 5 of 5"></a></li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Portrait viewer" hidden>
+    <figure class="v-fig"><img class="v-img" id="v-img" alt="" draggable="false"></figure>
+    <div class="v-bar">
+      <div class="v-cap"><span class="v-title" id="v-title"></span><span class="v-meta" id="v-meta"></span></div>
+      <div class="v-right"><span class="v-count" id="v-count" aria-live="polite"></span><a class="v-link" id="v-link" href="/portraiture">view project &rarr;</a></div>
+    </div>
+    <button class="v-btn v-prev" data-act="prev" aria-label="Previous portrait">prev</button>
+    <button class="v-btn v-next" data-act="next" aria-label="Next portrait">next</button>
+    <button class="v-btn v-close" data-act="close" aria-label="Close viewer">close</button>
+  </div>
+
+  <div id="menu" role="dialog" aria-modal="true" aria-label="Menu">
+    <button class="menu-close" data-act="menu-close" aria-label="Close menu">close</button>
+    <button class="menu-logo" data-nav="landing" aria-label="Home"><img src="/images/system/shanhuailogoinversed_black.png" alt="Shan-Huai" class="menu-logo-img"></button>
+    <div class="menu-cats">
+      <button class="m-link" data-nav="projects">project</button>
+      <button class="m-link" data-nav="live">live</button>
+      <button class="m-link" data-nav="photojournalism">photo-journalism</button>
+      <button class="m-link" data-nav="portraiture" aria-current="page">portraiture</button>
+      <button class="m-link" data-nav="wedding">wedding</button>
+      <button class="m-link" data-nav="archive">archive</button>
+    </div>
+    <div class="menu-foot">
+      <div class="menu-sec"><button class="m-sub" data-nav="about">bio</button></div>
+      <div class="menu-mini">
+        <a href="https://www.instagram.com/th3.editor" target="_blank" rel="noopener">instagram</a>
+        <a href="https://www.linkedin.com/in/shan-huai-chiang" target="_blank" rel="noopener">linkedin</a>
+        <a href="mailto:shanhuaichiang@gmail.com">email</a>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ================= Routing: same data-nav ids as index.html ================= */
+  // The draft is standalone, so instead of swap() a data-nav click goes to the real
+  // URL for that section; the live site's router then renders it.
+  var ROUTES = {
+    "landing":"/","projects":"/projects","live":"/live","photojournalism":"/photojournalism",
+    "portraiture":"/portraiture","wedding":"/wedding","archive":"/archive","about":"/about","contact":"/contact",
+    "pt-0821tingting":"/portraiture/0821tingting","pt-dualitywithin":"/portraiture/duality-within",
+    "pt-inmoodforsmoke":"/portraiture/in-mood-for-smoke","pt-tatiana":"/portraiture/tatiana",
+    "pt-untitledsketch":"/portraiture/untitled-sketch"
+  };
+  function go(target){ var url = ROUTES[target]; if(url) location.href = url; }
+
+  /* ================= Data (read from the static index) ================= */
+  var items = [];
+  [].forEach.call(document.querySelectorAll(".ix-group"), function(g){
+    var links = g.querySelectorAll(".ix-item");
+    [].forEach.call(links, function(a, i){
+      a.setAttribute("data-idx", items.length);
+      items.push({
+        thumb: a.getAttribute("data-thumb"), full: a.getAttribute("href"),
+        w: +a.getAttribute("data-w"), h: +a.getAttribute("data-h"),
+        name: g.getAttribute("data-name"), meta: g.getAttribute("data-meta"),
+        nav: g.getAttribute("data-proj"), n: i + 1, of: links.length
+      });
+    });
+  });
+  var NI = items.length;
+  if(!NI) return;
+  var groups = document.querySelectorAll(".ix-group").length;
+  document.getElementById("hud-meta").textContent = NI + " images · " + groups + " series";
+
+  /* ================= Tunables (from the reference capture) ================= */
+  var COLS        = 8;      // column templates; wall repeats every COLS columns
+  var CURVE_DEG   = 15;     // rotateX at the top/bottom edge of the viewport (reference ≈ 20)
+  var CURVE_R     = 1.45;   // translateZ = R·H·(1−cosθ)  (reference R ≈ 1.46·H)
+  var FADE        = 0.30;   // opacity drop at the edge (reference 0.32, floor .68)
+  var FADE_MIN    = 0.66;
+  var PAR         = 0.08;   // reverse parallax: px of wall per px of cursor offset (reference ≈ 0.1)
+  var PAR_TAU     = 200;    // ms, exponential ease (≈ 8%/frame)
+  var THRESH      = 6;      // px before a press becomes a drag (reference 3–8)
+  var FRICTION    = 0.95;   // per 60fps frame
+  var VMAX        = 4;      // px/ms throw cap
+  var VSTOP       = 0.012;  // px/ms: below this inertia ends (no endless drift)
+  var HOLD_MS     = 170;    // still press → zoom out
+  var ZOOM_OUT    = 0.78;
+  var ZOOM_OUT_TAU= 110;    // ms (≈400 ms to settle, as in reference)
+  var ZOOM_IN_TAU = 170;    // ms (≈700 ms to settle)
+  var PINCH_MIN   = 0.5, PINCH_MAX = 1.2;
+  var GLIDE_TAU   = 130;    // keyboard glide
+  var MARGIN      = 220;    // px of off-screen tiles kept around the viewport
+
+  var mqReduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+  var mqFine   = window.matchMedia("(hover:hover) and (pointer:fine)");
+  var reduce = mqReduce.matches, fine = mqFine.matches;
+  function onMQ(){
+    reduce = mqReduce.matches; fine = mqFine.matches;
+    if(reduce){ vx = vy = 0; s = zoomTarget; glide = null; }
+    dirty = true;
+  }
+  if(mqReduce.addEventListener){ mqReduce.addEventListener("change", onMQ); mqFine.addEventListener("change", onMQ); }
+
+  /* ================= State ================= */
+  var wall = document.getElementById("wall"), stage = document.getElementById("stage");
+  var liveEl = document.getElementById("live"), hint = document.getElementById("wall-help");
+  var W = 0, H = 0, colW = 0, gap = 0, pitch = 0, cols = [];
+  var camX = 0, camY = 0, s = 1, zoomTarget = 1;
+  var px = 0, py = 0, ptx = 0, pty = 0;          // parallax (current / target)
+  var mx = -1, my = -1, mouseIn = false;           // last mouse position
+  var vx = 0, vy = 0, glide = null;
+  var anchorX = 0, anchorY = 0;                    // zoom anchor (screen)
+  var dirty = true, paused = false, layoutQueued = false;
+
+  /* ================= Layout: staggered, uncropped, wraps both ways ================= */
+  // COLS columns, items dealt round-robin in site order. Each column is a vertical
+  // stack of natural-aspect images whose own height is its vertical period, so every
+  // column wraps seamlessly on its own; columns repeat every COLS·pitch horizontally.
+  function computeLayout(){
+    var r = wall.getBoundingClientRect();
+    var oldPitch = pitch;
+    W = r.width; H = r.height;
+    colW = Math.round(Math.max(140, Math.min(300, W * 0.17)));
+    gap = Math.round(colW * (W < 700 ? 0.2 : 0.24));
+    pitch = colW + gap;
+    cols = [];
+    for(var k = 0; k < COLS; k++) cols.push({ items:[], off:[], hs:[], period:0, phase:0 });
+    items.forEach(function(it, i){
+      var c = cols[i % COLS], h = Math.round(colW * it.h / it.w);
+      c.items.push(i); c.off.push(c.period); c.hs.push(h); c.period += h + gap;
+    });
+    cols.forEach(function(c, k){ c.phase = Math.round((((k * 0.382) % 1) - 0.5) * pitch); });
+    if(oldPitch){ camX *= pitch / oldPitch; camY *= pitch / oldPitch; }
+    else { var c0 = cols[0]; camX = 0; camY = c0.phase + c0.hs[0] / 2; } // newest portrait centred
+    releaseAll();
+    dirty = true;
+  }
+  function mod(a, n){ return ((a % n) + n) % n; }
+  function itemCenter(c, r, j){
+    var col = cols[mod(c, COLS)];
+    return { x: c * pitch, y: col.phase + r * col.period + col.off[j] + col.hs[j] / 2 };
+  }
+
+  /* ================= Tile pool (recycled) ================= */
+  var live = new Map(), free = [], byEl = new WeakMap(), poolSize = 0, gen = 0;
+  function createTile(){
+    var el = document.createElement("div"); el.className = "tile";
+    var blur = document.createElement("img"); blur.className = "blur"; blur.alt = ""; blur.draggable = false;
+    var img = document.createElement("img"); img.className = "sharp"; img.alt = ""; img.draggable = false; img.decoding = "async";
+    el.appendChild(blur); el.appendChild(img); stage.appendChild(el);
+    var t = { el:el, img:img, blur:blur, key:null, idx:-1, w:0, h:0, op:-1, src:"", blurT:0, kf:false };
+    byEl.set(el, t); poolSize++;
+    return t;
+  }
+  function acquire(){ return free.pop() || createTile(); }
+  function release(t){
+    live.delete(t.key); t.key = null;
+    t.el.style.visibility = "hidden";
+    unhover(t, true);
+    if(t.kf){ t.el.classList.remove("kfocus"); t.kf = false; }
+    free.push(t);
+  }
+  function releaseAll(){ live.forEach(function(t){ release(t); }); }
+
+  // decoded-image cache: a tile only gets an already-decoded src where possible
+  var cache = [];
+  function preload(i){
+    var c = cache[i]; if(c) return c;
+    c = cache[i] = { ready:false };
+    var im = new Image(); im.decoding = "async"; im.src = items[i].thumb; c.img = im;
+    var done = function(){ c.ready = true; };
+    if(im.decode) im.decode().then(done, done); else im.onload = im.onerror = done;
+    return c;
+  }
+  function assign(t, idx, key, h){
+    t.key = key; live.set(key, t);
+    if(t.w !== colW){ t.el.style.width = colW + "px"; t.w = colW; }
+    if(t.h !== h){ t.el.style.height = h + "px"; t.h = h; }   // reserved box = exact aspect
+    if(t.idx !== idx){
+      t.idx = idx; unhover(t, true);
+      var it = items[idx], src = it.thumb;
+      t.el.classList.remove("ready", "instant");
+      var pc = preload(idx);
+      t.img.src = src; t.src = src;
+      if(pc.ready){ t.el.classList.add("ready", "instant"); }
+      else {
+        var fin = function(){ if(t.idx === idx){ t.el.classList.remove("instant"); t.el.classList.add("ready"); } };
+        if(t.img.decode) t.img.decode().then(fin, fin); else t.img.onload = fin;
+      }
+    }
+    t.el.style.visibility = "visible";
+  }
+
+  /* ================= Per-frame placement ================= */
+  var kfKey = null, kfPos = null;   // keyboard focus {c,r,j}
+  function layoutFrame(){
+    gen++;
+    var hw = (W / 2 + MARGIN + Math.abs(px)) / s, hh = (H / 2 + MARGIN + Math.abs(py)) / s;
+    var x0 = camX - hw, x1 = camX + hw, y0 = camY - hh, y1 = camY + hh;
+    var cA = Math.ceil((x0 - colW / 2) / pitch), cB = Math.floor((x1 + colW / 2) / pitch);
+    var halfH = H / 2, R = CURVE_R * H, d2r = Math.PI / 180;
+    for(var c = cA; c <= cB; c++){
+      var col = cols[mod(c, COLS)], P = col.period;
+      var rA = Math.floor((y0 - col.phase) / P) - 1, rB = Math.floor((y1 - col.phase) / P);
+      for(var r = rA; r <= rB; r++){
+        for(var j = 0; j < col.items.length; j++){
+          var h = col.hs[j], top = col.phase + r * P + col.off[j];
+          if(top + h < y0 || top > y1) continue;
+          var key = c + "|" + r + "|" + j, t = live.get(key);
+          if(!t){ t = acquire(); assign(t, col.items[j], key, h); }
+          t.seen = gen;
+          var sx = W / 2 + (c * pitch - camX) * s + px;
+          var sy = halfH + (top + h / 2 - camY) * s + py;
+          var nd = (sy - halfH) / halfH; if(nd > 1.6) nd = 1.6; else if(nd < -1.6) nd = -1.6;
+          var th = CURVE_DEG * nd;                         // rotateX follows distance from centre
+          var z = R * (1 - Math.cos(th * d2r));            // edges bend toward the viewer
+          t.el.style.transform = "translate3d(" + (sx - colW / 2).toFixed(2) + "px," + (sy - h / 2).toFixed(2) + "px," +
+            z.toFixed(2) + "px) rotateX(" + th.toFixed(3) + "deg) scale(" + s.toFixed(4) + ")";
+          var op = Math.max(FADE_MIN, 1 - FADE * Math.min(1, Math.abs(nd)));
+          if(Math.abs(op - t.op) > 0.004){ t.el.style.opacity = op.toFixed(3); t.op = op; }
+          var isKf = key === kfKey;
+          if(isKf !== t.kf){ t.el.classList.toggle("kfocus", isKf); t.kf = isKf; }
+        }
+      }
+    }
+    live.forEach(function(t){ if(t.seen !== gen) release(t); });
+  }
+
+  // decode the ring just outside the viewport ahead of time (throttled)
+  var lastPre = 0;
+  function preloadAround(now){
+    if(now - lastPre < 150) return; lastPre = now;
+    var hw = (W + 2 * MARGIN) / s, hh = (H + 2 * MARGIN) / s;
+    var cA = Math.floor((camX - hw) / pitch), cB = Math.ceil((camX + hw) / pitch);
+    for(var c = cA; c <= cB; c++){
+      var col = cols[mod(c, COLS)], P = col.period;
+      var rA = Math.floor((camY - hh - col.phase) / P) - 1, rB = Math.floor((camY + hh - col.phase) / P);
+      for(var r = rA; r <= rB; r++) for(var j = 0; j < col.items.length; j++){
+        var top = col.phase + r * P + col.off[j];
+        if(top + col.hs[j] > camY - hh && top < camY + hh) preload(col.items[j]);
+      }
+    }
+  }
+
+  /* ================= Hover: blurred copy, hovered tile only ================= */
+  var hovT = null;
+  function hover(t){
+    if(t === hovT) return;
+    if(hovT) unhover(hovT);
+    hovT = t; if(!t) return;
+    clearTimeout(t.blurT);
+    if(t.blur.getAttribute("src") !== t.src) t.blur.src = t.src;
+    t.el.classList.add("blur-on");
+    requestAnimationFrame(function(){ if(hovT === t) t.el.classList.add("hov"); });
+  }
+  function unhover(t, now){
+    if(!t) return;
+    if(hovT === t) hovT = null;
+    t.el.classList.remove("hov");
+    clearTimeout(t.blurT);
+    if(now || reduce) t.el.classList.remove("blur-on");
+    else t.blurT = setTimeout(function(){ if(hovT !== t) t.el.classList.remove("blur-on"); }, 420);
+  }
+  function tileAt(x, y){
+    var el = document.elementFromPoint(x, y);
+    el = el && el.closest ? el.closest(".tile") : null;
+    return el ? byEl.get(el) || null : null;
+  }
+  function updateHover(){
+    if(!fine || !mouseIn || pointerDown || paused){ if(hovT) unhover(hovT); return; }
+    hover(tileAt(mx, my));
+  }
+
+  /* ================= Pointer input ================= */
+  var pointers = new Map(), pointerDown = false, dragging = false, moved = false, zoomHeld = false;
+  var startX = 0, startY = 0, lastX = 0, lastY = 0, samples = [], holdTimer = 0, downT = 0;
+  var TAP_MAX_MS = 500;   // a press longer than this (e.g. a touch long-press) is not a click
+  var pinch = null, pType = "mouse";
+
+  function stopMotion(){ vx = vy = 0; glide = null; }
+  function setZoomTarget(z, ax, ay){ zoomTarget = z; anchorX = ax; anchorY = ay; if(reduce){ applyZoom(z); } }
+  function applyZoom(ns){
+    // keep the world point under the anchor fixed: world = cam + (screen − C − parallax)/s
+    var ax = anchorX - W / 2 - px, ay = anchorY - H / 2 - py;
+    camX += ax * (1 / s - 1 / ns); camY += ay * (1 / s - 1 / ns);
+    s = ns; dirty = true;
+  }
+  function dimHint(){ if(!hint.classList.contains("dim")) hint.classList.add("dim"); }
+
+  wall.addEventListener("pointerdown", function(e){
+    if(e.pointerType === "mouse" && e.button !== 0) return;
+    try{ wall.setPointerCapture(e.pointerId); }catch(_){}
+    pointers.set(e.pointerId, { x:e.clientX, y:e.clientY });
+    pType = e.pointerType;
+    stopMotion();
+    if(pointers.size === 1){
+      pointerDown = true; dragging = false; moved = false; zoomHeld = false;
+      startX = lastX = e.clientX; startY = lastY = e.clientY; downT = e.timeStamp;
+      samples = [{ x:e.clientX, y:e.clientY, t:e.timeStamp }];
+      if(hovT) unhover(hovT);
+      clearTimeout(holdTimer);
+      if(pType !== "touch"){
+        holdTimer = setTimeout(function(){
+          if(pointerDown && !moved){ zoomHeld = true; setZoomTarget(ZOOM_OUT, lastX, lastY); dimHint(); }
+        }, HOLD_MS);
+      }
+    } else if(pointers.size === 2){
+      clearTimeout(holdTimer); moved = true; dragging = false;
+      var p = pinchPts();
+      pinch = { d0: p.d, s0: s, mx: p.mx, my: p.my };
+      anchorX = p.mx; anchorY = p.my;
+    }
+  });
+
+  function pinchPts(){
+    var a = [], it = pointers.values(), v;
+    while(!(v = it.next()).done) a.push(v.value);
+    return { d: Math.max(1, Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y)), mx:(a[0].x + a[1].x) / 2, my:(a[0].y + a[1].y) / 2 };
+  }
+
+  wall.addEventListener("pointermove", function(e){
+    if(e.pointerType === "mouse"){ mx = e.clientX; my = e.clientY; mouseIn = true; }
+    var p = pointers.get(e.pointerId);
+    if(!p){ if(e.pointerType === "mouse") updateHover(); return; }
+    p.x = e.clientX; p.y = e.clientY;
+    if(pointers.size >= 2 && pinch){
+      var q = pinchPts();
+      camX -= (q.mx - pinch.mx) / s; camY -= (q.my - pinch.my) / s;   // two-finger pan
+      pinch.mx = q.mx; pinch.my = q.my; anchorX = q.mx; anchorY = q.my;
+      var ns = Math.min(PINCH_MAX, Math.max(PINCH_MIN, pinch.s0 * q.d / pinch.d0));
+      applyZoom(ns); zoomTarget = ns; dimHint();
+      return;
+    }
+    if(pointers.size !== 1) return;
+    if(!dragging){
+      if(Math.hypot(e.clientX - startX, e.clientY - startY) < THRESH){ lastX = e.clientX; lastY = e.clientY; return; }
+      dragging = true; moved = true; clearTimeout(holdTimer);
+      wall.classList.add("grabbing"); dimHint();
+      lastX = startX; lastY = startY;                 // keep the grabbed point under the pointer
+    }
+    var dx = e.clientX - lastX, dy = e.clientY - lastY;
+    camX -= dx / s; camY -= dy / s;
+    lastX = e.clientX; lastY = e.clientY;
+    if(zoomHeld){ anchorX = lastX; anchorY = lastY; }
+    samples.push({ x:e.clientX, y:e.clientY, t:e.timeStamp });
+    if(samples.length > 8) samples.shift();
+    dirty = true;
+  });
+
+  function endPointer(e){
+    if(!pointers.has(e.pointerId)) return;
+    pointers.delete(e.pointerId);
+    if(pointers.size === 1){                           // pinch → one finger: continue as drag, no jump
+      var rest = pointers.values().next().value;
+      lastX = startX = rest.x; lastY = startY = rest.y; dragging = true; pinch = null;
+      samples = [{ x:rest.x, y:rest.y, t:e.timeStamp }];
+      return;
+    }
+    if(pointers.size > 0) return;
+    clearTimeout(holdTimer);
+    pointerDown = false;
+    wall.classList.remove("grabbing");
+    var wasPinch = !!pinch; pinch = null;
+    if(zoomHeld || wasPinch || zoomTarget !== 1){ setZoomTarget(1, lastX, lastY); }
+    if(dragging && !reduce && e.type === "pointerup"){
+      // velocity over the last ~90 ms of samples
+      var now = e.timeStamp, a = null, b = samples[samples.length - 1];
+      for(var i = samples.length - 1; i >= 0; i--){ if(now - samples[i].t <= 90) a = samples[i]; else break; }
+      if(a && b && b.t > a.t){
+        vx = (b.x - a.x) / (b.t - a.t); vy = (b.y - a.y) / (b.t - a.t);
+        var sp = Math.hypot(vx, vy); if(sp > VMAX){ vx *= VMAX / sp; vy *= VMAX / sp; }
+        if(sp < 0.05) vx = vy = 0;
+      }
+    }
+    if(e.type === "pointerup" && !moved && !zoomHeld && !wasPinch && e.timeStamp - downT < TAP_MAX_MS){
+      var t = tileAt(e.clientX, e.clientY);
+      if(t){ setKf(t.key); openViewer(t.idx, wall); }
+    }
+    dragging = false; zoomHeld = false;
+    if(e.pointerType === "mouse") updateHover();
+  }
+  wall.addEventListener("pointerup", endPointer);
+  wall.addEventListener("pointercancel", endPointer);
+  wall.addEventListener("pointerleave", function(e){ if(e.pointerType === "mouse" && !pointerDown){ mouseIn = false; if(hovT) unhover(hovT); } });
+  wall.addEventListener("contextmenu", function(e){ e.preventDefault(); });
+
+  // trackpad / wheel pans the wall
+  wall.addEventListener("wheel", function(e){
+    e.preventDefault();
+    var k = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? H : 1;
+    stopMotion();
+    camX += (e.shiftKey && !e.deltaX ? e.deltaY : e.deltaX) * k / s;
+    camY += (e.shiftKey && !e.deltaX ? 0 : e.deltaY) * k / s;
+    dirty = true; dimHint();
+  }, { passive:false });
+
+  /* ================= Keyboard ================= */
+  function setKf(key){
+    kfKey = key;
+    if(!key){ kfPos = null; return; }
+    var p = key.split("|"); kfPos = { c:+p[0], r:+p[1], j:+p[2] };
+    dirty = true;
+  }
+  function kfItem(){ return kfPos ? cols[mod(kfPos.c, COLS)].items[kfPos.j] : -1; }
+  function nearestCentreKey(){
+    var best = null, bd = Infinity;
+    live.forEach(function(t){
+      var p = t.key.split("|"), c = itemCenter(+p[0], +p[1], +p[2]);
+      var d = Math.hypot(c.x - camX, c.y - camY);
+      if(d < bd){ bd = d; best = t.key; }
+    });
+    return best;
+  }
+  function centreOn(pos){
+    // land the item at the viewport centre including the parallax offset it will have
+    var c = itemCenter(pos.c, pos.r, pos.j);
+    var tx = c.x + ptx / s, ty = c.y + pty / s;
+    stopMotion();
+    if(reduce){ camX = tx; camY = ty; dirty = true; } else glide = { x:tx, y:ty };
+  }
+  function announce(){
+    var i = kfItem(); if(i < 0) return;
+    var it = items[i];
+    liveEl.textContent = it.name + ", " + it.n + " of " + it.of + ". Press Enter to open.";
+  }
+  function moveFocus(dir){
+    if(!kfPos){ setKf(nearestCentreKey()); if(kfPos){ centreOn(kfPos); announce(); } return; }
+    var c = kfPos.c, r = kfPos.r, j = kfPos.j;
+    if(dir === "up" || dir === "down"){
+      var col = cols[mod(c, COLS)], L = col.items.length;
+      j += dir === "down" ? 1 : -1;
+      if(j >= L){ j = 0; r++; } else if(j < 0){ j = L - 1; r--; }
+    } else {
+      var y = itemCenter(c, r, j).y;
+      c += dir === "right" ? 1 : -1;
+      var col2 = cols[mod(c, COLS)], best = null, bd = Infinity;
+      var r0 = Math.floor((y - col2.phase) / col2.period);
+      for(var rr = r0 - 1; rr <= r0 + 1; rr++) for(var jj = 0; jj < col2.items.length; jj++){
+        var d = Math.abs(itemCenter(c, rr, jj).y - y);
+        if(d < bd){ bd = d; best = [rr, jj]; }
+      }
+      r = best[0]; j = best[1];
+    }
+    setKf(c + "|" + r + "|" + j); centreOn(kfPos); announce();
+  }
+  wall.addEventListener("keydown", function(e){
+    var map = { ArrowLeft:"left", ArrowRight:"right", ArrowUp:"up", ArrowDown:"down" };
+    if(map[e.key]){ e.preventDefault(); moveFocus(map[e.key]); dimHint(); return; }
+    if(e.key === "Enter" || e.key === " "){
+      e.preventDefault();
+      if(!kfPos) moveFocus(null);
+      var i = kfItem(); if(i >= 0) openViewer(i, wall);
+    }
+  });
+  wall.addEventListener("focus", function(){
+    if(!kfPos){ setKf(nearestCentreKey()); }
+    announce(); dirty = true;
+  });
+  wall.addEventListener("blur", function(){ setKf(null); });
+
+  /* ================= Viewer ================= */
+  var V = document.getElementById("viewer"), vImg = document.getElementById("v-img");
+  var vTitle = document.getElementById("v-title"), vMeta = document.getElementById("v-meta");
+  var vCount = document.getElementById("v-count"), vLink = document.getElementById("v-link");
+  var vi = -1, vOpener = null, vHideT = 0;
+  function pad(n){ return (n < 10 ? "0" : "") + n; }
+  function showItem(i){
+    vi = mod(i, NI);
+    var it = items[vi], want = vi;
+    vImg.classList.add("lowres");
+    vImg.width = it.w; vImg.height = it.h;
+    vImg.src = it.thumb;                               // instant (cached) preview…
+    vImg.alt = it.name + ", " + it.n + " of " + it.of;
+    vTitle.textContent = it.name; vMeta.textContent = it.meta;
+    vCount.textContent = pad(vi + 1) + " / " + pad(NI);
+    if(it.nav && ROUTES[it.nav]){ vLink.hidden = false; vLink.href = ROUTES[it.nav]; vLink.setAttribute("data-nav", it.nav); }
+    else { vLink.hidden = true; }
+    var full = new Image(); full.decoding = "async"; full.src = it.full;   // …then the full-size file
+    var swapIn = function(){ if(vi === want){ vImg.src = it.full; vImg.classList.remove("lowres"); } };
+    if(full.decode) full.decode().then(swapIn, swapIn); else full.onload = swapIn;
+    [vi + 1, vi - 1].forEach(function(n){ var im = new Image(); im.src = items[mod(n, NI)].full; });
+  }
+  function openViewer(i, opener){
+    clearTimeout(vHideT);
+    vOpener = opener || document.activeElement;
+    showItem(i);
+    V.hidden = false; paused = true; if(hovT) unhover(hovT, true);
+    requestAnimationFrame(function(){ V.classList.add("open"); });
+    V.querySelector(".v-close").focus();
+  }
+  function closeViewer(){
+    V.classList.remove("open"); paused = false; dirty = true;
+    vHideT = setTimeout(function(){ V.hidden = true; }, reduce ? 0 : 260);
+    if(vOpener && vOpener.focus) vOpener.focus({ preventScroll:true });
+  }
+  // swipe between portraits on touch
+  var swipe = null;
+  V.addEventListener("pointerdown", function(e){ if(e.pointerType !== "mouse") swipe = { x:e.clientX, y:e.clientY }; });
+  V.addEventListener("pointerup", function(e){
+    if(!swipe) return; var dx = e.clientX - swipe.x, dy = e.clientY - swipe.y; swipe = null;
+    if(Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.3) showItem(vi + (dx < 0 ? 1 : -1));
+  });
+
+  /* ================= Menu & index ================= */
+  var menu = document.getElementById("menu"), menuBtn = document.querySelector("[data-menu-open]");
+  function openMenu(){ menu.classList.add("open"); menuBtn.setAttribute("aria-expanded", "true"); paused = true; menu.querySelector(".menu-close").focus(); }
+  function closeMenu(){ menu.classList.remove("open"); menuBtn.setAttribute("aria-expanded", "false"); paused = !V.hidden || document.body.classList.contains("show-index"); dirty = true; menuBtn.focus(); }
+  var ixBtn = document.querySelector('[data-act="index"]'), ixEl = document.getElementById("index");
+  function toggleIndex(){
+    var on = document.body.classList.toggle("show-index");
+    ixBtn.setAttribute("aria-expanded", on ? "true" : "false");
+    ixBtn.textContent = on ? "wall" : "index";
+    paused = on; dirty = true;
+    if(on){ ixEl.scrollTop = 0; ixEl.focus({ preventScroll:true }); } else wall.focus({ preventScroll:true });
+  }
+
+  /* ================= One delegated click handler (data-nav / data-act) ================= */
+  var ACTS = {
+    "prev": function(){ showItem(vi - 1); },
+    "next": function(){ showItem(vi + 1); },
+    "close": closeViewer,
+    "menu-close": closeMenu,
+    "index": toggleIndex
+  };
+  document.addEventListener("click", function(e){
+    var n = e.target.closest("[data-nav]");
+    if(n){ e.preventDefault(); go(n.getAttribute("data-nav")); return; }
+    var a = e.target.closest("[data-act]");
+    if(a && ACTS[a.getAttribute("data-act")]){ e.preventDefault(); ACTS[a.getAttribute("data-act")](a, e); return; }
+    if(e.target.closest("[data-menu-open]")){ openMenu(); return; }
+    var ix = e.target.closest(".ix-item");
+    if(ix){ e.preventDefault(); openViewer(+ix.getAttribute("data-idx"), ix); }
+  });
+
+  // global keys: viewer + menu (Esc, arrows, focus trap)
+  function trap(container, e){
+    var f = [].filter.call(container.querySelectorAll("button,a[href]"), function(x){ return !x.hidden && x.offsetParent !== null; });
+    if(!f.length) return;
+    var first = f[0], last = f[f.length - 1];
+    if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+  }
+  document.addEventListener("keydown", function(e){
+    if(!V.hidden){
+      if(e.key === "Escape"){ e.preventDefault(); closeViewer(); }
+      else if(e.key === "ArrowLeft"){ e.preventDefault(); showItem(vi - 1); }
+      else if(e.key === "ArrowRight"){ e.preventDefault(); showItem(vi + 1); }
+      else if(e.key === "Tab") trap(V, e);
+      return;
+    }
+    if(menu.classList.contains("open")){
+      if(e.key === "Escape"){ e.preventDefault(); closeMenu(); }
+      else if(e.key === "Tab") trap(menu, e);
+      return;
+    }
+    if(e.key === "Escape" && document.body.classList.contains("show-index")){ e.preventDefault(); toggleIndex(); }
+  });
+
+  /* ================= Resize (ResizeObserver → next frame) ================= */
+  if(window.ResizeObserver){
+    new ResizeObserver(function(){
+      if(layoutQueued) return; layoutQueued = true;
+      requestAnimationFrame(function(){ layoutQueued = false; computeLayout(); });
+    }).observe(wall);
+  } else window.addEventListener("resize", function(){ requestAnimationFrame(computeLayout); });
+  document.addEventListener("mouseleave", function(){ mouseIn = false; });
+
+  /* ================= Main loop (requestAnimationFrame) ================= */
+  var last = performance.now(), hoverTick = 0;
+  function frame(now){
+    requestAnimationFrame(frame);
+    var dt = Math.min(64, now - last); last = now;
+    if(paused || document.hidden || !W) return;
+    var changed = false;
+
+    if(!pointerDown && (vx || vy)){                   // throw inertia
+      camX -= vx * dt / s; camY -= vy * dt / s;
+      var f = Math.pow(FRICTION, dt / 16.667); vx *= f; vy *= f;
+      if(Math.hypot(vx, vy) < VSTOP) vx = vy = 0;
+      changed = true;
+    }
+    if(glide){                                         // keyboard glide
+      var g = 1 - Math.exp(-dt / GLIDE_TAU);
+      camX += (glide.x - camX) * g; camY += (glide.y - camY) * g;
+      if(Math.abs(glide.x - camX) < 0.25 && Math.abs(glide.y - camY) < 0.25){ camX = glide.x; camY = glide.y; glide = null; }
+      changed = true;
+    }
+    if(s !== zoomTarget && !pinch){                    // eased, anchored zoom
+      var tau = zoomTarget < s ? ZOOM_OUT_TAU : ZOOM_IN_TAU;
+      var ns = reduce ? zoomTarget : s + (zoomTarget - s) * (1 - Math.exp(-dt / tau));
+      if(Math.abs(zoomTarget - ns) < 0.0006) ns = zoomTarget;
+      applyZoom(ns); changed = true;
+    }
+    // reverse-axis cursor parallax (mouse only); frozen while pressed so drags stay 1:1
+    if(!pointerDown){
+      if(fine && !reduce && mouseIn){ ptx = -PAR * (mx - W / 2); pty = -PAR * (my - H / 2); }
+      else { ptx = 0; pty = 0; }
+    }
+    if(px !== ptx || py !== pty){
+      if(reduce){ px = ptx; py = pty; }
+      else {
+        var k = 1 - Math.exp(-dt / PAR_TAU);
+        px += (ptx - px) * k; py += (pty - py) * k;
+        if(Math.abs(ptx - px) < 0.05 && Math.abs(pty - py) < 0.05){ px = ptx; py = pty; }
+      }
+      changed = true;
+    }
+    if(changed || dirty){
+      layoutFrame(); dirty = false; preloadAround(now);
+      // things moved under a still cursor: re-check the hovered tile now and then
+      if(fine && mouseIn && !pointerDown && ++hoverTick % 6 === 0) updateHover();
+    }
+  }
+
+  computeLayout();
+  requestAnimationFrame(frame);
+
+  // test/debug hook for the draft (read-only numbers)
+  window.__portraitWall = {
+    stats: function(){ return { pool: poolSize, live: live.size, inDom: stage.children.length, camX: camX, camY: camY, s: s, px: px, py: py, vx: vx, vy: vy, pitch: pitch, colW: colW, cols: COLS, reduce: reduce, fine: fine }; }
+  };
+})();
+</script>
+</body>
+</html>
