@@ -13,9 +13,8 @@
 <!--
   DRAFT — Portraiture as a draggable, infinite, curved image wall.
   Standalone page; not wired into index.html or the site navigation.
-  Data source: the static index (#index) below is the single source of truth for
-  images, order and project metadata. Without JS it is the page; with JS it feeds
-  the wall and doubles as the accessible fallback grid.
+  Data source: the JSON block #portraits (site order). Without JS a plain list of
+  the series links is shown instead.
 -->
 <style>
   :root{
@@ -85,19 +84,32 @@
     touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;outline:none}
   .wall.grabbing{cursor:grabbing}
   html:not(.js) .wall,html:not(.js) .hud{display:none}
+  html.js .nojs{display:none}
   .stage{position:absolute;inset:0;perspective:1000px;perspective-origin:50% 50%}
+  /* Each tile is a grid CELL: hairline top/left border (adjacent cells abut, so the
+     borders draw the grid, as in the reference), the uncropped image inset by --pad.
+     Columns are staggered, so horizontal lines step from column to column. */
+  .stage{--pad:20px}
   .tile{position:absolute;left:0;top:0;transform-origin:50% 50%;will-change:transform,opacity;
-    background:#151516;visibility:hidden;contain:layout style}
+    border-top:1px solid var(--line);border-left:1px solid var(--line);
+    background:rgba(0,0,0,.1);overflow:hidden;visibility:hidden;contain:layout style;
+    transition:background-color .3s ease,box-shadow .3s ease}
+  .tile::before{content:"";position:absolute;left:var(--pad);top:var(--pad);right:var(--pad);bottom:var(--pad);background:#151516}
   .tile img{position:absolute;display:block;pointer-events:none;-webkit-user-drag:none;user-select:none}
-  .tile .sharp{inset:0;width:100%;height:100%;opacity:0;transition:opacity .45s ease}
+  .tile .sharp{left:var(--pad);top:var(--pad);width:calc(100% - 2*var(--pad));height:calc(100% - 2*var(--pad));
+    opacity:0;transition:opacity .45s ease}
   .tile.ready .sharp{opacity:1}
   .tile.instant .sharp{transition:none}
-  /* Hover "phantom": a blurred copy fades in beneath the sharp image. Only the hovered
-     tile ever gets a src + filter (display:none everywhere else), so it costs one layer. */
-  .tile .blur{inset:-6%;width:112%;height:112%;filter:blur(30px);opacity:0;display:none;transition:opacity .4s ease}
+  /* Hover "glass": the cell lifts to a faint white tint (reference: rgba(255,255,255,.1)
+     over .3s) and a 30px-blurred copy of the photo fills the cell behind the sharp image,
+     so the pane glows in the photo's own colours like frosted glass. Only the hovered
+     cell ever gets a src + filter (display:none everywhere else). */
+  .tile .blur{left:-15%;top:-15%;width:130%;height:130%;object-fit:cover;filter:blur(30px) saturate(1.2);
+    opacity:0;display:none;transition:opacity .35s ease}
   .tile.blur-on .blur{display:block}
-  .tile.hov .blur{opacity:.85}
-  .tile.kfocus{outline:1px solid var(--paper);outline-offset:8px}
+  .tile.hov{background:rgba(237,234,227,.07);box-shadow:inset 0 0 0 1px rgba(237,234,227,.10),inset 0 1px 0 rgba(237,234,227,.22)}
+  .tile.hov .blur{opacity:.42}
+  .tile.kfocus{box-shadow:inset 0 0 0 1px var(--paper)}
   .vignette{position:absolute;inset:0;pointer-events:none;
     background:radial-gradient(ellipse at center,transparent 38%,rgba(11,11,12,.25) 62%,rgba(11,11,12,.85) 92%,var(--ink) 100%)}
 
@@ -113,9 +125,6 @@
   .hud-right{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
   .hud-hint{transition:opacity .6s ease}
   .hud-hint.dim{opacity:0}
-  .hud-btn{background:none;border:1px solid var(--edge);color:var(--paper);border-radius:100px;cursor:pointer;
-    font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:lowercase;padding:6px 16px}
-  .hud-btn:hover{background:rgba(237,234,227,.08)}
   .hud-meta{white-space:nowrap}
   @media(max-width:600px){
     .hud-hint{position:absolute;left:clamp(20px,4vw,48px);right:clamp(20px,4vw,48px);bottom:100%;margin-bottom:12px;text-align:left}
@@ -123,23 +132,8 @@
   @media(hover:none),(pointer:coarse){.hud-hint .fine{display:none}}
   @media(hover:hover) and (pointer:fine){.hud-hint .coarse{display:none}}
 
-  /* ---------- Fallback / index grid (no-JS page, and the "index" view with JS) ---------- */
-  .index{padding:calc(var(--hdr) + clamp(40px,6vw,80px)) clamp(20px,4vw,48px) clamp(90px,12vh,140px)}
-  html.js .index{position:fixed;inset:0;z-index:20;overflow-y:auto;background:var(--ink);display:none;overscroll-behavior:contain}
-  html.js body.show-index .index{display:block}
-  .ix-title{font-family:"Cormorant Garamond";font-weight:300;font-size:clamp(40px,6vw,78px);line-height:1;letter-spacing:-.02em;text-transform:lowercase;margin-bottom:clamp(28px,4vw,56px)}
-  html.js .ix-title{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
-  .ix-group{margin-bottom:clamp(48px,7vw,96px)}
-  .ix-head{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:18px;font-weight:300}
-  .ix-head a{font-family:"Cormorant Garamond";font-weight:300;font-size:clamp(28px,3.4vw,46px);line-height:1;letter-spacing:-.02em;color:var(--paper);text-decoration:none}
-  .ix-head a:hover{font-style:italic}
-  .ix-meta{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey)}
-  /* uncropped: CSS columns keep each image at its own aspect ratio */
-  .ix-grid{list-style:none;columns:5 160px;column-gap:14px}
-  .ix-grid li{break-inside:avoid;margin-bottom:14px}
-  .ix-item{display:block;line-height:0}
-  .ix-item img{width:100%;height:auto;display:block;background:#151516}
-  .ix-item:hover img{opacity:.85}
+  .nojs{list-style:none;padding:calc(var(--hdr) + 60px) clamp(20px,4vw,48px);font-family:"Cormorant Garamond";font-weight:300;font-size:clamp(28px,3.4vw,46px);line-height:1.3}
+  .nojs a{color:var(--paper);text-decoration:none}
 
   /* ---------- Viewer ---------- */
   .viewer{position:fixed;inset:0;z-index:60;background:rgba(11,11,12,.97);display:grid;
@@ -201,82 +195,58 @@
         <p class="hud-hint" id="wall-help">
           <span class="fine">drag · hold to zoom out · click to open</span>
           <span class="coarse">drag · pinch to zoom out · tap to open</span>
-          <span class="sr-only">. Keyboard: arrow keys move between portraits, Enter opens one. The index button lists every portrait.</span>
+          <span class="sr-only">. Keyboard: arrow keys move between portraits, Enter opens one.</span>
         </p>
-        <button class="hud-btn" data-act="index" aria-controls="index" aria-expanded="false">index</button>
       </div>
     </div>
 
     <p class="sr-only" aria-live="polite" id="live"></p>
 
-    <section class="index" id="index" aria-labelledby="ix-title" tabindex="-1">
-      <h2 class="ix-title" id="ix-title">Portraiture</h2>
-      <div class="ix-group" data-name="Untitled Sketch" data-meta="Taipei · 2023" data-proj="pt-untitledsketch">
-        <h3 class="ix-head"><a href="/portraiture/untitled-sketch" data-nav="pt-untitledsketch">Untitled Sketch</a><span class="ix-meta">Taipei · 2023</span></h3>
-        <ul class="ix-grid">
-          <li><a class="ix-item" href="/images/portraiture/rooftop_motion-cover.jpg" data-thumb="/images/portraiture/thumbs/rooftop_motion-cover.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/rooftop_motion-cover.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="Untitled Sketch, 1 of 9"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/rooftop_motion-1.jpg" data-thumb="/images/portraiture/thumbs/rooftop_motion-1.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/rooftop_motion-1.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Untitled Sketch, 2 of 9"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/rooftop_motion-2.jpg" data-thumb="/images/portraiture/thumbs/rooftop_motion-2.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/rooftop_motion-2.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Untitled Sketch, 3 of 9"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/rooftop_motion-3.jpg" data-thumb="/images/portraiture/thumbs/rooftop_motion-3.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/rooftop_motion-3.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Untitled Sketch, 4 of 9"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/rooftop_motion-4.jpg" data-thumb="/images/portraiture/thumbs/rooftop_motion-4.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/rooftop_motion-4.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Untitled Sketch, 5 of 9"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/rooftop_motion-5.jpg" data-thumb="/images/portraiture/thumbs/rooftop_motion-5.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/rooftop_motion-5.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Untitled Sketch, 6 of 9"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/rooftop_motion-6.jpg" data-thumb="/images/portraiture/thumbs/rooftop_motion-6.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/rooftop_motion-6.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Untitled Sketch, 7 of 9"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/rooftop_motion-7.jpg" data-thumb="/images/portraiture/thumbs/rooftop_motion-7.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/rooftop_motion-7.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Untitled Sketch, 8 of 9"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/rooftop_motion-8.jpg" data-thumb="/images/portraiture/thumbs/rooftop_motion-8.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/rooftop_motion-8.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Untitled Sketch, 9 of 9"></a></li>
-        </ul>
-      </div>
-      <div class="ix-group" data-name="@0821tingting" data-meta="Portrait · 2022" data-proj="pt-0821tingting">
-        <h3 class="ix-head"><a href="/portraiture/0821tingting" data-nav="pt-0821tingting">@0821tingting</a><span class="ix-meta">Portrait · 2022</span></h3>
-        <ul class="ix-grid">
-          <li><a class="ix-item" href="/images/portraiture/0821tingting_2021-15.jpg" data-thumb="/images/portraiture/thumbs/0821tingting_2021-15.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/0821tingting_2021-15.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="@0821tingting, 1 of 8"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/0821tingting_2021-16.jpg" data-thumb="/images/portraiture/thumbs/0821tingting_2021-16.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/0821tingting_2021-16.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="@0821tingting, 2 of 8"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/0821tingting_2021-17.jpg" data-thumb="/images/portraiture/thumbs/0821tingting_2021-17.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/0821tingting_2021-17.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="@0821tingting, 3 of 8"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/0821tingting_2021-18.jpg" data-thumb="/images/portraiture/thumbs/0821tingting_2021-18.jpg" data-w="1125" data-h="2000"><img src="/images/portraiture/thumbs/0821tingting_2021-18.jpg" width="1125" height="2000" loading="lazy" decoding="async" alt="@0821tingting, 4 of 8"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/0821tingting_2021-19.jpg" data-thumb="/images/portraiture/thumbs/0821tingting_2021-19.jpg" data-w="1125" data-h="2000"><img src="/images/portraiture/thumbs/0821tingting_2021-19.jpg" width="1125" height="2000" loading="lazy" decoding="async" alt="@0821tingting, 5 of 8"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/0821tingting_2021-20.jpg" data-thumb="/images/portraiture/thumbs/0821tingting_2021-20.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/0821tingting_2021-20.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="@0821tingting, 6 of 8"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/0821tingting_2021-21.jpg" data-thumb="/images/portraiture/thumbs/0821tingting_2021-21.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/0821tingting_2021-21.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="@0821tingting, 7 of 8"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/0821tingting_2021-22.jpg" data-thumb="/images/portraiture/thumbs/0821tingting_2021-22.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/0821tingting_2021-22.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="@0821tingting, 8 of 8"></a></li>
-        </ul>
-      </div>
-      <div class="ix-group" data-name="Duality Within" data-meta="Portrait · 2021" data-proj="pt-dualitywithin">
-        <h3 class="ix-head"><a href="/portraiture/duality-within" data-nav="pt-dualitywithin">Duality Within</a><span class="ix-meta">Portrait · 2021</span></h3>
-        <ul class="ix-grid">
-          <li><a class="ix-item" href="/images/portraiture/duality_within_2021-21.jpg" data-thumb="/images/portraiture/thumbs/duality_within_2021-21.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/duality_within_2021-21.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="Duality Within, 1 of 11"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/duality_within_2021-1.jpg" data-thumb="/images/portraiture/thumbs/duality_within_2021-1.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/duality_within_2021-1.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Duality Within, 2 of 11"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/duality_within_2021-2.jpg" data-thumb="/images/portraiture/thumbs/duality_within_2021-2.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/duality_within_2021-2.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Duality Within, 3 of 11"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/duality_within_2021-3.jpg" data-thumb="/images/portraiture/thumbs/duality_within_2021-3.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/duality_within_2021-3.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Duality Within, 4 of 11"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/duality_within_2021-4.jpg" data-thumb="/images/portraiture/thumbs/duality_within_2021-4.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/duality_within_2021-4.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Duality Within, 5 of 11"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/duality_within_2021-5.jpg" data-thumb="/images/portraiture/thumbs/duality_within_2021-5.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/duality_within_2021-5.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Duality Within, 6 of 11"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/duality_within_2021-6.jpg" data-thumb="/images/portraiture/thumbs/duality_within_2021-6.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/duality_within_2021-6.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Duality Within, 7 of 11"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/duality_within_2021-7.jpg" data-thumb="/images/portraiture/thumbs/duality_within_2021-7.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/duality_within_2021-7.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Duality Within, 8 of 11"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/duality_within_2021-8.jpg" data-thumb="/images/portraiture/thumbs/duality_within_2021-8.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/duality_within_2021-8.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Duality Within, 9 of 11"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/duality_within_2021-9.jpg" data-thumb="/images/portraiture/thumbs/duality_within_2021-9.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/duality_within_2021-9.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Duality Within, 10 of 11"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/duality_within_2021-10.jpg" data-thumb="/images/portraiture/thumbs/duality_within_2021-10.jpg" data-w="1600" data-h="2000"><img src="/images/portraiture/thumbs/duality_within_2021-10.jpg" width="1600" height="2000" loading="lazy" decoding="async" alt="Duality Within, 11 of 11"></a></li>
-        </ul>
-      </div>
-      <div class="ix-group" data-name="In Mood For Smoke" data-meta="Portrait · 2021" data-proj="pt-inmoodforsmoke">
-        <h3 class="ix-head"><a href="/portraiture/in-mood-for-smoke" data-nav="pt-inmoodforsmoke">In Mood For Smoke</a><span class="ix-meta">Portrait · 2021</span></h3>
-        <ul class="ix-grid">
-          <li><a class="ix-item" href="/images/portraiture/In-mood-for-smoke_2021-1.jpg" data-thumb="/images/portraiture/thumbs/In-mood-for-smoke_2021-1.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/In-mood-for-smoke_2021-1.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="In Mood For Smoke, 1 of 7"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/In-mood-for-smoke_2021-2.jpg" data-thumb="/images/portraiture/thumbs/In-mood-for-smoke_2021-2.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/In-mood-for-smoke_2021-2.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="In Mood For Smoke, 2 of 7"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/In-mood-for-smoke_2021-3.jpg" data-thumb="/images/portraiture/thumbs/In-mood-for-smoke_2021-3.jpg" data-w="1348" data-h="2000"><img src="/images/portraiture/thumbs/In-mood-for-smoke_2021-3.jpg" width="1348" height="2000" loading="lazy" decoding="async" alt="In Mood For Smoke, 3 of 7"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/In-mood-for-smoke_2021-4.jpg" data-thumb="/images/portraiture/thumbs/In-mood-for-smoke_2021-4.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/In-mood-for-smoke_2021-4.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="In Mood For Smoke, 4 of 7"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/In-mood-for-smoke_2021-5.jpg" data-thumb="/images/portraiture/thumbs/In-mood-for-smoke_2021-5.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/In-mood-for-smoke_2021-5.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="In Mood For Smoke, 5 of 7"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/In-mood-for-smoke_2021-6.jpg" data-thumb="/images/portraiture/thumbs/In-mood-for-smoke_2021-6.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/In-mood-for-smoke_2021-6.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="In Mood For Smoke, 6 of 7"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/In-mood-for-smoke_2021-7.jpg" data-thumb="/images/portraiture/thumbs/In-mood-for-smoke_2021-7.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/In-mood-for-smoke_2021-7.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="In Mood For Smoke, 7 of 7"></a></li>
-        </ul>
-      </div>
-      <div class="ix-group" data-name="Tatiana" data-meta="Portrait · 2020" data-proj="pt-tatiana">
-        <h3 class="ix-head"><a href="/portraiture/tatiana" data-nav="pt-tatiana">Tatiana</a><span class="ix-meta">Portrait · 2020</span></h3>
-        <ul class="ix-grid">
-          <li><a class="ix-item" href="/images/portraiture/tatiana_2021-08.jpg" data-thumb="/images/portraiture/thumbs/tatiana_2021-08.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/tatiana_2021-08.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="Tatiana, 1 of 5"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/tatiana_2021-09.jpg" data-thumb="/images/portraiture/thumbs/tatiana_2021-09.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/tatiana_2021-09.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="Tatiana, 2 of 5"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/tatiana_2021-11.jpg" data-thumb="/images/portraiture/thumbs/tatiana_2021-11.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/tatiana_2021-11.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="Tatiana, 3 of 5"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/tatiana_2021-12.jpg" data-thumb="/images/portraiture/thumbs/tatiana_2021-12.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/tatiana_2021-12.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="Tatiana, 4 of 5"></a></li>
-          <li><a class="ix-item" href="/images/portraiture/tatiana_2021-14.jpg" data-thumb="/images/portraiture/thumbs/tatiana_2021-14.jpg" data-w="1333" data-h="2000"><img src="/images/portraiture/thumbs/tatiana_2021-14.jpg" width="1333" height="2000" loading="lazy" decoding="async" alt="Tatiana, 5 of 5"></a></li>
-        </ul>
-      </div>
-    </section>
+    <!-- Portrait data, in site order (newest series first). The wall scatters it; the viewer's
+         prev/next follow this order. -->
+    <script type="application/json" id="portraits">
+  [{"name":"Untitled Sketch","meta":"Taipei · 2023","nav":"pt-untitledsketch","images":[{"full":"/images/portraiture/rooftop_motion-cover.jpg","thumb":"/images/portraiture/thumbs/rooftop_motion-cover.jpg","w":1333,"h":2000},
+    {"full":"/images/portraiture/rooftop_motion-1.jpg","thumb":"/images/portraiture/thumbs/rooftop_motion-1.jpg","w":1600,"h":2000},
+    {"full":"/images/portraiture/rooftop_motion-2.jpg","thumb":"/images/portraiture/thumbs/rooftop_motion-2.jpg","w":1600,"h":2000},
+    {"full":"/images/portraiture/rooftop_motion-3.jpg","thumb":"/images/portraiture/thumbs/rooftop_motion-3.jpg","w":1600,"h":2000},
+    {"full":"/images/portraiture/rooftop_motion-4.jpg","thumb":"/images/portraiture/thumbs/rooftop_motion-4.jpg","w":1600,"h":2000},
+    {"full":"/images/portraiture/rooftop_motion-5.jpg","thumb":"/images/portraiture/thumbs/rooftop_motion-5.jpg","w":1600,"h":2000},
+    {"full":"/images/portraiture/rooftop_motion-6.jpg","thumb":"/images/portraiture/thumbs/rooftop_motion-6.jpg","w":1600,"h":2000},
+    {"full":"/images/portraiture/rooftop_motion-7.jpg","thumb":"/images/portraiture/thumbs/rooftop_motion-7.jpg","w":1600,"h":2000},
+    {"full":"/images/portraiture/rooftop_motion-8.jpg","thumb":"/images/portraiture/thumbs/rooftop_motion-8.jpg","w":1600,"h":2000}]},
+  {"name":"@0821tingting","meta":"Portrait · 2022","nav":"pt-0821tingting","images":[{"full":"/images/portraiture/0821tingting_2021-15.jpg","thumb":"/images/portraiture/thumbs/0821tingting_2021-15.jpg","w":1333,"h":2000},
+    {"full":"/images/portraiture/0821tingting_2021-16.jpg","thumb":"/images/portraiture/thumbs/0821tingting_2021-16.jpg","w":1333,"h":2000},
+    {"full":"/images/portraiture/0821tingting_2021-17.jpg","thumb":"/images/portraiture/thumbs/0821tingting_2021-17.jpg","w":1333,"h":2000},
+    {"full":"/images/portraiture/0821tingting_2021-18.jpg","thumb":"/images/portraiture/thumbs/0821tingting_2021-18.jpg","w":1125,"h":2000},
+    {"full":"/images/portraiture/0821tingting_2021-19.jpg","thumb":"/images/portraiture/thumbs/0821tingting_2021-19.jpg","w":1125,"h":2000},
+    {"full":"/images/portraiture/0821tingting_2021-20.jpg","thumb":"/images/portraiture/thumbs/0821tingting_2021-20.jpg","w":1333,"h":2000},
+    {"full":"/images/portraiture/0821tingting_2021-21.jpg","thumb":"/images/portraiture/thumbs/0821tingting_2021-21.jpg","w":1333,"h":2000},
+    {"full":"/images/portraiture/0821tingting_2021-22.jpg","thumb":"/images/portraiture/thumbs/0821tingting_2021-22.jpg","w":1333,"h":2000}]},
+  {"name":"Duality Within","meta":"Portrait · 2021","nav":"pt-dualitywithin","images":[{"full":"/images/portraiture/duality_within_2021-21.jpg","thumb":"/images/portraiture/thumbs/duality_within_2021-21.jpg","w":1333,"h":2000},
+    {"full":"/images/portraiture/duality_within_2021-1.jpg","thumb":"/images/portraiture/thumbs/duality_within_2021-1.jpg","w":1600,"h":2000},
+    {"full":"/images/portraiture/duality_within_2021-2.jpg","thumb":"/images/portraiture/thumbs/duality_within_2021-2.jpg","w":1600,"h":2000},
+    {"full":"/images/portraiture/duality_within_2021-3.jpg","thumb":"/images/portraiture/thumbs/duality_within_2021-3.jpg","w":1600,"h":2000},
+    {"full":"/images/portraiture/duality_within_2021-4.jpg","thumb":"/images/portraiture/thumbs/duality_within_2021-4.jpg","w":1600,"h":2000},
+    {"full":"/images/portraiture/duality_within_2021-5.jpg","thumb":"/images/portraiture/thumbs/duality_within_2021-5.jpg","w":1600,"h":2000},
+    {"full":"/images/portraiture/duality_within_2021-6.jpg","thumb":"/images/portraiture/thumbs/duality_within_2021-6.jpg","w":1600,"h":2000},
+    {"full":"/images/portraiture/duality_within_2021-7.jpg","thumb":"/images/portraiture/thumbs/duality_within_2021-7.jpg","w":1600,"h":2000},
+    {"full":"/images/portraiture/duality_within_2021-8.jpg","thumb":"/images/portraiture/thumbs/duality_within_2021-8.jpg","w":1600,"h":2000},
+    {"full":"/images/portraiture/duality_within_2021-9.jpg","thumb":"/images/portraiture/thumbs/duality_within_2021-9.jpg","w":1600,"h":2000},
+    {"full":"/images/portraiture/duality_within_2021-10.jpg","thumb":"/images/portraiture/thumbs/duality_within_2021-10.jpg","w":1600,"h":2000}]},
+  {"name":"In Mood For Smoke","meta":"Portrait · 2021","nav":"pt-inmoodforsmoke","images":[{"full":"/images/portraiture/In-mood-for-smoke_2021-1.jpg","thumb":"/images/portraiture/thumbs/In-mood-for-smoke_2021-1.jpg","w":1333,"h":2000},
+    {"full":"/images/portraiture/In-mood-for-smoke_2021-2.jpg","thumb":"/images/portraiture/thumbs/In-mood-for-smoke_2021-2.jpg","w":1333,"h":2000},
+    {"full":"/images/portraiture/In-mood-for-smoke_2021-3.jpg","thumb":"/images/portraiture/thumbs/In-mood-for-smoke_2021-3.jpg","w":1348,"h":2000},
+    {"full":"/images/portraiture/In-mood-for-smoke_2021-4.jpg","thumb":"/images/portraiture/thumbs/In-mood-for-smoke_2021-4.jpg","w":1333,"h":2000},
+    {"full":"/images/portraiture/In-mood-for-smoke_2021-5.jpg","thumb":"/images/portraiture/thumbs/In-mood-for-smoke_2021-5.jpg","w":1333,"h":2000},
+    {"full":"/images/portraiture/In-mood-for-smoke_2021-6.jpg","thumb":"/images/portraiture/thumbs/In-mood-for-smoke_2021-6.jpg","w":1333,"h":2000},
+    {"full":"/images/portraiture/In-mood-for-smoke_2021-7.jpg","thumb":"/images/portraiture/thumbs/In-mood-for-smoke_2021-7.jpg","w":1333,"h":2000}]},
+  {"name":"Tatiana","meta":"Portrait · 2020","nav":"pt-tatiana","images":[{"full":"/images/portraiture/tatiana_2021-08.jpg","thumb":"/images/portraiture/thumbs/tatiana_2021-08.jpg","w":1333,"h":2000},
+    {"full":"/images/portraiture/tatiana_2021-09.jpg","thumb":"/images/portraiture/thumbs/tatiana_2021-09.jpg","w":1333,"h":2000},
+    {"full":"/images/portraiture/tatiana_2021-11.jpg","thumb":"/images/portraiture/thumbs/tatiana_2021-11.jpg","w":1333,"h":2000},
+    {"full":"/images/portraiture/tatiana_2021-12.jpg","thumb":"/images/portraiture/thumbs/tatiana_2021-12.jpg","w":1333,"h":2000},
+    {"full":"/images/portraiture/tatiana_2021-14.jpg","thumb":"/images/portraiture/thumbs/tatiana_2021-14.jpg","w":1333,"h":2000}]}]
+    </script>
+    <noscript><ul class="nojs"><li><a href="/portraiture/untitled-sketch">Untitled Sketch</a></li><li><a href="/portraiture/0821tingting">@0821tingting</a></li><li><a href="/portraiture/duality-within">Duality Within</a></li><li><a href="/portraiture/in-mood-for-smoke">In Mood For Smoke</a></li><li><a href="/portraiture/tatiana">Tatiana</a></li></ul></noscript>
   </main>
 
   <div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Portrait viewer" hidden>
@@ -327,23 +297,17 @@
   };
   function go(target){ var url = ROUTES[target]; if(url) location.href = url; }
 
-  /* ================= Data (read from the static index) ================= */
-  var items = [];
-  [].forEach.call(document.querySelectorAll(".ix-group"), function(g){
-    var links = g.querySelectorAll(".ix-item");
-    [].forEach.call(links, function(a, i){
-      a.setAttribute("data-idx", items.length);
-      items.push({
-        thumb: a.getAttribute("data-thumb"), full: a.getAttribute("href"),
-        w: +a.getAttribute("data-w"), h: +a.getAttribute("data-h"),
-        name: g.getAttribute("data-name"), meta: g.getAttribute("data-meta"),
-        nav: g.getAttribute("data-proj"), n: i + 1, of: links.length
-      });
+  /* ================= Data (embedded JSON, site order) ================= */
+  var items = [], SERIES = JSON.parse(document.getElementById("portraits").textContent);
+  SERIES.forEach(function(g){
+    g.images.forEach(function(im, i){
+      items.push({ thumb: im.thumb, full: im.full, w: im.w, h: im.h,
+        name: g.name, meta: g.meta, nav: g.nav, n: i + 1, of: g.images.length });
     });
   });
   var NI = items.length;
   if(!NI) return;
-  var groups = document.querySelectorAll(".ix-group").length;
+  var groups = SERIES.length;
   document.getElementById("hud-meta").textContent = NI + " images · " + groups + " series";
 
   /* ================= Tunables (from the reference capture) ================= */
@@ -364,7 +328,7 @@
   var ZOOM_IN_TAU = 170;    // ms (≈700 ms to settle)
   var PINCH_MIN   = 0.5, PINCH_MAX = 1.2;
   var GLIDE_TAU   = 130;    // keyboard glide
-  var MARGIN      = 220;    // px of off-screen tiles kept around the viewport
+  var MARGIN      = 110;    // px of off-screen tiles kept around the viewport
 
   var mqReduce = window.matchMedia("(prefers-reduced-motion: reduce)");
   var mqFine   = window.matchMedia("(hover:hover) and (pointer:fine)");
@@ -388,21 +352,47 @@
   var dirty = true, paused = false, layoutQueued = false;
 
   /* ================= Layout: staggered, uncropped, wraps both ways ================= */
-  // COLS columns, items dealt round-robin in site order. Each column is a vertical
-  // stack of natural-aspect images whose own height is its vertical period, so every
+  // COLS columns of abutting grid cells. Each column is a vertical stack of cells sized to
+  // their (uncropped) image + padding; its own height is its vertical period, so every
   // column wraps seamlessly on its own; columns repeat every COLS·pitch horizontally.
+  // Images are placed in a fixed scattered order (see scatterOrder) so that cells next
+  // to each other — above, below, left, right, and across both wrap seams — come from
+  // different series wherever the counts allow.
+  function rng(seed){ return function(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; var t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function scatterOrder(){
+    var rand = rng(20251109), pool = items.map(function(_, i){ return i; });
+    for(var i = pool.length - 1; i > 0; i--){ var j = Math.floor(rand() * (i + 1)), t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
+    var grid = [], rows = Math.ceil(NI / COLS), k, row;
+    for(k = 0; k < COLS; k++) grid.push([]);
+    var proj = function(i){ return i == null ? null : items[i].nav; };
+    for(row = 0; row < rows; row++) for(k = 0; k < COLS; k++){
+      if(!pool.length) break;
+      var bad = {}, L = grid[mod(k - 1, COLS)], Rt = grid[mod(k + 1, COLS)];
+      [grid[k][row - 1], L[row - 1], L[row], L[row + 1], Rt[row - 1], Rt[row], Rt[row + 1],
+       row === rows - 1 ? grid[k][0] : null].forEach(function(n){ var p = proj(n); if(p) bad[p] = 1; });
+      var pick = 0;
+      for(var q = 0; q < pool.length; q++){ if(!bad[proj(pool[q])]){ pick = q; break; } }
+      grid[k].push(pool.splice(pick, 1)[0]);
+    }
+    return grid;
+  }
+  var ORDER = scatterOrder();
   function computeLayout(){
     var r = wall.getBoundingClientRect();
     var oldPitch = pitch;
     W = r.width; H = r.height;
-    colW = Math.round(Math.max(140, Math.min(300, W * 0.17)));
-    gap = Math.round(colW * (W < 700 ? 0.2 : 0.24));
-    pitch = colW + gap;
+    colW = Math.round(Math.max(88, Math.min(200, W * 0.11)));   // image width (≈⅔ of the first draft)
+    gap = Math.round(colW * 0.13);                                // cell padding around the image
+    pitch = colW + 2 * gap + 1;                                   // cell width incl. 1px grid line
+    stage.style.setProperty("--pad", gap + "px");
     cols = [];
     for(var k = 0; k < COLS; k++) cols.push({ items:[], off:[], hs:[], period:0, phase:0 });
-    items.forEach(function(it, i){
-      var c = cols[i % COLS], h = Math.round(colW * it.h / it.w);
-      c.items.push(i); c.off.push(c.period); c.hs.push(h); c.period += h + gap;
+    ORDER.forEach(function(list, k){
+      var c = cols[k];
+      list.forEach(function(i){
+        var it = items[i], h = Math.round(colW * it.h / it.w) + 2 * gap + 1;   // cell height
+        c.items.push(i); c.off.push(c.period); c.hs.push(h); c.period += h;
+      });
     });
     cols.forEach(function(c, k){ c.phase = Math.round((((k * 0.382) % 1) - 0.5) * pitch); });
     if(oldPitch){ camX *= pitch / oldPitch; camY *= pitch / oldPitch; }
@@ -449,8 +439,8 @@
   }
   function assign(t, idx, key, h){
     t.key = key; live.set(key, t);
-    if(t.w !== colW){ t.el.style.width = colW + "px"; t.w = colW; }
-    if(t.h !== h){ t.el.style.height = h + "px"; t.h = h; }   // reserved box = exact aspect
+    if(t.w !== pitch){ t.el.style.width = pitch + "px"; t.w = pitch; }
+    if(t.h !== h){ t.el.style.height = h + "px"; t.h = h; }   // cell = exact image aspect + padding
     if(t.idx !== idx){
       t.idx = idx; unhover(t, true);
       var it = items[idx], src = it.thumb;
@@ -472,7 +462,7 @@
     gen++;
     var hw = (W / 2 + MARGIN + Math.abs(px)) / s, hh = (H / 2 + MARGIN + Math.abs(py)) / s;
     var x0 = camX - hw, x1 = camX + hw, y0 = camY - hh, y1 = camY + hh;
-    var cA = Math.ceil((x0 - colW / 2) / pitch), cB = Math.floor((x1 + colW / 2) / pitch);
+    var cA = Math.ceil((x0 - pitch / 2) / pitch), cB = Math.floor((x1 + pitch / 2) / pitch);
     var halfH = H / 2, R = CURVE_R * H, d2r = Math.PI / 180;
     for(var c = cA; c <= cB; c++){
       var col = cols[mod(c, COLS)], P = col.period;
@@ -489,7 +479,7 @@
           var nd = (sy - halfH) / halfH; if(nd > 1.6) nd = 1.6; else if(nd < -1.6) nd = -1.6;
           var th = CURVE_DEG * nd;                         // rotateX follows distance from centre
           var z = R * (1 - Math.cos(th * d2r));            // edges bend toward the viewer
-          t.el.style.transform = "translate3d(" + (sx - colW / 2).toFixed(2) + "px," + (sy - h / 2).toFixed(2) + "px," +
+          t.el.style.transform = "translate3d(" + (sx - pitch / 2).toFixed(2) + "px," + (sy - h / 2).toFixed(2) + "px," +
             z.toFixed(2) + "px) rotateX(" + th.toFixed(3) + "deg) scale(" + s.toFixed(4) + ")";
           var op = Math.max(FADE_MIN, 1 - FADE * Math.min(1, Math.abs(nd)));
           if(Math.abs(op - t.op) > 0.004){ t.el.style.opacity = op.toFixed(3); t.op = op; }
@@ -779,35 +769,24 @@
     if(Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.3) showItem(vi + (dx < 0 ? 1 : -1));
   });
 
-  /* ================= Menu & index ================= */
+  /* ================= Menu ================= */
   var menu = document.getElementById("menu"), menuBtn = document.querySelector("[data-menu-open]");
   function openMenu(){ menu.classList.add("open"); menuBtn.setAttribute("aria-expanded", "true"); paused = true; menu.querySelector(".menu-close").focus(); }
-  function closeMenu(){ menu.classList.remove("open"); menuBtn.setAttribute("aria-expanded", "false"); paused = !V.hidden || document.body.classList.contains("show-index"); dirty = true; menuBtn.focus(); }
-  var ixBtn = document.querySelector('[data-act="index"]'), ixEl = document.getElementById("index");
-  function toggleIndex(){
-    var on = document.body.classList.toggle("show-index");
-    ixBtn.setAttribute("aria-expanded", on ? "true" : "false");
-    ixBtn.textContent = on ? "wall" : "index";
-    paused = on; dirty = true;
-    if(on){ ixEl.scrollTop = 0; ixEl.focus({ preventScroll:true }); } else wall.focus({ preventScroll:true });
-  }
+  function closeMenu(){ menu.classList.remove("open"); menuBtn.setAttribute("aria-expanded", "false"); paused = !V.hidden; dirty = true; menuBtn.focus(); }
 
   /* ================= One delegated click handler (data-nav / data-act) ================= */
   var ACTS = {
     "prev": function(){ showItem(vi - 1); },
     "next": function(){ showItem(vi + 1); },
     "close": closeViewer,
-    "menu-close": closeMenu,
-    "index": toggleIndex
+    "menu-close": closeMenu
   };
   document.addEventListener("click", function(e){
     var n = e.target.closest("[data-nav]");
     if(n){ e.preventDefault(); go(n.getAttribute("data-nav")); return; }
     var a = e.target.closest("[data-act]");
     if(a && ACTS[a.getAttribute("data-act")]){ e.preventDefault(); ACTS[a.getAttribute("data-act")](a, e); return; }
-    if(e.target.closest("[data-menu-open]")){ openMenu(); return; }
-    var ix = e.target.closest(".ix-item");
-    if(ix){ e.preventDefault(); openViewer(+ix.getAttribute("data-idx"), ix); }
+    if(e.target.closest("[data-menu-open]")){ openMenu(); }
   });
 
   // global keys: viewer + menu (Esc, arrows, focus trap)
@@ -831,7 +810,6 @@
       else if(e.key === "Tab") trap(menu, e);
       return;
     }
-    if(e.key === "Escape" && document.body.classList.contains("show-index")){ e.preventDefault(); toggleIndex(); }
   });
 
   /* ================= Resize (ResizeObserver → next frame) ================= */
