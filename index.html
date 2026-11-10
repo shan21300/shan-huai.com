@@ -5118,7 +5118,7 @@
        through vUV), softened over about a pixel; off entirely in the carousel so it stays exact */
     "  float m = 1.0;",
     "  if(uRad > 0.0){",
-    "    vec2 q = abs((vUV - 0.5)*uSz) - (uSz*0.5 - vec2(uRad));",
+    "    vec2 q = abs((uv - 0.5)*uSz) - (uSz*0.5 - vec2(uRad));",   /* frame space: the corners bend and drag with the frame */
     "    float d = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - uRad;",
     "    m = 1.0 - smoothstep(-0.75, 0.75, d);",
     "  }",
@@ -5192,6 +5192,7 @@
   if(!gl){ useStrip(); return; }
 
   /* ---------- Layout: frame sizes and the bend ---------- */
+  var CORNER = 9;   /* carousel frame corner radius in px (Figma-style), in the frame's own space so it bends with it */
   var GROW = 0.05;   /* the frame under the pointer grows by this much, from its centre */
   var W = 0, H = 0, dpr = 1, cy = 0, baseH = 0, gap = 0, A = 1, P = 3.4, zone = 160, K = 3.2;
   var inst = [], L = 1;   /* instances: {w: work, s: track start, len: width} — the list repeats if it is too short */
@@ -5671,7 +5672,8 @@
       gl.uniform1f(U.uMix, q.e); gl.uniform1f(U.uOp, q.op); gl.uniform1f(U.uShade, q.shade);
       /* corner radius: about 5% of the ring card's short side, easing to square as it lands */
       var sw = G.w + (len - G.w)*q.e, sh = G.h + (baseH - G.h)*q.e;
-      gl.uniform2f(U.uSz, sw, sh); gl.uniform1f(U.uRad, home ? 0 : RADIUS*Math.min(G.w, G.h)*(1 - q.e));
+      gl.uniform2f(U.uSz, sw, sh);
+      gl.uniform1f(U.uRad, home ? CORNER : RADIUS*Math.min(G.w, G.h)*(1 - q.e) + CORNER*q.e);
       gl.uniform1f(U.uAlpha, tex ? 1 : 0);
       gl.uniform2f(U.uEdge, 2/len, 2/baseH);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, (SEG + 1)*2);
@@ -5830,8 +5832,10 @@
       gl.uniform1f(U.uDim, w.dim); gl.uniform1f(U.uFocus, w.focus);
       gl.uniform1f(U.uReveal, reveal(w, t));
       gl.uniform2f(U.uEdge, 2/len, 2/fh);
+      gl.uniform2f(U.uSz, len, fh); gl.uniform1f(U.uRad, CORNER);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, (SEG + 1)*2);
     }
+    gl.uniform1f(U.uRad, 0);
     drawYears(t);
     /* keep rendering while a visible video is playing */
     for(var j = 0; j < N; j++){ if(works[j].vState === 2 && works[j].video && !works[j].video.paused){ dirty = true; break; } }
