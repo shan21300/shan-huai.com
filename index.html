@@ -5106,12 +5106,10 @@
     "    vec2 g = vec2(texture2D(uTex, q0 + vec2(tp.x, 0.0)).a - texture2D(uTex, q0 - vec2(tp.x, 0.0)).a,",
     "                  texture2D(uTex, q0 + vec2(0.0, tp.y)).a - texture2D(uTex, q0 - vec2(0.0, tp.y)).a);",
     "    g /= max(length(g), 1e-5);",                         /* the edge's direction in the texture */
-    /* how many texels one device pixel spans: across, the drag compresses the source by
-       exp(-K t); down, the bend scales it by sc */
-    "    float ds = 1.0;",
-    "    if(s < z) ds = exp(-uK*(z - s)/z); else if(s > uScr.x - z) ds = exp(-uK*(s - uScr.x + z)/z);",
-    "    ds = mix(1.0, ds, uWarp);",
-    "    vec2 tpp = vec2(uTexSz.x*ds/uFw, uTexSz.y/(uFh*sc))/uDpr;",
+    /* how many texels one device pixel spans, before the drag: the edge stays ~1px soft where the
+       label is at rest, and its softness stretches with the drag, so a dragged label smears into
+       a smooth blur like the pictures (the distance field keeps it free of pixel steps) */
+    "    vec2 tpp = vec2(uTexSz.x/uFw, uTexSz.y/(uFh*sc))/uDpr;",
     "    float D = (0.5 - a0)*2.0*uSdfR;",                    /* texels outside the glyph edge (negative inside) */
     "    float cov = clamp(0.5 - D/max(length(g*tpp), 1e-4), 0.0, 1.0);",   /* ≈ one device pixel of anti-aliasing */
     "    gl_FragColor = vec4(mix(vec3(0.082, 0.082, 0.086), vec3(1.0), uDim*0.55), cov*uOp*uReveal);",
