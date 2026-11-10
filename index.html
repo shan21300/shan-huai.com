@@ -883,7 +883,9 @@
     text-transform:uppercase;color:var(--grey)}
 
   /* ---------- Page transition curtain ---------- */
-  #curtain{position:fixed;inset:0;z-index:55;pointer-events:none;
+  /* Hidden at rest: parked just below the screen, it would otherwise show through the
+     see-through bottom toolbar of iOS Safari 26 (and any browser that draws the page under its bars). */
+  #curtain{position:fixed;inset:0;z-index:55;pointer-events:none;visibility:hidden;
     transform:translateY(100%);background:var(--ink);
     border-top:1px solid var(--edge)}
 
@@ -3916,11 +3918,11 @@
     var inc=document.getElementById(target);
     var c=document.getElementById("curtain");
     var tl=gsap.timeline();
-    tl.set(c,{yPercent:100});
+    tl.set(c,{yPercent:100,visibility:"visible"});
     tl.to(c,{yPercent:0,duration:.55,ease:"power4.inOut"});
     tl.add(function(){ swap(target); });
     tl.to(c,{yPercent:-100,duration:.6,ease:"power4.inOut"},"+=0.05");
-    tl.set(c,{yPercent:100});
+    tl.set(c,{yPercent:100,visibility:"hidden"});
     tl.from(inc.children,{y:26,opacity:0,duration:.7,ease:"power3.out"},"-=0.35");
   }
 
