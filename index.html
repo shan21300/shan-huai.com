@@ -145,7 +145,7 @@
     font-family:"Cormorant Garamond";font-weight:300;font-size:clamp(30px,3.9vw,53px);line-height:1.1;
     letter-spacing:-.02em;text-transform:lowercase;transition:opacity .3s ease}
   .m-link:hover{font-style:italic}
-  /* "commercial" is a placeholder until its page exists; hidden menu links stay hidden */
+  /* .m-soon: style for a menu item whose page doesn't exist yet; hidden menu links stay hidden */
   a.m-link{text-decoration:none}
   .m-link.m-soon{cursor:default}
   .m-link.m-soon:hover{font-style:normal}
@@ -3403,7 +3403,7 @@
     <div class="menu-cats">
       <!-- Navigation is Commercial / Personal for now. The earlier page links stay below,
            hidden (not deleted), so they can be brought back by removing "hidden". -->
-      <span class="m-link m-soon" aria-disabled="true">commercial</span>
+      <a class="m-link" href="/commercial">commercial</a>
       <a class="m-link" href="/personal">personal</a>
       <button class="m-link" data-nav="projects" hidden>project</button>
       <button class="m-link" data-nav="live" hidden>live</button>

@@ -14,7 +14,7 @@
   if(matchMedia("(prefers-reduced-motion: reduce)").matches) document.documentElement.classList.add("reduce");
 </script>
 <!--
-  COMMERCIAL — DRAFT (not linked from the site yet).
+  COMMERCIAL — standalone page served at /commercial (commercial.html); linked from the site menu.
   The work fills the screen; a film-editing style timeline at the bottom is the navigation.
   Scrubbing (drag / swipe / wheel / arrow keys) moves the reel under a fixed playhead; the
   clip under the playhead is the active project and its media is the background.
@@ -241,7 +241,7 @@
 
   <div id="menu" role="dialog" aria-modal="true" aria-label="Menu">
     <div class="menu-cats">
-      <span class="m-link" aria-current="page">commercial</span>
+      <a class="m-link" href="/commercial" aria-current="page">commercial</a>
       <a class="m-link" href="/personal">personal</a>
     </div>
     <div class="menu-foot">
@@ -257,7 +257,7 @@
   "use strict";
 
   /* ================= Routing: same data-nav ids as index.html ================= */
-  // Standalone draft: a data-nav click goes to the real URL; the live site's router renders it.
+  // Standalone page: a data-nav click goes to the real URL; the main site's router renders it.
   var ROUTES = {
     "landing":"/","about":"/about","contact":"/contact",
     "proj-sub":"/project/sub",
@@ -794,7 +794,7 @@
   render();
   settle();
 
-  /* read-only hook for testing the draft */
+  /* read-only hook for testing */
   window.__ct = {
     stats: function(){
       return { active: active, pos: pos, target: target, pitch: pitch, n: N, lap: L, copies: K, scrubbing: isScrubbing(), reduce: reduce, lite: lite, noAutoplay: noAutoplay,
