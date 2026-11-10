@@ -5096,11 +5096,17 @@
     "  }",
     "  vec2 uv = mix(vec2(u, v), vUV, uIntro);",            /* on the ring: plain card coordinates */
     "  vec3 c = texture2D(uTex, uCrop.xy + uv*uCrop.zw).rgb;",
-    "  if(dx != 0.0 && uIntro < 0.5){",
-    "    vec2 uR = vec2(clamp((sp + dx - uScr.x*0.5 - uFx0)/uFw, 0.0, 1.0), v);",
-    "    vec2 uB = vec2(clamp((sp - dx - uScr.x*0.5 - uFx0)/uFw, 0.0, 1.0), v);",
-    "    c.r = texture2D(uTex, uCrop.xy + uR*uCrop.zw).r;",
-    "    c.b = texture2D(uTex, uCrop.xy + uB*uCrop.zw).b;",
+    /* spectral blur: 9 taps spread across ±dx, each tinted along red → green → blue and
+       averaged per channel, so the split is a soft rainbow smear rather than three copies */
+    "  if(abs(dx) > 0.05 && uIntro < 0.5){",
+    "    vec3 acc = vec3(0.0), wsum = vec3(0.0);",
+    "    for(int i = 0; i < 9; i++){",
+    "      float f = float(i)/8.0;",
+    "      vec3 wt = vec3(max(0.0, 1.0 - 2.0*f), max(0.0, 1.0 - abs(2.0*f - 1.0)), max(0.0, 2.0*f - 1.0)) + 0.08;",
+    "      vec2 ut = vec2(clamp((sp + dx*(1.0 - 2.0*f) - uScr.x*0.5 - uFx0)/uFw, 0.0, 1.0), v);",
+    "      acc += texture2D(uTex, uCrop.xy + ut*uCrop.zw).rgb*wt; wsum += wt;",
+    "    }",
+    "    c = acc/wsum;",
     "  }",
     "  vec3 ink = vec3(1.0);",                                /* the home page's white */
     "  c = mix(vec3(0.925), c, uAlpha);",
@@ -5189,7 +5195,7 @@
   if(!gl){ useStrip(); return; }
 
   /* ---------- Layout: frame sizes and the bend ---------- */
-  var RGB = 0.024;   /* RGB split strength at the very edge (fraction of the distance from centre) */
+  var RGB = 0.035;   /* RGB split strength at the very edge (fraction of the distance from centre) */
   var W = 0, H = 0, dpr = 1, cy = 0, baseH = 0, gap = 0, A = 1, P = 3.4, zone = 160, K = 3.2;
   var inst = [], L = 1;   /* instances: {w: work, s: track start, len: width} — the list repeats if it is too short */
   function bend(sx){ var u = Math.max(0, Math.min(1.25, sx/W)); return 1 + A*Math.pow(u, P); }
