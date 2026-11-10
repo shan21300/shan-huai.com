@@ -5006,7 +5006,7 @@
       timg:null, tState:0, ttex:null, first:false, dealAt:0, landOrder:0,
       img:null, state:0 /*0 none,1 loading,2 decoded,3 uploaded,-1 failed*/, tex:null, crop:[0,0,1,1],
       video:null, vtex:null, vcrop:null, vState:0 /*0 none,1 starting,2 playing,-1 failed*/, vFresh:false, vAlpha:0,
-      alpha:0, dim:0, focus:0, revealAt:0
+      alpha:0, dim:0, focus:0, grow:0, revealAt:0
     };
   });
   /* ---------- Ring preloader state (the drawing is further down, in the same scene) ---------- */
@@ -5100,7 +5100,7 @@
     "  float v = clamp(((yy - uFcy)/sc - uFy0)/uFh, 0.0, 1.0);",
     "  if(uLabel > 0.5){",                                 /* year label: same bend and edge drag, ink from the texture's alpha */
     "    vec4 lt = texture2D(uTex, vec2(u, v));",
-    "    gl_FragColor = vec4(lt.rgb, lt.a*uOp*uReveal);",
+    "    gl_FragColor = vec4(mix(lt.rgb, vec3(1.0), uDim*0.55), lt.a*uOp*uReveal);",
     "    return;",
     "  }",
     "  vec2 uv = mix(vec2(u, v), vUV, uIntro);",            /* on the ring: plain card coordinates */
@@ -5192,6 +5192,7 @@
   if(!gl){ useStrip(); return; }
 
   /* ---------- Layout: frame sizes and the bend ---------- */
+  var GROW = 0.05;   /* the frame under the pointer grows by this much, from its centre */
   var W = 0, H = 0, dpr = 1, cy = 0, baseH = 0, gap = 0, A = 1, P = 3.4, zone = 160, K = 3.2;
   var inst = [], L = 1;   /* instances: {w: work, s: track start, len: width} — the list repeats if it is too short */
   function bend(sx){ var u = Math.max(0, Math.min(1.25, sx/W)); return 1 + A*Math.pow(u, P); }
@@ -5254,9 +5255,13 @@
   }
   function hitTest(px, py){
     var tx = dragX(px) - W/2;
-    for(var k = 0; k < inst.length; k++){
-      var x0 = x0Of(k);
-      if(tx >= x0 && tx <= x0 + inst[k].len) return Math.abs(py - cy) <= baseH*bend(px)/2 ? k : -1;
+    /* a frame that is growing (hovered) sits on top, so it is tested first */
+    for(var pass = 0; pass < 2; pass++){
+      for(var k = 0; k < inst.length; k++){
+        var gw = inst[k].w.grow; if((gw > 0) !== (pass === 0)) continue;
+        var g = 1 + GROW*gw, len = inst[k].len*g, x0 = x0Of(k) - (len - inst[k].len)/2;
+        if(tx >= x0 && tx <= x0 + len && Math.abs(py - cy) <= baseH*g*bend(px)/2) return k;
+      }
     }
     return -1;
   }
@@ -5709,6 +5714,8 @@
       var w = works[i];
       var dimT = hw >= 0 && hw !== i ? 1 : 0;
       if(Math.abs(w.dim - dimT) > 0.002){ w.dim += (dimT - w.dim)*a6; dirty = true; } else w.dim = dimT;
+      var gT = hw === i ? 1 : 0;
+      if(Math.abs(w.grow - gT) > 0.002){ w.grow += (gT - w.grow)*a6; dirty = true; } else w.grow = gT;
       var fT = focusWork === i ? 1 : 0;
       if(Math.abs(w.focus - fT) > 0.002){ w.focus += (fT - w.focus)*af; dirty = true; } else w.focus = fT;
       if(w.state === 3 && w.alpha < 1){ w.alpha = Math.min(1, w.alpha + dt/0.35); dirty = true; }
@@ -5777,13 +5784,14 @@
       var p = inst[k], w = p.w, x0 = x0Of(k);
       if(!w.yearFirst) continue;
       var lt = yearTex[w.year] || (yearTex[w.year] = buildYear(w.year, len));
+      var gx = p.len*GROW*w.grow/2; x0 -= gx;          /* rides the frame's top-left corner as it grows */
       if(!onScreen(x0, lt.w)) continue;
       if(!on){ on = true; gl.uniform1f(U.uLabel, 1); gl.uniform1f(U.uOp, rg.warp); gl.uniform4f(U.uCrop, 0, 0, 1, 1); }
-      var y0 = -baseH/2 - baseH*0.04 - lt.h;
+      var y0 = -baseH*(1 + GROW*w.grow)/2 - baseH*0.04 - lt.h;
       gl.bindTexture(gl.TEXTURE_2D, lt.tex);
       gl.uniform1f(U.uX0, x0); gl.uniform1f(U.uW, lt.w); gl.uniform1f(U.uFx0, x0); gl.uniform1f(U.uFw, lt.w);
       gl.uniform1f(U.uH, lt.h); gl.uniform1f(U.uY0, y0); gl.uniform1f(U.uFh, lt.h); gl.uniform1f(U.uFy0, y0);
-      gl.uniform1f(U.uReveal, reveal(w, t));
+      gl.uniform1f(U.uReveal, reveal(w, t)); gl.uniform1f(U.uDim, w.dim);   /* greys out with its frame */
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, (SEG + 1)*2);
     }
     if(on){ gl.uniform1f(U.uLabel, 0); gl.uniform1f(U.uOp, 1); }
@@ -5799,10 +5807,14 @@
     gl.uniform1f(U.uWarp, rg.warp);
     gl.uniform1f(U.uVZone, zone); gl.uniform1f(U.uVK, K); gl.uniform1f(U.uVWarp, rg.warp);
     gl.activeTexture(gl.TEXTURE0);
+    /* frames at rest first, then the one growing under the pointer, on top of its neighbours */
+    for(var pass = 0; pass < 2; pass++)
     for(var k = 0; k < inst.length; k++){
-      var p = inst[k], x0 = x0Of(k);
-      if(!onScreen(x0, p.len)) continue;
-      var w = p.w, tex = w.tex, crop = w.crop, alpha = w.tex ? w.alpha : 0;
+      var p = inst[k], w = p.w;
+      if((w.grow > 0) !== (pass === 1)) continue;
+      var g = 1 + GROW*w.grow, len = p.len*g, x0 = x0Of(k) - (len - p.len)/2, fh = baseH*g;
+      if(!onScreen(x0, len)) continue;
+      var tex = w.tex, crop = w.crop, alpha = w.tex ? w.alpha : 0;
       if(!tex && w.ttex){ tex = w.ttex; crop = [0, 0, 1, 1]; alpha = 1; }   /* ring copy until the full image arrives */
       if(w.video && w.vState === 2){
         if(w.vFresh || !w.vtex || !w.video.requestVideoFrameCallback){
@@ -5812,11 +5824,12 @@
       }
       gl.bindTexture(gl.TEXTURE_2D, tex || blankTex);
       gl.uniform4f(U.uCrop, crop[0], crop[1], crop[2], crop[3]);
-      gl.uniform1f(U.uX0, x0); gl.uniform1f(U.uW, p.len); gl.uniform1f(U.uFx0, x0); gl.uniform1f(U.uFw, p.len);
+      gl.uniform1f(U.uX0, x0); gl.uniform1f(U.uW, len); gl.uniform1f(U.uFx0, x0); gl.uniform1f(U.uFw, len);
+      gl.uniform1f(U.uH, fh); gl.uniform1f(U.uY0, -fh/2); gl.uniform1f(U.uFh, fh); gl.uniform1f(U.uFy0, -fh/2);
       gl.uniform1f(U.uAlpha, alpha);
       gl.uniform1f(U.uDim, w.dim); gl.uniform1f(U.uFocus, w.focus);
       gl.uniform1f(U.uReveal, reveal(w, t));
-      gl.uniform2f(U.uEdge, 2/p.len, 2/baseH);
+      gl.uniform2f(U.uEdge, 2/len, 2/fh);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, (SEG + 1)*2);
     }
     drawYears(t);
