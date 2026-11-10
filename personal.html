@@ -639,6 +639,11 @@
     TINT: 0.5,        // warm glass tint strength (0 = neutral, 1 = full TINT_COL)
     TINT_COL: [1.0, 0.975, 0.93],   // the glass colour at TINT = 1
     LIFT: 0.02,       // lifted blacks (0.02 = 2%)
+    // Outside the rim: the wall without the lens, out of focus and dimmed
+    OUTSIDE: 0.45,    // brightness of the outside (0 = flat barrel black, 1 = full)
+    OUTSIDE_BLUR: 26, // blur radius outside, in CSS px
+    OUTSIDE_SAT: 0.6, // colour saturation outside (0 = grey, 1 = full)
+    OUTSIDE_LIP: 18,  // width of the dark shadow just outside the rim, in CSS px
     SPEED: 0.3,       // extra magnification + CA at full drag/throw speed (0 = no speed response)
     SPEED_REF: 2.0,   // drag speed (same measure as the speed zoom) that counts as "full speed"
     SPEED_UP: 90, SPEED_DOWN: 450,   // ms to ease into / back out of the speed bend
@@ -650,7 +655,8 @@
   var Edge = (function(){
     var api = { on:false };
     var canvas = null, gl = null, inited = false, lost = false;
-    var progT = null, progP = null, quad = null, fbo = null, fboTex = null, fbW = 0, fbH = 0;
+    var progT = null, progP = null, progD = null, quad = null, fbo = null, fboTex = null, fbW = 0, fbH = 0;
+    var sFbo = null, sTex = null, sW = 0, sH = 0;   // 1/8-size wall for the out-of-focus outside
     var dpr = 1, TEX = 512, tex = [], texT = [], blurTex = [], capTex = [], capW = 0, capH = 0, capFs = 0;
     var needTiles = true, needPost = true, boost = 0;
     var cPaper = [237/255, 234/255, 227/255], cGrey = [128/255, 128/255, 128/255], cInk = [11/255, 11/255, 12/255];
@@ -712,6 +718,18 @@
       "  gl_FragColor = c * uSt.w;",                                                    // tile opacity (premultiplied)
       "}"].join("\n");
     var VS_P = "attribute vec2 aP; varying vec2 vUv; void main(){ vUv = aP; gl_Position = vec4(aP * 2.0 - 1.0, 0.0, 1.0); }";
+    // Downsample: 1/8-size box-filtered copy of the wall (16 bilinear taps cover each 8×8 block),
+    // so the out-of-focus area outside the loupe can blur widely with only a few taps.
+    var FS_D = [
+      "precision highp float;",
+      "uniform sampler2D uTex; uniform vec2 uTx;",
+      "varying vec2 vUv;",
+      "void main(){",
+      "  vec3 c = vec3(0.0);",
+      "  for(int i = 0; i < 4; i++) for(int j = 0; j < 4; j++)",
+      "    c += texture2D(uTex, vUv + vec2(float(i) * 2.0 - 3.0, float(j) * 2.0 - 3.0) * uTx).rgb;",
+      "  gl_FragColor = vec4(c / 16.0, 1.0);",
+      "}"].join("\n");
     // Loupe post pass. p: lens space (r = 1 at the middle of the shorter edge, y up). The lens
     // curve here must stay identical to lensScale() in JS (api.src uses it for hit-testing).
     var FS_P = [
@@ -721,14 +739,29 @@
       "uniform vec4 uK;",             // K1, K2, REFRACT, REFRACT_POW
       "uniform float uMag, uRim, uCA, uBlur, uFocus, uVig, uHi, uLift, uPx;",   // uBlur, uPx in lens units
       "uniform vec3 uTint, uBarrel;",
+      "uniform sampler2D uSmall;",    // 1/8-size copy of the wall, for the out-of-focus area outside the rim
+      "uniform vec4 uOut;",           // outside: blur radius (lens units), brightness, saturation, lip shadow width
       "varying vec2 vUv;",
       "float ign(vec2 f){ return fract(52.9829189 * fract(dot(f, vec2(0.06711056, 0.00583715)))); }",   // interleaved gradient noise
       "vec2 toUv(vec2 q){ return q / uHalf * 0.5 + 0.5; }",
+      // Outside the loupe: the wall itself (no lens), heavily out of focus and dimmed, with a dark lip at the rim.
+      "vec3 outside(vec2 p, float r){",
+      "  float a0 = ign(gl_FragCoord.xy + 17.0) * 6.2831853; vec3 c = vec3(0.0);",
+      "  for(int i = 0; i < 8; i++){",
+      "    float fi = float(i), a = a0 + fi * 2.3999632;",
+      "    c += texture2D(uSmall, toUv(p + vec2(cos(a), sin(a)) * uOut.x * sqrt((fi + 0.5) / 8.0))).rgb;",
+      "  }",
+      "  c *= 0.125;",
+      "  float L = dot(c, vec3(0.2126, 0.7152, 0.0722)); c = mix(vec3(L), c, uOut.z);",
+      "  c = mix(uBarrel, c, uOut.y);",
+      "  float lip = 1.0 - smoothstep(0.0, uOut.w, r - uRim);",                  // shadow cast by the barrel just outside the rim
+      "  return mix(c, uBarrel * 0.6, lip * lip * 0.85);",
+      "}",
       "void main(){",
       "  vec2 p = (vUv * 2.0 - 1.0) * uHalf;",
       "  float r = length(p);",
       "  float inLens = 1.0 - smoothstep(uRim - uPx, uRim + uPx, r);",          // 1px anti-aliased hard rim
-      "  if(inLens <= 0.0){ gl_FragColor = vec4(uBarrel, 1.0); return; }",
+      "  if(inLens <= 0.0){ gl_FragColor = vec4(outside(p, r), 1.0); return; }",
       "  float rho = min(r / uRim, 1.0), r2 = rho * rho;",
       "  float sc = (1.0 + uK.x * r2 + uK.y * r2 * r2 + uK.z * pow(max(rho, 1e-4), uK.w)) / uMag;",
       "  vec2 src = p * sc;",
@@ -761,7 +794,7 @@
       "  float band = exp(-pow((d - 0.022) / 0.009, 2.0));",
       "  float h = clamp(uHi * arc * band, 0.0, 1.0);",
       "  c = 1.0 - (1.0 - c) * (1.0 - h);",                                       // screen blend
-      "  gl_FragColor = vec4(mix(uBarrel, c, inLens), 1.0);",
+      "  gl_FragColor = vec4(inLens < 1.0 ? mix(outside(p, r), c, inLens) : c, 1.0);",
       "}"].join("\n");
 
     function compile(vs, fs){
@@ -784,12 +817,12 @@
       return t;
     }
     function setup(){
-      progT = compile(VS_T, FS_T); progP = compile(VS_P, FS_P);
+      progT = compile(VS_T, FS_T); progP = compile(VS_P, FS_P); progD = compile(VS_P, FS_D);
       quad = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, quad);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0,0, 1,0, 0,1, 1,1]), gl.STATIC_DRAW);
       gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
       gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
-      tex = []; texT = []; blurTex = []; capTex = []; capW = 0; fbW = fbH = 0; fbo = null; fboTex = null;
+      tex = []; texT = []; blurTex = []; capTex = []; capW = 0; fbW = fbH = 0; fbo = null; fboTex = null; sFbo = null; sTex = null; sW = sH = 0;
       needTiles = needPost = true;
     }
     function init(){
@@ -831,6 +864,12 @@
         var ok = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         fbW = cw; fbH = ch;
+        if(sTex) gl.deleteTexture(sTex); if(sFbo) gl.deleteFramebuffer(sFbo);
+        sW = Math.max(1, Math.ceil(cw / 8)); sH = Math.max(1, Math.ceil(ch / 8));
+        sTex = mkTex(); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, sW, sH, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+        sFbo = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, sFbo);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, sTex, 0);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         if(!ok && !gl.isContextLost()){ gl = null; setOn(false); return; }
       }
       needTiles = true;
@@ -939,7 +978,7 @@
         var rT = tex[t.idx] ? 1 : 0;
         if(t.gRdy !== rT){ t.gRdy = reduce ? rT : Math.min(rT, t.gRdy + dt / 450); needTiles = true; }
       });
-      if(needTiles) drawTiles();
+      if(needTiles){ drawTiles(); drawSmall(); }
       if(needTiles || needPost) drawPost();
       needTiles = needPost = false;
     };
@@ -977,6 +1016,14 @@
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       }
     }
+    function drawSmall(){
+      gl.disable(gl.BLEND);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, sFbo); gl.viewport(0, 0, sW, sH);
+      var P = progD; gl.useProgram(P.p);
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, fboTex); gl.uniform1i(P.u.uTex, 0);
+      gl.uniform2f(P.u.uTx, 1 / fbW, 1 / fbH);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    }
     function drawPost(){
       gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, canvas.width, canvas.height);
       var P = progP, u = P.u; gl.useProgram(P.p);
@@ -990,6 +1037,8 @@
       gl.uniform1f(u.uPx, 1 / (m * dpr));
       gl.uniform3f(u.uTint, 1 + (EDGE.TINT_COL[0] - 1) * tw, 1 + (EDGE.TINT_COL[1] - 1) * tw, 1 + (EDGE.TINT_COL[2] - 1) * tw);
       gl.uniform3fv(u.uBarrel, cInk);
+      gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, sTex); gl.uniform1i(u.uSmall, 1);
+      gl.uniform4f(u.uOut, EDGE.OUTSIDE_BLUR / m, EDGE.OUTSIDE, EDGE.OUTSIDE_SAT, EDGE.OUTSIDE_LIP / m);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
     api.boost = function(){ return boost; };
@@ -1005,7 +1054,8 @@
         ["REFRACT", 0, 0.5, 0.005], ["REFRACT_POW", 4, 40, 1], ["RIM", 0.6, 1.2, 0.005],
         ["CA", 0, 0.04, 0.0005], ["BLUR", 0, 8, 0.1], ["FOCUS", 0, 1, 0.01],
         ["VIGNETTE", 0, 0.6, 0.01], ["HIGHLIGHT", 0, 0.5, 0.01], ["TINT", 0, 1, 0.01],
-        ["LIFT", 0, 0.1, 0.002], ["SPEED", 0, 1, 0.01]
+        ["LIFT", 0, 0.1, 0.002], ["SPEED", 0, 1, 0.01],
+        ["OUTSIDE", 0, 1, 0.01], ["OUTSIDE_BLUR", 0, 80, 1], ["OUTSIDE_SAT", 0, 1, 0.01], ["OUTSIDE_LIP", 0, 60, 1]
       ];
       var box = document.createElement("div");
       box.style.cssText = "position:fixed;right:12px;top:72px;z-index:99;width:310px;padding:10px 12px;border-radius:8px;" +
