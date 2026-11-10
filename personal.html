@@ -205,7 +205,7 @@
     font-family:"IBM Plex Mono",monospace;font-size:10px;line-height:1.5;letter-spacing:.08em;text-transform:uppercase;color:var(--edge)}
   .vg-meta span{display:block}
   .vg-meta.is-left{text-align:right;color:var(--paper)}
-  @media (min-width:720px){ #vg-info .m{display:none} #vg-info .go{margin-top:2px} }
+  @media (min-width:720px){ #vg-info .m{display:none} }
   .vg-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;
     -webkit-user-drag:none;opacity:0;transition:opacity .6s ease}
   .vg-media img.is-loaded{opacity:1}
@@ -218,18 +218,14 @@
   .vg-tl:focus-visible{outline:1px solid var(--paper);outline-offset:3px}
   .vg-info{position:absolute;left:0;top:0;width:max-content;max-width:var(--tlw,none);will-change:transform,opacity}
   .vg-info .m{display:block;font-size:11px;color:var(--edge);text-transform:uppercase}
-  .vg-info .go{display:inline-block;margin-top:8px;font-size:11px;text-transform:uppercase;
-    text-decoration:none;border-bottom:1px solid var(--edge);padding-bottom:2px}
-  .vg-info .go:hover{border-color:var(--paper)}
   .vg-hint{position:fixed;right:var(--sp);bottom:calc(var(--sp) * .7);font-size:11px;color:var(--grey);text-transform:uppercase;z-index:20}
   :root{--sp:clamp(16px,3.2vw,48px)}
   /* Phones keep the reference's layout: title list on the left, images on one centre line. */
   @media (max-width:719px){
     .vg-hint,.vg-meta{display:none !important}
     .vg-tl{font-size:19px}
-    .vg-info .m,.vg-info .go{font-size:9px;letter-spacing:.08em}
+    .vg-info .m{font-size:9px;letter-spacing:.08em}
     .vg-info .m{white-space:normal}
-    .vg-info .go{margin-top:6px}
   }
 
   /* ================= Viewer (shared) ================= */
@@ -298,7 +294,6 @@
       <nav class="vg-titles" id="vg-titles" aria-label="Projects">
         <div class="vg-info" id="vg-info">
           <span class="m mono" id="vg-info-m"></span>
-          <a class="go mono" id="vg-info-go" href="/" data-nav="landing">Open project →</a>
         </div>
       </nav>
       <span class="vg-pill" id="vg-pill" aria-hidden="true">view</span>
@@ -1354,7 +1349,7 @@
     }
     var TL_MIN = 0.46;
     function renderTitles(ai){
-      var TL_LINE = 21 * L.tlk, TL_ACTIVE = 40 * L.tlk, TL_INFO = L.mobile ? 60 : 34;
+      var TL_LINE = 21 * L.tlk, TL_ACTIVE = 40 * L.tlk, TL_INFO = L.mobile ? 30 : 8;
       var y = 0, aY = 0, i, it;
       for(i = 0; i < N; i++){
         it = sItems[i]; it.tlY = y;
@@ -1373,7 +1368,7 @@
       infoEl.style.transform = "translate3d(0," + (aa.tlY + off + TL_ACTIVE * (TL_MIN + (1 - TL_MIN) * aa.t) + 6) + "px,0)";
       infoEl.style.opacity = clamp((aa.t - 0.5) * 2, 0, 1);
     }
-    var infoM = document.getElementById("vg-info-m"), infoGo = document.getElementById("vg-info-go");
+    var infoM = document.getElementById("vg-info-m");
     function setActive(i){
       if(activeIdx >= 0){
         var o = sItems[activeIdx];
@@ -1384,7 +1379,6 @@
       it.el.classList.add("is-active"); it.hit.setAttribute("aria-current", "true"); it.tl.setAttribute("aria-current", "true");
       if(hovIt) pillLabel();                       // e.g. "go to" → "view" once the hovered image opens
       infoM.textContent = w.label;
-      infoGo.href = ROUTES[w.nav] || "/"; infoGo.setAttribute("data-nav", w.nav);
     }
 
     /* ---------- Hover (mouse only): grow the hovered image, dim the rest, cursor pill ----------
