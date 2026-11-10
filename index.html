@@ -5068,7 +5068,7 @@
     "#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#endif",
     "uniform sampler2D uTex; uniform vec4 uCrop; uniform vec2 uRes, uEdge, uScr;",
     "uniform float uAlpha, uDim, uReveal, uFocus, uFx0, uFw, uZone, uK, uFcy, uFh, uFa, uFp;",
-    "uniform float uIntro, uWarp, uOp, uShade, uFy0, uLabel, uRGB;",           /* ring preloader controls (0,1,1,1 when idle) */
+    "uniform float uIntro, uWarp, uOp, uShade, uFy0, uLabel;",           /* ring preloader controls (0,1,1,1 when idle) */
     "uniform vec2 uSz; uniform float uRad;",                /* ring cards: size and corner radius in card px (0 = square) */
     "varying vec2 vUV;",
     "void main(){",
@@ -5076,13 +5076,10 @@
        point pulled back toward the zone's inner line, so content smears outward smoothly
        (one continuous warp, no blended copies). The frame's outline is untouched. */
     "  float s = gl_FragCoord.x/uRes.x*uScr.x;",            /* screen x, CSS px */
-    "  float z = uZone, sp = s, tz = 0.0;",
-    "  if(s < z){ tz = (z - s)/z; sp = z - z*(1.0 - exp(-uK*tz))/uK; }",
-    "  else if(s > uScr.x - z){ tz = (s - uScr.x + z)/z; sp = uScr.x - z + z*(1.0 - exp(-uK*tz))/uK; }",
-    "  sp = mix(s, sp, uWarp);",
-    /* RGB split, as on the personal wall: red is sampled further out and blue further in,
-       growing with the square of the depth into the edge zone (images only, not the labels) */
-    "  float dx = (sp - uScr.x*0.5)*uRGB*tz*tz*uWarp;",                            /* the edge drag eases in after the preloader */
+    "  float z = uZone, sp = s;",
+    "  if(s < z){ float t = (z - s)/z; sp = z - z*(1.0 - exp(-uK*t))/uK; }",
+    "  else if(s > uScr.x - z){ float t = (s - uScr.x + z)/z; sp = uScr.x - z + z*(1.0 - exp(-uK*t))/uK; }",
+    "  sp = mix(s, sp, uWarp);",                            /* the edge drag eases in after the preloader */
     "  float u = clamp((sp - uScr.x*0.5 - uFx0)/uFw, 0.0, 1.0);",
     /* vertical position computed per pixel from the same bend as the vertex shader
        (interpolating it per triangle leaves sawtooth steps that the edge drag magnifies) */
@@ -5096,20 +5093,6 @@
     "  }",
     "  vec2 uv = mix(vec2(u, v), vUV, uIntro);",            /* on the ring: plain card coordinates */
     "  vec3 c = texture2D(uTex, uCrop.xy + uv*uCrop.zw).rgb;",
-    /* spectral blur: 9 taps spread across ±dx, each tinted along red → green → blue and
-       averaged per channel, so the split is a soft rainbow smear rather than three copies */
-    /* runs on every pixel (dx is 0 outside the edge zones): a per-pixel branch here leaves a
-       seam where it starts, because texture lookups pick their mip level from neighbours */
-    "  if(uIntro < 0.5){",
-    "    vec3 acc = vec3(0.0), wsum = vec3(0.0);",
-    "    for(int i = 0; i < 9; i++){",
-    "      float f = float(i)/8.0;",
-    "      vec3 wt = vec3(max(0.0, 1.0 - 2.0*f), max(0.0, 1.0 - abs(2.0*f - 1.0)), max(0.0, 2.0*f - 1.0)) + 0.08;",
-    "      vec2 ut = vec2(clamp((sp + dx*(1.0 - 2.0*f) - uScr.x*0.5 - uFx0)/uFw, 0.0, 1.0), v);",
-    "      acc += texture2D(uTex, uCrop.xy + ut*uCrop.zw).rgb*wt; wsum += wt;",
-    "    }",
-    "    c = acc/wsum;",
-    "  }",
     "  vec3 ink = vec3(1.0);",                                /* the home page's white */
     "  c = mix(vec3(0.925), c, uAlpha);",
     "  float l = dot(c, vec3(0.299, 0.587, 0.114));",
@@ -5143,7 +5126,7 @@
     if(!gl.getProgramParameter(prog, gl.LINK_STATUS) && !gl.isContextLost()) throw new Error(gl.getProgramInfoLog(prog));
     gl.useProgram(prog);
     ["uView","uX0","uW","uH","uCy","uA","uP","uTex","uCrop","uRes","uEdge","uAlpha","uDim","uReveal","uFocus","uZone","uK","uScr","uFx0","uFw","uFcy","uFh","uFa","uFp",
-     "uC","uRx","uUy","uF","uMix","uO","uIntro","uWarp","uOp","uShade","uSz","uRad","uY0","uFy0","uLabel","uRGB"]
+     "uC","uRx","uUy","uF","uMix","uO","uIntro","uWarp","uOp","uShade","uSz","uRad","uY0","uFy0","uLabel"]
       .forEach(function(n){ U[n] = gl.getUniformLocation(prog, n); });
     var v = [];
     for(var s = 0; s <= SEG; s++){ v.push(s/SEG, 0, s/SEG, 1); }
@@ -5161,7 +5144,7 @@
     gl.uniform3f(U.uC, 0, 0, 0); gl.uniform3f(U.uRx, 0, 0, 0); gl.uniform3f(U.uUy, 0, 0, 0);
     gl.uniform1f(U.uF, 1000); gl.uniform1f(U.uMix, 1); gl.uniform2f(U.uO, 0, 0);
     gl.uniform1f(U.uIntro, 0); gl.uniform1f(U.uOp, 1); gl.uniform1f(U.uShade, 1);
-    gl.uniform2f(U.uSz, 1, 1); gl.uniform1f(U.uRad, 0); gl.uniform1f(U.uLabel, 0); gl.uniform1f(U.uRGB, 0);
+    gl.uniform2f(U.uSz, 1, 1); gl.uniform1f(U.uRad, 0); gl.uniform1f(U.uLabel, 0);
     yearTex = {};   /* (re)built for this context */
   }
   function newTex(mips){
@@ -5197,7 +5180,6 @@
   if(!gl){ useStrip(); return; }
 
   /* ---------- Layout: frame sizes and the bend ---------- */
-  var RGB = 0.035;   /* RGB split strength at the very edge (fraction of the distance from centre) */
   var W = 0, H = 0, dpr = 1, cy = 0, baseH = 0, gap = 0, A = 1, P = 3.4, zone = 160, K = 3.2;
   var inst = [], L = 1;   /* instances: {w: work, s: track start, len: width} — the list repeats if it is too short */
   function bend(sx){ var u = Math.max(0, Math.min(1.25, sx/W)); return 1 + A*Math.pow(u, P); }
@@ -5796,7 +5778,7 @@
     gl.uniform1f(U.uH, baseH); gl.uniform1f(U.uZone, zone); gl.uniform1f(U.uK, K);
     gl.uniform1f(U.uFcy, cy); gl.uniform1f(U.uFh, baseH); gl.uniform1f(U.uFa, A); gl.uniform1f(U.uFp, P);
     gl.uniform1f(U.uY0, -baseH/2); gl.uniform1f(U.uFy0, -baseH/2);
-    gl.uniform1f(U.uWarp, rg.warp); gl.uniform1f(U.uRGB, RGB);
+    gl.uniform1f(U.uWarp, rg.warp);
     gl.activeTexture(gl.TEXTURE0);
     for(var k = 0; k < inst.length; k++){
       var p = inst[k], x0 = x0Of(k);
