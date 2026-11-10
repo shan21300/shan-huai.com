@@ -1,4 +1,5 @@
 .git
-   .gitignore
-   wrangler.toml
-   .assetsignore
+.gitignore
+wrangler.toml
+.assetsignore
+.claude
