@@ -1194,7 +1194,7 @@
   #landing .cc-stage canvas{display:block;width:100%;height:100%}
   html:not(.cc-gl) #landing .cc-stage{display:none}
   #landing .cc-cap{position:fixed;left:50%;bottom:calc(var(--cc-py) + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
-    z-index:20;pointer-events:none;text-align:center;width:min(86vw,560px);height:100px;contain:strict;
+    z-index:20;pointer-events:none;text-align:center;width:min(86vw,560px);height:118px;contain:strict;
     display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
   html:not(.cc-gl) #landing .cc-cap{display:none}
   #landing .cc-cap-name{font-family:"Cormorant Garamond",serif;font-weight:300;font-size:clamp(30px,2.7vw,40px);line-height:1.1;letter-spacing:-.01em;
@@ -1220,7 +1220,9 @@
   /* projects with a wordmark show it (a small black copy in /images/carousel/logos) in place
      of the text name; the box keeps tall marks and long lockups at a similar visual weight */
   #landing .cc-cap-logo{display:block;margin:0 auto;width:auto;height:auto;max-height:60px;max-width:min(230px,100%)}
-  @media (max-width:760px){ #landing .cc-cap-name{font-size:28px} #landing .cc-cap-logo{max-height:50px;max-width:min(200px,100%)} }
+  #landing .cc-cap-logo[src$="/heysong.webp"]{max-height:90px}   /* 1.5x: its lockup reads small at the shared size */
+  @media (max-width:760px){ #landing .cc-cap-name{font-size:28px} #landing .cc-cap-logo{max-height:50px;max-width:min(200px,100%)}
+    #landing .cc-cap-logo[src$="/heysong.webp"]{max-height:75px} }
   /* ---- Curve gallery: photo-only project pages (.proj-page) ----
      Cards sit on a convex drum (CSS 3D); wheel / drag / swipe / arrow keys move along it.
      Built by the curve-gallery script at the end of <body>, which replaces .proj-stage and the rail. */
@@ -5066,7 +5068,7 @@
     "#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#endif",
     "uniform sampler2D uTex; uniform vec4 uCrop; uniform vec2 uRes, uEdge, uScr;",
     "uniform float uAlpha, uDim, uReveal, uFocus, uFx0, uFw, uZone, uK, uFcy, uFh, uFa, uFp;",
-    "uniform float uIntro, uWarp, uOp, uShade, uFy0, uLabel;",           /* ring preloader controls (0,1,1,1 when idle) */
+    "uniform float uIntro, uWarp, uOp, uShade, uFy0, uLabel, uRGB;",           /* ring preloader controls (0,1,1,1 when idle) */
     "uniform vec2 uSz; uniform float uRad;",                /* ring cards: size and corner radius in card px (0 = square) */
     "varying vec2 vUV;",
     "void main(){",
@@ -5074,10 +5076,13 @@
        point pulled back toward the zone's inner line, so content smears outward smoothly
        (one continuous warp, no blended copies). The frame's outline is untouched. */
     "  float s = gl_FragCoord.x/uRes.x*uScr.x;",            /* screen x, CSS px */
-    "  float z = uZone, sp = s;",
-    "  if(s < z){ float t = (z - s)/z; sp = z - z*(1.0 - exp(-uK*t))/uK; }",
-    "  else if(s > uScr.x - z){ float t = (s - uScr.x + z)/z; sp = uScr.x - z + z*(1.0 - exp(-uK*t))/uK; }",
-    "  sp = mix(s, sp, uWarp);",                            /* the edge drag eases in after the preloader */
+    "  float z = uZone, sp = s, tz = 0.0;",
+    "  if(s < z){ tz = (z - s)/z; sp = z - z*(1.0 - exp(-uK*tz))/uK; }",
+    "  else if(s > uScr.x - z){ tz = (s - uScr.x + z)/z; sp = uScr.x - z + z*(1.0 - exp(-uK*tz))/uK; }",
+    "  sp = mix(s, sp, uWarp);",
+    /* RGB split, as on the personal wall: red is sampled further out and blue further in,
+       growing with the square of the depth into the edge zone (images only, not the labels) */
+    "  float dx = (sp - uScr.x*0.5)*uRGB*tz*tz*uWarp;",                            /* the edge drag eases in after the preloader */
     "  float u = clamp((sp - uScr.x*0.5 - uFx0)/uFw, 0.0, 1.0);",
     /* vertical position computed per pixel from the same bend as the vertex shader
        (interpolating it per triangle leaves sawtooth steps that the edge drag magnifies) */
@@ -5091,6 +5096,12 @@
     "  }",
     "  vec2 uv = mix(vec2(u, v), vUV, uIntro);",            /* on the ring: plain card coordinates */
     "  vec3 c = texture2D(uTex, uCrop.xy + uv*uCrop.zw).rgb;",
+    "  if(dx != 0.0 && uIntro < 0.5){",
+    "    vec2 uR = vec2(clamp((sp + dx - uScr.x*0.5 - uFx0)/uFw, 0.0, 1.0), v);",
+    "    vec2 uB = vec2(clamp((sp - dx - uScr.x*0.5 - uFx0)/uFw, 0.0, 1.0), v);",
+    "    c.r = texture2D(uTex, uCrop.xy + uR*uCrop.zw).r;",
+    "    c.b = texture2D(uTex, uCrop.xy + uB*uCrop.zw).b;",
+    "  }",
     "  vec3 ink = vec3(1.0);",                                /* the home page's white */
     "  c = mix(vec3(0.925), c, uAlpha);",
     "  float l = dot(c, vec3(0.299, 0.587, 0.114));",
@@ -5124,7 +5135,7 @@
     if(!gl.getProgramParameter(prog, gl.LINK_STATUS) && !gl.isContextLost()) throw new Error(gl.getProgramInfoLog(prog));
     gl.useProgram(prog);
     ["uView","uX0","uW","uH","uCy","uA","uP","uTex","uCrop","uRes","uEdge","uAlpha","uDim","uReveal","uFocus","uZone","uK","uScr","uFx0","uFw","uFcy","uFh","uFa","uFp",
-     "uC","uRx","uUy","uF","uMix","uO","uIntro","uWarp","uOp","uShade","uSz","uRad","uY0","uFy0","uLabel"]
+     "uC","uRx","uUy","uF","uMix","uO","uIntro","uWarp","uOp","uShade","uSz","uRad","uY0","uFy0","uLabel","uRGB"]
       .forEach(function(n){ U[n] = gl.getUniformLocation(prog, n); });
     var v = [];
     for(var s = 0; s <= SEG; s++){ v.push(s/SEG, 0, s/SEG, 1); }
@@ -5142,7 +5153,7 @@
     gl.uniform3f(U.uC, 0, 0, 0); gl.uniform3f(U.uRx, 0, 0, 0); gl.uniform3f(U.uUy, 0, 0, 0);
     gl.uniform1f(U.uF, 1000); gl.uniform1f(U.uMix, 1); gl.uniform2f(U.uO, 0, 0);
     gl.uniform1f(U.uIntro, 0); gl.uniform1f(U.uOp, 1); gl.uniform1f(U.uShade, 1);
-    gl.uniform2f(U.uSz, 1, 1); gl.uniform1f(U.uRad, 0); gl.uniform1f(U.uLabel, 0);
+    gl.uniform2f(U.uSz, 1, 1); gl.uniform1f(U.uRad, 0); gl.uniform1f(U.uLabel, 0); gl.uniform1f(U.uRGB, 0);
     yearTex = {};   /* (re)built for this context */
   }
   function newTex(mips){
@@ -5178,6 +5189,7 @@
   if(!gl){ useStrip(); return; }
 
   /* ---------- Layout: frame sizes and the bend ---------- */
+  var RGB = 0.024;   /* RGB split strength at the very edge (fraction of the distance from centre) */
   var W = 0, H = 0, dpr = 1, cy = 0, baseH = 0, gap = 0, A = 1, P = 3.4, zone = 160, K = 3.2;
   var inst = [], L = 1;   /* instances: {w: work, s: track start, len: width} — the list repeats if it is too short */
   function bend(sx){ var u = Math.max(0, Math.min(1.25, sx/W)); return 1 + A*Math.pow(u, P); }
@@ -5755,11 +5767,13 @@
       var p = inst[k], w = p.w, x0 = x0Of(k);
       if(!w.yearFirst) continue;
       var lt = yearTex[w.year] || (yearTex[w.year] = buildYear(w.year, len));
-      if(!onScreen(x0, lt.w)) continue;
+      if(!onScreen(x0 - zone, lt.w + zone*2)) continue;
       if(!on){ on = true; gl.uniform1f(U.uLabel, 1); gl.uniform1f(U.uOp, rg.warp); gl.uniform4f(U.uCrop, 0, 0, 1, 1); }
       var y0 = -baseH/2 - baseH*0.04 - lt.h;
       gl.bindTexture(gl.TEXTURE_2D, lt.tex);
-      gl.uniform1f(U.uX0, x0); gl.uniform1f(U.uW, lt.w); gl.uniform1f(U.uFx0, x0); gl.uniform1f(U.uFw, lt.w);
+      /* the quad reaches a zone further each side: the edge drag stretches the glyphs past
+         the label's own box, and they'd be cut off at it (frames don't show this, they touch) */
+      gl.uniform1f(U.uX0, x0 - zone); gl.uniform1f(U.uW, lt.w + zone*2); gl.uniform1f(U.uFx0, x0); gl.uniform1f(U.uFw, lt.w);
       gl.uniform1f(U.uH, lt.h); gl.uniform1f(U.uY0, y0); gl.uniform1f(U.uFh, lt.h); gl.uniform1f(U.uFy0, y0);
       gl.uniform1f(U.uReveal, reveal(w, t));
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, (SEG + 1)*2);
@@ -5774,7 +5788,7 @@
     gl.uniform1f(U.uH, baseH); gl.uniform1f(U.uZone, zone); gl.uniform1f(U.uK, K);
     gl.uniform1f(U.uFcy, cy); gl.uniform1f(U.uFh, baseH); gl.uniform1f(U.uFa, A); gl.uniform1f(U.uFp, P);
     gl.uniform1f(U.uY0, -baseH/2); gl.uniform1f(U.uFy0, -baseH/2);
-    gl.uniform1f(U.uWarp, rg.warp);
+    gl.uniform1f(U.uWarp, rg.warp); gl.uniform1f(U.uRGB, RGB);
     gl.activeTexture(gl.TEXTURE0);
     for(var k = 0; k < inst.length; k++){
       var p = inst[k], x0 = x0Of(k);
