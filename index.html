@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="/images/system/apple-touch-icon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Archivo:wdth,wght@125,800&display=swap" rel="stylesheet" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <!-- hls.js: Chrome/Firefox can't play Cloudflare Stream in a native <video> without it;
      Safari plays HLS natively. Used to stream cover videos instead of the MP4 download,
@@ -5041,7 +5041,7 @@
   var gl = null, prog = null, buf = null, blankTex = null, U = {}, SEG = 48, isGL2 = false;
   var VS = [
     "attribute vec2 aUV;",
-    "uniform vec2 uView; uniform float uX0, uW, uH, uCy, uA, uP;",
+    "uniform vec2 uView; uniform float uX0, uW, uH, uY0, uCy, uA, uP;",
     /* ring preloader: the same frame as a flat card on a tilted 3D ring (centre uC, edge
        vectors uRx / uUy, perspective distance uF, screen origin uO), blended by uMix
        (0 = on the ring, 1 = in its carousel slot) */
@@ -5051,7 +5051,7 @@
     "  float x = uView.x*0.5 + uX0 + aUV.x*uW;",          /* widths stay constant across the screen… */
     "  float u = clamp(x/uView.x, 0.0, 1.25);",
     "  float s = 1.0 + uA*pow(u, uP);",                    /* …height is flat on the left and rises to the right */
-    "  float y = uCy + (aUV.y - 0.5)*uH*s;",
+    "  float y = uCy + (uY0 + aUV.y*uH)*s;",                /* uY0 = top, unbent (frames: -uH/2) */
     "  vec3 p = uC + (aUV.x - 0.5)*uRx + (aUV.y - 0.5)*uUy;",
     "  float k = uF/(uF - p.z);",
     "  vec2 q = mix(uO + p.xy*k, vec2(x, y), uMix);",
@@ -5063,7 +5063,7 @@
     "#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#endif",
     "uniform sampler2D uTex; uniform vec4 uCrop; uniform vec2 uRes, uEdge, uScr;",
     "uniform float uAlpha, uDim, uReveal, uFocus, uFx0, uFw, uZone, uK, uFcy, uFh, uFa, uFp;",
-    "uniform float uIntro, uWarp, uOp, uShade;",           /* ring preloader controls (0,1,1,1 when idle) */
+    "uniform float uIntro, uWarp, uOp, uShade, uFy0, uLabel;",           /* ring preloader controls (0,1,1,1 when idle) */
     "uniform vec2 uSz; uniform float uRad;",                /* ring cards: size and corner radius in card px (0 = square) */
     "varying vec2 vUV;",
     "void main(){",
@@ -5080,7 +5080,12 @@
        (interpolating it per triangle leaves sawtooth steps that the edge drag magnifies) */
     "  float yy = (1.0 - gl_FragCoord.y/uRes.y)*uScr.y;",
     "  float sc = 1.0 + uFa*pow(clamp(s/uScr.x, 0.0, 1.25), uFp);",
-    "  float v = clamp(0.5 + (yy - uFcy)/(uFh*sc), 0.0, 1.0);",
+    "  float v = clamp(((yy - uFcy)/sc - uFy0)/uFh, 0.0, 1.0);",
+    "  if(uLabel > 0.5){",                                 /* year label: same bend and edge drag, ink from the texture's alpha */
+    "    vec4 lt = texture2D(uTex, vec2(u, v));",
+    "    gl_FragColor = vec4(lt.rgb, lt.a*uOp*uReveal);",
+    "    return;",
+    "  }",
     "  vec2 uv = mix(vec2(u, v), vUV, uIntro);",            /* on the ring: plain card coordinates */
     "  vec3 c = texture2D(uTex, uCrop.xy + uv*uCrop.zw).rgb;",
     "  vec3 ink = vec3(1.0);",                                /* the home page's white */
@@ -5116,7 +5121,7 @@
     if(!gl.getProgramParameter(prog, gl.LINK_STATUS) && !gl.isContextLost()) throw new Error(gl.getProgramInfoLog(prog));
     gl.useProgram(prog);
     ["uView","uX0","uW","uH","uCy","uA","uP","uTex","uCrop","uRes","uEdge","uAlpha","uDim","uReveal","uFocus","uZone","uK","uScr","uFx0","uFw","uFcy","uFh","uFa","uFp",
-     "uC","uRx","uUy","uF","uMix","uO","uIntro","uWarp","uOp","uShade","uSz","uRad"]
+     "uC","uRx","uUy","uF","uMix","uO","uIntro","uWarp","uOp","uShade","uSz","uRad","uY0","uFy0","uLabel"]
       .forEach(function(n){ U[n] = gl.getUniformLocation(prog, n); });
     var v = [];
     for(var s = 0; s <= SEG; s++){ v.push(s/SEG, 0, s/SEG, 1); }
@@ -5134,7 +5139,8 @@
     gl.uniform3f(U.uC, 0, 0, 0); gl.uniform3f(U.uRx, 0, 0, 0); gl.uniform3f(U.uUy, 0, 0, 0);
     gl.uniform1f(U.uF, 1000); gl.uniform1f(U.uMix, 1); gl.uniform2f(U.uO, 0, 0);
     gl.uniform1f(U.uIntro, 0); gl.uniform1f(U.uOp, 1); gl.uniform1f(U.uShade, 1);
-    gl.uniform2f(U.uSz, 1, 1); gl.uniform1f(U.uRad, 0);
+    gl.uniform2f(U.uSz, 1, 1); gl.uniform1f(U.uRad, 0); gl.uniform1f(U.uLabel, 0);
+    yearTex = {};   /* (re)built for this context */
   }
   function newTex(mips){
     var t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
@@ -5588,6 +5594,7 @@
     gl.uniform1f(U.uCy, cy); gl.uniform1f(U.uA, A); gl.uniform1f(U.uP, P);
     gl.uniform1f(U.uH, baseH); gl.uniform1f(U.uZone, zone); gl.uniform1f(U.uK, K);
     gl.uniform1f(U.uFcy, cy); gl.uniform1f(U.uFh, baseH); gl.uniform1f(U.uFa, A); gl.uniform1f(U.uFp, P);
+    gl.uniform1f(U.uY0, -baseH/2); gl.uniform1f(U.uFy0, -baseH/2);
     gl.uniform1f(U.uIntro, 1); gl.uniform1f(U.uWarp, 0); gl.uniform1f(U.uDim, 0); gl.uniform1f(U.uFocus, 0); gl.uniform1f(U.uReveal, 1);
     gl.uniform1f(U.uF, G.F); gl.uniform2f(U.uO, G.ox, G.oy);
     gl.activeTexture(gl.TEXTURE0);
@@ -5692,6 +5699,63 @@
     var k = Math.max(0, Math.min(1, (t - w.revealAt)/650));
     return 1 - Math.pow(1 - k, 3);
   }
+  /* ---------- Year labels ----------
+     Each year's first frame (in carousel order) carries its year, set vertically on top of
+     the frame's left edge. It is drawn in the same scene with the same bend and liquid edge
+     drag as the frames, so it rides the curve and smears at the screen edges with them. */
+  var yearTex = {}, yearFont = '800 {px}px "Archivo", system-ui, sans-serif', yearSize = 0;
+  works.forEach(function(w, i){
+    var ys = (w.meta || "").match(/\d{4}/g);
+    w.year = ys ? ys[ys.length - 1] : "";
+    w.yearFirst = !!w.year && (i === 0 || works[i - 1].year !== w.year);
+  });
+  function yearLen(){   /* the label's length (unbent px): about the frame's height, below the logo */
+    var room = cy - baseH/2 - baseH*0.04 - Math.max(84, H*0.1);
+    return Math.max(0, Math.min(baseH*1.1, room));
+  }
+  function buildYear(y, len){
+    var px = 200, c = document.createElement("canvas"), x = c.getContext("2d");
+    x.font = yearFont.replace("{px}", px); try{ x.fontStretch = "expanded"; }catch(e){}
+    var m = x.measureText(y);
+    var asc = m.actualBoundingBoxAscent || px*0.72, des = m.actualBoundingBoxDescent || 0;
+    var tl = m.actualBoundingBoxLeft || 0, tw = (m.actualBoundingBoxRight || m.width) + tl;
+    /* draw at about twice the screen size (the bend doubles it on the right), DPR included */
+    var k = Math.min(4, len*dpr*2/tw); px *= k; asc *= k; des *= k; tl *= k; tw *= k;
+    var pad = Math.ceil(px*0.02) + 2;
+    c.width = Math.ceil(asc + des) + pad*2; c.height = Math.ceil(tw) + pad*2;
+    x = c.getContext("2d"); x.font = yearFont.replace("{px}", px.toFixed(1));
+    try{ x.fontStretch = "expanded"; }catch(e){}   /* only the 125% width is loaded, so it is matched either way */
+    x.fillStyle = "#151516";
+    x.translate(pad + asc, c.height - pad); x.rotate(-Math.PI/2);   /* reads bottom to top */
+    x.fillText(y, tl, 0);
+    var t = newTex(isGL2);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, c);
+    if(isGL2) gl.generateMipmap(gl.TEXTURE_2D);
+    /* the label's on-screen box: len along the text; its thickness keeps the canvas's ratio */
+    var s = len/(c.height - pad*2);
+    return { tex:t, w:c.width*s, h:c.height*s, len:len };
+  }
+  var yearsReady = !(document.fonts && document.fonts.load);
+  if(!yearsReady) document.fonts.load(yearFont.replace("{px}", 100), "2026").then(function(){ yearsReady = true; yearTex = {}; dirty = true; }, function(){ yearsReady = true; dirty = true; });
+  function drawYears(t){
+    var len = yearLen(); if(!yearsReady || len < 24) return;
+    if(Math.abs(len - yearSize) > 0.5){ yearSize = len; for(var y in yearTex) gl.deleteTexture(yearTex[y].tex); yearTex = {}; }   /* resized: redraw at the new size */
+    var on = false;
+    for(var k = 0; k < inst.length; k++){
+      var p = inst[k], w = p.w, x0 = x0Of(k);
+      if(!w.yearFirst) continue;
+      var lt = yearTex[w.year] || (yearTex[w.year] = buildYear(w.year, len));
+      if(!onScreen(x0, lt.w)) continue;
+      if(!on){ on = true; gl.uniform1f(U.uLabel, 1); gl.uniform1f(U.uOp, rg.warp); gl.uniform4f(U.uCrop, 0, 0, 1, 1); }
+      var y0 = -baseH/2 - baseH*0.04 - lt.h;
+      gl.bindTexture(gl.TEXTURE_2D, lt.tex);
+      gl.uniform1f(U.uX0, x0); gl.uniform1f(U.uW, lt.w); gl.uniform1f(U.uFx0, x0); gl.uniform1f(U.uFw, lt.w);
+      gl.uniform1f(U.uH, lt.h); gl.uniform1f(U.uY0, y0); gl.uniform1f(U.uFh, lt.h); gl.uniform1f(U.uFy0, y0);
+      gl.uniform1f(U.uReveal, reveal(w, t));
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, (SEG + 1)*2);
+    }
+    if(on){ gl.uniform1f(U.uLabel, 0); gl.uniform1f(U.uOp, 1); }
+  }
   function render(t){
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -5699,6 +5763,7 @@
     gl.uniform1f(U.uCy, cy); gl.uniform1f(U.uA, A); gl.uniform1f(U.uP, P);
     gl.uniform1f(U.uH, baseH); gl.uniform1f(U.uZone, zone); gl.uniform1f(U.uK, K);
     gl.uniform1f(U.uFcy, cy); gl.uniform1f(U.uFh, baseH); gl.uniform1f(U.uFa, A); gl.uniform1f(U.uFp, P);
+    gl.uniform1f(U.uY0, -baseH/2); gl.uniform1f(U.uFy0, -baseH/2);
     gl.uniform1f(U.uWarp, rg.warp);
     gl.activeTexture(gl.TEXTURE0);
     for(var k = 0; k < inst.length; k++){
@@ -5721,6 +5786,7 @@
       gl.uniform2f(U.uEdge, 2/p.len, 2/baseH);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, (SEG + 1)*2);
     }
+    drawYears(t);
     /* keep rendering while a visible video is playing */
     for(var j = 0; j < N; j++){ if(works[j].vState === 2 && works[j].video && !works[j].video.paused){ dirty = true; break; } }
   }
