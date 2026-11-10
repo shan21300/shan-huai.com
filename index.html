@@ -1234,6 +1234,95 @@
   .cg-ticks button.on::before{opacity:1;height:20px}
   .cg-count{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.12em;color:var(--grey)}
   .cg-count b{font-weight:400;color:var(--paper)}
+
+  /* ---- Category index (Live / Photo-Journalism / Portraiture / Wedding) ----
+     Built by JS from each section's .pcard list (the source of truth), shown when
+     <html> has .cx-on. ?index=0 shows the previous List/Grid layout, ?index=1 this one. */
+  .cx{display:none}
+  .cx-on .has-cx > .gal-head,.cx-on .has-cx > .proj-index{display:none !important}
+  .cx-on .has-cx > .cx{display:block}
+  .cx{--cx-pad:clamp(16px,2.8vw,40px);--cx-top:clamp(104px,11vw,150px);--cx-gap:8px;
+    --cx-ease:cubic-bezier(.22,1,.36,1);--cx-t:.26s;--cx-frame:#141415;
+    padding:calc(var(--cx-top) + env(safe-area-inset-top,0px)) var(--cx-pad) clamp(48px,7vw,96px)}
+  .cx-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;
+    padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:clamp(24px,3.4vw,40px);
+    font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+  .cx-head h1{font:inherit;color:var(--paper);margin:0}
+  .cx-sub{color:var(--grey)}
+  .cx-body{display:grid;grid-template-columns:minmax(300px,35%) minmax(0,1fr);
+    column-gap:clamp(32px,3.4vw,48px);align-items:start}
+
+  /* rows */
+  .cx-list{list-style:none;margin:0;padding:0}
+  .cx-row{display:grid;grid-template-columns:2.6em minmax(0,1fr) auto auto 14px;align-items:baseline;
+    column-gap:14px;padding:13px 0 12px;border-bottom:1px solid var(--line);
+    color:var(--paper);text-decoration:none;opacity:.6;transition:opacity var(--cx-t) ease}
+  .cx.has-active .cx-row{opacity:.4}
+  .cx .cx-row.is-active{opacity:1}
+  .cx-row:focus{outline:none}
+  .cx-row:focus-visible{outline:1px solid var(--edge);outline-offset:4px}
+  .cx-num,.cx-cat,.cx-year,.cx-arrow{font-family:"IBM Plex Mono",monospace;font-size:10px;
+    letter-spacing:.1em;text-transform:uppercase;font-variant-numeric:tabular-nums}
+  .cx-title{font-family:"Cormorant Garamond",serif;font-weight:300;font-size:clamp(24px,2.3vw,34px);
+    line-height:1.05;letter-spacing:-.01em;min-width:0;text-wrap:balance;
+    transition:transform var(--cx-t) var(--cx-ease)}
+  .cx-cat{max-width:12em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right}
+  .cx-year{white-space:nowrap;text-align:right}
+  .cx-arrow{opacity:0;transform:translateX(-4px);text-align:right;
+    transition:opacity var(--cx-t) ease,transform var(--cx-t) var(--cx-ease)}
+  .cx-row.is-active .cx-title{transform:translateX(6px)}
+  .cx-row.is-active .cx-arrow{opacity:1;transform:none}
+
+  /* cover grid: every cover visible at rest; the active one comes forward, the rest dim */
+  .cx-grid{--cols:3;--rows:2;display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));
+    gap:var(--cx-gap);position:sticky;top:calc(var(--cx-top) - 12px);
+    width:max(min(100%,420px),min(100%,calc((100svh - var(--cx-top) - 140px - (var(--rows) - 1) * var(--cx-gap)) / var(--rows) * .75 * var(--cols) + (var(--cols) - 1) * var(--cx-gap))))}
+  .cx-tile{position:relative;display:block;aspect-ratio:3/4;background:var(--cx-frame);overflow:hidden;
+    transform:translateZ(0) scale(1);transition:transform var(--cx-t) var(--cx-ease);z-index:0}
+  .cx-tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;
+    opacity:0;transition:opacity .4s ease}
+  .cx-tile img.is-loaded{opacity:1}
+  .cx-tile::after{content:"";position:absolute;inset:0;background:var(--ink);opacity:0;pointer-events:none;
+    transition:opacity var(--cx-t) ease;z-index:2}
+  .cx.has-active .cx-tile:not(.is-active)::after{opacity:.65}
+  .cx-tile.is-active{transform:translateZ(0) scale(1.03);z-index:1}
+  .cx-cap{position:absolute;left:0;right:0;bottom:0;z-index:3;display:flex;justify-content:space-between;gap:10px;
+    padding:22px 10px 9px;background:linear-gradient(to top,rgba(11,11,12,.72),rgba(11,11,12,0));
+    font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--paper);opacity:0;transition:opacity var(--cx-t) ease}
+  .cx-cap span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cx-tile.is-active .cx-cap{opacity:1}
+  .cx-tile.no-cover::before,.cx-stage-img.no-cover::before{content:"No cover";position:absolute;inset:0;
+    display:flex;align-items:center;justify-content:center;font-family:"IBM Plex Mono",monospace;
+    font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey)}
+  .cx-stage{display:none}
+
+  /* tablet: covers above the list (as in the reference) */
+  @media(max-width:1023px){
+    .cx-body{display:flex;flex-direction:column;align-items:stretch}
+    .cx-grid{order:-1;position:static;width:100%;margin-bottom:clamp(24px,4vw,40px)}
+  }
+  /* phone: one large cover that follows the row in the middle of the screen; one tap opens */
+  @media(max-width:767px){
+    .cx-grid{display:none}
+    .cx-stage{display:block;position:sticky;top:calc(10px + env(safe-area-inset-top,0px));z-index:2;
+      height:min(46svh,calc((100vw - 2 * var(--cx-pad)) * 4 / 3));margin-bottom:20px;
+      background:var(--ink);box-shadow:0 18px 18px -6px var(--ink)}
+    .cx-stage-img{position:absolute;inset:0;background:var(--cx-frame);opacity:0;transition:opacity .3s ease}
+    .cx-stage-img.is-active{opacity:1}
+    .cx-stage-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+    .cx-row{grid-template-columns:2.4em minmax(0,1fr) auto;padding:16px 0 14px}
+    .cx-cat,.cx-arrow{display:none}
+    .cx-title{font-size:clamp(25px,7vw,30px)}
+  }
+  /* reduced motion: no slide or zoom. (The site-wide reduced-motion rule also turns every
+     transition off, so the highlight changes instantly.) */
+  @media(prefers-reduced-motion:reduce){
+    .cx{--cx-t:.12s}
+    .cx-title,.cx-arrow,.cx-tile{transition:none !important}
+    .cx-row.is-active .cx-title,.cx-row .cx-arrow,.cx-tile.is-active{transform:none}
+    .cx-tile img,.cx-stage-img{transition-duration:.12s}
+  }
 </style>
 </head>
 <body>
@@ -3996,6 +4085,171 @@
       });
     });
   });
+  /* ---- Category index ----
+     Builds the numbered index for each category page from its .pcard list, so the
+     cards stay the single source of truth (titles, place/event, year, order, cover).
+     Must run BEFORE the "main [data-nav]" binding below: the generated rows and tiles
+     carry data-nav and are wired to go() by that same loop. */
+  (function(){
+    var CATS={ "live":"Live", "photojournalism":"Photo-Journalism", "portraiture":"Portraiture", "wedding":"Wedding" };
+    // ?index=1 (default) shows the index, ?index=0 the previous List/Grid layout. The choice
+    // is kept for the tab, because the router drops the query string on navigation.
+    var q=null, saved=null;
+    try{ q=new URLSearchParams(location.search).get("index"); }catch(e){}
+    if(q==="0"||q==="1"){ try{ sessionStorage.setItem("cx-index",q); }catch(e){} }
+    else { try{ saved=sessionStorage.getItem("cx-index"); }catch(e){} }
+    var on=(q==="0"||q==="1" ? q : (saved||"1"))!=="0";
+    document.documentElement.classList.toggle("cx-on", on);
+
+    function dateKey(s){
+      var m=(s||"").trim().match(/^(\d{4})(?:-(\d{2}))?(?:-(\d{2}))?$/);
+      if(!m) return -1;
+      return (+m[1])*10000 + (m[2]?+m[2]:0)*100 + (m[3]?+m[3]:0);
+    }
+    function pad(n){ return (n<10?"0":"")+n; }
+    function el(tag, cls, text){
+      var e=document.createElement(tag); if(cls) e.className=cls;
+      if(text!=null) e.textContent=text; return e;
+    }
+    // cover <img>: the 520px uncropped thumb first, then the card's own image, then "No cover"
+    function cover(id, fallback, host, eager){
+      var img=new Image(); img.alt=""; img.decoding="async";
+      if(!eager) img.loading="lazy";
+      var tries=["/images/wall-thumbs/"+id+".jpg"]; if(fallback) tries.push(fallback);
+      img.addEventListener("load", function(){ img.classList.add("is-loaded"); });
+      img.addEventListener("error", function(){
+        tries.shift();
+        if(tries.length) img.src=tries[0];
+        else { img.remove(); host.classList.add("no-cover"); }
+      });
+      img.dataset.src=tries[0];
+      return img;
+    }
+
+    Object.keys(CATS).forEach(function(secId){
+      var sec=document.getElementById(secId); if(!sec) return;
+      var cards=[].slice.call(sec.querySelectorAll(".proj-index > .pcard[data-nav]"));
+      // same order rule as the galleries: data-date, newest first, undated last (stable)
+      var items=cards.map(function(c, i){
+        var meta=((c.querySelector(".pc-meta")||{}).textContent||"").trim();
+        var parts=meta.split("·").map(function(s){ return s.trim(); }).filter(Boolean);
+        var year="", sub=meta;
+        if(parts.length && /\d{4}/.test(parts[parts.length-1])){ year=parts.pop(); sub=parts.join(" · "); }
+        var d=(c.getAttribute("data-date")||"").trim();
+        if(!year && /^\d{4}/.test(d)) year=d.slice(0,4);
+        var im=c.querySelector("img");
+        return { id:c.getAttribute("data-nav"), i:i, key:dateKey(d), year:year, sub:sub,
+          title:((c.querySelector(".pc-name")||{}).textContent||"").trim() || (im&&im.alt) || "Untitled",
+          img:im ? im.getAttribute("src") : "" };
+      }).sort(function(a,b){ return (b.key-a.key) || (a.i-b.i); });
+      if(!items.length) return;
+
+      var years=[]; items.forEach(function(it){ (it.year.match(/\d{4}/g)||[]).forEach(function(y){ years.push(+y); }); });
+      var lo=Math.min.apply(null,years), hi=Math.max.apply(null,years);
+
+      var root=el("div","cx");
+      var head=el("div","cx-head");
+      head.appendChild(el("h1","", CATS[secId]+" ("+pad(items.length)+")"));
+      if(years.length) head.appendChild(el("span","cx-sub", lo===hi ? String(lo) : lo+"–"+hi));
+      root.appendChild(head);
+
+      var body=el("div","cx-body");
+      var grid=el("div","cx-grid"); grid.setAttribute("aria-hidden","true");
+      var cols=items.length<=3 ? items.length : (items.length<=6 ? 3 : 4);
+      grid.style.setProperty("--cols", cols);
+      grid.style.setProperty("--rows", Math.ceil(items.length/cols));
+      var stage=el("div","cx-stage"); stage.setAttribute("aria-hidden","true");
+      var list=el("ol","cx-list"); list.setAttribute("aria-label", CATS[secId]+" projects, newest first");
+
+      var rows=[], tiles=[], shots=[];
+      items.forEach(function(it, n){
+        var href=urlForId(it.id) || "#";
+        var a=el("a","cx-row"); a.href=href; a.setAttribute("data-nav", it.id); a.dataset.i=n;
+        a.appendChild(el("span","cx-num", pad(n+1)));
+        a.appendChild(el("span","cx-title", it.title));
+        a.appendChild(el("span","cx-cat", it.sub));
+        a.appendChild(el("span","cx-year", it.year || "—"));
+        a.appendChild(el("span","cx-arrow", "→"));
+        var li=el("li"); li.appendChild(a); list.appendChild(li); rows.push(a);
+
+        var t=el("a","cx-tile"); t.href=href; t.tabIndex=-1; t.setAttribute("data-nav", it.id); t.dataset.i=n;
+        var im=cover(it.id, it.img, t, false); im.src=im.dataset.src; t.appendChild(im);
+        var cap=el("span","cx-cap"); cap.appendChild(el("span","", it.sub)); cap.appendChild(el("span","", it.year));
+        t.appendChild(cap); grid.appendChild(t); tiles.push(t);
+
+        // phone stage: src is only set for the shown cover and its neighbours
+        var s=el("div","cx-stage-img"); s.dataset.i=n; s.appendChild(cover(it.id, it.img, s, true));
+        stage.appendChild(s); shots.push(s);
+      });
+      // list first in the DOM (reading order); the grid is decorative (aria-hidden, no tab stop)
+      var col=el("div","cx-col"); col.appendChild(stage); col.appendChild(list);
+      body.appendChild(col); body.appendChild(grid);
+      root.appendChild(body);
+      sec.insertBefore(root, sec.firstChild); sec.classList.add("has-cx");
+
+      /* active state: one class flip per change, CSS transitions retarget mid-flight,
+         so fast moves never queue or flicker */
+      var cur=-1;
+      function warm(i){
+        [i, i+1, i-1].forEach(function(k){
+          var s=shots[k]; if(!s) return; var im=s.querySelector("img");
+          if(im && !im.getAttribute("src")) im.src=im.dataset.src;
+        });
+      }
+      function setActive(i){
+        if(i===cur) return;
+        if(cur>-1){ rows[cur].classList.remove("is-active"); tiles[cur].classList.remove("is-active"); shots[cur].classList.remove("is-active"); }
+        cur=i;
+        if(i>-1){ rows[i].classList.add("is-active"); tiles[i].classList.add("is-active"); shots[i].classList.add("is-active"); warm(i); }
+        root.classList.toggle("has-active", i>-1);
+      }
+      function idxOf(t){ var a=t && t.closest && t.closest("[data-i]"); return a && root.contains(a) ? +a.dataset.i : -1; }
+      var phone=window.matchMedia("(max-width:767px)");
+
+      body.addEventListener("pointerover", function(e){
+        if(e.pointerType!=="mouse") return;            // touch never relies on hover
+        var i=idxOf(e.target); if(i>-1) setActive(i);
+      });
+      body.addEventListener("pointerleave", function(e){
+        if(e.pointerType!=="mouse" || phone.matches) return;
+        if(!root.contains(document.activeElement)) setActive(-1);
+      });
+      root.addEventListener("focusin", function(e){ var i=idxOf(e.target); if(i>-1) setActive(i); });
+      root.addEventListener("focusout", function(e){
+        if(!root.contains(e.relatedTarget) && !phone.matches) setActive(-1);
+      });
+      // real links: a plain click goes through the site's go() (bound below via data-nav);
+      // a modified / middle click is left to the browser (new tab) and skips go()
+      root.addEventListener("click", function(e){
+        if(!e.target.closest("a[data-nav]")) return;
+        if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button!==0){ e.stopPropagation(); return; }
+        e.preventDefault();
+      }, true);
+
+      // phone: the stage shows the first row still visible below it, so the newest
+      // project shows at the top and each row takes over as the one above slides under
+      var ticking=false;
+      function follow(){
+        ticking=false;
+        if(!phone.matches || !sec.classList.contains("is-active")) return;
+        var line=stage.getBoundingClientRect().bottom+8, best=rows.length-1;
+        for(var k=0;k<rows.length;k++){
+          var b=rows[k].getBoundingClientRect();
+          if((b.top+b.bottom)/2>line){ best=k; break; }
+        }
+        setActive(best);
+      }
+      function queue(){ if(!ticking){ ticking=true; requestAnimationFrame(follow); } }
+      window.addEventListener("scroll", queue, {passive:true});
+      window.addEventListener("resize", queue);
+      if(typeof ResizeObserver==="function"){
+        // fires when the section is shown (display:none -> block); the layout read is deferred to rAF
+        new ResizeObserver(function(){ queue(); }).observe(root);
+      }
+      if(phone.addEventListener) phone.addEventListener("change", function(){ setActive(-1); queue(); });
+    });
+  })();
+
   // in-page navigation (index cards + back buttons)
   document.querySelectorAll("main [data-nav]").forEach(function(el){
     el.addEventListener("click",function(){
