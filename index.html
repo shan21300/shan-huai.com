@@ -5098,7 +5098,9 @@
     "  vec3 c = texture2D(uTex, uCrop.xy + uv*uCrop.zw).rgb;",
     /* spectral blur: 9 taps spread across ±dx, each tinted along red → green → blue and
        averaged per channel, so the split is a soft rainbow smear rather than three copies */
-    "  if(abs(dx) > 0.05 && uIntro < 0.5){",
+    /* runs on every pixel (dx is 0 outside the edge zones): a per-pixel branch here leaves a
+       seam where it starts, because texture lookups pick their mip level from neighbours */
+    "  if(uIntro < 0.5){",
     "    vec3 acc = vec3(0.0), wsum = vec3(0.0);",
     "    for(int i = 0; i < 9; i++){",
     "      float f = float(i)/8.0;",
