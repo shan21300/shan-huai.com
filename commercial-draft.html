@@ -94,9 +94,9 @@
   .ct-media{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;display:block;
     opacity:0;transition:opacity .5s ease;-webkit-user-drag:none;user-select:none}
   .ct-media.is-ready{opacity:1}
-  /* portrait / vertical media: never cropped — fitted between the header and the timeline */
-  .ct-media.fit-contain{object-fit:contain;top:calc(var(--cc-py) * 2 + var(--cc-logo) + env(safe-area-inset-top,0px));
-    height:calc(100% - var(--tl-h) - var(--cc-py) * 2 - var(--cc-logo) - 70px - env(safe-area-inset-top,0px))}
+  /* portrait / vertical media: always the full screen height, top to bottom, centred. Wide screens
+     get dark space either side; a screen narrower than the picture trims its sides, never top/bottom. */
+  .ct-media.fit-contain{width:auto;max-width:none;height:100%;left:50%;transform:translateX(-50%);object-fit:fill}
   .ct-video{z-index:1}
   /* light shading only where text sits: top band for the header, bottom for caption + timeline */
   .ct-shade{position:fixed;inset:0;z-index:5;pointer-events:none;
