@@ -3,3 +3,4 @@
 wrangler.toml
 .assetsignore
 .claude
+worker.js

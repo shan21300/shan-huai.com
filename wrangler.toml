@@ -1,6 +1,17 @@
 name = "holy-rain-4c97"
+main = "worker.js"
 compatibility_date = "2026-07-15"
 
 [assets]
 directory = "."
+binding = "ASSETS"
 not_found_handling = "single-page-application"
+# Let worker.js see page loads (to log visitor locations); images skip it.
+run_worker_first = ["/*", "!/images/*"]
+
+[observability]
+enabled = true
+
+[[analytics_engine_datasets]]
+binding = "VISITS"
+dataset = "shan_huai_visits"
