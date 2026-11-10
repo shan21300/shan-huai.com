@@ -814,8 +814,16 @@
      scroller); JS maps scroll -> column offset and sets sizes as CSS variables. ===== */
   #proj-locallocalpark .llp-reels{position:relative;
     --sw:390px;--sh:844px;--bz:0px;--rad:0px;--stage-h:100vh}
-  #proj-locallocalpark .llp-reels-stage{position:sticky;top:0;height:var(--stage-h);overflow:hidden;
-    display:flex;align-items:center;justify-content:center}
+  /* the reels' own scroller. Scrolling is off (.is-live missing) until the section fills the
+     window, so the page scrolls it into place first. Once locked, each wheel/trackpad gesture or
+     swipe moves exactly one reel (JS, like the arrow keys); at the first reel, scrolling up hands
+     back to the page. */
+  #proj-locallocalpark .llp-reels-stage{position:relative;height:var(--stage-h);overflow:hidden;
+    scrollbar-width:none;overscroll-behavior-y:auto}
+  #proj-locallocalpark .llp-reels-stage.is-live{overflow-y:auto}
+  #proj-locallocalpark .llp-reels-stage::-webkit-scrollbar{display:none}
+  #proj-locallocalpark .llp-reels-view{position:sticky;top:0;height:var(--stage-h);overflow:hidden;
+    margin-bottom:calc(var(--stage-h) * -1);display:flex;align-items:center;justify-content:center;z-index:1}
   #proj-locallocalpark .llp-reels-col{position:absolute;left:50%;top:50%;width:var(--sw);height:var(--sh);
     margin:calc(var(--sh) / -2) 0 0 calc(var(--sw) / -2);will-change:transform}
   #proj-locallocalpark .llp-reel{position:absolute;left:0;top:0;width:100%;height:100%;
@@ -3052,6 +3060,7 @@
       <!-- LLP REELS (draft): built by the "LLP REELS" script from its REELS list. -->
       <div class="llp-reels" aria-roledescription="reel player" aria-label="Local Local Park reels">
         <div class="llp-reels-stage">
+          <div class="llp-reels-view">
           <div class="llp-reels-col"></div>
           <div class="llp-phone-shadow" aria-hidden="true"></div>
           <div class="llp-screen"></div>
@@ -3092,6 +3101,8 @@
             </div>
             <div class="llp-toast" role="status" aria-live="polite"></div>
           </div>
+          </div>
+          <div class="llp-reels-snaps"></div>
         </div>
       </div>
       <!-- /LLP REELS -->
@@ -6369,6 +6380,9 @@
   var N = REELS.length;
 
   var stage = root.querySelector(".llp-reels-stage"), col = root.querySelector(".llp-reels-col");
+  // the reels' own scroller: one spacer per reel gives it its scroll height
+  var snaps = [];
+  for(var si = 0; si < N; si++){ var sn = document.createElement("div"); sn.className = "llp-snap"; root.querySelector(".llp-reels-snaps").appendChild(sn); snaps.push(sn); }
   var ui = root.querySelector(".llp-ui"), meta = ui.querySelector(".llp-meta");
   var $ = function(s){ return ui.querySelector(s); };
   var glyph = $(".llp-glyph"), panel = $(".llp-panel"), toastEl = $(".llp-toast");
@@ -6425,9 +6439,8 @@
   function layout(){
     var W = sec.clientWidth, H = sec.clientHeight;
     if(!W || !H) { update(); return; }
-    // if a reel is in the frame, keep that same reel in the frame after the resize
-    var keep = null;
-    if(L.H && L.pitch > 1){ var r0 = progress(); if(r0 > -0.02 && r0 < N - 1 + 0.02) keep = Math.max(0, Math.min(N - 1, Math.round(r0))); }
+    // keep the same reel in the frame across a resize
+    var keep = L.pitch > 1 ? Math.max(0, Math.min(N - 1, Math.round(stage.scrollTop / L.pitch))) : 0;
     var sw, sh, bz, rad, pitch;
     if(W >= 700){                       // phone frame
       sh = Math.round(Math.min(H * 0.8, 900)); sw = Math.round(sh * 9 / 19.5);
@@ -6440,10 +6453,12 @@
     s.setProperty("--sw", sw + "px"); s.setProperty("--sh", sh + "px");
     s.setProperty("--bz", bz + "px"); s.setProperty("--rad", rad + "px");
     s.setProperty("--stage-h", H + "px");
-    L.pitch = pitch; L.H = H; L.rootH = H + (N - 1) * pitch;
+    L.pitch = pitch; L.H = H;
     L.S = sh; L.G = pitch - sh;   // reel step when touching, and the extra gap at rest
-    s.height = L.rootH + "px";
-    if(keep !== null){ sec.scrollTo({ top: Math.round(sec.scrollTop + rootTop() + keep * pitch), behavior: "instant" }); }
+    s.height = H + "px";
+    // one snap stop per reel; the last one is a full window tall so it can sit at the end
+    snaps.forEach(function(el, i){ el.style.height = (i < N - 1 ? pitch : H) + "px"; });
+    stage.scrollTo({ top: keep * pitch, behavior: "instant" });
     update();
   }
   if("ResizeObserver" in window){
@@ -6453,17 +6468,23 @@
 
   // ---- scroll -> column (rAF) ----
   function rootTop(){ return root.getBoundingClientRect().top - sec.getBoundingClientRect().top; }
-  function progress(){ return -rootTop() / L.pitch; }      // 0 = first reel locked in, N-1 = last
+  // < 0 while the section is still sliding into view; 0..N-1 = which reel is in the frame
+  function progress(){ return (stage.scrollTop - rootTop()) / L.pitch; }
   function update(){
     ticking = false;
     var live = sec.classList.contains("is-active") && sec.clientHeight > 0;
     var top = live ? rootTop() : 0;
-    var raw = -top / L.pitch, p = Math.max(0, Math.min(N - 1, raw));
-    // within a pixel of a reel: sit exactly on it (scroll offsets can be fractional)
-    if(Math.abs(p - Math.round(p)) * L.pitch < 1) p = Math.round(p);
+    // locked = the section fills the window: only then does scrolling move the reels
+    var locked = live && Math.abs(top) < 1;
+    if(locked && !wasLocked){ gesture = true; lastWheelT = performance.now(); }   // momentum that locked it in is used up
+    wasLocked = locked;
+    stage.classList.toggle("is-live", locked);
+    var st = stage.scrollTop, p = Math.max(0, Math.min(N - 1, st / L.pitch));
+    var off = Math.abs(st - Math.round(p) * L.pitch);
+    if(off < 1) p = Math.round(p);     // within a pixel of a reel: sit exactly on it
     P = p;
-    // moving between reels inside the locked range -> close the gaps so reels touch in the frame
-    var moving = live && raw > 0 && raw < N - 1 && Math.abs(p - Math.round(p)) * L.pitch >= 1;
+    // moving between reels -> close the gaps so reels touch in the frame
+    var moving = locked && off >= 1;
     gTarget = moving ? 0 : 1;
     if(mqReduce.matches) g = gTarget;
     render();
@@ -6471,8 +6492,7 @@
     var idx = Math.round(p);
     if(idx !== cur) setActive(idx);
     // play only once the phone is locked and the reel sits exactly in the frame (not while moving)
-    var px = raw * L.pitch, snapped = live && !document.hidden &&
-      px > -1 && px < (N - 1) * L.pitch + 1 && Math.abs(px - Math.round(raw) * L.pitch) < 1;
+    var snapped = locked && !document.hidden && off < 1;
     var want = snapped && !paused && (!mqReduce.matches || userStarted);
     if(want !== lastWant || cur !== lastCur){ lastWant = want; lastCur = cur; syncPlay(want); }
   }
@@ -6504,54 +6524,73 @@
       else { si.visibility = ""; si.transform = "translate3d(0," + (d * L.S).toFixed(2) + "px,0)"; }
     });
   }
-  var lastST = 0, lastDir = 0;
-  function onScroll(){
-    var st = sec.scrollTop;
-    if(st !== lastST){ lastDir = st > lastST ? 1 : -1; lastST = st; }
-    if(!ticking){ ticking = true; requestAnimationFrame(update); }
-    gestureTrack();
-  }
-  sec.addEventListener("scroll", onScroll, { passive:true });
+  function onScroll(){ if(!ticking){ ticking = true; requestAnimationFrame(update); } }
+  sec.addEventListener("scroll", onScroll, { passive:true });     // the page (section slides in)
+  stage.addEventListener("scroll", onScroll, { passive:true });   // the reels (native snapping)
   document.addEventListener("visibilitychange", function(){ lastWant = null; update(); });
 
-  // ---- snapping safety net: settle on a reel once scrolling stops ----
-  var scrolling = false, startIdx = 0, idleT = 0, settlingTo = null;
-  var hasScrollEnd = "onscrollend" in window;
-  function gestureTrack(){
-    if(!scrolling){
-      scrolling = true;
-      var sr = progress();
-      // a gesture that began outside the locked range snaps to the nearest reel
-      startIdx = (sr < -0.002 || sr > N - 1 + 0.002) ? null : (cur < 0 ? 0 : cur);
+  function goTo(i){ stage.scrollTo({ top: i * L.pitch, behavior: mqReduce.matches ? "auto" : "smooth" }); }
+
+  // ---- one reel per gesture (wheel / trackpad / touch), like the arrow keys ----
+  // The move starts the instant a gesture begins; the rest of that gesture (trackpad momentum,
+  // a fast-spun wheel) is absorbed. A new gesture = a pause of 160ms+, or a fresh flick that
+  // speeds up again during the momentum tail.
+  var wasLocked = false, gesture = false, lastWheelT = 0, lastAbs = 0;
+  function isLocked(){ return stage.classList.contains("is-live"); }
+  function here(){ return Math.round(stage.scrollTop / L.pitch); }
+  function settled(){ return Math.abs(stage.scrollTop - here() * L.pitch) < 1; }
+  stage.addEventListener("wheel", function(e){
+    if(!isLocked() || e.ctrlKey) return;                         // not locked (page scrolls) / pinch-zoom
+    var d = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaMode === 2 ? e.deltaY * L.H : e.deltaY;
+    var now = performance.now(), a = Math.abs(d);
+    if(gesture && (now - lastWheelT > 160 || (settled() && a > 12 && a > lastAbs * 1.8))) gesture = false;
+    lastWheelT = now; lastAbs = a;
+    if(gesture){ e.preventDefault(); return; }
+    if(a < 2){ e.preventDefault(); return; }                     // jitter
+    var next = here() + (d > 0 ? 1 : -1);
+    if(next < 0) return;                                         // above the first reel: let the page scroll up
+    e.preventDefault(); gesture = true;
+    if(next <= N - 1) goTo(next);                                // past the last reel: nothing more (page ends)
+  }, { passive:false });
+
+  // touch: the reels follow the finger, then go to the next/previous reel or spring back
+  var tY = 0, tT = 0, tBase = 0, tDrag = null, tLastY = 0, tLastT = 0, tVel = 0;
+  stage.addEventListener("touchstart", function(e){
+    if(!isLocked() || e.touches.length !== 1) { tDrag = null; return; }
+    tY = tLastY = e.touches[0].clientY; tT = tLastT = performance.now(); tVel = 0;
+    tBase = here() * L.pitch; tDrag = "maybe";
+  }, { passive:true });
+  stage.addEventListener("touchmove", function(e){
+    if(!tDrag || !isLocked()) return;
+    var y = e.touches[0].clientY, dy = tY - y, now = performance.now();   // dy > 0: towards the next reel
+    if(tDrag === "maybe"){
+      if(Math.abs(dy) < 4) return;
+      if(dy < 0 && here() === 0){ tDrag = null; return; }       // pulling down at the first reel: the page scrolls
+      tDrag = "on";
     }
-    if(!hasScrollEnd){ clearTimeout(idleT); idleT = setTimeout(settle, 160); }
+    e.preventDefault();
+    var lo = Math.max(0, tBase - L.pitch), hi = Math.min((N - 1) * L.pitch, tBase + L.pitch);
+    stage.scrollTop = Math.max(lo, Math.min(hi, tBase + dy));
+    if(now > tLastT){ tVel = 0.8 * ((tLastY - y) / (now - tLastT)) + 0.2 * tVel; }
+    tLastY = y; tLastT = now;
+  }, { passive:false });
+  function touchEnd(){
+    if(tDrag !== "on"){ tDrag = null; return; }
+    tDrag = null;
+    var dy = stage.scrollTop - tBase, from = Math.round(tBase / L.pitch), to = from;
+    if(dy > L.pitch * 0.08 || tVel > 0.25) to = from + 1;       // a short or quick swipe is enough
+    else if(dy < -L.pitch * 0.08 || tVel < -0.25) to = from - 1;
+    goTo(Math.max(0, Math.min(N - 1, to)));
   }
-  if(hasScrollEnd) sec.addEventListener("scrollend", settle);
-  // new input while a snap is animating: the person wins, the snap is dropped
-  ["wheel", "touchstart"].forEach(function(ev){
-    sec.addEventListener(ev, function(){
-      if(settlingTo === null) return;
-      settlingTo = null; scrolling = false; startIdx = null;
-      clearTimeout(idleT); idleT = setTimeout(function(){ if(!scrolling) settle(); }, 450); // a tap with no scroll still lands on a reel
-    }, { passive:true });
-  });
-  function settle(){
-    scrolling = false;
-    if(!sec.classList.contains("is-active")) return;
-    var raw = progress();
-    if(raw < 0 || raw > N - 1) { settlingTo = null; return; }            // outside the locked range: normal page
-    var near = Math.round(raw), target;
-    if(settlingTo !== null) target = settlingTo;                      // finishing our own snap
-    else if(startIdx === null || Math.abs(raw - near) * L.pitch < 12) target = near; // entered from outside / jitter
-    else target = lastDir > 0 ? Math.ceil(raw) : Math.floor(raw);    // onward in the direction moved: small scrolls change reel, never a tug back
-    target = Math.max(0, Math.min(N - 1, target));
-    if(Math.abs(raw - target) * L.pitch < 1){ settlingTo = null; return; }
-    settlingTo = target; goTo(target);
-  }
-  function goTo(i){
-    var y = sec.scrollTop + rootTop() + i * L.pitch;
-    sec.scrollTo({ top: Math.round(y), behavior: mqReduce.matches ? "auto" : "smooth" });
-  }
+  stage.addEventListener("touchend", touchEnd, { passive:true });
+  stage.addEventListener("touchcancel", touchEnd, { passive:true });
+  // safety net: if the reels ever come to rest between two reels (e.g. some other way of
+  // scrolling), settle onto the nearest one
+  var restT = 0;
+  stage.addEventListener("scroll", function(){
+    clearTimeout(restT);
+    restT = setTimeout(function(){ if(isLocked() && !tDrag && !settled()) goTo(here()); }, 180);
+  }, { passive:true });
 
   // ---- video: only the reel in the frame plays; neighbours preload; others unloaded ----
   function attach(r){
@@ -6566,7 +6605,7 @@
     v.addEventListener("ended", function(){
       var i = reels.indexOf(r);
       if(i !== cur || i >= N - 1 || paused) return;
-      settlingTo = null; startIdx = i + 1; goTo(i + 1);           // auto-advance to the next reel
+      goTo(i + 1);                                               // auto-advance to the next reel
     });
     v.addEventListener("error", function(){ fail(r); });
     r.el.insertBefore(v, r.el.children[1] || null);
@@ -6740,16 +6779,15 @@
     if(/INPUT|TEXTAREA|SELECT/.test((e.target || {}).tagName || "")) return;
     var dir = (e.key === "ArrowDown" || e.key === "PageDown") ? 1 : (e.key === "ArrowUp" || e.key === "PageUp") ? -1 : 0;
     if(!dir) return;
-    var raw = progress();
-    if(raw < -0.01 || raw > N - 1 + 0.01) return;                // not locked: normal scrolling
-    var next = Math.round(raw) + dir;
-    e.preventDefault(); settlingTo = null;
+    if(Math.abs(rootTop()) >= 1) return;                         // not locked: normal scrolling
+    var next = Math.round(stage.scrollTop / L.pitch) + dir;
+    e.preventDefault();
     if(next < 0 || next > N - 1){                                // past the ends: the page scrolls on
       var step = /Page/.test(e.key) ? L.H * 0.85 : 120;
       sec.scrollBy({ top: dir * step, behavior: mqReduce.matches ? "auto" : "smooth" });
       return;
     }
-    startIdx = next; goTo(next);
+    goTo(next);
   });
   if(mqReduce.addEventListener) mqReduce.addEventListener("change", function(){ lastWant = null; update(); });
 
