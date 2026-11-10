@@ -1108,7 +1108,9 @@
 
 
   /* ===== Selected Works landing (scoped to #landing / .sw-* only) ===== */
-  #landing.is-active{background:var(--ink);transition:background-color .45s ease}
+  #landing.is-active{background:#fff;color:var(--ink);transition:background-color .45s ease}
+  /* Home page is white with a black logo (body too, so overscroll / first paint match) */
+  body.on-landing,body:has(#landing.is-active){background:#fff}
   /* Video slides (Making Ordinary Sense / Girlfriend): pure black backdrop */
   #landing.is-active.sw-black{background:#000}
   /* 100svh: on iOS 100vh is the LARGE viewport (toolbar hidden), so the box hangs
@@ -1195,6 +1197,9 @@
   header .brandBtn .logo-img-b{display:block;position:absolute;left:0;top:0;height:var(--cc-logo);width:auto;opacity:0;transition:opacity .35s ease}
   body.menu-is-open:not(.menu-inv) .brandBtn .logo-img{opacity:0}
   body.menu-is-open:not(.menu-inv) .brandBtn .logo-img-b{opacity:.92}
+  /* home page (white): black logo; its menu opens dark (menu-inv), where the logo is white */
+  body.on-landing:not(.menu-is-open) .brandBtn .logo-img{opacity:0}
+  body.on-landing:not(.menu-is-open) .brandBtn .logo-img-b{opacity:.92}
   body.menu-is-open header{z-index:80;transform:none}
   body.menu-is-open header::before{display:none}   /* no dark header band over the open menu */
   #menu .menu-logo,#menu .menu-close{display:none}
@@ -1232,7 +1237,7 @@
     scrollbar-width:thin;scrollbar-color:var(--line) transparent}
   html.cc-strip #landing .cc-works li{flex:none;scroll-snap-align:start}
   html.cc-strip #landing .cc-work{display:block;text-decoration:none;color:inherit}
-  html.cc-strip #landing .cc-work img{display:block;height:min(52vh,60vw);width:auto;aspect-ratio:4 / 3;object-fit:cover;background:#151516}
+  html.cc-strip #landing .cc-work img{display:block;height:min(52vh,60vw);width:auto;aspect-ratio:4 / 3;object-fit:cover;background:#ececec}
   html.cc-strip #landing .cc-work.is-port img{aspect-ratio:3 / 4}
   #landing .cc-work-name{display:block;font-family:"Cormorant Garamond",serif;font-weight:300;font-size:19px;margin-top:10px}
   #landing .cc-work-meta{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-top:3px}
@@ -1359,7 +1364,7 @@
     transition:opacity .45s ease}
   #landing .rl-load.is-out{opacity:0}
   #landing .rl-count{display:flex;font-family:"IBM Plex Mono",monospace;font-weight:400;font-size:clamp(32px,6.9vw,74px);
-    line-height:1;color:var(--paper);font-variant-numeric:tabular-nums}
+    line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
   #landing .rl-col{display:block;height:1em;overflow:hidden;
     -webkit-mask-image:linear-gradient(transparent,#000 14%,#000 86%,transparent);
     mask-image:linear-gradient(transparent,#000 14%,#000 86%,transparent)}
@@ -1384,7 +1389,7 @@
 
   <header>
     <span class="header-spacer" aria-hidden="true"></span>
-    <button class="brandBtn" aria-label="Open menu" aria-expanded="false" aria-controls="menu"><img src="/images/system/shanhuailogoinversed_white.png" alt="Shan-Huai" class="logo-img"><img src="/images/system/shanhuailogoinversed_black.png" alt="" class="logo-img-b" loading="lazy" aria-hidden="true"></button>
+    <button class="brandBtn" aria-label="Open menu" aria-expanded="false" aria-controls="menu"><img src="/images/system/shanhuailogoinversed_white.png" alt="Shan-Huai" class="logo-img"><img src="/images/system/shanhuailogoinversed_black.png" alt="" class="logo-img-b" aria-hidden="true"></button>
     <button class="menuBtn" data-menu-open aria-label="Menu">menu</button>
   </header>
 
@@ -3999,7 +4004,8 @@
     // blend into the menu's usual light-bg/dark-text inversion — invert it back to
     // dark-bg/light-text here to keep the reveal contrast, matching every other page.
     var curEl = document.getElementById(current);
-    var inverted = !!(curEl && curEl.classList.contains("hs-layout"));
+    // The home page is white too, so its menu opens dark as well.
+    var inverted = current==="landing" || !!(curEl && curEl.classList.contains("hs-layout"));
     menuEl.classList.toggle("menu-inverted", inverted);
     document.body.classList.toggle("menu-inv", inverted);   // dark menu: the logo stays white
     var menuLogoImg = document.querySelector(".menu-logo-img");
@@ -5158,14 +5164,14 @@
     "  float v = clamp(0.5 + (yy - uFcy)/(uFh*sc), 0.0, 1.0);",
     "  vec2 uv = mix(vec2(u, v), vUV, uIntro);",            /* on the ring: plain card coordinates */
     "  vec3 c = texture2D(uTex, uCrop.xy + uv*uCrop.zw).rgb;",
-    "  vec3 ink = vec3(0.043, 0.043, 0.047);",
-    "  c = mix(vec3(0.082, 0.082, 0.086), c, uAlpha);",
+    "  vec3 ink = vec3(1.0);",                                /* the home page's white */
+    "  c = mix(vec3(0.925), c, uAlpha);",
     "  float l = dot(c, vec3(0.299, 0.587, 0.114));",
     "  c = mix(c, vec3(l), uDim*0.9);",                     /* frames you are not pointing at go grey… */
-    "  c = mix(c, ink, uDim*0.55);",                        /* …and recede into the dark */
-    "  c = mix(ink, c, uReveal);",                          /* intro: frames develop up from black */
+    "  c = mix(c, ink, uDim*0.55);",                        /* …and recede into the white */
+    "  c = mix(ink, c, uReveal);",                          /* intro: frames develop up from white */
     "  vec2 e = min(vUV, 1.0 - vUV)/uEdge;",
-    "  c = mix(c, vec3(0.929, 0.918, 0.89), step(min(e.x, e.y), 1.0)*uFocus);", /* keyboard focus ring */
+    "  c = mix(c, vec3(0.043, 0.043, 0.047), step(min(e.x, e.y), 1.0)*uFocus);", /* keyboard focus ring */
     "  c = mix(ink, c, uShade);",                           /* ring cards facing away sit in shadow */
     /* rounded corners: distance to a rounded box in the card's own pixels (perspective-correct
        through vUV), softened over about a pixel; off entirely in the carousel so it stays exact */
@@ -5200,9 +5206,9 @@
     var loc = gl.getAttribLocation(prog, "aUV");
     gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     blankTex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, blankTex);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([21,21,22,255]));
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([236,236,236,255]));
     gl.uniform1i(U.uTex, 0);
-    gl.clearColor(11/255, 11/255, 12/255, 1);
+    gl.clearColor(1, 1, 1, 1);
     gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
     gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);   /* ring cards fade */
     /* idle values: a plain carousel frame */
