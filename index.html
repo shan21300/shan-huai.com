@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Shan-Huai Chiang</title>
+<script src="/fluid-cursor.js" defer></script>
 <link rel="icon" type="image/png" href="/images/system/favicon.png" />
 <link rel="apple-touch-icon" href="/images/system/apple-touch-icon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -50,26 +51,6 @@
     font-family:"DM Sans",system-ui,sans-serif;
     overflow-x:hidden;
     -webkit-font-smoothing:antialiased;
-  }
-  /* Custom aperture cursor (desktop only) */
-  @media(hover:hover) and (pointer:fine){
-    *, *::before, *::after{cursor:none !important}
-  }
-  #cursor-aperture{
-    position:fixed;top:0;left:0;width:24px;height:24px;
-    pointer-events:none;z-index:9999;
-    transform:translate(-50%,-50%);
-    background-image:url('/images/system/aperuture_cursor.png');
-    background-size:contain;background-repeat:no-repeat;background-position:center;
-    filter:invert(1);
-    mix-blend-mode:difference;
-    will-change:transform,width,height;
-    display:none;
-    transition:width .3s cubic-bezier(.2,.7,.2,1), height .3s cubic-bezier(.2,.7,.2,1);
-  }
-  #cursor-aperture.hover{width:42px;height:42px}
-  @media(hover:hover) and (pointer:fine){
-    #cursor-aperture{display:block}
   }
   /* faint film grain over everything */
   body::after{
@@ -929,7 +910,7 @@
   #about .about p{font-size:clamp(17px,1.2vw,20px);line-height:1.75;max-width:60ch}
   .proj-page .pinfo{right:clamp(70px,7vw,96px)} /* clear the thumbnail rail */
   /* isolation + translateZ give the frosted card its own compositing layer, so the
-     blend-mode cursor (#cursor-aperture, mix-blend-mode:difference) passing nearby no
+     blend-mode cursor (fluid-cursor.js, mix-blend-mode:difference) passing nearby no
      longer forces partial re-blurs that show up as vertical streaks tracking the cursor. */
   .pinfo-card{background:rgba(11,11,12,0.62);backdrop-filter:blur(16px);
     -webkit-backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:20px;
@@ -1063,8 +1044,6 @@
   .snaplist.is-active .gal-head{position:relative;z-index:45}
 
 
-  /* ---- Custom trailing cursor (blend-difference) ---- */
-  /* Replaced by #cursor-aperture at top of file */
 
 
   /* ========== BIO PAGE (Desktop) ==========
@@ -1205,10 +1184,6 @@
   #menu .menu-logo,#menu .menu-close{display:none}
   header .brandBtn:focus-visible{outline:1px solid var(--edge);outline-offset:6px}
   @media(hover:hover) and (pointer:fine){
-    body.on-landing #cursor-aperture{display:none !important}
-    body.on-landing,body.on-landing *{cursor:auto !important}
-    body.on-landing a,body.on-landing button{cursor:pointer !important}
-    body.on-landing .m-soon{cursor:default !important}
     html.cc-gl body.on-landing .cc-stage{cursor:grab !important}
     html.cc-gl body.on-landing .cc-stage.is-over{cursor:pointer !important}
     html.cc-gl body.on-landing .cc-stage.is-dragging{cursor:grabbing !important}
@@ -1378,7 +1353,6 @@
 </style>
 </head>
 <body>
-  <div id="cursor-aperture" aria-hidden="true"></div>
 
 
   <div id="loader">
@@ -3589,61 +3563,6 @@
 (function(){
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var hasGSAP = typeof gsap !== "undefined";
-
-  /* ---------------- Custom aperture cursor ---------------- */
-  (function(){
-    var canHover = window.matchMedia("(hover:hover) and (pointer:fine)").matches;
-    if(!canHover) return;
-    var cur = document.getElementById("cursor-aperture");
-    if(!cur) return;
-    var x = 0, y = 0, tx = 0, ty = 0, raf = null, seen = false;
-    cur.style.opacity = "0";   // stay hidden until the pointer is actually somewhere
-    function loop(){
-      // smooth follow (LERP)
-      tx += (x - tx) * 0.35;
-      ty += (y - ty) * 0.35;
-      // size offset adjusts based on current width so cursor stays centered on pointer
-      var w = cur.offsetWidth || 28;
-      var h = cur.offsetHeight || 28;
-      cur.style.transform = "translate(" + (tx - w/2) + "px," + (ty - h/2) + "px)";
-      raf = requestAnimationFrame(loop);
-    }
-    document.addEventListener("mousemove", function(e){
-      x = e.clientX; y = e.clientY;
-      if(!seen){                       // first sighting: snap to the pointer, then reveal
-        seen = true; tx = x; ty = y;
-        cur.style.transform = "translate(" + (x - cur.offsetWidth/2) + "px," + (y - cur.offsetHeight/2) + "px)";
-        cur.style.opacity = "1";
-      }
-      if(!raf) raf = requestAnimationFrame(loop);
-    }, {passive:true});
-    document.addEventListener("mouseleave", function(){ cur.style.opacity = "0"; });
-    document.addEventListener("mouseenter", function(){ if(seen) cur.style.opacity = "1"; });
-
-    // Over an embedded player the pointer sits inside a cross-origin iframe, which
-    // swallows mousemove — the aperture would freeze mid-screen. Hide it there and
-    // let the player's own native cursor drive the controls; snap back on exit.
-    document.querySelectorAll(".proj-reel").forEach(function(box){
-      box.addEventListener("mouseenter", function(){ cur.style.opacity = "0"; });
-      box.addEventListener("mouseleave", function(e){
-        x = tx = e.clientX; y = ty = e.clientY;
-        cur.style.transform = "translate(" + (x - cur.offsetWidth/2) + "px," + (y - cur.offsetHeight/2) + "px)";
-        if(seen) cur.style.opacity = "1";
-      });
-    });
-    
-    // Hover expansion over interactive elements
-    var HOVER_SEL = "a,button,[data-nav],[data-menu-open],[data-view],.pcard,.proj-panel,.rt,.pinfo-head,.pinfo-tab,.pinfo-toggle,input,textarea,summary,label,.frame,.tile,.w-item,.viewtoggle button,.pgbtn,.back,.brandBtn,.menuBtn,.menu-close,.menu-logo,.m-link,.m-sub,.zc-cell";
-    document.addEventListener("mouseover", function(e){
-      if(e.target && e.target.closest && e.target.closest(HOVER_SEL)) cur.classList.add("hover");
-    });
-    document.addEventListener("mouseout", function(e){
-      if(e.target && e.target.closest && e.target.closest(HOVER_SEL) && 
-         !(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest(HOVER_SEL))){
-        cur.classList.remove("hover");
-      }
-    });
-  })();
 
   /* ---------------- Loader + reveal ---------------- */
   function reveal(){
