@@ -809,19 +809,122 @@
     .hs-layout .llp-slide{flex-basis:88%}
     .hs-layout .llp-slide.is-port{flex-basis:50%}
   }
-  /* DRAFT (draft/llp-extended): extra room at the bottom of Local Local Park for new content.
-     .llp-slot boxes are placeholders — swap each for an image/video/text block, then delete
-     the dashed styling. */
-  #proj-locallocalpark .llp-ext{margin-top:120px;padding-bottom:30vh}
-  #proj-locallocalpark .llp-ext-label{font-family:"IBM Plex Mono",monospace;font-size:11px;
-    letter-spacing:.16em;text-transform:uppercase;color:var(--grey);margin:0 0 16px}
-  #proj-locallocalpark .llp-slot{display:flex;align-items:center;justify-content:center;
-    border:1px dashed rgba(127,127,127,.5);color:var(--grey);margin-top:12px;
-    font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase}
-  #proj-locallocalpark .llp-slot.is-wide{aspect-ratio:16/9}
-  #proj-locallocalpark .llp-slot-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  #proj-locallocalpark .llp-slot-pair .llp-slot{aspect-ratio:4/5}
-  #proj-locallocalpark .llp-slot.is-text{min-height:200px}
+  /* ===== LLP REELS (draft): phone frame locked in the middle of the window while a column of
+     reels scrolls behind it. The stage is position:sticky inside the section (the section is the
+     scroller); JS maps scroll -> column offset and sets sizes as CSS variables. ===== */
+  #proj-locallocalpark .llp-reels{position:relative;
+    --sw:390px;--sh:844px;--bz:0px;--rad:0px;--stage-h:100vh}
+  #proj-locallocalpark .llp-reels-stage{position:sticky;top:0;height:var(--stage-h);overflow:hidden;
+    display:flex;align-items:center;justify-content:center}
+  #proj-locallocalpark .llp-reels-col{position:absolute;left:50%;top:50%;width:var(--sw);height:var(--sh);
+    margin:calc(var(--sh) / -2) 0 0 calc(var(--sw) / -2);will-change:transform}
+  #proj-locallocalpark .llp-reel{position:absolute;left:0;top:0;width:100%;height:100%;
+    border-radius:var(--rad);overflow:hidden;background:#000;will-change:transform,opacity}
+  #proj-locallocalpark .llp-reel img,
+  #proj-locallocalpark .llp-reel video{position:absolute;inset:0;width:100%;height:100%;
+    object-fit:contain;display:block;background:transparent}
+  #proj-locallocalpark .llp-reel.is-fill img,
+  #proj-locallocalpark .llp-reel.is-fill video{object-fit:cover}
+  #proj-locallocalpark .llp-reel video{opacity:0;transition:opacity .3s ease}
+  /* phone frame: a ring around the screen hole, drawn in CSS (no images) */
+  #proj-locallocalpark .llp-phone{position:absolute;left:50%;top:50%;pointer-events:none;
+    width:calc(var(--sw) + var(--bz) * 2);height:calc(var(--sh) + var(--bz) * 2);
+    transform:translate(-50%,-50%);border-radius:calc(var(--rad) + var(--bz));
+    border:var(--bz) solid #0c0c0d;
+    box-shadow:0 0 0 1.5px #8f8a86,0 0 0 3px #3a3735}
+  #proj-locallocalpark .llp-phone-shadow{position:absolute;left:50%;top:50%;pointer-events:none;
+    width:calc(var(--sw) + var(--bz) * 2);height:calc(var(--sh) + var(--bz) * 2);
+    transform:translate(-50%,-50%);border-radius:calc(var(--rad) + var(--bz));
+    box-shadow:0 30px 80px rgba(0,0,0,.28)}
+  /* inside the phone screen: its own clipped layer where reels sit edge to edge */
+  #proj-locallocalpark .llp-screen{position:absolute;left:50%;top:50%;width:var(--sw);height:var(--sh);
+    transform:translate(-50%,-50%);border-radius:var(--rad);overflow:hidden;background:#000}
+  #proj-locallocalpark .llp-reel-in{border-radius:0}
+  #proj-locallocalpark .llp-phone::before{content:"";position:absolute;top:calc(var(--sw) * .03);left:50%;
+    width:calc(var(--sw) * .3);height:calc(var(--sw) * .085);transform:translateX(-50%);
+    border-radius:999px;background:#0c0c0d}
+  #proj-locallocalpark .llp-phone::after{content:"";position:absolute;right:calc(var(--bz) * -1 - 5px);
+    top:28%;width:3px;height:11%;border-radius:2px;background:#6f6a66}
+  #proj-locallocalpark .llp-phone i{position:absolute;left:calc(var(--bz) * -1 - 5px);width:3px;
+    border-radius:2px;background:#6f6a66}
+  #proj-locallocalpark .llp-phone i:nth-child(1){top:18%;height:5%}
+  #proj-locallocalpark .llp-phone i:nth-child(2){top:26%;height:9%}
+  #proj-locallocalpark .llp-phone i:nth-child(3){top:37%;height:9%}
+  /* interface: fixed inside the screen; its content switches to the reel in the frame */
+  #proj-locallocalpark .llp-ui{position:absolute;left:50%;top:50%;width:var(--sw);height:var(--sh);
+    transform:translate(-50%,-50%);border-radius:var(--rad);overflow:hidden;color:#fff;
+    font-family:"DM Sans",system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+  #proj-locallocalpark .llp-ui button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+  #proj-locallocalpark .llp-ui :focus-visible{outline:2px solid #fff;outline-offset:2px;border-radius:6px}
+  #proj-locallocalpark .llp-tap{position:absolute;inset:0;width:100%;height:100%;
+    background:linear-gradient(to bottom,rgba(0,0,0,0) 60%,rgba(0,0,0,.55))}
+  #proj-locallocalpark .llp-tap:focus-visible{outline-offset:-4px}
+  #proj-locallocalpark .llp-glyph{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;
+    border-radius:50%;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;
+    opacity:0;transform:scale(.8);transition:opacity .2s ease,transform .25s cubic-bezier(.34,1.56,.64,1);pointer-events:none}
+  #proj-locallocalpark .llp-glyph.on{opacity:1;transform:none}
+  #proj-locallocalpark .llp-glyph svg{width:28px;height:28px}
+  #proj-locallocalpark .llp-heart-fly{position:absolute;width:96px;height:96px;margin:-48px 0 0 -48px;
+    pointer-events:none;color:#ff3040;animation:llpHeart .9s cubic-bezier(.2,.8,.3,1) forwards}
+  @keyframes llpHeart{0%{opacity:0;transform:scale(.3) rotate(-12deg)}
+    18%{opacity:1;transform:scale(1.15) rotate(-12deg)}32%{transform:scale(.95) rotate(-12deg)}
+    60%{opacity:1;transform:scale(1) translateY(-10px) rotate(-12deg)}
+    100%{opacity:0;transform:scale(.7) translateY(-90px) rotate(-12deg)}}
+  #proj-locallocalpark .llp-meta{position:absolute;left:4.5%;right:20%;bottom:4.5%;pointer-events:none}
+  #proj-locallocalpark .llp-meta > *{pointer-events:auto}
+  #proj-locallocalpark .llp-who{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  #proj-locallocalpark .llp-av{width:30px;height:30px;border-radius:50%;object-fit:cover;flex:none;background:#3c5a2f}
+  #proj-locallocalpark .llp-handle{font-weight:600;font-size:13px;text-decoration:none;color:#fff}
+  #proj-locallocalpark .llp-follow{border:1px solid rgba(255,255,255,.85) !important;border-radius:7px;
+    padding:2px 9px !important;font-size:11px !important;font-weight:600 !important}
+  #proj-locallocalpark .llp-follow[aria-pressed="true"]{background:rgba(255,255,255,.18) !important;border-color:transparent !important}
+  #proj-locallocalpark .llp-cap{font-size:12.5px;line-height:1.4;margin:0 0 9px;white-space:pre-line;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  #proj-locallocalpark .llp-meta.is-open .llp-cap{display:block;max-height:9.5em;overflow-y:auto}
+  #proj-locallocalpark .llp-more{font-size:12px;color:rgba(255,255,255,.75);margin:-6px 0 9px;display:none}
+  #proj-locallocalpark .llp-meta.has-more .llp-more{display:inline-block}
+  #proj-locallocalpark .llp-audio{display:inline-flex;align-items:center;gap:6px;font-size:11px;
+    padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.16);max-width:100%;white-space:nowrap}
+  #proj-locallocalpark .llp-audio svg{width:12px;height:12px;flex:none}
+  #proj-locallocalpark .llp-rail{position:absolute;right:3%;bottom:4.5%;display:flex;flex-direction:column;
+    align-items:center;gap:16px}
+  #proj-locallocalpark .llp-rail button{display:flex;flex-direction:column;align-items:center;gap:3px;
+    font-size:10.5px;font-weight:600;min-width:40px}
+  #proj-locallocalpark .llp-rail svg{width:26px;height:26px;display:block;
+    transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+  #proj-locallocalpark .llp-rail button:active svg{transform:scale(.86)}
+  #proj-locallocalpark .llp-like[aria-pressed="true"] svg{color:#ff3040}
+  #proj-locallocalpark .llp-like[aria-pressed="true"] svg path,
+  #proj-locallocalpark .llp-save[aria-pressed="true"] svg path{fill:currentColor}
+  #proj-locallocalpark .llp-like.pop svg{animation:llpPop .35s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes llpPop{40%{transform:scale(1.3)}}
+  /* content swap when the reel in the frame changes: settles in with a small spring */
+  #proj-locallocalpark .llp-ui.swap .llp-meta,
+  #proj-locallocalpark .llp-ui.swap .llp-rail{opacity:0;transform:translateY(12px);transition:none}
+  #proj-locallocalpark .llp-meta,#proj-locallocalpark .llp-rail{
+    transition:opacity .35s ease,transform .5s cubic-bezier(.34,1.56,.64,1)}
+  #proj-locallocalpark .llp-panel{position:absolute;left:0;right:0;bottom:0;padding:18px 18px 22px;
+    background:#1c1c1e;border-radius:16px 16px 0 0;transform:translateY(105%);
+    transition:transform .4s cubic-bezier(.2,.9,.3,1);text-align:center;font-size:13px}
+  #proj-locallocalpark .llp-panel.open{transform:none}
+  #proj-locallocalpark .llp-panel p{margin:0 0 14px;color:rgba(255,255,255,.75)}
+  #proj-locallocalpark .llp-panel a{display:inline-block;padding:8px 16px;border-radius:9px;background:#fff;
+    color:#111;text-decoration:none;font-weight:600}
+  #proj-locallocalpark .llp-panel-x{position:absolute;right:12px;top:10px;font-size:20px !important;line-height:1}
+  #proj-locallocalpark .llp-toast{position:absolute;left:50%;top:12%;transform:translate(-50%,-6px);
+    padding:6px 12px;border-radius:8px;background:rgba(0,0,0,.7);font-size:12px;opacity:0;
+    transition:opacity .2s ease,transform .2s ease;pointer-events:none;white-space:nowrap}
+  #proj-locallocalpark .llp-toast.on{opacity:1;transform:translate(-50%,0)}
+  /* phones (no frame): full-bleed reels, same interface */
+  @media(max-width:699px){
+    #proj-locallocalpark .llp-phone,#proj-locallocalpark .llp-phone-shadow{display:none}
+  }
+  @media(prefers-reduced-motion:reduce){
+    #proj-locallocalpark .llp-meta,#proj-locallocalpark .llp-rail,#proj-locallocalpark .llp-panel,
+    #proj-locallocalpark .llp-glyph,#proj-locallocalpark .llp-rail svg,#proj-locallocalpark .llp-reel video{transition:none}
+    #proj-locallocalpark .llp-heart-fly,#proj-locallocalpark .llp-like.pop svg{animation:none;display:none}
+  }
+  /* ===== /LLP REELS ===== */
   .hs-layout .hs-reveal{opacity:0;transform:translateY(34px);
     transition:opacity .7s ease, transform .8s cubic-bezier(.16,1,.3,1)}
   .hs-layout .hs-reveal.in{opacity:1;transform:none}
@@ -2944,19 +3047,54 @@
             poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/4e5e8e41b491b76c5cdb360e79266395/thumbnails/thumbnail.jpg?width=1280"
             style="aspect-ratio:1756/1080" muted loop playsinline preload="none"></video>
         </div>
+      </div>
 
-        <!-- DRAFT: extended bottom. Placeholder slots for new content. -->
-        <div class="llp-ext">
-          <p class="llp-ext-label">More — in progress</p>
-          <div class="llp-slot is-text">Text block</div>
-          <div class="llp-slot is-wide">Wide image / video (16:9)</div>
-          <div class="llp-slot-pair">
-            <div class="llp-slot">Image (4:5)</div>
-            <div class="llp-slot">Image (4:5)</div>
+      <!-- LLP REELS (draft): built by the "LLP REELS" script from its REELS list. -->
+      <div class="llp-reels" aria-roledescription="reel player" aria-label="Local Local Park reels">
+        <div class="llp-reels-stage">
+          <div class="llp-reels-col"></div>
+          <div class="llp-phone-shadow" aria-hidden="true"></div>
+          <div class="llp-screen"></div>
+          <div class="llp-phone" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="llp-ui">
+            <button class="llp-tap" type="button" data-reel="tap" aria-label="Pause"></button>
+            <div class="llp-glyph" aria-hidden="true"></div>
+            <div class="llp-meta">
+              <div class="llp-who">
+                <img class="llp-av" alt="" width="30" height="30">
+                <a class="llp-handle" target="_blank" rel="noopener"></a>
+                <button class="llp-follow" type="button" data-reel="follow" aria-pressed="false">Follow</button>
+              </div>
+              <p class="llp-cap"></p>
+              <button class="llp-more" type="button" data-reel="more" aria-expanded="false">more</button>
+              <div><span class="llp-audio"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 18.5a2.5 2.5 0 1 1-2.5-2.5c.53 0 1.02.16 1.5.45V5.2l11-2.2v12.5a2.5 2.5 0 1 1-2.5-2.5c.53 0 1.02.16 1.5.45V7.4l-9 1.8v9.3z"/></svg><span class="llp-audio-t"></span></span></div>
+            </div>
+            <div class="llp-rail">
+              <button class="llp-like" type="button" data-reel="like" aria-pressed="false" aria-label="Like">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 20.3 4.6 13a4.7 4.7 0 0 1 6.6-6.7l.8.8.8-.8A4.7 4.7 0 0 1 19.4 13z"/></svg>
+                <span class="llp-n" data-n="likes"></span></button>
+              <button class="llp-comment" type="button" data-reel="comment" aria-label="Comments" aria-expanded="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M20.5 11.6a8.4 8.4 0 0 1-12.2 7.5L3.5 20.5l1.4-4.6a8.4 8.4 0 1 1 15.6-4.3z"/></svg>
+                <span class="llp-n" data-n="comments"></span></button>
+              <button class="llp-share" type="button" data-reel="share" aria-label="Share">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M21 3.5 3 10.2l7.4 3.1L13.6 21z"/><path d="m10.4 13.3 5.3-5.3"/></svg>
+                <span>Share</span></button>
+              <button class="llp-save" type="button" data-reel="save" aria-pressed="false" aria-label="Save">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 3.5h12v17l-6-4.6-6 4.6z"/></svg></button>
+              <button class="llp-mute" type="button" data-reel="mute" aria-pressed="true" aria-label="Unmute">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></svg>
+                <span class="llp-mute-t">Muted</span></button>
+            </div>
+            <div class="llp-panel" role="dialog" aria-label="Comments" aria-hidden="true">
+              <button class="llp-panel-x" type="button" data-reel="close" aria-label="Close comments">&times;</button>
+              <p>Comments live on Instagram.</p>
+              <a class="llp-panel-link" target="_blank" rel="noopener" tabindex="-1">View comments on Instagram ↗</a>
+            </div>
+            <div class="llp-toast" role="status" aria-live="polite"></div>
           </div>
-          <div class="llp-slot is-wide">Wide image / video (16:9)</div>
         </div>
       </div>
+      <!-- /LLP REELS -->
     </section>
 <!-- MARTONI SUPER-E: colour grade for Modular Agency. Same .hs-layout template as FROMETO;
      hero is the Stream film. Description and credits still to come. -->
@@ -6187,6 +6325,438 @@
   });
   addEventListener("resize",function(){ galleries.forEach(layout); });
 })();
+</script>
+<script>
+/* ===== LLP REELS (draft) =====
+   A column of reels scrolls behind a phone frame locked in the middle of the window.
+   - Native scrolling throughout: the stage is position:sticky inside the section (which is the
+     page's scroller); scroll position maps 1:1 to the column's offset, so trackpad momentum is
+     never fought. Snapping happens only once scrolling (momentum included) has stopped: a
+     smooth scroll to the next/previous reel in the direction moved. (CSS scroll-snap was tried
+     and dropped: Chrome's proximity snap pulled small scrolls back to the starting reel.)
+   - Add reels by adding entries to REELS. Counts: a number shows it, null hides it. */
+(function(){
+  var sec = document.getElementById("proj-locallocalpark");
+  var root = sec && sec.querySelector(".llp-reels");
+  if(!root) return;
+
+  var STREAM = "https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/";
+  // Reels, in order. Copied from each Instagram post (captions keep their line breaks).
+  // url: the post's own link when known; otherwise the account page is used for comments/share.
+  // cover (optional): a local image shown if Stream has no thumbnail for the video.
+  // Counts: a number shows it (0 shows just the icon); null hides it. Comments include replies.
+  var PARK = { handle:"local.local_park", avatar:"/images/projects/llp-reel-avatar.webp" };
+  var ZS   = { handle:"local.local_zs",   avatar:"/images/projects/llp-reel-avatar-zs.webp" };
+  function reel(acct, d){ d.handle = acct.handle; d.avatar = acct.avatar; return d; }
+  var REELS = [
+    reel(PARK, { stream:"8a5e45ea42b98e6b222669c74e2d4b49", url:"https://www.instagram.com/reel/DXUQPRzE89q/",
+      caption:"爆點在最後...", audio:"Original audio", likes:197, comments:1 }),
+    reel(PARK, { stream:"5b0e031d107e1abdf6f73b25d48fc184", url:null,
+      caption:"Super Local Doe 系列全面調降，帶著Local Local Park的餐點去野餐吧！\n\n👕 非常不熱的遮陽防曬-超輕鬆口袋襯衫：1580\n🥤 外帶飲料不累贅-迷你餐刀多用掛飾：880\n👜可以變單肩包的-百變造型 Belt Bag：1580\n🥐 野餐最大容量超方便-酸種麵包 Tote Bag：1080",
+      audio:"Original audio", likes:71, comments:0 }),
+    reel(PARK, { stream:"cd717d008a71678857f7081671ea4053", url:null,
+      caption:"Threads上45萬人圍觀的披薩盒打拋飯，外賣已經爆單啦😭", audio:"Original audio", likes:56, comments:2 }),
+    reel(ZS, { stream:"3af7975e4a1795453e61cc177848c289", url:null,
+      caption:"最近我們常常收到客人提問：欸？這裡不是Local Local 中山店嗎？\n\n這裡還是Local Local 中山！\n\n我們日前完成品牌全面改裝升級，回歸更質樸的街邊小店樣貌，將空間轉化為台北少見、充滿泰北度假感的「再地清邁茶室」。\n\n我們希望提供中山商圈上班族與逛街人潮的飲食更多選擇，準備了出餐快速、風味道地卻不過於厚重的清邁街頭飯食，讓一個人用餐或三五好友聚餐，都能輕鬆享受熟悉又溫暖的泰北滋味。\n\n八月起也將營業時間延長至晚間九點，滿足晚餐時段的泰式口味用餐需求🥥\n\n#中山美食 #中山餐廳 #泰式料理 #泰式早午餐 #泰式咖啡廳",
+      audio:"Original audio", likes:182, comments:5 }),
+    reel(ZS, { stream:"0ed604b8f3428dd06ea694668885e0d4", url:null,
+      caption:"大概只有我們這邊會在法吐上加希臘優格🤌\n吃起來有甜有脆有奶香有療癒，又沒那麼負擔！\n難怪這道一直穩坐甜點冠軍✨\n\n#中山早午餐 #中山下午茶 #焦糖布里歐 #法式吐司早午餐",
+      audio:"Local Local Coffee 咖啡再地", likes:87, comments:4 }),
+    reel(ZS, { stream:"fbebca987e880fd248e0c55b04224d56", url:null,
+      caption:"在戶外座舒服喝飲料的季節\n🍋🍋\u200d🟩🍓🍒🍑🥭🍍🍐", audio:"Local Local Coffee 咖啡再地", likes:32, comments:0 })
+  ];
+  REELS.forEach(function(d){ d.link = d.url || ("https://www.instagram.com/" + d.handle + "/"); });
+  var N = REELS.length;
+
+  var stage = root.querySelector(".llp-reels-stage"), col = root.querySelector(".llp-reels-col");
+  var ui = root.querySelector(".llp-ui"), meta = ui.querySelector(".llp-meta");
+  var $ = function(s){ return ui.querySelector(s); };
+  var glyph = $(".llp-glyph"), panel = $(".llp-panel"), toastEl = $(".llp-toast");
+  var mqReduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+  var ICON = {
+    play:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M8 5.5v13l10.5-6.5z"/></svg>',
+    pause:'<svg viewBox="0 0 24 24" fill="#fff"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>',
+    muted:'<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="m16 9.5 5 5m0-5-5 5"/>',
+    sound:'<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>',
+    heart:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.3 4.6 13a4.7 4.7 0 0 1 6.6-6.7l.8.8.8-.8A4.7 4.7 0 0 1 19.4 13z"/></svg>'
+  };
+
+  // ---- build the column from the data list ----
+  // Each reel exists twice: in the stack behind the phone (dimmed neighbours, gaps at rest) and
+  // inside the phone screen, where reels always sit edge to edge like Instagram, so no gap can
+  // ever show inside the frame. The video plays in the screen copy.
+  var screen = root.querySelector(".llp-screen");
+  function cover(d, el){
+    var img = document.createElement("img");
+    img.alt = ""; img.decoding = "async"; img.draggable = false;
+    // Fill the tall phone screen like Instagram does with a vertical reel (crops the sides a
+    // little); anything not close to vertical (e.g. 4:5, landscape) is shown whole instead.
+    img.addEventListener("load", function(){
+      el.classList.toggle("is-fill", img.naturalWidth / img.naturalHeight <= 0.6);
+    });
+    // a video Stream is still processing can 404 the resized thumbnail: fall back to the plain one;
+    // a video Stream doesn't have yet has no thumbnail at all: use the reel's own cover if given
+    img.addEventListener("error", function(){
+      if(img.src.indexOf("?") > -1) img.src = STREAM + d.stream + "/thumbnails/thumbnail.jpg";
+      else if(d.cover && img.src.indexOf(d.cover) < 0) img.src = d.cover;
+    });
+    img.src = STREAM + d.stream + "/thumbnails/thumbnail.jpg?height=1280";
+    el.appendChild(img);
+    return el;
+  }
+  function reelEl(d, parent, cls){
+    var el = document.createElement("div");
+    el.className = "llp-reel " + cls; el.setAttribute("aria-hidden", "true");
+    parent.appendChild(cover(d, el));
+    return el;
+  }
+  var reels = REELS.map(function(d){
+    return { d:d, out:reelEl(d, col, "llp-reel-out"), el:reelEl(d, screen, "llp-reel-in"), v:null, failed:false };
+  });
+
+  // ---- state ----
+  var muted = true;                     // kept across reels
+  var cur = -1, paused = false, userStarted = false;
+  var liked = false, saved = false, following = false;
+  var L = { pitch:1, H:0, rootH:0 };    // layout numbers
+  var lastWant = null, lastCur = -1, ticking = false;
+
+  // ---- layout (ResizeObserver -> rAF) ----
+  function layout(){
+    var W = sec.clientWidth, H = sec.clientHeight;
+    if(!W || !H) { update(); return; }
+    // if a reel is in the frame, keep that same reel in the frame after the resize
+    var keep = null;
+    if(L.H && L.pitch > 1){ var r0 = progress(); if(r0 > -0.02 && r0 < N - 1 + 0.02) keep = Math.max(0, Math.min(N - 1, Math.round(r0))); }
+    var sw, sh, bz, rad, pitch;
+    if(W >= 700){                       // phone frame
+      sh = Math.round(Math.min(H * 0.8, 900)); sw = Math.round(sh * 9 / 19.5);
+      bz = Math.max(8, Math.round(sw * 0.035)); rad = Math.round(sw * 0.14);
+      pitch = sh + bz * 2 + Math.round(Math.max(28, H * 0.05));
+    } else {                            // phones: no frame, full-bleed reels
+      sw = W; sh = H; bz = 0; rad = 0; pitch = H;
+    }
+    var s = root.style;
+    s.setProperty("--sw", sw + "px"); s.setProperty("--sh", sh + "px");
+    s.setProperty("--bz", bz + "px"); s.setProperty("--rad", rad + "px");
+    s.setProperty("--stage-h", H + "px");
+    L.pitch = pitch; L.H = H; L.rootH = H + (N - 1) * pitch;
+    L.S = sh; L.G = pitch - sh;   // reel step when touching, and the extra gap at rest
+    s.height = L.rootH + "px";
+    if(keep !== null){ sec.scrollTo({ top: Math.round(sec.scrollTop + rootTop() + keep * pitch), behavior: "instant" }); }
+    update();
+  }
+  if("ResizeObserver" in window){
+    var roRaf = 0;
+    new ResizeObserver(function(){ cancelAnimationFrame(roRaf); roRaf = requestAnimationFrame(layout); }).observe(sec);
+  } else { addEventListener("resize", function(){ requestAnimationFrame(layout); }); }
+
+  // ---- scroll -> column (rAF) ----
+  function rootTop(){ return root.getBoundingClientRect().top - sec.getBoundingClientRect().top; }
+  function progress(){ return -rootTop() / L.pitch; }      // 0 = first reel locked in, N-1 = last
+  function update(){
+    ticking = false;
+    var live = sec.classList.contains("is-active") && sec.clientHeight > 0;
+    var top = live ? rootTop() : 0;
+    var raw = -top / L.pitch, p = Math.max(0, Math.min(N - 1, raw));
+    // within a pixel of a reel: sit exactly on it (scroll offsets can be fractional)
+    if(Math.abs(p - Math.round(p)) * L.pitch < 1) p = Math.round(p);
+    P = p;
+    // moving between reels inside the locked range -> close the gaps so reels touch in the frame
+    var moving = live && raw > 0 && raw < N - 1 && Math.abs(p - Math.round(p)) * L.pitch >= 1;
+    gTarget = moving ? 0 : 1;
+    if(mqReduce.matches) g = gTarget;
+    render();
+    if(g !== gTarget && !gRaf){ gT0 = performance.now(); gRaf = requestAnimationFrame(gStep); }
+    var idx = Math.round(p);
+    if(idx !== cur) setActive(idx);
+    // play only once the phone is locked and the reel sits exactly in the frame (not while moving)
+    var px = raw * L.pitch, snapped = live && !document.hidden &&
+      px > -1 && px < (N - 1) * L.pitch + 1 && Math.abs(px - Math.round(raw) * L.pitch) < 1;
+    var want = snapped && !paused && (!mqReduce.matches || userStarted);
+    if(want !== lastWant || cur !== lastCur){ lastWant = want; lastCur = cur; syncPlay(want); }
+  }
+  // Reel positions. Spacing = screen height + gap * g: at rest (g=1) the stack shows gaps
+  // around the phone; while moving (g=0) the next reel rides directly under the current one,
+  // like Instagram. g eases quickly between the two so the next reel "catches up".
+  var P = 0, g = 1, gTarget = 1, gRaf = 0, gT0 = 0;
+  function gStep(now){
+    var dt = Math.min(50, now - gT0); gT0 = now;
+    var tau = gTarget < g ? 45 : 110;                 // close fast, open a little softer
+    g += (gTarget - g) * (1 - Math.exp(-dt / tau));
+    if(Math.abs(gTarget - g) < 0.002) g = gTarget;
+    render();
+    gRaf = g !== gTarget ? requestAnimationFrame(gStep) : 0;
+  }
+  function render(){
+    var step = L.S + g * L.G;
+    reels.forEach(function(r, i){
+      var d = i - P, so = r.out.style, si = r.el.style;
+      // stack copy (outside the phone): gaps at rest, closing up while moving; dimmed at rest
+      if(Math.abs(d) > 2.5) so.visibility = "hidden";
+      else {
+        so.visibility = "";
+        so.transform = "translate3d(0," + (d * step).toFixed(2) + "px,0)";
+        so.opacity = String(1 - Math.min(1, Math.abs(d)) * 0.65 * g);
+      }
+      // screen copy (inside the phone): always edge to edge
+      if(Math.abs(d) >= 1.5) si.visibility = "hidden";
+      else { si.visibility = ""; si.transform = "translate3d(0," + (d * L.S).toFixed(2) + "px,0)"; }
+    });
+  }
+  var lastST = 0, lastDir = 0;
+  function onScroll(){
+    var st = sec.scrollTop;
+    if(st !== lastST){ lastDir = st > lastST ? 1 : -1; lastST = st; }
+    if(!ticking){ ticking = true; requestAnimationFrame(update); }
+    gestureTrack();
+  }
+  sec.addEventListener("scroll", onScroll, { passive:true });
+  document.addEventListener("visibilitychange", function(){ lastWant = null; update(); });
+
+  // ---- snapping safety net: settle on a reel once scrolling stops ----
+  var scrolling = false, startIdx = 0, idleT = 0, settlingTo = null;
+  var hasScrollEnd = "onscrollend" in window;
+  function gestureTrack(){
+    if(!scrolling){
+      scrolling = true;
+      var sr = progress();
+      // a gesture that began outside the locked range snaps to the nearest reel
+      startIdx = (sr < -0.002 || sr > N - 1 + 0.002) ? null : (cur < 0 ? 0 : cur);
+    }
+    if(!hasScrollEnd){ clearTimeout(idleT); idleT = setTimeout(settle, 160); }
+  }
+  if(hasScrollEnd) sec.addEventListener("scrollend", settle);
+  // new input while a snap is animating: the person wins, the snap is dropped
+  ["wheel", "touchstart"].forEach(function(ev){
+    sec.addEventListener(ev, function(){
+      if(settlingTo === null) return;
+      settlingTo = null; scrolling = false; startIdx = null;
+      clearTimeout(idleT); idleT = setTimeout(function(){ if(!scrolling) settle(); }, 450); // a tap with no scroll still lands on a reel
+    }, { passive:true });
+  });
+  function settle(){
+    scrolling = false;
+    if(!sec.classList.contains("is-active")) return;
+    var raw = progress();
+    if(raw < 0 || raw > N - 1) { settlingTo = null; return; }            // outside the locked range: normal page
+    var near = Math.round(raw), target;
+    if(settlingTo !== null) target = settlingTo;                      // finishing our own snap
+    else if(startIdx === null || Math.abs(raw - near) * L.pitch < 12) target = near; // entered from outside / jitter
+    else target = lastDir > 0 ? Math.ceil(raw) : Math.floor(raw);    // onward in the direction moved: small scrolls change reel, never a tug back
+    target = Math.max(0, Math.min(N - 1, target));
+    if(Math.abs(raw - target) * L.pitch < 1){ settlingTo = null; return; }
+    settlingTo = target; goTo(target);
+  }
+  function goTo(i){
+    var y = sec.scrollTop + rootTop() + i * L.pitch;
+    sec.scrollTo({ top: Math.round(y), behavior: mqReduce.matches ? "auto" : "smooth" });
+  }
+
+  // ---- video: only the reel in the frame plays; neighbours preload; others unloaded ----
+  function attach(r){
+    if(r.v || r.failed || !window._hsStream) return;
+    var v = document.createElement("video");
+    // every reel but the last moves on to the next when it ends; the last one loops
+    var last = reels.indexOf(r) === N - 1;
+    v.muted = true; v.loop = last; v.playsInline = true; v.preload = "auto";
+    v.setAttribute("muted", ""); v.setAttribute("playsinline", "");
+    if(last) v.setAttribute("loop", "");
+    v.addEventListener("playing", function(){ if(!r.failed) v.style.opacity = "1"; });
+    v.addEventListener("ended", function(){
+      var i = reels.indexOf(r);
+      if(i !== cur || i >= N - 1 || paused) return;
+      settlingTo = null; startIdx = i + 1; goTo(i + 1);           // auto-advance to the next reel
+    });
+    v.addEventListener("error", function(){ fail(r); });
+    r.el.insertBefore(v, r.el.children[1] || null);
+    r.v = v;
+    window._hsStream(v, r.d.stream);
+    if(v._hls && window.Hls) v._hls.on(window.Hls.Events.ERROR, function(e, data){ if(data && data.fatal) fail(r); });
+  }
+  function detach(r){
+    if(!r.v) return;
+    var v = r.v; r.v = null;
+    try{ v.pause(); }catch(e){}
+    if(v._hls){ try{ v._hls.destroy(); }catch(e){} }
+    v.removeAttribute("src"); try{ v.load(); }catch(e){}
+    v.remove();
+  }
+  function fail(r){ r.failed = true; if(r.v){ r.v.style.opacity = "0"; detach(r); } }  // cover stays
+  function syncPlay(want){
+    reels.forEach(function(r, i){
+      if(Math.abs(i - cur) <= 1) attach(r); else detach(r);
+      if(!r.v) return;
+      if(i === cur && want){
+        r.v.muted = muted;
+        var pr = r.v.play(); if(pr && pr.catch) pr.catch(function(){});
+      } else if(!r.v.paused){ r.v.pause(); }
+    });
+    showGlyph();
+  }
+
+  // ---- interface ----
+  function fmt(n){ return n >= 1e6 ? (n/1e6).toFixed(1).replace(/\.0$/,"") + "M" : n >= 1e4 ? (n/1e3).toFixed(1).replace(/\.0$/,"") + "K" : String(n); }
+  function setCounts(){
+    var d = REELS[cur];
+    ui.querySelectorAll("[data-n]").forEach(function(s){
+      var k = s.getAttribute("data-n"), v = d[k];
+      if(v === null || v === undefined || (k === "comments" && v === 0)){ s.hidden = true; return; }
+      s.hidden = false; s.textContent = fmt(v + (k === "likes" && liked ? 1 : 0));
+    });
+  }
+  function setPressed(sel, on, label){
+    var b = $(sel); b.setAttribute("aria-pressed", on ? "true" : "false");
+    if(label) b.setAttribute("aria-label", label);
+    return b;
+  }
+  function setMuteUI(){
+    var b = setPressed(".llp-mute", muted, muted ? "Unmute" : "Mute");
+    b.querySelector("svg").innerHTML = muted ? ICON.muted : ICON.sound;
+    b.querySelector(".llp-mute-t").textContent = muted ? "Muted" : "Sound";
+  }
+  function setPanel(open){
+    panel.classList.toggle("open", open);
+    panel.setAttribute("aria-hidden", open ? "false" : "true");
+    panel.querySelector("a").tabIndex = open ? 0 : -1;
+    panel.querySelector("button").tabIndex = open ? 0 : -1;
+    $(".llp-comment").setAttribute("aria-expanded", open ? "true" : "false");
+  }
+  function setCaption(open){
+    meta.classList.toggle("is-open", open);
+    var m = $(".llp-more"); m.textContent = open ? "less" : "more"; m.setAttribute("aria-expanded", open ? "true" : "false");
+  }
+  var glyphT = 0;
+  function showGlyph(flash){
+    clearTimeout(glyphT);
+    var stopped = paused || (mqReduce.matches && !userStarted);
+    glyph.innerHTML = stopped ? ICON.play : ICON.pause;
+    glyph.classList.toggle("on", stopped || !!flash);
+    if(flash && !stopped) glyphT = setTimeout(function(){ glyph.classList.remove("on"); }, 550);
+    $(".llp-tap").setAttribute("aria-label", stopped ? "Play" : "Pause");
+  }
+  function setActive(i){
+    cur = i;
+    var d = REELS[i];
+    // reset per-reel state (mute is kept)
+    liked = saved = following = false; paused = false;
+    setPressed(".llp-like", false); setPressed(".llp-save", false);
+    var f = setPressed(".llp-follow", false); f.textContent = "Follow";
+    setPanel(false); setCaption(false);
+    $(".llp-av").src = d.avatar;
+    var h = $(".llp-handle"); h.textContent = d.handle; h.href = "https://www.instagram.com/" + d.handle + "/";
+    $(".llp-cap").textContent = d.caption;
+    $(".llp-audio-t").textContent = d.audio + " · " + d.handle;
+    var pl = panel.querySelector("a"); pl.href = d.link;
+    pl.textContent = d.url ? "View comments on Instagram \u2197" : "Open @" + d.handle + " on Instagram \u2197";
+    setCounts(); setMuteUI();
+    // "more" only when the caption is clamped
+    var cap = $(".llp-cap"); meta.classList.toggle("has-more", cap.scrollHeight > cap.clientHeight + 1);
+    // settle-in motion for the new reel's interface
+    if(!mqReduce.matches){
+      ui.classList.add("swap"); void ui.offsetWidth;
+      requestAnimationFrame(function(){ ui.classList.remove("swap"); });
+    }
+    reels.forEach(function(r, j){ r.el.setAttribute("aria-hidden", j === i ? "false" : "true"); });
+    stage.setAttribute("aria-label", "Reel " + (i + 1) + " of " + N);
+  }
+
+  function toast(msg){
+    toastEl.textContent = msg; toastEl.classList.add("on");
+    clearTimeout(toast.t); toast.t = setTimeout(function(){ toastEl.classList.remove("on"); }, 1600);
+  }
+  function like(on){
+    liked = on; setPressed(".llp-like", on, on ? "Unlike" : "Like"); setCounts();
+    if(on && !mqReduce.matches){ var b = $(".llp-like"); b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); }
+  }
+  function flyHeart(x, y){
+    if(mqReduce.matches) return;
+    var hEl = document.createElement("div"); hEl.className = "llp-heart-fly"; hEl.innerHTML = ICON.heart;
+    hEl.style.left = x + "px"; hEl.style.top = y + "px";
+    ui.appendChild(hEl);
+    hEl.addEventListener("animationend", function(){ hEl.remove(); });
+  }
+  function togglePause(){
+    if(mqReduce.matches && !userStarted){ userStarted = true; paused = false; }
+    else paused = !paused;
+    lastWant = null; update(); showGlyph(true);
+  }
+  function share(){
+    var url = REELS[cur].link;
+    if(navigator.share){
+      navigator.share({ title:"@" + REELS[cur].handle + " on Instagram", url:url }).catch(function(){});
+      return;
+    }
+    copy(url);
+  }
+  function copy(url){
+    function done(){ toast("Link copied"); }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(done, function(){ legacyCopy(url) ? done() : toast(url); });
+    } else { legacyCopy(url) ? done() : toast(url); }
+  }
+  function legacyCopy(t){
+    var ta = document.createElement("textarea"); ta.value = t; ta.setAttribute("readonly", "");
+    ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select();
+    var ok = false; try{ ok = document.execCommand("copy"); }catch(e){}
+    ta.remove(); return ok;
+  }
+
+  // one delegated listener (same idea as the site's data-nav pattern)
+  var tapT = 0, lastTap = 0, lastXY = null;
+  ui.addEventListener("click", function(e){
+    var t = e.target.closest("[data-reel]"); if(!t || cur < 0) return;
+    var act = t.getAttribute("data-reel");
+    if(act === "tap"){
+      if(panel.classList.contains("open")){ setPanel(false); return; }
+      if(e.detail === 0){ togglePause(); return; }              // keyboard: no double-tap wait
+      var r = ui.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, now = Date.now();
+      if(now - lastTap < 300 && lastXY && Math.abs(x - lastXY[0]) < 40 && Math.abs(y - lastXY[1]) < 40){
+        clearTimeout(tapT); lastTap = 0;
+        if(!liked) like(true);
+        flyHeart(x, y);
+        return;
+      }
+      lastTap = now; lastXY = [x, y];
+      clearTimeout(tapT); tapT = setTimeout(togglePause, 260);
+    }
+    else if(act === "like") like(!liked);
+    else if(act === "save"){ saved = !saved; setPressed(".llp-save", saved, saved ? "Remove from saved" : "Save"); }
+    else if(act === "follow"){ following = !following; setPressed(".llp-follow", following).textContent = following ? "Following" : "Follow"; }
+    else if(act === "more") setCaption(!meta.classList.contains("is-open"));
+    else if(act === "comment"){ var o = !panel.classList.contains("open"); setPanel(o); if(o) panel.querySelector("a").focus({preventScroll:true}); }
+    else if(act === "close"){ setPanel(false); $(".llp-comment").focus({preventScroll:true}); }
+    else if(act === "share") share();
+    else if(act === "mute"){
+      muted = !muted; setMuteUI();
+      var rr = reels[cur]; if(rr && rr.v) rr.v.muted = muted;
+    }
+  });
+  ui.addEventListener("dblclick", function(e){ if(e.target.closest("[data-reel=tap]")) e.preventDefault(); });
+
+  // keyboard: arrows / Page Up/Down move a reel while the frame is locked; never traps
+  document.addEventListener("keydown", function(e){
+    if(!sec.classList.contains("is-active") || e.altKey || e.metaKey || e.ctrlKey) return;
+    if(/INPUT|TEXTAREA|SELECT/.test((e.target || {}).tagName || "")) return;
+    var dir = (e.key === "ArrowDown" || e.key === "PageDown") ? 1 : (e.key === "ArrowUp" || e.key === "PageUp") ? -1 : 0;
+    if(!dir) return;
+    var raw = progress();
+    if(raw < -0.01 || raw > N - 1 + 0.01) return;                // not locked: normal scrolling
+    var next = Math.round(raw) + dir;
+    e.preventDefault(); settlingTo = null;
+    if(next < 0 || next > N - 1){                                // past the ends: the page scrolls on
+      var step = /Page/.test(e.key) ? L.H * 0.85 : 120;
+      sec.scrollBy({ top: dir * step, behavior: mqReduce.matches ? "auto" : "smooth" });
+      return;
+    }
+    startIdx = next; goTo(next);
+  });
+  if(mqReduce.addEventListener) mqReduce.addEventListener("change", function(){ lastWant = null; update(); });
+
+  window.__llpReels = { reels:reels, data:REELS, L:L, get cur(){ return cur; }, get muted(){ return muted; }, progress:progress };
+  if(sec.clientHeight) layout();
+})();
+/* ===== /LLP REELS ===== */
 </script>
 </body>
 </html>
