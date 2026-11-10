@@ -150,12 +150,18 @@
     opacity:0;display:none;transition:opacity .35s ease}
   .tile.blur-on .blur{display:block}
   .tile.hov{background:rgba(237,234,227,.07);box-shadow:inset 0 0 0 1px rgba(237,234,227,.10),inset 0 1px 0 rgba(237,234,227,.22)}
-  .tile.hov .blur{opacity:.42}
+  .tile.hov .blur{opacity:.25}
   .tile.hov .cap{color:var(--paper)}
   .tile .cap{transition:color .3s ease}
   .tile.kfocus{box-shadow:inset 0 0 0 1px var(--paper)}
   .vignette{position:absolute;inset:0;pointer-events:none;
     background:radial-gradient(ellipse at center,transparent 38%,rgba(11,11,12,.25) 62%,rgba(11,11,12,.85) 92%,var(--ink) 100%)}
+  /* Edge distortion (?edge=1): WebGL draws the wall; the HTML tiles stay laid out but invisible
+     (they still take clicks and keyboard focus). The vignette is lighter so the bent edges show. */
+  .wall-gl{position:absolute;left:0;top:0;width:100%;height:100%;display:none;pointer-events:none}
+  .wall.gl-on .wall-gl{display:block}
+  .wall.gl-on .stage{opacity:0}
+  .wall.gl-on .vignette{background:radial-gradient(ellipse at center,transparent 55%,rgba(11,11,12,.22) 80%,rgba(11,11,12,.6) 100%)}
 
   .hud{position:fixed;left:0;right:0;bottom:0;z-index:30;pointer-events:none;
     display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
@@ -412,9 +418,15 @@
   /* =====================================================================
      WALL
      ===================================================================== */
-  var CURVE_DEG = 15, CURVE_R = 1.45, FADE = 0.30, FADE_MIN = 0.66;
+  var CURVE_DEG = 25, CURVE_R = 1.45, FADE = 0.30, FADE_MIN = 0.66;
   var PAR = 0.08, PAR_TAU = 200, THRESH = 6, FRICTION = 0.95, VMAX = 4, VSTOP = 0.012;
   var HOLD_MS = 170, ZOOM_OUT = 0.78, ZOOM_OUT_TAU = 110, ZOOM_IN_TAU = 170;
+  // Speed zoom: dragging or throwing fast pulls the wall back to show more of the grid, and it
+  // settles back to full size as the motion slows. Speeds are px per ms on a ~800px screen
+  // (scaled up on smaller screens, so a phone flick counts as fast). The speed reading jumps up
+  // at once and decays over SPEED_DECAY ms, so even a short flick visibly pulls back.
+  var SPEED_ZOOM = 0.7, SPEED_V0 = 0.6, SPEED_V1 = 2.0, SPEED_DECAY = 260, SPEED_ZOOM_IN_TAU = 320;
+  var dragSpeed = 0, zoomBySpeed = false;
   var PINCH_MIN = 0.5, PINCH_MAX = 1.2, GLIDE_TAU = 130, MARGIN = 110, TAP_MAX_MS = 500;
 
   var wall = document.getElementById("wall"), stage = document.getElementById("stage");
@@ -494,6 +506,7 @@
     if(oldCW){ camX *= CW / oldCW; camY *= CH / oldCH; }
     releaseAll();
     dirty = true;
+    Edge.layout();
   }
   function itemCenter(c, r){ return { x: c * CW, y: r * CH }; }
 
@@ -547,6 +560,7 @@
       fs.width = iw + "px"; fs.height = ih + "px";
       fs.left = (PADC + Math.round((BOXW - iw) / 2)) + "px";
       fs.top = (PADC + Math.round((BOXH - ih) / 2)) + "px";
+      t.fx = PADC + Math.round((BOXW - iw) / 2); t.fy = PADC + Math.round((BOXH - ih) / 2); t.fw = iw; t.fh = ih;
       t.cn.textContent = it.name; t.cy.textContent = it.year;
       t.el.classList.remove("ready", "instant");
       var pc = preload(idx);
@@ -581,6 +595,7 @@
         t.seen = gen;
         var sx = W / 2 + (c * CW - camX) * s + px;
         t.el.style.transform = "translate3d(" + (sx - CW / 2).toFixed(2) + "px," + ty + tail;
+        t.gx = sx - CW / 2; t.gy = sy - CH / 2; t.gz = z; t.gth = th * d2r; t.gop = op;   // same placement, for WebGL
         if(Math.abs(op - t.op) > 0.004){ t.el.style.opacity = op.toFixed(3); t.op = op; }
         var isKf = key === kfKey;
         if(isKf !== t.kf){ t.el.classList.toggle("kfocus", isKf); t.kf = isKf; }
@@ -595,6 +610,325 @@
     for(var r = Math.floor((camY - hh) / CH); r <= Math.ceil((camY + hh) / CH); r++)
       for(var c = Math.floor((camX - hw) / CW); c <= Math.ceil((camX + hw) / CW); c++) preload(itemAt(c, r));
   }
+
+  /* =====================================================================
+     EDGE DISTORTION (WebGL). ?edge=1 (default) draws the wall with a small WebGL renderer
+     and bends it toward the screen edges; ?edge=0 is the plain CSS wall.
+     The HTML tiles keep doing everything else: they stay laid out (invisible) for
+     hit-testing and keyboard focus, and clicks/hover are mapped through the same bend
+     so they land on the cover that is visible under the cursor.
+     If WebGL is unavailable, fails, or the context is lost, the CSS wall shows instead.
+     ===================================================================== */
+  var EDGE = {
+    START: 0.66,      // where the bend begins: 0 = centre, 1 = screen edge (rounded-rectangle distance)
+    ROUND: 4.0,       // shape of the clean centre: 2 = ellipse, 4 = rounded rectangle, 12+ ≈ square
+    STRENGTH: 1.7,    // how hard the outer band stretches (stretch at the very edge ≈ e^STRENGTH)
+    RGB: 0.012,       // RGB split; grows toward the edges and is strongest in the corners
+    SPEED: 0.3,       // extra bend at full drag/throw speed (0 = no speed response)
+    SPEED_REF: 2.0,   // drag speed (same measure as the speed zoom) that counts as "full speed"
+    SPEED_UP: 90, SPEED_DOWN: 450,   // ms to ease into / back out of the speed bend
+    REDUCED: 0.35,    // strength with prefers-reduced-motion (speed response is always off then)
+    DPR_MAX: 2        // device-pixel-ratio cap for the canvas
+  };
+  var EDGE_ON = !/(^|[?&])edge=0(&|$)/.test(location.search.slice(1));
+
+  var Edge = (function(){
+    var api = { on:false };
+    var canvas = null, gl = null, inited = false, lost = false;
+    var progT = null, progP = null, quad = null, fbo = null, fboTex = null, fbW = 0, fbH = 0;
+    var dpr = 1, TEX = 512, tex = [], texT = [], blurTex = [], capTex = [], capW = 0, capH = 0, capFs = 0;
+    var needTiles = true, needPost = true, boost = 0;
+    var cPaper = [237/255, 234/255, 227/255], cGrey = [128/255, 128/255, 128/255], cInk = [11/255, 11/255, 12/255];
+    var cFrame = [21/255, 21/255, 22/255], LINE_A = 0.14;
+    var up = document.createElement("canvas"), upx = up.getContext("2d");
+
+    var VS_T = [
+      "attribute vec2 aP;",
+      "uniform vec2 uView, uCell; uniform vec4 uT; uniform float uS, uPer;",
+      "varying vec2 vL;",
+      "void main(){",
+      "  vec2 l = aP * uCell; vL = l;",
+      "  vec2 c = (l - uCell * 0.5) * uS;",                       // transform-origin: centre; scale(s)
+      "  float y = c.y * cos(uT.w), z = uT.z + c.y * sin(uT.w);", // rotateX(θ), then translateZ
+      "  vec2 w = vec2(uT.x + uCell.x * 0.5 + c.x, uT.y + uCell.y * 0.5 + y);",
+      "  float d = uPer / (uPer - z);",                             // CSS perspective, origin at the centre
+      "  vec2 sc = uView * 0.5 + (w - uView * 0.5) * d;",
+      "  vec2 ndc = vec2(sc.x / uView.x * 2.0 - 1.0, 1.0 - sc.y / uView.y * 2.0);",
+      "  gl_Position = vec4(ndc / d, 0.0, 1.0 / d);",               // homogeneous w → perspective-correct textures
+      "}"].join("\n");
+    var FS_T = [
+      "precision highp float;",
+      "uniform vec2 uCell; uniform vec4 uFrame, uCapR, uBlurM, uSt; uniform vec2 uBlurPx;",
+      "uniform sampler2D uImg, uBlur, uCap; uniform vec3 uPaper, uGrey, uFrameCol; uniform float uLineA, uAA, uHasImg, uMask;",
+      "varying vec2 vL;",
+      "vec4 over(vec4 d, vec4 s){ return s + d * (1.0 - s.a); }",
+      "void main(){",
+      "  vec2 l = vL; float hov = uSt.x;",
+      "  vec4 c = vec4(0.0, 0.0, 0.0, 0.1);",                                         // cell background
+      "  c = over(c, vec4(uPaper * 0.07 * hov, 0.07 * hov));",                         // hover glass tint
+      "  if(hov > 0.002 && uHasImg > 0.5){",                                            // blurred copy behind the cover
+      "    vec2 bu = l * uBlurM.xy + uBlurM.zw; vec3 b = vec3(0.0);",
+      "    for(int i = -2; i <= 2; i++) for(int j = -2; j <= 2; j++) b += texture2D(uBlur, bu + vec2(float(i), float(j)) * uBlurPx).rgb;",
+      "    b /= 25.0; float L = dot(b, vec3(0.2126, 0.7152, 0.0722)); b = max(mix(vec3(L), b, 1.2), 0.0);",
+      "    float a = 0.25 * hov; c = over(c, vec4(b * a, a));",
+      "  }",
+      "  vec2 hs = uFrame.zw * 0.5, q = abs(l - uFrame.xy - hs) - hs + 4.0;",          // rounded frame (4px)
+      "  float sd = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - 4.0;",
+      "  float fa = clamp(0.5 - sd / uAA, 0.0, 1.0);",
+      "  if(uMask > 0.5){ gl_FragColor = vec4(0.0, 0.0, 0.0, fa * uHasImg * uSt.z); return; }",   // image mask for the RGB split
+      "  if(fa > 0.0){",
+      "    vec3 im = uFrameCol;",
+      "    if(uHasImg > 0.5) im = mix(uFrameCol, texture2D(uImg, (l - uFrame.xy) / uFrame.zw).rgb, uSt.z);",
+      "    c = over(c, vec4(im * fa, fa));",
+      "  }",
+      "  vec2 cu = (l - uCapR.xy) / uCapR.zw;",                                          // caption
+      "  if(cu.x >= 0.0 && cu.x <= 1.0 && cu.y >= 0.0 && cu.y <= 1.0){",
+      "    float ta = texture2D(uCap, cu).a; vec3 tc = mix(uGrey, uPaper, hov); c = over(c, vec4(tc * ta, ta));",
+      "  }",
+      "  vec2 ib = l - 1.0, pb = uCell - 1.0;",                                          // inset shadows inside the border
+      "  float inPad = step(0.0, ib.x) * step(0.0, ib.y);",
+      "  float ring = inPad * max(max(step(ib.x, 1.0), step(ib.y, 1.0)), max(step(pb.x - 1.0, ib.x), step(pb.y - 1.0, ib.y)));",
+      "  float topl = inPad * step(ib.y, 1.0);",
+      "  if(uSt.y > 0.5){ c = over(c, vec4(uPaper * ring, ring)); }",                    // keyboard focus ring
+      "  else if(hov > 0.002){ float a1 = 0.10 * hov * ring, a2 = 0.22 * hov * topl;",
+      "    c = over(c, vec4(uPaper * a2, a2)); c = over(c, vec4(uPaper * a1, a1)); }",
+      "  float ln = max(step(l.x, 1.0), step(l.y, 1.0)) * uLineA;",                      // grid lines: top + left border
+      "  c = over(c, vec4(uPaper * ln, ln));",
+      "  gl_FragColor = c * uSt.w;",                                                    // tile opacity (premultiplied)
+      "}"].join("\n");
+    var VS_P = "attribute vec2 aP; varying vec2 vUv; void main(){ vUv = aP; gl_Position = vec4(aP * 2.0 - 1.0, 0.0, 1.0); }";
+    var FS_P = [
+      "precision highp float;",
+      "uniform sampler2D uTex; uniform float uA, uP, uC, uRGB;",
+      "varying vec2 vUv;",
+      "void main(){",
+      "  vec2 pos = vUv * 2.0 - 1.0, q = max(abs(pos), 1e-5);",
+      "  float r = pow(pow(q.x, uP) + pow(q.y, uP), 1.0 / uP);",          // rounded-rectangle distance
+      "  if(r <= uA){ gl_FragColor = vec4(texture2D(uTex, vUv).rgb, 1.0); return; }",
+      "  float t = (r - uA) / (1.0 - uA);",
+      "  float g = uA + (1.0 - uA) * (uC > 1e-4 ? (1.0 - exp(-uC * t)) / uC : t);",
+      "  vec2 src = pos * (g / r);",                                       // sample nearer the centre → the edge band stretches outward
+      "  float k = uRGB * t * t;",
+      "  vec2 uR = clamp(src * (1.0 + k), -1.0, 1.0) * 0.5 + 0.5;",
+      "  vec2 uB = clamp(src * (1.0 - k), -1.0, 1.0) * 0.5 + 0.5;",
+      "  vec4 mid = texture2D(uTex, src * 0.5 + 0.5);",
+      "  float m = mid.a;",                                                // 1 on cover images, 0 on grid, captions, background
+      "  gl_FragColor = vec4(mix(mid.r, texture2D(uTex, uR).r, m), mid.g, mix(mid.b, texture2D(uTex, uB).b, m), 1.0);",
+      "}"].join("\n");
+
+    function compile(vs, fs){
+      function sh(type, src){ var o = gl.createShader(type); gl.shaderSource(o, src); gl.compileShader(o);
+        if(!gl.getShaderParameter(o, gl.COMPILE_STATUS) && !gl.isContextLost()) throw new Error(gl.getShaderInfoLog(o)); return o; }
+      var p = gl.createProgram();
+      gl.attachShader(p, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(p, sh(gl.FRAGMENT_SHADER, fs));
+      gl.bindAttribLocation(p, 0, "aP"); gl.linkProgram(p);
+      if(!gl.getProgramParameter(p, gl.LINK_STATUS) && !gl.isContextLost()) throw new Error(gl.getProgramInfoLog(p));
+      var u = {}, n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
+      for(var i = 0; i < n; i++){ var a = gl.getActiveUniform(p, i), nm = a.name.replace(/\[0\]$/, ""); u[nm] = gl.getUniformLocation(p, nm); }
+      return { p:p, u:u };
+    }
+    function mkTex(filterMin){
+      var t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filterMin || gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      return t;
+    }
+    function setup(){
+      progT = compile(VS_T, FS_T); progP = compile(VS_P, FS_P);
+      quad = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, quad);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0,0, 1,0, 0,1, 1,1]), gl.STATIC_DRAW);
+      gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+      tex = []; texT = []; blurTex = []; capTex = []; capW = 0; fbW = fbH = 0; fbo = null; fboTex = null;
+      needTiles = needPost = true;
+    }
+    function init(){
+      inited = true;
+      canvas = document.createElement("canvas"); canvas.className = "wall-gl"; canvas.setAttribute("aria-hidden", "true");
+      var attrs = { alpha:false, antialias:false, depth:false, stencil:false, premultipliedAlpha:true, preserveDrawingBuffer:false };
+      try{
+        gl = canvas.getContext("webgl", attrs) || canvas.getContext("experimental-webgl", attrs);
+        if(!gl) return;
+        setup();
+      }catch(err){ gl = null; if(window.console) console.warn("Edge distortion off:", err && err.message); return; }
+      wall.insertBefore(canvas, stage.nextSibling);
+      canvas.addEventListener("webglcontextlost", function(e){ e.preventDefault(); lost = true; setOn(false); }, false);
+      canvas.addEventListener("webglcontextrestored", function(){
+        lost = false;
+        try{ setup(); sizeCanvas(); buildCaptions(); setOn(true); }catch(_){ setOn(false); }
+      }, false);
+      TEX = W * Math.min(window.devicePixelRatio || 1, EDGE.DPR_MAX) >= 1000 ? 512 : 256;
+      setOn(true);
+      if(document.fonts && document.fonts.load){
+        Promise.all([document.fonts.load('500 12px "IBM Plex Mono"'), document.fonts.load('400 12px "IBM Plex Mono"')])
+          .then(function(){ if(gl && !lost){ buildCaptions(); needTiles = true; dirty = true; } }, function(){});
+      }
+    }
+    function setOn(v){
+      api.on = !!v && !!gl && !lost;
+      wall.classList.toggle("gl-on", api.on);
+      needTiles = needPost = true; dirty = true;
+    }
+    function sizeCanvas(){
+      dpr = Math.min(window.devicePixelRatio || 1, EDGE.DPR_MAX);
+      var cw = Math.max(1, Math.round(W * dpr)), ch = Math.max(1, Math.round(H * dpr));
+      if(canvas.width !== cw || canvas.height !== ch){ canvas.width = cw; canvas.height = ch; }
+      if(fbW !== cw || fbH !== ch || !fbo){
+        if(fboTex) gl.deleteTexture(fboTex); if(fbo) gl.deleteFramebuffer(fbo);
+        fboTex = mkTex(); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, cw, ch, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+        fbo = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fboTex, 0);
+        var ok = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        fbW = cw; fbH = ch;
+        if(!ok && !gl.isContextLost()){ gl = null; setOn(false); return; }
+      }
+      needTiles = true;
+    }
+
+    // Captions: one small alpha texture per project, drawn with the page's font and redrawn on relayout.
+    function spaced(ctx, str, x, y, ls){ for(var i = 0; i < str.length; i++){ ctx.fillText(str[i], x, y); x += ctx.measureText(str[i]).width + ls; } return x; }
+    function spacedW(ctx, str, ls){ var w = 0; for(var i = 0; i < str.length; i++) w += ctx.measureText(str[i]).width + ls; return w; }
+    function buildCaptions(){
+      if(!gl) return;
+      capFs = clamp(CW * 0.05, 8.5, 12); capW = CW - 1 - 2 * PADC; capH = Math.ceil(capFs * 1.2);
+      var ls = 0.06 * capFs, fam = '"IBM Plex Mono", monospace';
+      var cv = document.createElement("canvas"), cx = cv.getContext("2d");
+      cv.width = Math.max(1, Math.ceil(capW * dpr)); cv.height = Math.max(1, Math.ceil(capH * dpr));
+      items.forEach(function(it, i){
+        cx.setTransform(1, 0, 0, 1, 0, 0); cx.clearRect(0, 0, cv.width, cv.height); cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        cx.fillStyle = "#fff"; cx.textBaseline = "alphabetic";
+        cx.font = "400 " + capFs + "px " + fam;
+        var mt = cx.measureText("H"), asc = mt.fontBoundingBoxAscent || capFs * 0.8, des = mt.fontBoundingBoxDescent || capFs * 0.25;
+        var base = (capH - (asc + des)) / 2 + asc;
+        var yw = spacedW(cx, it.year, ls);
+        spaced(cx, it.year, capW - yw, base, ls);
+        cx.font = "500 " + capFs + "px " + fam;
+        var nm = it.name.toUpperCase(), maxW = capW - yw - 8;
+        if(spacedW(cx, nm, ls) > maxW){
+          while(nm.length > 1 && spacedW(cx, nm + "…", ls) > maxW) nm = nm.slice(0, -1);
+          nm += "…";
+        }
+        spaced(cx, nm, 0, base, ls);
+        if(!capTex[i]) capTex[i] = mkTex();
+        gl.bindTexture(gl.TEXTURE_2D, capTex[i]);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, cv);
+      });
+      needTiles = true;
+    }
+    // Covers: resampled into a power-of-two texture with mipmaps (sharp when small, never cropped:
+    // the full image is stretched into the square and drawn back at its own proportions).
+    function upload(i){
+      var c = cache[i], im = c && c.img;
+      if(!im || !im.naturalWidth) return false;
+      up.width = up.height = TEX; upx.imageSmoothingEnabled = true; upx.imageSmoothingQuality = "high";
+      upx.drawImage(im, 0, 0, TEX, TEX);
+      tex[i] = mkTex(gl.LINEAR_MIPMAP_LINEAR);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, up);
+      gl.generateMipmap(gl.TEXTURE_2D);
+      up.width = up.height = 32; upx.drawImage(im, 0, 0, 32, 32);
+      blurTex[i] = mkTex(); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, up);
+      up.width = up.height = 1;
+      texT[i] = performance.now();
+      return true;
+    }
+
+    api.layout = function(){
+      if(!EDGE_ON) return;
+      if(!inited) init();
+      if(!gl || lost) return;
+      sizeCanvas(); buildCaptions();
+    };
+    function strength(){
+      var k = reduce ? EDGE.REDUCED : 1;
+      return EDGE.STRENGTH * k * (1 + (reduce ? 0 : boost));
+    }
+    // Screen point → the point of the (undistorted) wall that is drawn there.
+    api.src = function(x, y){
+      if(!api.on || !W || !H) return { x:x, y:y };
+      var a = EDGE.START, p = EDGE.ROUND, c = strength();
+      var u = x / W * 2 - 1, v = y / H * 2 - 1;
+      var r = Math.pow(Math.pow(Math.max(Math.abs(u), 1e-5), p) + Math.pow(Math.max(Math.abs(v), 1e-5), p), 1 / p);
+      if(r <= a) return { x:x, y:y };
+      var t = (r - a) / (1 - a), g = a + (1 - a) * (c > 1e-4 ? (1 - Math.exp(-c * t)) / c : t), k = g / r;
+      return { x:(u * k + 1) / 2 * W, y:(v * k + 1) / 2 * H };
+    };
+
+    api.tick = function(now, dt, layoutChanged){
+      if(!api.on) return;
+      if(layoutChanged) needTiles = true;
+      // textures for covers that have finished loading (a few per frame)
+      for(var i = 0, n = 0; i < NI && n < 3; i++){ if(!tex[i] && cache[i] && cache[i].ready && upload(i)){ n++; needTiles = true; } }
+      // speed response: camera speed on screen, eased in fast and out slowly
+      var sp = dragSpeed;
+      var target = (reduce || !EDGE.SPEED) ? 0 : Math.min(1, sp / EDGE.SPEED_REF) * EDGE.SPEED;
+      if(target !== boost){
+        var tau = target > boost ? EDGE.SPEED_UP : EDGE.SPEED_DOWN;
+        boost += (target - boost) * (1 - Math.exp(-dt / tau));
+        if(Math.abs(target - boost) < 0.0005) boost = target;
+        needPost = true;
+      }
+      // per-tile hover / focus / fade-in animation
+      live.forEach(function(t){
+        var hT = t === hovT ? 1 : 0;
+        if(t.gIdx !== t.idx){ t.gIdx = t.idx; t.gHov = hT; t.gRdy = tex[t.idx] ? 1 : 0; }
+        if(t.gHov === undefined) t.gHov = 0;
+        if(t.gHov !== hT){ var dh = dt / 300; t.gHov = hT > t.gHov ? Math.min(hT, t.gHov + dh) : Math.max(hT, t.gHov - dh); needTiles = true; }
+        var rT = tex[t.idx] ? 1 : 0;
+        if(t.gRdy !== rT){ t.gRdy = reduce ? rT : Math.min(rT, t.gRdy + dt / 450); needTiles = true; }
+      });
+      if(needTiles) drawTiles();
+      if(needTiles || needPost) drawPost();
+      needTiles = needPost = false;
+    };
+    function ease(x){ return x * x * (3 - 2 * x); }
+    function drawTiles(){
+      gl.bindFramebuffer(gl.FRAMEBUFFER, fbo); gl.viewport(0, 0, fbW, fbH);
+      gl.colorMask(true, true, true, true); gl.clearColor(cInk[0], cInk[1], cInk[2], 0); gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+      var P = progT, u = P.u; gl.useProgram(P.p);
+      gl.uniform2f(u.uView, W, H); gl.uniform2f(u.uCell, CW, CH); gl.uniform1f(u.uS, s); gl.uniform1f(u.uPer, 1000);
+      gl.uniform3fv(u.uPaper, cPaper); gl.uniform3fv(u.uGrey, cGrey); gl.uniform3fv(u.uFrameCol, cFrame);
+      gl.uniform1f(u.uLineA, LINE_A); gl.uniform1f(u.uAA, 0.8 / (s * dpr));
+      gl.uniform4f(u.uCapR, 1 + PADC, CH - PADC - capH, capW, capH);
+      gl.uniform2f(u.uBlurPx, 1 / 32 * 1.6, 1 / 32 * 1.6);
+      gl.uniform1i(u.uImg, 0); gl.uniform1i(u.uBlur, 1); gl.uniform1i(u.uCap, 2);
+      var PW = CW - 1, PH = CH - 1, bx0 = 1 - 0.15 * PW, by0 = 1 - 0.15 * PH, bw = 1.3 * PW, bh = 1.3 * PH, br = bw / bh;
+      gl.uniform1f(u.uMask, 0); live.forEach(tileDraw);
+      // second pass: alpha only = where the cover images are, so the RGB split skips grid lines and captions
+      gl.disable(gl.BLEND); gl.colorMask(false, false, false, true);
+      gl.uniform1f(u.uMask, 1); live.forEach(tileDraw);
+      gl.colorMask(true, true, true, true);
+      function tileDraw(t){
+        if(t.gx === undefined || t.idx < 0) return;
+        var it = items[t.idx], has = tex[t.idx] ? 1 : 0;
+        gl.uniform4f(u.uT, t.gx, t.gy, t.gz, t.gth);
+        gl.uniform4f(u.uFrame, 1 + t.fx, 1 + t.fy, t.fw, t.fh);
+        gl.uniform4f(u.uSt, ease(t.gHov || 0), t.kf ? 1 : 0, ease(t.gRdy || 0), t.gop);
+        gl.uniform1f(u.uHasImg, has);
+        // object-fit:cover for the blurred copy, as uv = l·M.xy + M.zw
+        var ar = it.w / it.h, fx = Math.min(1, br / ar), fy = Math.min(1, ar / br);
+        gl.uniform4f(u.uBlurM, fx / bw, fy / bh, 0.5 - fx * (bx0 / bw + 0.5), 0.5 - fy * (by0 / bh + 0.5));
+        gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, has ? tex[t.idx] : null);
+        gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, has ? blurTex[t.idx] : null);
+        gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, capTex[t.idx] || null);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      }
+    }
+    function drawPost(){
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, canvas.width, canvas.height);
+      var P = progP, u = P.u; gl.useProgram(P.p);
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, fboTex); gl.uniform1i(u.uTex, 0);
+      gl.uniform1f(u.uA, EDGE.START); gl.uniform1f(u.uP, EDGE.ROUND); gl.uniform1f(u.uC, strength());
+      gl.uniform1f(u.uRGB, EDGE.RGB * (reduce ? 0.5 : 1));
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    }
+    api.boost = function(){ return boost; };
+    window.__wallEdge = { api:api, EDGE:EDGE };   // for tuning from the console / tests
+    return api;
+  })();
 
   /* ---------- Hover: glass cell, hovered tile only ---------- */
   var hovT = null;
@@ -616,6 +950,12 @@
     else t.blurT = setTimeout(function(){ if(hovT !== t) t.el.classList.remove("blur-on"); }, 420);
   }
   function tileAt(x, y){
+    if(Edge.on){
+      // the bent wall: find the tile drawn under (x, y), i.e. at its source point
+      var q = Edge.src(x, y), els = document.elementsFromPoint(q.x, q.y);
+      for(var i = 0; i < els.length; i++){ var te = els[i].closest && els[i].closest(".tile"); if(te) return byEl.get(te) || null; if(els[i] === wall) break; }
+      return null;
+    }
     var el = document.elementFromPoint(x, y);
     el = el && el.closest ? el.closest(".tile") : null;
     return el ? byEl.get(el) || null : null;
@@ -683,6 +1023,8 @@
       if(Math.hypot(e.clientX - startX, e.clientY - startY) < THRESH){ lastX = e.clientX; lastY = e.clientY; return; }
       dragging = true; moved = true; clearTimeout(holdTimer);
       wall.classList.add("grabbing"); dimHint();
+      // dragging zooms out right away (no need to hold still first); release springs back
+      if(!zoomHeld){ zoomHeld = true; setZoomTarget(ZOOM_OUT, e.clientX, e.clientY); }
       lastX = startX; lastY = startY;
     }
     camX -= (e.clientX - lastX) / s; camY -= (e.clientY - lastY) / s;
@@ -810,12 +1152,31 @@
       if(Math.abs(glide.x - camX) < 0.25 && Math.abs(glide.y - camY) < 0.25){ camX = glide.x; camY = glide.y; glide = null; }
       changed = true;
     }
-    if(s !== zoomTarget && !pinch){
-      var tau = zoomTarget < s ? ZOOM_OUT_TAU : ZOOM_IN_TAU;
-      var ns = reduce ? zoomTarget : s + (zoomTarget - s) * (1 - Math.exp(-dt / tau));
-      if(Math.abs(zoomTarget - ns) < 0.0006) ns = zoomTarget;
+    // how fast the wall is moving on screen: the pointer while dragging, the throw while gliding
+    var vNow = 0;
+    if(pointerDown && dragging && !pinch){
+      var sb = samples[samples.length - 1], sa = null;
+      if(sb && now - sb.t <= 100) for(var si = samples.length - 2; si >= 0; si--){ sa = samples[si]; if(sb.t - sa.t >= 60) break; }
+      if(sa && sb.t > sa.t) vNow = Math.hypot(sb.x - sa.x, sb.y - sa.y) / (sb.t - sa.t);
+    } else if(!pointerDown) vNow = Math.hypot(vx, vy);
+    vNow *= clamp(800 / Math.min(W, H), 1, 2);
+    dragSpeed = Math.max(vNow, dragSpeed * Math.exp(-dt / SPEED_DECAY));
+    if(dragSpeed < 0.002) dragSpeed = 0;
+    var zt = zoomTarget;
+    if(!reduce && !pinch){
+      var sk = clamp((dragSpeed - SPEED_V0) / (SPEED_V1 - SPEED_V0), 0, 1);
+      var sz = 1 - (1 - SPEED_ZOOM) * sk * sk * (3 - 2 * sk);
+      if(sz < zt - 0.0005){ zt = sz; zoomBySpeed = true; }
+      // pull back around the finger/cursor while dragging, around the centre while gliding
+      if(zoomBySpeed){ if(pointerDown){ anchorX = lastX; anchorY = lastY; } else { anchorX = W / 2; anchorY = H / 2; } }
+    }
+    if(s !== zt && !pinch){
+      var tau = zt < s ? ZOOM_OUT_TAU : (zoomBySpeed ? SPEED_ZOOM_IN_TAU : ZOOM_IN_TAU);
+      var ns = reduce ? zt : s + (zt - s) * (1 - Math.exp(-dt / tau));
+      if(Math.abs(zt - ns) < 0.0006) ns = zt;
       applyZoom(ns); changed = true;
     }
+    if(zoomBySpeed && s === zoomTarget) zoomBySpeed = false;
     if(!pointerDown){
       if(fine && !reduce && mouseIn){ ptx = -PAR * (mx - W / 2); pty = -PAR * (my - H / 2); }
       else { ptx = 0; pty = 0; }
@@ -829,10 +1190,12 @@
       }
       changed = true;
     }
-    if(changed || dirty){
+    var laid = changed || dirty;
+    if(laid){
       layoutFrame(); dirty = false; preloadAround(now);
       if(fine && mouseIn && !pointerDown && ++hoverTick % 6 === 0) updateHover();
     }
+    if(Edge.on) Edge.tick(now, dt, laid);
   }
 
   /* =====================================================================
