@@ -14,6 +14,26 @@
      Safari plays HLS natively. Used to stream cover videos instead of the MP4 download,
      which Chrome rejects ("no supported sources"). -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.13/hls.min.js"></script>
+<script>
+/* Ring preloader switch (read once per page load):
+   ?loader=0      → the previous intro (#loader) and the 4:3 / 3:4 cropped carousel
+   ?loader=1      → (default) the ring preloader and an uncropped carousel
+   ?loader=replay → play the ring again even if it already played this session
+   Classes: rl = uncropped carousel; rl-intro = home page with the new intro, as
+   rl-ring (full ring), rl-skip (repeat visit) or rl-fade (reduced motion). */
+(function(){
+  var d = document.documentElement, q = null;
+  try{ q = new URLSearchParams(location.search).get("loader"); }catch(e){}
+  if(q === "0"){ d.classList.add("rl-off"); return; }
+  d.classList.add("rl");
+  if(!/^\/(index\.html)?$/.test(location.pathname)) return;
+  var seen = false;
+  try{ seen = sessionStorage.getItem("rl-seen") === "1"; }catch(e){}
+  var mode = matchMedia("(prefers-reduced-motion: reduce)").matches ? "fade" : (seen && q !== "replay") ? "skip" : "ring";
+  d.classList.add("rl-intro");
+  d.classList.add("rl-" + mode);
+})();
+</script>
 <style>
   :root{
     --ink:#0B0B0C;
@@ -1323,6 +1343,29 @@
     .cx-row.is-active .cx-title,.cx-row .cx-arrow,.cx-tile.is-active{transform:none}
     .cx-tile img,.cx-stage-img{transition-duration:.12s}
   }
+
+  /* ===== Ring preloader (see the switch script in <head> and the carousel script) =====
+     The ring is drawn in the carousel's own WebGL scene; only the counter is HTML. */
+  html.rl-intro #loader{display:none}
+  html.rl.cc-strip #landing .cc-work img,
+  html.rl.cc-strip #landing .cc-work.is-port img{aspect-ratio:auto;object-fit:contain}
+  #landing .rl-load{display:none}
+  html.rl-ring:not(.rl-landed) #landing .rl-load,#landing .rl-load.is-out{position:fixed;inset:0;z-index:30;pointer-events:none;display:flex;align-items:flex-end;justify-content:flex-end;
+    padding:0 calc(var(--cc-px) + env(safe-area-inset-right,0px)) calc(var(--cc-py) + env(safe-area-inset-bottom,0px));
+    transition:opacity .45s ease}
+  #landing .rl-load.is-out{opacity:0}
+  #landing .rl-count{display:flex;font-family:"IBM Plex Mono",monospace;font-weight:400;font-size:clamp(32px,6.9vw,74px);
+    line-height:1;color:var(--paper);font-variant-numeric:tabular-nums}
+  #landing .rl-col{display:block;height:1em;overflow:hidden;
+    -webkit-mask-image:linear-gradient(transparent,#000 14%,#000 86%,transparent);
+    mask-image:linear-gradient(transparent,#000 14%,#000 86%,transparent)}
+  #landing .rl-strip{display:block;will-change:transform}
+  #landing .rl-strip span{display:block;height:1em;width:.6em;text-align:center}
+  html.rl-ring #landing .cc-cap{opacity:0;transition:opacity .6s ease}
+  html.rl-ring.rl-landed #landing .cc-cap{opacity:1}
+  html.rl-fade #landing.is-active{animation:rlFade .5s ease both}
+  @keyframes rlFade{from{opacity:0}to{opacity:1}}
+  #landing .cc-sr:focus{outline:none}
 </style>
 </head>
 <body>
@@ -1347,7 +1390,7 @@
          .cc-works below, newest first; the script further down draws them in WebGL. -->
     <section class="page is-active" id="landing">
       <script>document.documentElement.classList.add(matchMedia("(prefers-reduced-motion: reduce)").matches ? "cc-strip" : "cc-gl");</script>
-      <h1 class="cc-sr">Shan-Huai Chiang — selected work</h1>
+      <h1 class="cc-sr" tabindex="-1">Shan-Huai Chiang — selected work</h1>
       <div class="cc-stage" aria-hidden="true"><canvas></canvas></div>
       <ol class="cc-works" aria-label="Selected work, newest first">
         <li><a class="cc-work" href="/project/sub" data-nav="proj-sub" data-stream="e997d71eb8270f43dddcebf6eeefa9fa" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-sub.webp" width="1200" height="800" alt="SUB"><span class="cc-work-name">SUB</span><span class="cc-work-meta">Branding — Local Remote · 2026</span></a></li>
@@ -1369,6 +1412,8 @@
         <li><a class="cc-work" href="/photojournalism/the-umbrella-movement" data-nav="pj-hkprotest" data-cat="Photo-Journalism" data-meta="Hong Kong · 2019"><img data-src="/images/carousel/pj-hkprotest.webp" width="1200" height="800" alt="The Umbrella Movement"><span class="cc-work-name">The Umbrella Movement</span><span class="cc-work-meta">Photo-Journalism — Hong Kong · 2019</span></a></li>
       </ol>
       <div class="cc-cap" aria-live="polite"><span class="cc-cap-name"></span><span class="cc-cap-meta mono"></span></div>
+      <!-- ring preloader counter: static so "000" shows while the rest of the page is still arriving -->
+      <div class="rl-load" aria-hidden="true"><div class="rl-count"><span class="rl-col"><span class="rl-strip"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>0</span></span></span><span class="rl-col"><span class="rl-strip"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>0</span></span></span><span class="rl-col"><span class="rl-strip"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>0</span></span></span></div></div>
     </section>
 
     <!-- BRANDING -->
@@ -3594,6 +3639,8 @@
   /* ---------------- Loader + reveal ---------------- */
   function reveal(){
     var loader=document.getElementById("loader");
+    /* the home page's ring preloader (or its skip / fade versions) replaces this intro */
+    if(document.documentElement.classList.contains("rl-intro")){ if(loader && loader.parentNode) loader.parentNode.removeChild(loader); return; }
     if(reduce || !hasGSAP){ if(loader && loader.parentNode) loader.parentNode.removeChild(loader); return; }
 
     // --- Smooth trickle progress (YouTube/Medium pattern) ---
@@ -4980,6 +5027,7 @@
   var stripOn = false;
   function useStrip(){
     if(stripOn) return; stripOn = true;
+    endIntroDom(true);   /* no WebGL: the ring preloader becomes a plain fade */
     doc.classList.remove("cc-gl"); doc.classList.add("cc-strip");
     links.forEach(function(a){
       var img = a.querySelector("img");
@@ -5002,18 +5050,51 @@
   var capEl = land.querySelector(".cc-cap");
   var capName = capEl.querySelector(".cc-cap-name"), capMeta = capEl.querySelector(".cc-cap-meta");
 
+  /* ?loader=0 keeps the 4:3 / 3:4 crop; otherwise every frame shows its whole image */
+  var REAL = doc.classList.contains("rl");
   var works = links.map(function(a, i){
     var img = a.querySelector("img");
     var src = (+img.getAttribute("width")) / (+img.getAttribute("height"));
+    var full = img.getAttribute("data-src");
     return {
       i:i, a:a, name: img.alt, cat: a.getAttribute("data-cat"), meta: a.getAttribute("data-meta"),
-      src: img.getAttribute("data-src"), stream: a.getAttribute("data-stream"),
-      aspect: src >= 1 ? 4/3 : 3/4,
+      src: full, stream: a.getAttribute("data-stream"),
+      /* small copy for the ring preloader: images/carousel/ring/<same name>; if it is
+         missing the ring simply uses the full image */
+      thumb: full.replace(/\/carousel\/([^\/]+)$/, "/carousel/ring/$1"),
+      ar: src, aspect: REAL ? src : src >= 1 ? 4/3 : 3/4,
+      timg:null, tState:0, ttex:null, first:false, dealAt:0, landOrder:0,
       img:null, state:0 /*0 none,1 loading,2 decoded,3 uploaded,-1 failed*/, tex:null, crop:[0,0,1,1],
       video:null, vtex:null, vcrop:null, vState:0 /*0 none,1 starting,2 playing,-1 failed*/, vFresh:false, vAlpha:0,
       alpha:0, dim:0, focus:0, revealAt:0
     };
   });
+  /* ---------- Ring preloader state (the drawing is further down, in the same scene) ---------- */
+  var RING = doc.classList.contains("rl-ring");
+  var rg = { phase: RING ? "load" : "done", t0:0, el:0, shown:0, forced:false, skip:false, hundredAt:0,
+             transT0:0, spin:0, spinS:0, warp: RING ? 0 : 1, nLand:0, startedAt:0, landedAt:0, timeline:[] };
+  var rlEl = null, rlCols = [];
+  /* the DOM side of finishing (or abandoning) the intro: counter out, caption in, focus, session flag */
+  function endIntroDom(fade){
+    if(!doc.classList.contains("rl-intro")) return;
+    if(rlEl){ var el = rlEl; rlEl = null; el.classList.add("is-out"); setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 500); }
+    if(fade && doc.classList.contains("rl-ring")){ doc.classList.remove("rl-ring"); doc.classList.add("rl-fade"); }
+    doc.classList.add("rl-landed");
+    land.removeAttribute("aria-busy");
+    /* focus starts on the landing (unless the visitor already moved focus somewhere) */
+    var ae = document.activeElement;
+    if(!ae || ae === document.body || ae === document.documentElement){
+      var h = land.querySelector(".cc-sr"); if(h) try{ h.focus({ preventScroll:true }); }catch(e){ h.focus(); }
+    }
+    try{ sessionStorage.setItem("rl-seen", "1"); }catch(e){}
+    if(rg) rg.phase = "done";   /* rg is still undefined when reduced motion exits early */
+  }
+  if(doc.classList.contains("rl-intro") && !RING){
+    /* repeat visit or reduced motion: no ring; the carousel's own frame fade-in (or the
+       strip's CSS fade) is the whole intro */
+    endIntroDom(false);
+  }
+
   /* centre crop of a source (sw×sh) to the frame's 3:4 / 4:3: [offsetU, offsetV, scaleU, scaleV] */
   function cropFor(w, sw, sh){
     var s = sw/sh, t = w.aspect;
@@ -5026,19 +5107,28 @@
   var VS = [
     "attribute vec2 aUV;",
     "uniform vec2 uView; uniform float uX0, uW, uH, uCy, uA, uP;",
+    /* ring preloader: the same frame as a flat card on a tilted 3D ring (centre uC, edge
+       vectors uRx / uUy, perspective distance uF, screen origin uO), blended by uMix
+       (0 = on the ring, 1 = in its carousel slot) */
+    "uniform vec3 uC, uRx, uUy; uniform float uF, uMix; uniform vec2 uO;",
     "varying vec2 vUV;",
     "void main(){",
     "  float x = uView.x*0.5 + uX0 + aUV.x*uW;",          /* widths stay constant across the screen… */
     "  float u = clamp(x/uView.x, 0.0, 1.25);",
     "  float s = 1.0 + uA*pow(u, uP);",                    /* …height is flat on the left and rises to the right */
     "  float y = uCy + (aUV.y - 0.5)*uH*s;",
-    "  gl_Position = vec4(x/uView.x*2.0 - 1.0, 1.0 - y/uView.y*2.0, 0.0, 1.0);",
+    "  vec3 p = uC + (aUV.x - 0.5)*uRx + (aUV.y - 0.5)*uUy;",
+    "  float k = uF/(uF - p.z);",
+    "  vec2 q = mix(uO + p.xy*k, vec2(x, y), uMix);",
+    "  float w = mix(1.0/k, 1.0, uMix);",                  /* perspective-correct texturing on the ring */
+    "  gl_Position = vec4((q.x/uView.x*2.0 - 1.0)*w, (1.0 - q.y/uView.y*2.0)*w, 0.0, w);",
     "  vUV = aUV;",
     "}"].join("\n");
   var FS = [
     "#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#endif",
     "uniform sampler2D uTex; uniform vec4 uCrop; uniform vec2 uRes, uEdge, uScr;",
     "uniform float uAlpha, uDim, uReveal, uFocus, uFx0, uFw, uZone, uK, uFcy, uFh, uFa, uFp;",
+    "uniform float uIntro, uWarp, uOp, uShade;",           /* ring preloader controls (0,1,1,1 when idle) */
     "varying vec2 vUV;",
     "void main(){",
     /* Liquid edge drag: inside the outer zone on each side, the image is sampled from a
@@ -5048,13 +5138,15 @@
     "  float z = uZone, sp = s;",
     "  if(s < z){ float t = (z - s)/z; sp = z - z*(1.0 - exp(-uK*t))/uK; }",
     "  else if(s > uScr.x - z){ float t = (s - uScr.x + z)/z; sp = uScr.x - z + z*(1.0 - exp(-uK*t))/uK; }",
+    "  sp = mix(s, sp, uWarp);",                            /* the edge drag eases in after the preloader */
     "  float u = clamp((sp - uScr.x*0.5 - uFx0)/uFw, 0.0, 1.0);",
     /* vertical position computed per pixel from the same bend as the vertex shader
        (interpolating it per triangle leaves sawtooth steps that the edge drag magnifies) */
     "  float yy = (1.0 - gl_FragCoord.y/uRes.y)*uScr.y;",
     "  float sc = 1.0 + uFa*pow(clamp(s/uScr.x, 0.0, 1.25), uFp);",
     "  float v = clamp(0.5 + (yy - uFcy)/(uFh*sc), 0.0, 1.0);",
-    "  vec3 c = texture2D(uTex, uCrop.xy + vec2(u, v)*uCrop.zw).rgb;",
+    "  vec2 uv = mix(vec2(u, v), vUV, uIntro);",            /* on the ring: plain card coordinates */
+    "  vec3 c = texture2D(uTex, uCrop.xy + uv*uCrop.zw).rgb;",
     "  vec3 ink = vec3(0.043, 0.043, 0.047);",
     "  c = mix(vec3(0.082, 0.082, 0.086), c, uAlpha);",
     "  float l = dot(c, vec3(0.299, 0.587, 0.114));",
@@ -5063,7 +5155,8 @@
     "  c = mix(ink, c, uReveal);",                          /* intro: frames develop up from black */
     "  vec2 e = min(vUV, 1.0 - vUV)/uEdge;",
     "  c = mix(c, vec3(0.929, 0.918, 0.89), step(min(e.x, e.y), 1.0)*uFocus);", /* keyboard focus ring */
-    "  gl_FragColor = vec4(c, 1.0);",
+    "  c = mix(ink, c, uShade);",                           /* ring cards facing away sit in shadow */
+    "  gl_FragColor = vec4(c, uOp);",
     "}"].join("\n");
 
   function compile(type, src){
@@ -5078,7 +5171,8 @@
     gl.linkProgram(prog);
     if(!gl.getProgramParameter(prog, gl.LINK_STATUS) && !gl.isContextLost()) throw new Error(gl.getProgramInfoLog(prog));
     gl.useProgram(prog);
-    ["uView","uX0","uW","uH","uCy","uA","uP","uTex","uCrop","uRes","uEdge","uAlpha","uDim","uReveal","uFocus","uZone","uK","uScr","uFx0","uFw","uFcy","uFh","uFa","uFp"]
+    ["uView","uX0","uW","uH","uCy","uA","uP","uTex","uCrop","uRes","uEdge","uAlpha","uDim","uReveal","uFocus","uZone","uK","uScr","uFx0","uFw","uFcy","uFh","uFa","uFp",
+     "uC","uRx","uUy","uF","uMix","uO","uIntro","uWarp","uOp","uShade"]
       .forEach(function(n){ U[n] = gl.getUniformLocation(prog, n); });
     var v = [];
     for(var s = 0; s <= SEG; s++){ v.push(s/SEG, 0, s/SEG, 1); }
@@ -5091,6 +5185,11 @@
     gl.uniform1i(U.uTex, 0);
     gl.clearColor(11/255, 11/255, 12/255, 1);
     gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
+    gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);   /* ring cards fade */
+    /* idle values: a plain carousel frame */
+    gl.uniform3f(U.uC, 0, 0, 0); gl.uniform3f(U.uRx, 0, 0, 0); gl.uniform3f(U.uUy, 0, 0, 0);
+    gl.uniform1f(U.uF, 1000); gl.uniform1f(U.uMix, 1); gl.uniform2f(U.uO, 0, 0);
+    gl.uniform1f(U.uIntro, 0); gl.uniform1f(U.uOp, 1); gl.uniform1f(U.uShade, 1);
   }
   function newTex(mips){
     var t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
@@ -5106,6 +5205,13 @@
     if(isGL2) gl.generateMipmap(gl.TEXTURE_2D);  /* NPOT in WebGL1: no mipmaps */
     w.crop = cropFor(w, w.img.naturalWidth, w.img.naturalHeight);
     w.state = 3;
+    if(w.ttex) w.alpha = 1;   /* the ring thumbnail was already showing: swap, don't fade from grey */
+  }
+  function uploadThumb(w){
+    w.ttex = newTex(isGL2);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, w.timg);
+    if(isGL2) gl.generateMipmap(gl.TEXTURE_2D);
+    w.tState = 3;
   }
 
   try{
@@ -5154,6 +5260,9 @@
     /* open with the newest project centred (the oldest ones loop in on its left) */
     if(!placed){ placed = true; pos = target = centreOf(0); }
     else if(oldL > 1){ pos = pos/oldL*L; target = target/oldL*L; }
+    /* during the ring preloader the landing stays at its opening position, re-measured
+       here on every resize; the frames' landing spots are read from it each frame */
+    if(rg.phase !== "done"){ pos = target = centreOf(0); if(rg.startedAt) introLoads(); }
     dirty = true;
   }
   function wrap(x){ return ((x % L) + L*1.5) % L - L/2; } /* → [-L/2, L/2) */
@@ -5190,8 +5299,13 @@
 
   /* ---------- Input ---------- */
   function now(){ return performance.now(); }
+  /* any input during the ring skips ahead to the landing; nothing is blocked */
+  function introSkip(){ if(rg.phase === "load"){ rg.forced = true; rg.skip = true; } }
+  ["pointerdown", "keydown", "wheel", "touchstart"].forEach(function(ev){
+    window.addEventListener(ev, function(e){ if(ev === "keydown" && (e.key === "Shift" || e.key === "Control" || e.key === "Alt" || e.key === "Meta")) return; introSkip(); }, { passive:true, capture:true });
+  });
   stage.addEventListener("pointerdown", function(e){
-    if(e.button !== 0 || !live()) return;
+    if(e.button !== 0 || !live() || rg.phase !== "done") return;
     pointer.type = e.pointerType;
     drag = { id:e.pointerId, x0:e.clientX, y0:e.clientY, t0:target, active:false, samples:[[now(), e.clientX]],
              hit: hitTest(e.clientX, e.clientY), type:e.pointerType };
@@ -5239,7 +5353,7 @@
   window.addEventListener("blur", function(){ pointer.in = false; });
 
   window.addEventListener("wheel", function(e){
-    if(e.ctrlKey || !live()) return;                  /* pinch-zoom, another page, or menu open */
+    if(e.ctrlKey || !live() || rg.phase !== "done") return;                /* pinch-zoom, another page, or menu open */
     var d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
     if(e.deltaMode === 1) d *= 16; else if(e.deltaMode === 2) d *= H;
     target += Math.max(-260, Math.min(260, d*1.1));
@@ -5248,7 +5362,7 @@
 
   document.addEventListener("keydown", function(e){
     if(e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
-    if(e.altKey || e.metaKey || e.ctrlKey || !inst.length || !live()) return;
+    if(e.altKey || e.metaKey || e.ctrlKey || !inst.length || !live() || rg.phase !== "done") return;
     var dir = e.key === "ArrowRight" ? 1 : -1;
     var active = document.activeElement, li = links.indexOf(active);
     if(li >= 0){ links[(li + dir + N) % N].focus(); e.preventDefault(); return; } /* focus handler glides */
@@ -5256,7 +5370,7 @@
     e.preventDefault();
   });
   links.forEach(function(a, i){
-    a.addEventListener("focus", function(){ focusWork = i; var k = nearestInstOf(i); if(k >= 0) glideTo(k); dirty = true; });
+    a.addEventListener("focus", function(){ focusWork = i; introSkip(); if(rg.phase !== "done") return; var k = nearestInstOf(i); if(k >= 0) glideTo(k); dirty = true; });
     a.addEventListener("blur", function(){ if(focusWork === i) focusWork = -1; dirty = true; });
   });
 
@@ -5270,6 +5384,7 @@
       if(img.decode) img.decode().then(done, done); else done();
     };
     img.onerror = function(){ loading--; w.state = -1; };
+    if(rg.phase !== "done") img.fetchPriority = "high";  /* the ring preloader waits on these */
     img.src = w.src;
   }
   function distOff(k){ /* px between instance k and the screen (0 if on screen) */
@@ -5375,8 +5490,9 @@
     return true;
   }
 
-  /* The site's own intro loader covers the page; frames are simply there when it lifts. */
-  var useLoader = false, introDone = true;
+  /* The site's own intro loader covers the page; frames are simply there when it lifts.
+     With the ring preloader, videos wait until the frames have landed. */
+  var useLoader = false, introDone = !RING;
 
   /* ---------- Caption ---------- */
   function setCaption(wi){
@@ -5387,6 +5503,190 @@
     capMeta.textContent = w.cat + " — " + w.meta;
   }
 
+  /* ================= Ring preloader =================
+     All 17 works are dealt onto a tilted 3D ring while a 0–100 counter follows real
+     loading (the full images of the frames visible in the opening view, small ring
+     copies of the rest). Then the ring straightens and each visible frame travels into
+     its exact carousel slot at the opening position; the others fade out on the ring.
+     Positions are read from the live carousel layout every frame, so nothing here
+     depends on how many projects there are or where they sit. */
+  var MIN_MS = 2400, MAX_MS = 6500;          /* counter never finishes before MIN; MAX lands with what has loaded */
+  var DEAL0 = 250, DEAL_GAP = 85, DEAL_DUR = 950;
+  var TILT = 0.33, ROLL = -0.2;              /* ≈19° viewed from above, ≈−11° roll (right side higher) */
+  var OMEGA = 0.07, SPIN0 = OMEGA*MAX_MS/1000; /* slow spin, front moving left, reaching 0 no earlier than MAX */
+  var TR_RING = 900, TR_DELAY = 120, TR_STAGGER = 55, TR_FLY = 1050, TR_FADE = 650;
+  var tUploadQ = [];
+  function clamp01(x){ return x < 0 ? 0 : x > 1 ? 1 : x; }
+  function eOut(x){ return 1 - Math.pow(1 - x, 3); }
+  function eInOut(x){ return x < 0.5 ? 4*x*x*x : 1 - Math.pow(-2*x + 2, 3)/2; }
+  function cropTo(ar, t){ if(ar > t){ var k = t/ar; return [(1-k)/2, 0, k, 1]; } var m = ar/t; return [0, (1-m)/2, 1, m]; }
+
+  function loadThumb(w){
+    w.tState = 1;
+    var img = new Image(); img.decoding = "async";
+    img.onload = function(){
+      var done = function(){ w.timg = img; w.tState = 2; tUploadQ.push(w); };
+      if(img.decode) img.decode().then(done, done); else done();
+    };
+    img.onerror = function(){ w.tState = -1; if(w.state === 0) startLoad(w); };  /* no ring copy: use the full image */
+    img.fetchPriority = "high";                         /* ahead of the other pages' images */
+    img.src = w.thumb;
+  }
+  /* what the counter waits for: full images of the opening view, ring copies of the rest */
+  function introLoads(){
+    var fv = visibleWorks();
+    works.forEach(function(w){
+      w.first = fv.indexOf(w) >= 0;
+      if(w.first){ if(w.state === 0) startLoad(w); }
+      else if(!w.tState && w.state === 0) loadThumb(w);
+    });
+  }
+  function settled(w){
+    return w.first ? (w.state === 3 || w.state === -1) : (w.tState === 3 || w.state === 3 || (w.tState === -1 && w.state === -1));
+  }
+  function ringReady(w){ return w.state === 3 || w.tState === 3; }
+  function introProgress(){ var d = 0; for(var i = 0; i < N; i++) if(settled(works[i])) d++; return d/N; }
+
+  function buildCounter(){
+    rlEl = land.querySelector(".rl-load");            /* static markup in #landing */
+    if(!rlEl) return;
+    rlCols = Array.prototype.slice.call(rlEl.querySelectorAll(".rl-strip"));
+    land.setAttribute("aria-busy", "true");
+    setCounter(0);
+  }
+  /* odometer: the ones digit rolls continuously, each higher digit rolls during the last unit below it */
+  function setCounter(v){
+    if(!rlCols.length) return;
+    v = Math.max(0, Math.min(100, v));
+    var ones = v % 10, roll = Math.max(0, ones - 9), tensB = Math.floor(v/10);
+    var tens = (tensB % 10) + roll;
+    var hund = Math.floor(v/100) + (tensB % 10 === 9 ? roll : 0);
+    var o = [hund, tens, ones];
+    for(var c = 0; c < 3; c++) rlCols[c].style.transform = "translate3d(0," + (-o[c]).toFixed(3) + "em,0)";
+  }
+
+  function ringGeom(){
+    var h = Math.min(H*0.27, W*0.30), cw = h*0.75;          /* every ring card is a 3:4 crop */
+    var R = N*cw*1.14/(2*Math.PI), Rmax = W*(W < 760 ? 0.40 : 0.36);
+    if(R > Rmax){ R = Rmax; cw = R*2*Math.PI/(N*1.14); h = cw/0.75; }
+    return { h:h, w:cw, R:R, F:R*2.6, ox:W/2, oy:H*0.47 };
+  }
+  function beginTransition(t){
+    rg.phase = "trans"; rg.transT0 = t; rg.spinS = rg.spin;
+    rg.timeline.push(["transition", Math.round(rg.el)]);
+    if(rlEl) rlEl.classList.add("is-out");
+    /* landing order: left to right across the opening view */
+    var lands = [];
+    for(var k = 0; k < inst.length; k++){ if(onScreen(x0Of(k), inst[k].len)) lands.push(k); }
+    lands.sort(function(a, b){ return x0Of(a) - x0Of(b); });
+    works.forEach(function(w){ w.landOrder = -1; });
+    lands.forEach(function(k, j){ inst[k].w.landOrder = j; if(!inst[k].w.dealAt) inst[k].w.dealAt = rg.el; });
+    rg.nLand = lands.length;
+  }
+  function finishIntro(t){
+    rg.landedAt = performance.now(); rg.timeline.push(["landed", Math.round(rg.el)]);
+    introDone = true; rg.warp = 0;
+    works.forEach(function(w){ if(w.tex) w.alpha = 1; });
+    endIntroDom(false);
+    if(focusWork >= 0){ var k = nearestInstOf(focusWork); if(k >= 0) glideTo(k); }
+    else lastInput = t - 1400;               /* the carousel's drift eases in straight away, leftward like the ring */
+    lastSched = 0; dirty = true;
+    render(t);                                /* same frame: the carousel takes over with no gap */
+  }
+
+  function introTick(t, dt){
+    if(!rg.t0){ rg.t0 = t; rg.startedAt = performance.now(); }
+    var el = rg.el = t - rg.t0;
+    for(var u = 0; u < 2; u++){                /* a couple of texture uploads per frame */
+      if(uploadQ.length){ var a = uploadQ.shift(); if(a.state === 2) upload(a); }
+      else if(tUploadQ.length){ var b = tUploadQ.shift(); if(b.tState === 2) uploadThumb(b); }
+    }
+    if(rg.phase === "load"){
+      if(el > MAX_MS) rg.forced = true;
+      var p = rg.forced ? 1 : introProgress();
+      var cap = 100*Math.min(p, rg.forced ? 1 : el/MIN_MS);
+      if(rg.shown < cap) rg.shown = Math.min(cap, rg.shown + Math.max((cap - rg.shown)*dt*5, (rg.forced ? 160 : 18)*dt));
+      if(cap >= 100 && rg.shown > 99.6) rg.shown = 100;
+      setCounter(rg.shown);
+      for(var i = 0; i < N; i++){
+        var w = works[i];
+        if(!w.dealAt && el >= DEAL0 + i*DEAL_GAP && ringReady(w)) w.dealAt = el;
+      }
+      rg.spin = SPIN0 - OMEGA*el/1000;
+      if(rg.shown >= 100 && !rg.hundredAt){ rg.hundredAt = el; rg.timeline.push(["counter100", Math.round(el)]); }
+      if(rg.skip || (rg.hundredAt && el - rg.hundredAt > 280)) beginTransition(t);
+    }
+    var T = rg.phase === "trans" ? t - rg.transT0 : -1;
+    if(T >= 0){
+      rg.spin = rg.spinS*(1 - eOut(clamp01(T/(TR_RING + 200))));
+      /* hand over only after one frame has been drawn with every frame fully in its slot,
+         so the carousel's first frame matches the loader's last one exactly */
+      if(rg.allIn){ finishIntro(t); return; }
+      if(T >= TR_DELAY + Math.max(0, rg.nLand - 1)*TR_STAGGER + TR_FLY && T >= TR_FADE) rg.allIn = true;
+    }
+    renderIntro(T);
+  }
+
+  function renderIntro(T){
+    var G = ringGeom(), el = rg.el;
+    var g = T < 0 ? 0 : eInOut(clamp01(T/TR_RING));
+    var ta = TILT*(1 - g), tb = ROLL*(1 - g);
+    var ca = Math.cos(ta), sa = Math.sin(ta), cb = Math.cos(tb), sb = Math.sin(tb);
+    function rot(x, y, z){ var y1 = y*ca + z*sa, z1 = -y*sa + z*ca; return [x*cb - y1*sb, x*sb + y1*cb, z1]; }
+    var landK = {};
+    for(var k = 0; k < inst.length; k++){ if(onScreen(x0Of(k), inst[k].len)) landK[inst[k].w.i] = k; }
+
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform2f(U.uView, W, H); gl.uniform2f(U.uScr, W, H); gl.uniform2f(U.uRes, canvas.width, canvas.height);
+    gl.uniform1f(U.uCy, cy); gl.uniform1f(U.uA, A); gl.uniform1f(U.uP, P);
+    gl.uniform1f(U.uH, baseH); gl.uniform1f(U.uZone, zone); gl.uniform1f(U.uK, K);
+    gl.uniform1f(U.uFcy, cy); gl.uniform1f(U.uFh, baseH); gl.uniform1f(U.uFa, A); gl.uniform1f(U.uFp, P);
+    gl.uniform1f(U.uIntro, 1); gl.uniform1f(U.uWarp, 0); gl.uniform1f(U.uDim, 0); gl.uniform1f(U.uFocus, 0); gl.uniform1f(U.uReveal, 1);
+    gl.uniform1f(U.uF, G.F); gl.uniform2f(U.uO, G.ox, G.oy);
+    gl.activeTexture(gl.TEXTURE0);
+
+    var step = 2*Math.PI/N, draws = [];
+    if(T >= 0){   /* a resize mid-transition can bring another frame into view: it lands too */
+      for(var j = 0; j < N; j++){ if(landK[j] !== undefined && works[j].landOrder < 0){ works[j].landOrder = rg.nLand++; if(!works[j].dealAt) works[j].dealAt = el; } }
+    }
+    for(var i = 0; i < N; i++){
+      var w = works[i]; if(!w.dealAt) continue;
+      var op = clamp01((el - w.dealAt)/300), e = 0, kk = landK[i];
+      if(T >= 0){
+        if(kk !== undefined && w.landOrder >= 0) e = eInOut(clamp01((T - TR_DELAY - w.landOrder*TR_STAGGER)/TR_FLY));
+        else op *= 1 - eOut(clamp01(T/TR_FADE));
+      }
+      if(op <= 0.003) continue;
+      var th = i*step*eOut(clamp01((el - w.dealAt)/DEAL_DUR)) + rg.spin;
+      var st = Math.sin(th), ct = Math.cos(th);
+      var C = rot(G.R*st, 0, G.R*ct), Rx = rot(G.w*ct, 0, -G.w*st), Uy = rot(0, G.h, 0), nz = rot(st, 0, ct)[2];
+      var face = clamp01((nz + 0.25)/0.55); face = face*face*(3 - 2*face);
+      draws.push({ w:w, k:kk, e:e, op:op, C:C, Rx:Rx, Uy:Uy, shade: 0.5 + 0.5*face + (0.5 - 0.5*face)*e, z: C[2] + e*1e5 });
+    }
+    draws.sort(function(a, b){ return a.z - b.z; });
+    for(var d = 0; d < draws.length; d++){
+      var q = draws[d], wk = q.w;
+      var tex = wk.state === 3 ? wk.tex : wk.tState === 3 ? wk.ttex : null;
+      /* 3:4 on the ring → the whole image in its slot. A frame that has arrived samples its
+         image exactly as the carousel does (per-pixel bend, same crop), so the hand-over is exact. */
+      var home = q.e >= 1;
+      var crop = home && wk.state === 3 ? wk.crop : cropTo(wk.ar, 0.75 + (wk.aspect - 0.75)*q.e);
+      gl.uniform1f(U.uIntro, home ? 0 : 1);
+      var x0 = q.k !== undefined ? x0Of(q.k) : 0, len = q.k !== undefined ? inst[q.k].len : 1;
+      gl.bindTexture(gl.TEXTURE_2D, tex || blankTex);
+      gl.uniform4f(U.uCrop, crop[0], crop[1], crop[2], crop[3]);
+      gl.uniform1f(U.uX0, x0); gl.uniform1f(U.uW, len); gl.uniform1f(U.uFx0, x0); gl.uniform1f(U.uFw, len);
+      gl.uniform3f(U.uC, q.C[0], q.C[1], q.C[2]); gl.uniform3f(U.uRx, q.Rx[0], q.Rx[1], q.Rx[2]); gl.uniform3f(U.uUy, q.Uy[0], q.Uy[1], q.Uy[2]);
+      gl.uniform1f(U.uMix, q.e); gl.uniform1f(U.uOp, q.op); gl.uniform1f(U.uShade, q.shade);
+      gl.uniform1f(U.uAlpha, tex ? 1 : 0);
+      gl.uniform2f(U.uEdge, 2/len, 2/baseH);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, (SEG + 1)*2);
+    }
+    /* back to the plain-carousel values */
+    gl.uniform1f(U.uIntro, 0); gl.uniform1f(U.uMix, 1); gl.uniform1f(U.uOp, 1); gl.uniform1f(U.uShade, 1);
+  }
+
   /* ---------- Frame loop ---------- */
   var raf = 0, lastT = 0, running = false;
   function ease(dt, tau){ return 1 - Math.exp(-dt/tau); }
@@ -5394,6 +5694,9 @@
     raf = requestAnimationFrame(loop);
     var dt = Math.min(0.05, Math.max(0, (t - lastT)/1000)); lastT = t;
     if(!W || !inst.length) return;
+    if(rg.phase !== "done"){ introTick(t, dt); setCaption(inst[centreInst()].w.i); return; }
+    if(rg.warp < 1){ rg.warp = Math.min(1, rg.warp + dt/0.8); dirty = true; }   /* liquid edge eases in after the ring */
+    if(tUploadQ.length){ var tq = tUploadQ.shift(); if(tq.tState === 2) uploadThumb(tq); }
 
     /* hover (mouse only), recomputed every frame because frames move under the pointer */
     var hov = -1;
@@ -5446,11 +5749,13 @@
     gl.uniform1f(U.uCy, cy); gl.uniform1f(U.uA, A); gl.uniform1f(U.uP, P);
     gl.uniform1f(U.uH, baseH); gl.uniform1f(U.uZone, zone); gl.uniform1f(U.uK, K);
     gl.uniform1f(U.uFcy, cy); gl.uniform1f(U.uFh, baseH); gl.uniform1f(U.uFa, A); gl.uniform1f(U.uFp, P);
+    gl.uniform1f(U.uWarp, rg.warp);
     gl.activeTexture(gl.TEXTURE0);
     for(var k = 0; k < inst.length; k++){
       var p = inst[k], x0 = x0Of(k);
       if(!onScreen(x0, p.len)) continue;
       var w = p.w, tex = w.tex, crop = w.crop, alpha = w.tex ? w.alpha : 0;
+      if(!tex && w.ttex){ tex = w.ttex; crop = [0, 0, 1, 1]; alpha = 1; }   /* ring copy until the full image arrives */
       if(w.video && w.vState === 2){
         if(w.vFresh || !w.vtex || !w.video.requestVideoFrameCallback){
           if(uploadVideo(w)) w.vFresh = false;
@@ -5506,20 +5811,31 @@
   var lost = false, lostTimer = 0;
   canvas.addEventListener("webglcontextlost", function(e){
     e.preventDefault(); lost = true; stop();
-    works.forEach(function(w){ w.tex = null; w.vtex = null; if(w.state === 3) w.state = 2; });
+    works.forEach(function(w){ w.tex = null; w.vtex = null; w.ttex = null; if(w.state === 3) w.state = 2; if(w.tState === 3) w.tState = 2; });
     uploadQ = works.filter(function(w){ return w.state === 2; });
+    tUploadQ = works.filter(function(w){ return w.tState === 2; });
     lostTimer = setTimeout(function(){ if(lost){ works.forEach(function(w){ if(w.video) w.video.pause(); }); useStrip(); } }, 4000); /* not coming back → plain strip */
   });
   canvas.addEventListener("webglcontextrestored", function(){
     clearTimeout(lostTimer); lost = false;
     try{ initGL(); }catch(err){ useStrip(); return; }
     uploadQ = works.filter(function(w){ return w.state === 2; });
+    tUploadQ = works.filter(function(w){ return w.tState === 2; });
     if(!document.hidden) start();
   });
 
   layout();   /* if the page starts hidden (a deep link to a project), the ResizeObserver lays out later */
+  if(RING){ buildCounter(); rg.startedAt = performance.now(); introLoads(); }
   /* a deep link to a project switches pages right after load: don't start (or fetch) until home shows */
   if(live() && /^\/(index\.html)?$/.test(location.pathname)) start();
+
+  /* test hook (read-only snapshot of the ring preloader) */
+  window.__ring = function(){
+    return { phase: rg.phase, el: Math.round(rg.el), shown: +rg.shown.toFixed(1), forced: rg.forced, timeline: rg.timeline.slice(),
+      progress: introProgress(), first: works.filter(function(w){ return w.first; }).map(function(w){ return w.i; }),
+      dealt: works.filter(function(w){ return w.dealAt; }).length,
+      startedAt: rg.startedAt, landedAt: rg.landedAt };
+  };
 
   /* test hook (read-only snapshot), used by the draft's checks */
   window.__carousel = function(){
