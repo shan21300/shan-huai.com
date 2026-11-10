@@ -99,6 +99,12 @@
   .ct-media{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;display:block;
     opacity:0;transition:opacity .5s ease;-webkit-user-drag:none;user-select:none}
   .ct-media.is-ready{opacity:1}
+  /* data-frame="16:9": the media is letterboxed (black bands, no crop) inside a 16:9 frame,
+     and that frame covers the screen like any other 16:9 cover. Used for Martoni's 2.39:1 film. */
+  .ct-layer.has-frame{container-type:size}
+  .ct-frame{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#000;
+    width:max(100cqw,177.778cqh);height:max(56.25cqw,100cqh)}
+  .ct-frame .ct-media{object-fit:contain}
   /* portrait / vertical media: always the full screen height, top to bottom, centred. Wide screens
      get dark space either side; a screen narrower than the picture trims its sides, never top/bottom. */
   .ct-media.fit-contain{width:auto;max-width:none;height:100%;left:50%;transform:translateX(-50%);object-fit:fill}
@@ -216,7 +222,7 @@
             <li><a class="ct-clip" href="/project/frometo" data-nav="proj-frometo" draggable="false" data-logo="/images/projects/FRM_title.png"
                    data-stream="5d5a347fdc546fa2904564d13861d576" data-cat="Branding" data-meta="Local Remote · 2026"><img
                    src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/5d5a347fdc546fa2904564d13861d576/thumbnails/thumbnail.jpg?width=480" width="480" height="270" alt="" decoding="async" draggable="false"><span class="ct-clip-name mono">FROMETO</span></a></li>
-            <li><a class="ct-clip" href="https://www.kickstarter.com/projects/martoni/martoni-super-e-the-micro-mobility-device-that-flies?ref=creator_tab" data-nav="proj-martoni" draggable="false" data-logo="/images/projects/MARTONI_title.png"
+            <li><a class="ct-clip" href="https://www.kickstarter.com/projects/martoni/martoni-super-e-the-micro-mobility-device-that-flies?ref=creator_tab" data-nav="proj-martoni" draggable="false" data-frame="16:9" data-logo="/images/projects/MARTONI_title.png"
                    data-stream="8d9b3df3dd9fd9d25b34955a51e46079" data-poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/8d9b3df3dd9fd9d25b34955a51e46079/thumbnails/thumbnail.jpg?width=1920&time=20s" data-cat="Colorist" data-meta="Modular Agency · 2026"><img
                    src="/images/commercial/thumb-martoni.webp" width="480" height="201" alt="" decoding="async" draggable="false"><span class="ct-clip-name mono">Martoni Super-E</span></a></li>
             <li><a class="ct-clip" href="/project/local-local-park" data-nav="proj-locallocalpark" draggable="false" data-logo="/images/projects/LLP_title.png"
@@ -340,6 +346,7 @@
       stream: stream, video: video, poster: poster,
       srcset: a.getAttribute("data-poster-srcset") || "",
       portrait: a.getAttribute("data-orient") === "portrait",
+      frame: a.getAttribute("data-frame") === "16:9",
       layer: null, img: null, posterDone: false, posterWaiters: [],
       vid: null, hls: null, vState: 0      /* 0 none · 1 loading · 2 playing · 3 warm (paused, buffering ahead) · -1 failed */
     };
@@ -370,8 +377,10 @@
     }
     img.addEventListener("load", done); img.addEventListener("error", done);
     img.src = p.poster;
-    L.appendChild(img); stage.appendChild(L);
-    p.layer = L; p.img = img;
+    var box = L;
+    if(p.frame){ L.classList.add("has-frame"); box = document.createElement("div"); box.className = "ct-frame"; L.appendChild(box); }
+    box.appendChild(img); stage.appendChild(L);
+    p.layer = L; p.box = box; p.img = img;
     if(img.complete && img.naturalWidth) done();
     return L;
   }
@@ -435,7 +444,7 @@
     });
     v.addEventListener("pause", function(){ if(p.vid === v) v.classList.remove("is-ready"); });
     v.addEventListener("error", function(){ if(p.vid === v) fail(p, "media error"); });
-    p.layer.appendChild(v);
+    p.box.appendChild(v);
 
     if(p.type === "file"){
       v.src = p.video;
