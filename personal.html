@@ -162,7 +162,7 @@
   .wall-gl{position:absolute;left:0;top:0;width:100%;height:100%;display:none;pointer-events:none}
   .wall.gl-on .wall-gl{display:block}
   .wall.gl-on .stage{opacity:0}
-  .wall.gl-on .vignette{background:radial-gradient(ellipse at center,transparent 55%,rgba(11,11,12,.22) 80%,rgba(11,11,12,.6) 100%)}
+  .wall.gl-on .vignette{display:none}   /* the loupe shader draws its own vignette and barrel */
 
   .hud{position:fixed;left:0;right:0;bottom:0;z-index:30;pointer-events:none;
     display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
@@ -618,16 +618,31 @@
      so they land on the cover that is visible under the cursor.
      If WebGL is unavailable, fails, or the context is lost, the CSS wall shows instead.
      ===================================================================== */
+  /* LOUPE: the wall is seen through a circular photographer's loupe.
+     Units: r = 1 is the middle of the shorter screen edge; ρ = r / RIM (0 centre, 1 rim).
+     Lens curve (one smooth polynomial, no kink):
+       src = p · (1 + K1·ρ² + K2·ρ⁴ + REFRACT·ρ^REFRACT_POW) / MAG
+     MAG magnifies the centre; negative K1/K2 stretch the outer band (pincushion);
+     REFRACT/REFRACT_POW squeeze a thin band just inside the rim (glass refraction). */
   var EDGE = {
-    START: 0.66,      // where the bend begins: 0 = centre, 1 = screen edge (rounded-rectangle distance)
-    // Shape: a true circle on screen, sized to the longer side. On a landscape screen the left and
-    // right edges bend while the top and bottom middles stay clean (the reverse in portrait).
-    STRENGTH: 1.7,    // how hard the outer band stretches (stretch at the very edge ≈ e^STRENGTH)
-    RGB: 0.012,       // RGB split; grows toward the edges and is strongest in the corners
-    SPEED: 0.3,       // extra bend at full drag/throw speed (0 = no speed response)
+    MAG: 1.08,        // centre magnification (1 = none)
+    K1: -0.10,        // ρ² term: < 0 stretches the outer band
+    K2: -0.06,        // ρ⁴ term: < 0 stretches the outermost band harder
+    REFRACT: 0.135,   // strength of the compression band just inside the rim
+    REFRACT_POW: 20,  // how thin that band is (higher = thinner, hugs the rim)
+    RIM: 0.98,        // lens radius, as a fraction of half the shorter side
+    CA: 0.008,        // chromatic aberration at the rim (R out / B in; zero at the centre, grows ~ρ³)
+    BLUR: 2.2,        // focus falloff: blur radius at the rim, in CSS px
+    FOCUS: 0.75,      // where the softening starts (ρ); the outer ~25% blurs progressively
+    VIGNETTE: 0.15,   // darkening at the rim inside the lens (0.15 = 15% darker)
+    HIGHLIGHT: 0.10,  // specular arc at the top-left of the rim (opacity, screen blend)
+    TINT: 0.5,        // warm glass tint strength (0 = neutral, 1 = full TINT_COL)
+    TINT_COL: [1.0, 0.975, 0.93],   // the glass colour at TINT = 1
+    LIFT: 0.02,       // lifted blacks (0.02 = 2%)
+    SPEED: 0.3,       // extra magnification + CA at full drag/throw speed (0 = no speed response)
     SPEED_REF: 2.0,   // drag speed (same measure as the speed zoom) that counts as "full speed"
     SPEED_UP: 90, SPEED_DOWN: 450,   // ms to ease into / back out of the speed bend
-    REDUCED: 0.35,    // strength with prefers-reduced-motion (speed response is always off then)
+    REDUCED: 0.35,    // lens strength (curve, magnification, CA) with prefers-reduced-motion; no speed response then
     DPR_MAX: 2        // device-pixel-ratio cap for the canvas
   };
   var EDGE_ON = !/(^|[?&])edge=0(&|$)/.test(location.search.slice(1));
@@ -697,23 +712,56 @@
       "  gl_FragColor = c * uSt.w;",                                                    // tile opacity (premultiplied)
       "}"].join("\n");
     var VS_P = "attribute vec2 aP; varying vec2 vUv; void main(){ vUv = aP; gl_Position = vec4(aP * 2.0 - 1.0, 0.0, 1.0); }";
+    // Loupe post pass. p: lens space (r = 1 at the middle of the shorter edge, y up). The lens
+    // curve here must stay identical to lensScale() in JS (api.src uses it for hit-testing).
     var FS_P = [
       "precision highp float;",
-      "uniform sampler2D uTex; uniform float uA, uC, uRGB; uniform vec2 uAsp;",
+      "uniform sampler2D uTex;",
+      "uniform vec2 uHalf;",          // half the screen in lens units (≥ 1 on each axis)
+      "uniform vec4 uK;",             // K1, K2, REFRACT, REFRACT_POW
+      "uniform float uMag, uRim, uCA, uBlur, uFocus, uVig, uHi, uLift, uPx;",   // uBlur, uPx in lens units
+      "uniform vec3 uTint, uBarrel;",
       "varying vec2 vUv;",
+      "float ign(vec2 f){ return fract(52.9829189 * fract(dot(f, vec2(0.06711056, 0.00583715)))); }",   // interleaved gradient noise
+      "vec2 toUv(vec2 q){ return q / uHalf * 0.5 + 0.5; }",
       "void main(){",
-      "  vec2 pos = vUv * 2.0 - 1.0;",
-      "  float r = length(pos * uAsp);",                                  // circular distance (1 = middle of the longer edge)
-      "  if(r <= uA){ gl_FragColor = vec4(texture2D(uTex, vUv).rgb, 1.0); return; }",
-      "  float t = (r - uA) / (1.0 - uA);",
-      "  float g = uA + (1.0 - uA) * (uC > 1e-4 ? (1.0 - exp(-uC * t)) / uC : t);",
-      "  vec2 src = pos * (g / r);",                                       // sample nearer the centre → the edge band stretches outward
-      "  float k = uRGB * t * t;",
-      "  vec2 uR = clamp(src * (1.0 + k), -1.0, 1.0) * 0.5 + 0.5;",
-      "  vec2 uB = clamp(src * (1.0 - k), -1.0, 1.0) * 0.5 + 0.5;",
-      "  vec4 mid = texture2D(uTex, src * 0.5 + 0.5);",
-      "  float m = mid.a;",                                                // 1 on cover images, 0 on grid, captions, background
-      "  gl_FragColor = vec4(mix(mid.r, texture2D(uTex, uR).r, m), mid.g, mix(mid.b, texture2D(uTex, uB).b, m), 1.0);",
+      "  vec2 p = (vUv * 2.0 - 1.0) * uHalf;",
+      "  float r = length(p);",
+      "  float inLens = 1.0 - smoothstep(uRim - uPx, uRim + uPx, r);",          // 1px anti-aliased hard rim
+      "  if(inLens <= 0.0){ gl_FragColor = vec4(uBarrel, 1.0); return; }",
+      "  float rho = min(r / uRim, 1.0), r2 = rho * rho;",
+      "  float sc = (1.0 + uK.x * r2 + uK.y * r2 * r2 + uK.z * pow(max(rho, 1e-4), uK.w)) / uMag;",
+      "  vec2 src = p * sc;",
+      // focus falloff + chromatic aberration, one loop: 4 disc taps, each reads R, G, B at its own
+      // radial offset (R pushed out, B pulled in, spread over the taps so fringes stay soft).
+      "  float bl = uBlur * smoothstep(uFocus, 1.0, rho);",
+      "  float k = uCA * rho * r2;",
+      "  float a0 = ign(gl_FragCoord.xy) * 6.2831853;",
+      "  vec3 c = vec3(0.0);",
+      "  for(int i = 0; i < 4; i++){",
+      "    float fi = float(i), a = a0 + fi * 2.3999632;",                        // golden-angle spiral disc
+      "    vec2 o = vec2(cos(a), sin(a)) * bl * sqrt((fi + 0.5) / 4.0);",
+      "    float t = (fi + 0.5) / 2.0;",                                           // 0.25 .. 1.75, mean 1
+      "    vec2 q = src + o;",
+      "    c.r += texture2D(uTex, toUv(q * (1.0 + k * t))).r;",
+      "    c.g += texture2D(uTex, toUv(q)).g;",
+      "    c.b += texture2D(uTex, toUv(q * (1.0 - k * t))).b;",
+      "  }",
+      "  c *= 0.25;",
+      // light: vignette, warm glass tint, lifted blacks
+      "  c *= 1.0 - uVig * r2;",
+      "  c *= uTint;",
+      "  c = uLift + c * (1.0 - uLift);",
+      // rim: soft inner shadow, then a 1–2px dark edge, then a faint specular arc (top-left, ~120°)
+      "  float d = uRim - r;",                                                    // distance inside the rim
+      "  c *= 1.0 - 0.45 * (1.0 - smoothstep(0.0, 0.07, d)) * (1.0 - smoothstep(0.0, 0.07, d));",
+      "  c *= 1.0 - 0.75 * (1.0 - smoothstep(uPx * 1.0, uPx * 2.5, d));",
+      "  float ang = dot(p / max(r, 1e-4), vec2(-0.70710678, 0.70710678));",   // 1 toward the top-left
+      "  float arc = smoothstep(0.5, 0.95, ang);",                                // cos 60° → ~120° sweep
+      "  float band = exp(-pow((d - 0.022) / 0.009, 2.0));",
+      "  float h = clamp(uHi * arc * band, 0.0, 1.0);",
+      "  c = 1.0 - (1.0 - c) * (1.0 - h);",                                       // screen blend
+      "  gl_FragColor = vec4(mix(uBarrel, c, inLens), 1.0);",
       "}"].join("\n");
 
     function compile(vs, fs){
@@ -842,20 +890,31 @@
       if(!gl || lost) return;
       sizeCanvas(); buildCaptions();
     };
-    function strength(){
-      var k = reduce ? EDGE.REDUCED : 1;
-      return EDGE.STRENGTH * k * (1 + (reduce ? 0 : boost));
+    // The live lens: EDGE scaled by prefers-reduced-motion and the drag/throw speed boost
+    // (speed adds a little magnification and CA). Shared by the shader uniforms and api.src.
+    function lens(){
+      var k = reduce ? EDGE.REDUCED : 1, b = reduce ? 0 : boost;
+      return {
+        mag: (1 + (EDGE.MAG - 1) * k) * (1 + 0.25 * b),
+        k1: EDGE.K1 * k, k2: EDGE.K2 * k, kr: EDGE.REFRACT * k, kp: EDGE.REFRACT_POW,
+        rim: EDGE.RIM, ca: EDGE.CA * k * (1 + 1.5 * b)
+      };
     }
-    // Screen point → the point of the (undistorted) wall that is drawn there.
+    // Same curve as FS_P: the source point is p · lensScale(ρ).
+    function lensScale(L, rho){
+      var r2 = rho * rho;
+      return (1 + L.k1 * r2 + L.k2 * r2 * r2 + L.kr * Math.pow(Math.max(rho, 1e-4), L.kp)) / L.mag;
+    }
+    // Screen point → the point of the (undistorted) wall that is drawn there; null outside the lens.
     api.src = function(x, y){
       if(!api.on || !W || !H) return { x:x, y:y };
-      var a = EDGE.START, c = strength(), M = Math.max(W, H);
-      var u = x / W * 2 - 1, v = y / H * 2 - 1;
-      var r = Math.hypot(u * W / M, v * H / M);
-      if(r <= a) return { x:x, y:y };
-      var t = (r - a) / (1 - a), g = a + (1 - a) * (c > 1e-4 ? (1 - Math.exp(-c * t)) / c : t), k = g / r;
-      return { x:(u * k + 1) / 2 * W, y:(v * k + 1) / 2 * H };
+      var L = lens(), m = Math.min(W, H) / 2;
+      var px = (x - W / 2) / m, py = (y - H / 2) / m, r = Math.hypot(px, py);
+      if(r > L.rim) return null;
+      var sc = lensScale(L, r / L.rim);
+      return { x:W / 2 + px * sc * m, y:H / 2 + py * sc * m };
     };
+    api.refresh = function(){ needPost = true; dirty = true; };
 
     api.tick = function(now, dt, layoutChanged){
       if(!api.on) return;
@@ -922,14 +981,64 @@
       gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, canvas.width, canvas.height);
       var P = progP, u = P.u; gl.useProgram(P.p);
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, fboTex); gl.uniform1i(u.uTex, 0);
-      gl.uniform1f(u.uA, EDGE.START); gl.uniform2f(u.uAsp, W / Math.max(W, H), H / Math.max(W, H)); gl.uniform1f(u.uC, strength());
-      gl.uniform1f(u.uRGB, EDGE.RGB * (reduce ? 0.5 : 1));
+      var L = lens(), m = Math.min(W, H) / 2, tw = EDGE.TINT;
+      gl.uniform2f(u.uHalf, W / 2 / m, H / 2 / m);
+      gl.uniform4f(u.uK, L.k1, L.k2, L.kr, L.kp);
+      gl.uniform1f(u.uMag, L.mag); gl.uniform1f(u.uRim, L.rim); gl.uniform1f(u.uCA, L.ca);
+      gl.uniform1f(u.uBlur, EDGE.BLUR / m); gl.uniform1f(u.uFocus, EDGE.FOCUS);
+      gl.uniform1f(u.uVig, EDGE.VIGNETTE); gl.uniform1f(u.uHi, EDGE.HIGHLIGHT); gl.uniform1f(u.uLift, EDGE.LIFT);
+      gl.uniform1f(u.uPx, 1 / (m * dpr));
+      gl.uniform3f(u.uTint, 1 + (EDGE.TINT_COL[0] - 1) * tw, 1 + (EDGE.TINT_COL[1] - 1) * tw, 1 + (EDGE.TINT_COL[2] - 1) * tw);
+      gl.uniform3fv(u.uBarrel, cInk);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
     api.boost = function(){ return boost; };
     window.__wallEdge = { api:api, EDGE:EDGE };   // for tuning from the console / tests
     return api;
   })();
+
+  /* ?loupe-debug=1: sliders for the loupe values in EDGE (live; "copy" puts the current EDGE values on the clipboard). */
+  if(EDGE_ON && /(^|[?&])loupe-debug=1(&|$)/.test(location.search.slice(1))){
+    (function(){
+      var defs = [
+        ["MAG", 1, 1.3, 0.005], ["K1", -0.4, 0.2, 0.005], ["K2", -0.4, 0.2, 0.005],
+        ["REFRACT", 0, 0.5, 0.005], ["REFRACT_POW", 4, 40, 1], ["RIM", 0.6, 1.2, 0.005],
+        ["CA", 0, 0.04, 0.0005], ["BLUR", 0, 8, 0.1], ["FOCUS", 0, 1, 0.01],
+        ["VIGNETTE", 0, 0.6, 0.01], ["HIGHLIGHT", 0, 0.5, 0.01], ["TINT", 0, 1, 0.01],
+        ["LIFT", 0, 0.1, 0.002], ["SPEED", 0, 1, 0.01]
+      ];
+      var box = document.createElement("div");
+      box.style.cssText = "position:fixed;right:12px;top:72px;z-index:99;width:310px;padding:10px 12px;border-radius:8px;" +
+        "background:rgba(11,11,12,.86);border:1px solid rgba(237,234,227,.15);color:#edeae3;" +
+        "font:11px/1.2 'IBM Plex Mono',monospace;letter-spacing:.04em;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)";
+      var html = "<div style='display:flex;justify-content:space-between;margin-bottom:6px'><b>LOUPE</b>" +
+        "<span><button data-a=copy>copy</button> <button data-a=hide>–</button></span></div><div data-body>";
+      defs.forEach(function(d){
+        html += "<label style='display:grid;grid-template-columns:92px 1fr 56px;gap:6px;align-items:center;margin:3px 0'>" +
+          d[0] + "<input type=range min=" + d[1] + " max=" + d[2] + " step=" + d[3] + " value=" + EDGE[d[0]] + " data-k=" + d[0] + ">" +
+          "<output style='text-align:right'>" + EDGE[d[0]] + "</output></label>";
+      });
+      box.innerHTML = html + "</div>";
+      box.querySelectorAll("button").forEach(function(b){ b.style.cssText = "font:inherit;color:inherit;background:none;border:1px solid rgba(237,234,227,.3);border-radius:4px;padding:1px 6px;cursor:pointer"; });
+      ["pointerdown", "wheel", "keydown", "touchstart"].forEach(function(t){ box.addEventListener(t, function(e){ e.stopPropagation(); }, { passive:true }); });
+      box.addEventListener("input", function(e){
+        var k = e.target.getAttribute("data-k"); if(!k) return;
+        EDGE[k] = parseFloat(e.target.value); e.target.nextSibling.textContent = e.target.value;
+        Edge.refresh();
+      });
+      box.addEventListener("click", function(e){
+        var a = e.target.getAttribute && e.target.getAttribute("data-a");
+        if(a === "hide"){ var b = box.querySelector("[data-body]"); b.style.display = b.style.display ? "" : "none"; }
+        if(a === "copy"){
+          var out = {}; defs.forEach(function(d){ out[d[0]] = EDGE[d[0]]; });
+          var txt = JSON.stringify(out, null, 2);
+          if(navigator.clipboard) navigator.clipboard.writeText(txt).catch(function(){});
+          if(window.console) console.log(txt);
+        }
+      });
+      document.body.appendChild(box);
+    })();
+  }
 
   /* ---------- Hover: glass cell, hovered tile only ---------- */
   var hovT = null;
@@ -953,7 +1062,8 @@
   function tileAt(x, y){
     if(Edge.on){
       // the bent wall: find the tile drawn under (x, y), i.e. at its source point
-      var q = Edge.src(x, y), els = document.elementsFromPoint(q.x, q.y);
+      var q = Edge.src(x, y); if(!q) return null;   // on the loupe's barrel: nothing under the cursor
+      var els = document.elementsFromPoint(q.x, q.y);
       for(var i = 0; i < els.length; i++){ var te = els[i].closest && els[i].closest(".tile"); if(te) return byEl.get(te) || null; if(els[i] === wall) break; }
       return null;
     }
