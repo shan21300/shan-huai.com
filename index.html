@@ -231,6 +231,8 @@
      letters so no offset is needed) — cap by width like LLP. */
   .proj-panel-title .proj-panel-logo[src="/images/projects/FRM_title.png"]{height:auto;width:7em}
   .sw-name .sw-name-logo[src="/images/projects/FRM_title.png"]{height:auto;width:7em}
+  /* Martoni's stacked mark + wordmark (2.76:1) reads oversized at 3em tall — cap by width. */
+  .proj-panel-title .proj-panel-logo[src="/images/projects/MARTONI_title.png"]{height:auto;width:4.5em}
   .proj-panel-meta{font-family:"IBM Plex Mono",monospace;font-size:12px;
     letter-spacing:.12em;text-transform:uppercase;color:var(--grey)}
   .proj-panel-arrow{color:var(--paper);font-size:clamp(20px,2vw,28px);
@@ -607,6 +609,7 @@
      stream attaches, so nothing below shifts. */
   @media(max-width:860px){
     #proj-frometo .hs-hero{height:auto;aspect-ratio:16/9}
+    #proj-martoni .hs-hero{height:auto;aspect-ratio:1910/800}
   }
   .hs-layout .hs-sec-label{border-top:1px solid var(--line);padding-top:18px;
     margin-bottom:36px;text-align:center}
@@ -1383,6 +1386,7 @@
       <h1 class="cc-sr" tabindex="-1">Shan-Huai Chiang — selected work</h1>
       <div class="cc-stage" aria-hidden="true"><canvas></canvas></div>
       <ol class="cc-works" aria-label="Selected work, newest first">
+        <li><a class="cc-work" href="/project/martoni-super-e" data-nav="proj-martoni" data-logo="/images/carousel/logos/martoni.webp" data-stream="8d9b3df3dd9fd9d25b34955a51e46079" data-cat="Colorist" data-meta="Modular Agency · 2026"><img data-src="/images/carousel/proj-martoni.webp" width="1910" height="800" alt="Martoni Super-E"><span class="cc-work-name">Martoni Super-E</span><span class="cc-work-meta">Colorist — Modular Agency · 2026</span></a></li>
         <li><a class="cc-work" href="/project/sub" data-nav="proj-sub" data-logo="/images/carousel/logos/sub.webp" data-stream="e997d71eb8270f43dddcebf6eeefa9fa" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-sub.webp" width="1200" height="800" alt="SUB"><span class="cc-work-name">SUB</span><span class="cc-work-meta">Branding — Local Remote · 2026</span></a></li>
         <li><a class="cc-work" href="/project/heysong-sarsaparilla" data-nav="proj-heysong" data-logo="/images/carousel/logos/heysong.webp" data-stream="0b36c9ded9204e7376cbc535b745884f" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-heysong.webp" width="1422" height="800" alt="黑松沙士"><span class="cc-work-name">黑松沙士</span><span class="cc-work-meta">Branding — Local Remote · 2026</span></a></li>
         <li><a class="cc-work" href="/project/frometo" data-nav="proj-frometo" data-logo="/images/carousel/logos/frometo.webp" data-stream="5d5a347fdc546fa2904564d13861d576" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-frometo.webp" width="1422" height="800" alt="FROMETO"><span class="cc-work-name">FROMETO</span><span class="cc-work-meta">Branding — Local Remote · 2026</span></a></li>
@@ -1438,6 +1442,19 @@
         <section class="page" id="projects">
       <!-- Projects: scroll-snap full-viewport panels. Add/remove .proj-panel blocks freely. -->
       <!-- Each panel: swap src on .proj-panel-bg (img or iframe), update title/meta/href -->
+
+      <div class="proj-panel is-video" data-nav="proj-martoni" style="cursor:pointer">
+        <img class="proj-panel-cover" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/8d9b3df3dd9fd9d25b34955a51e46079/thumbnails/thumbnail.jpg?width=1280&time=20s" alt="" loading="lazy">
+        <video class="proj-panel-bg" data-stream="8d9b3df3dd9fd9d25b34955a51e46079" muted playsinline preload="none"></video>
+        <div class="proj-panel-overlay"></div>
+        <div class="proj-panel-info">
+          <div class="proj-panel-text">
+            <span class="proj-panel-title"><img class="proj-panel-logo" src="/images/projects/MARTONI_title.png" alt="Martoni Super-E"></span>
+            <span class="proj-panel-meta">Modular Agency · 2026</span>
+          </div>
+          <a class="proj-panel-arrow" href="#" onclick="event.preventDefault();event.stopPropagation()">↗</a>
+        </div>
+      </div>
 
       <div class="proj-panel is-video" data-nav="proj-sub" style="cursor:pointer">
         <img class="proj-panel-cover" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/e997d71eb8270f43dddcebf6eeefa9fa/thumbnails/thumbnail.jpg?width=1280" alt="" loading="lazy">
@@ -2927,6 +2944,46 @@
         </div>
       </div>
     </section>
+<!-- MARTONI SUPER-E: colour grade for Modular Agency. Same .hs-layout template as FROMETO;
+     hero is the Stream film. Description and credits still to come. -->
+<section class="page proj-detail hs-layout" id="proj-martoni">
+      <video class="hs-hero" data-stream="8d9b3df3dd9fd9d25b34955a51e46079"
+        poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/8d9b3df3dd9fd9d25b34955a51e46079/thumbnails/thumbnail.jpg?width=1280&time=20s"
+        muted loop playsinline preload="none"></video>
+      <div class="pinfo">
+        <div class="pinfo-card">
+          <div class="pinfo-head">
+            <div class="pinfo-tabs"><span class="pinfo-tab is-on" data-view="info">Info</span></div>
+            <span class="pinfo-toggle" role="switch" aria-label="Toggle floater" aria-checked="false"></span>
+          </div>
+          <div class="pinfo-body">
+            <div class="pinfo-scroll">
+              <div class="pinfo-view is-on" data-view="info">
+                <div class="pinfo-credits">
+                  <div class="pinfo-ck">Project</div><div class="pinfo-cv">Martoni Super-E</div>
+                  <div class="pinfo-ck">Agency</div><div class="pinfo-cv">Modular Agency</div>
+                  <div class="pinfo-ck">Role</div><div class="pinfo-cv">Colorist</div>
+                  <div class="pinfo-ck">Year</div><div class="pinfo-cv">2026</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="proj-detail-wrap">
+        <div class="proj-detail-section hs-nav-row">
+          <button class="back" data-nav="projects">← Projects</button>
+        </div>
+
+        <div class="proj-detail-section hs-meta">
+          <div><div class="hs-meta-k">Project</div><div class="hs-meta-v">Martoni Super-E</div></div>
+          <div><div class="hs-meta-k">Agency</div><div class="hs-meta-v">Modular Agency</div></div>
+          <div><div class="hs-meta-k">Role</div><div class="hs-meta-v">Colorist</div></div>
+          <div><div class="hs-meta-k">Year</div><div class="hs-meta-v">2026</div></div>
+        </div>
+      </div>
+    </section>
 <!-- FROMETO: clone of the Local Local Park (.hs-layout) template. Gallery follows the
      block order of localremote.co/projects/frometo. Videos are Cloudflare Stream IDs in the
      same slots; slot 08 (Vimeo 1223353048) could not be downloaded and is still missing. -->
@@ -3753,6 +3810,7 @@
     "proj-sub":"/project/sub",
     "proj-locallocalpark":"/project/local-local-park",
     "proj-frometo":"/project/frometo",
+    "proj-martoni":"/project/martoni-super-e",
     "gig-cornelius":"/live/cornelius","gig-someshiitsam":"/live/someshiit-sam",
     "gig-elephantgym":"/live/elephant-gym","gig-hillsong":"/live/hillsong",
     "gig-thehope":"/live/the-hope","gig-mosaic":"/live/mosaic",
