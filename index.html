@@ -182,6 +182,10 @@
     line-height:1.1;letter-spacing:-.02em;text-transform:lowercase;color:var(--ink);
     text-decoration:none;transition:opacity .3s ease}
   .menu-mini a:hover{font-style:italic}
+  /* menu items never get a focus box: keyboard focus shows the same italic as hover */
+  #menu .m-link:focus,#menu .m-sub:focus,#menu .menu-mini a:focus{outline:none}
+  #menu .m-link:focus-visible,#menu .m-sub:focus-visible,#menu .menu-mini a:focus-visible{font-style:italic}
+  #menu .m-link.m-soon:focus-visible{font-style:normal}
   header .logo{background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center}
   header .logo,header .menuBtn{pointer-events:auto}
   .logo-img{height:clamp(75px,7.5vw,102px);width:auto;display:block;opacity:.9;transition:opacity .2s}
@@ -4004,9 +4008,11 @@
       : "/images/system/shanhuailogoinversed_black.png";
     menuEl.classList.add("open");
     document.body.classList.add("menu-is-open");
-    {                                // the page behind can't be tabbed into; focus the first link
+    {                                // the page behind can't be tabbed into
       var mainEl=document.querySelector("main"); if(mainEl) mainEl.setAttribute("inert","");
-      setTimeout(function(){         // first visible item ("close" and the menu logo are hidden here)
+      // Opened from the keyboard: focus the first link so Tab carries on inside the menu.
+      // Opened by tap or click: leave focus on the logo, so no menu item looks selected.
+      if(lastInputWasKey) setTimeout(function(){   // first visible item ("close" and the menu logo are hidden here)
         var c=menuEl.querySelectorAll("a[href],button");
         for(var i=0;i<c.length;i++){ if(c[i].offsetParent){ c[i].focus({preventScroll:true}); break; } }
       }, 60);
@@ -4016,6 +4022,10 @@
     gsap.fromTo(".m-link",{y:26,opacity:0},{y:0,opacity:1,duration:.6,stagger:.06,ease:"power3.out",delay:.05});
     gsap.fromTo(".menu-foot > *",{y:14,opacity:0},{y:0,opacity:1,duration:.5,stagger:.08,ease:"power3.out",delay:.22});
   }
+  /* whether the last input was a key (vs pointer), so opening the menu by tap doesn't select an item */
+  var lastInputWasKey=false;
+  document.addEventListener("keydown",function(){ lastInputWasKey=true; },true);
+  document.addEventListener("pointerdown",function(){ lastInputWasKey=false; },true);
   function closeMenu(cb){
     document.body.classList.remove("menu-is-open");
     var mainEl=document.querySelector("main"); if(mainEl) mainEl.removeAttribute("inert");
