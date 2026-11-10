@@ -40,11 +40,11 @@
     --clip-w:clamp(150px,19vw,288px);
     --clip-h:calc(var(--clip-w) * 9 / 16);
     --gap:3px;
-    --ruler:22px;
+    --ph-head:12px;                                            /* room above the clips for the playhead's head */
     --tl-pad:calc(16px + env(safe-area-inset-bottom,0px));
-    --tl-h:calc(var(--clip-h) + var(--ruler) + 30px + 16px);   /* JS replaces with the measured height */
+    --tl-h:calc(var(--clip-h) + var(--ph-head) + 30px + 16px); /* JS replaces with the measured height */
   }
-  @media (max-width:600px){ :root{ --clip-w:36vw; --ruler:20px } }
+  @media (max-width:600px){ :root{ --clip-w:36vw } }
 
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{height:100%}
@@ -66,15 +66,7 @@
   .brandBtn .logo-img{height:var(--cc-logo);width:auto;display:block;opacity:.9;transition:opacity .35s ease}
   .brandBtn .logo-img-b{position:absolute;left:0;top:0;height:var(--cc-logo);width:auto;opacity:0;transition:opacity .35s ease}
   .brandBtn:hover .logo-img{opacity:1}
-  .hdr-right{position:absolute;right:calc(var(--cc-px) + env(safe-area-inset-right,0px));top:calc(var(--cc-py) + env(safe-area-inset-top,0px));
-    height:var(--cc-logo);display:flex;align-items:center;gap:18px;pointer-events:auto}
-  .hdr-btn{background:none;border:none;color:var(--paper);cursor:pointer;padding:6px 0;
-    font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.12em;text-transform:lowercase;opacity:.85;
-    text-shadow:0 1px 12px rgba(0,0,0,.5)}
-  .hdr-btn:hover,.hdr-btn[aria-expanded="true"]{opacity:1}
   body.menu-is-open header{z-index:80}
-  body.index-open header{z-index:65}      /* logo + "close" stay usable above the index list */
-  body.menu-is-open .hdr-right{visibility:hidden}
   body.menu-is-open .brandBtn .logo-img{opacity:0}
   body.menu-is-open .brandBtn .logo-img-b{opacity:.92}
   body.menu-is-open .brandBtn:focus-visible{outline-color:var(--ink)}
@@ -132,22 +124,15 @@
 
   /* ---------- Timeline ---------- */
   .ct-tl{position:fixed;left:0;right:0;bottom:0;z-index:20;padding-bottom:var(--tl-pad)}
-  .ct-bar{position:relative;height:30px;display:flex;align-items:center;justify-content:space-between;
-    padding:0 calc(var(--cc-px) + env(safe-area-inset-left,0px));font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:rgba(237,234,227,.7);
-    text-shadow:0 1px 10px rgba(0,0,0,.55)}
+  .ct-bar{position:relative;height:30px;font-size:10.5px;color:rgba(237,234,227,.7);text-shadow:0 1px 10px rgba(0,0,0,.55)}
   .ct-tc{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:13ch;text-align:center;color:var(--paper);
     font-variant-numeric:tabular-nums;letter-spacing:.08em;contain:layout paint}
-  .ct-count{font-variant-numeric:tabular-nums;margin-left:auto}
-  .ct-view{position:relative;height:calc(var(--ruler) + var(--clip-h));overflow:hidden;touch-action:none;
+  .ct-view{position:relative;height:calc(var(--ph-head) + var(--clip-h));overflow:hidden;touch-action:none;
     cursor:grab;-webkit-user-select:none;user-select:none}
   .ct-view.is-dragging,.ct-view.is-dragging *{cursor:grabbing}
-  .ct-track{position:absolute;left:0;top:0;height:100%;will-change:transform}
-  .ct-ruler{position:relative;height:var(--ruler);
-    background-image:linear-gradient(to right,rgba(237,234,227,.3) 1px,transparent 1px);
-    background-size:var(--tick,28.8px) 5px;background-repeat:repeat-x;background-position:0 100%}
-  .ct-mark{position:absolute;left:0;bottom:0;height:var(--ruler);border-left:1px solid rgba(237,234,227,.55);
-    padding:2px 0 0 5px;font-size:9px;letter-spacing:.08em;color:rgba(237,234,227,.5);white-space:nowrap;font-variant-numeric:tabular-nums}
-  .ct-works{display:flex;gap:var(--gap);list-style:none}
+  /* the reel loops: JS puts copies of the list either side of the real one (aria-hidden, not focusable) */
+  .ct-track{position:absolute;left:0;top:var(--ph-head);height:var(--clip-h);display:flex;gap:var(--gap);will-change:transform}
+  .ct-works{display:flex;gap:var(--gap);list-style:none;flex:none}
   .ct-works li{flex:none}
   .ct-clip{position:relative;display:block;width:var(--clip-w);height:var(--clip-h);overflow:hidden;background:#151516;
     text-decoration:none;-webkit-user-drag:none;-webkit-tap-highlight-color:transparent}
@@ -168,25 +153,6 @@
   .ct-playhead::before{content:"";position:absolute;left:-5px;top:0;width:11px;height:12px;background:var(--paper);
     clip-path:polygon(0 0,100% 0,100% 55%,50% 100%,0 55%)}
 
-  /* ---------- Index: the plain, non-timeline list of the same projects ---------- */
-  .ct-index{position:fixed;inset:0;z-index:60;background:rgba(11,11,12,.96);overflow:auto;overscroll-behavior:contain;
-    padding:calc(var(--cc-py) * 2 + var(--cc-logo) + 36px + env(safe-area-inset-top,0px)) calc(var(--cc-px) + env(safe-area-inset-left,0px)) 48px}
-  .ct-index[hidden]{display:none}
-  .ct-index-h{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);margin-bottom:22px}
-  .ct-index ol{list-style:none;border-top:1px solid var(--line)}
-  .ct-index li{border-bottom:1px solid var(--line)}
-  .ct-index a{display:grid;grid-template-columns:3.2em 1fr auto;align-items:baseline;gap:16px;padding:16px 0;text-decoration:none}
-  .ct-index .ix-n{font-size:10.5px;letter-spacing:.12em;color:var(--grey)}
-  .ct-index .ix-t{font-family:"Cormorant Garamond",serif;font-weight:300;font-size:clamp(28px,3.4vw,44px);line-height:1.05;letter-spacing:-.02em}
-  .ct-index .ix-m{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:rgba(237,234,227,.7);text-align:right}
-  .ct-index a:hover .ix-t,.ct-index a:focus-visible .ix-t{font-style:italic}
-  .ct-index a[aria-current="true"] .ix-n{color:var(--paper)}
-  @media (max-width:600px){
-    .ct-index a{grid-template-columns:2.4em 1fr;row-gap:6px}
-    .ct-index .ix-m{grid-column:2;text-align:left}
-    .ct-bar .ct-reel{display:none}
-  }
-
   /* ---------- Reduced motion: stills, no glides or fades ---------- */
   html.reduce .ct-layer,html.reduce .ct-media,html.reduce .ct-cap-in,html.reduce .ct-clip img,
   html.reduce #menu,html.reduce .ct-loading{transition:none}
@@ -195,15 +161,12 @@
   html:not(.js) .ct-view{overflow-x:auto;cursor:auto}
   html:not(.js) .ct-track{position:static}
   html:not(.js) .ct-clip img{filter:none}
-  html:not(.js) .ct-hit,html:not(.js) .ct-loading,html:not(.js) .ct-playhead,html:not(.js) .hdr-right,html:not(.js) .ct-tc{display:none}
+  html:not(.js) .ct-hit,html:not(.js) .ct-loading,html:not(.js) .ct-playhead,html:not(.js) .ct-tc{display:none}
 </style>
 </head>
 <body>
   <header>
     <button class="brandBtn" data-act="menu-toggle" aria-label="Open menu" aria-controls="menu" aria-expanded="false"><img src="/images/system/shanhuailogoinversed_white.png" alt="Shan-Huai" class="logo-img"><img data-src="/images/system/shanhuailogoinversed_black.png" alt="" class="logo-img-b" aria-hidden="true"></button>
-    <div class="hdr-right">
-      <button class="hdr-btn" data-act="index" aria-controls="ct-index" aria-expanded="false">index</button>
-    </div>
   </header>
 
   <main class="ct">
@@ -225,15 +188,12 @@
 
     <nav class="ct-tl" id="ct-tl" aria-label="Commercial projects">
       <div class="ct-bar mono">
-        <span class="ct-reel">Commercial reel</span>
         <span class="ct-tc" id="ct-tc" aria-hidden="true">00:00:05:00</span>
-        <span class="ct-count" id="ct-count">01 / 04</span>
       </div>
       <div class="ct-view" id="ct-view">
         <div class="ct-track" id="ct-track">
-          <div class="ct-ruler mono" id="ct-ruler" aria-hidden="true"></div>
-          <!-- Commercial projects, newest first. Name / category / meta / route / Stream UID are the
-               ones index.html already uses for these projects. -->
+          <!-- Projects, newest first (the landing page's order). Name / category / meta / route /
+               Stream UID / images are the ones index.html already uses for these projects. -->
           <ol class="ct-works" id="ct-works">
             <li><a class="ct-clip" href="/project/sub" data-nav="proj-sub" draggable="false"
                    data-stream="e997d71eb8270f43dddcebf6eeefa9fa" data-cat="Branding" data-meta="Local Remote · 2026"><img
@@ -249,18 +209,32 @@
                    data-poster-srcset="/images/carousel/proj-locallocalpark.webp 1200w, /images/projects/LLP_1.avif 3000w"
                    data-cat="Branding" data-meta="Local Remote · 2026"><img
                    src="/images/carousel/proj-locallocalpark.webp" width="1200" height="800" alt="" decoding="async" draggable="false"><span class="ct-clip-name mono">Local Local Park</span></a></li>
+            <li><a class="ct-clip" href="/live/cornelius" data-nav="gig-cornelius" draggable="false"
+                   data-poster="/images/Concerts/cornelius_chillout_-2.jpg" data-orient="portrait"
+                   data-cat="Live" data-meta="Chillout Music Festival · 2025"><img
+                   src="/images/carousel/gig-cornelius.webp" width="533" height="800" alt="" decoding="async" draggable="false"><span class="ct-clip-name mono">Cornelius</span></a></li>
+            <li><a class="ct-clip" href="/live/someshiit-sam" data-nav="gig-someshiitsam" draggable="false"
+                   data-poster="/images/Concerts/someshiitSam_chillout_-01.jpg" data-orient="portrait"
+                   data-cat="Live" data-meta="Chillout Music Festival · 2025"><img
+                   src="/images/carousel/gig-someshiitsam.webp" width="533" height="800" alt="" decoding="async" draggable="false"><span class="ct-clip-name mono">someshiit 山姆</span></a></li>
+            <li><a class="ct-clip" href="/wedding/julian-and-judy" data-nav="julianjudy" draggable="false"
+                   data-poster="/images/wedding-engagement/Julian%26Judy_engagement-06.jpg"
+                   data-cat="Wedding" data-meta="Engagement Session · 2025"><img
+                   src="/images/carousel/julianjudy.webp" width="1200" height="800" alt="" decoding="async" draggable="false"><span class="ct-clip-name mono">Julian and Judy</span></a></li>
+            <li><a class="ct-clip" href="/live/elephant-gym" data-nav="gig-elephantgym" draggable="false"
+                   data-poster="/images/Concerts/elephantgym_bristol-10.jpg" data-orient="portrait"
+                   data-cat="Live" data-meta="Bristol · 2024"><img
+                   src="/images/carousel/gig-elephantgym.webp" width="533" height="800" alt="" decoding="async" draggable="false"><span class="ct-clip-name mono">Elephant Gym</span></a></li>
+            <li><a class="ct-clip" href="/wedding/daniel-and-juny" data-nav="danieljuny" draggable="false"
+                   data-poster="/images/wedding-engagement/DJ-Juny_engagement-04.jpg" data-orient="portrait"
+                   data-cat="Wedding" data-meta="Taiwan · 2021"><img
+                   src="/images/carousel/danieljuny.webp" width="533" height="800" alt="" decoding="async" draggable="false"><span class="ct-clip-name mono">Daniel and Juny</span></a></li>
           </ol>
         </div>
         <div class="ct-playhead" aria-hidden="true"></div>
       </div>
     </nav>
   </main>
-
-  <!-- Plain list of the same projects (opened from "index" in the header) -->
-  <div class="ct-index" id="ct-index" role="dialog" aria-modal="true" aria-label="Commercial projects list" hidden>
-    <p class="ct-index-h mono">Commercial — index</p>
-    <ol id="ct-index-list"></ol>
-  </div>
 
   <div id="menu" role="dialog" aria-modal="true" aria-label="Menu">
     <div class="menu-cats">
@@ -286,7 +260,12 @@
     "proj-sub":"/project/sub",
     "proj-heysong":"/project/heysong-sarsaparilla",
     "proj-frometo":"/project/frometo",
-    "proj-locallocalpark":"/project/local-local-park"
+    "proj-locallocalpark":"/project/local-local-park",
+    "gig-cornelius":"/live/cornelius",
+    "gig-someshiitsam":"/live/someshiit-sam",
+    "julianjudy":"/wedding/julian-and-judy",
+    "gig-elephantgym":"/live/elephant-gym",
+    "danieljuny":"/wedding/daniel-and-juny"
   };
   function go(target, el){
     var url = ROUTES[target] || (el && el.getAttribute("href"));
@@ -308,21 +287,21 @@
   var stage = document.getElementById("ct-stage");
   var view = document.getElementById("ct-view");
   var track = document.getElementById("ct-track");
-  var ruler = document.getElementById("ct-ruler");
   var works = document.getElementById("ct-works");
   var tl = document.getElementById("ct-tl");
   var hit = document.getElementById("ct-hit");
   var cap = document.getElementById("ct-cap");
   var elTitle = document.getElementById("ct-title"),
       elMeta = document.getElementById("ct-meta"), elOpen = document.getElementById("ct-open"),
-      elTc = document.getElementById("ct-tc"), elCount = document.getElementById("ct-count"),
-      elLive = document.getElementById("ct-live");
+      elTc = document.getElementById("ct-tc"), elLive = document.getElementById("ct-live");
   var clips = [].slice.call(works.querySelectorAll(".ct-clip"));
   var N = clips.length;
   if(!N) return;
+  clips.forEach(function(c, i){ c.setAttribute("data-i", i); c.setAttribute("data-copy", 0); });
+  var copies = clips.map(function(c){ return [c]; });       /* every element showing clip i: the real one + loop copies */
 
   function pad(n){ return (n < 10 ? "0" : "") + n; }
-  function clamp(v, a, b){ return v < a ? a : v > b ? b : v; }
+  function wrap(i){ return ((i % N) + N) % N; }
   function posterWidth(){ var w = innerWidth * Math.min(devicePixelRatio || 1, 2); return w <= 1000 ? 960 : w <= 1500 ? 1280 : 1920; }
 
   var P = clips.map(function(a, i){
@@ -347,8 +326,11 @@
   /* clip thumbnails: portrait media is fitted, not cropped */
   P.forEach(function(p){
     var im = p.a.querySelector("img");
-    function chk(){ if(p.portrait || (im.naturalHeight > im.naturalWidth * 1.05)) p.a.classList.add("is-portrait"); }
-    if(im){ if(im.complete && im.naturalWidth) chk(); else im.addEventListener("load", chk); }
+    function chk(){
+      if(p.portrait || (im.naturalHeight > im.naturalWidth * 1.05)){ p.thumbPortrait = true; copies[p.i].forEach(function(c){ c.classList.add("is-portrait"); }); }
+    }
+    if(p.portrait) chk();
+    else if(im){ if(im.complete && im.naturalWidth) chk(); else im.addEventListener("load", chk); }
   });
 
   /* ================= Background layers (poster first, video on top when it plays) ================= */
@@ -489,46 +471,65 @@
     if(small) return;                                       /* phones: only the active video */
     warmT = setTimeout(function(){
       if(isScrubbing()) return;
-      [active - 1, active + 1].forEach(function(j){ if(j >= 0 && j < N && !P[j].vid) startVideo(P[j], true); });
+      neighbours(active).forEach(function(j){ if(!P[j].vid) startVideo(P[j], true); });
     }, 1500);
   }
 
   /* ================= Timeline state ================= */
-  var pos = 0, target = 0;                  /* playhead position along the reel, px */
-  var pitch = 1, clipW = 1, gap = 0, viewW = 1, lo = 0, hi = 1;
+  /* pos is an unbounded position along an endless reel (px); the reel repeats every L px.
+     The track holds K copies of the list, then the real list, then K more copies. */
+  var pos = 0, target = 0;
+  var pitch = 1, clipW = 1, gap = 0, viewW = 1, L = 1, K = 0;
   var active = -1, raf = 0, last = 0, dragging = false, drag = null, lastWheel = 0;
-  var settleT = 0, suppressUntil = 0, lastPointerT = 0, menuOpen = false, indexOpen = false;
+  var settleT = 0, suppressUntil = 0, lastPointerT = 0, menuOpen = false;
   var lastTc = "";
 
   function centre(i){ return i * pitch + clipW / 2; }
-  function clampT(v){ return clamp(v, lo, hi); }
-  function rubber(v){ return v < lo ? lo - (lo - v) * 0.3 : v > hi ? hi + (v - hi) * 0.3 : v; }
+  function base(v){ return Math.floor(v / L) * L; }                 /* start of the loop lap v is in */
+  function neighbours(i){ return N > 2 ? [wrap(i - 1), wrap(i + 1)] : N === 2 ? [wrap(i + 1)] : []; }
+  function ringDist(a, b){ var d = Math.abs(a - b) % N; return Math.min(d, N - d); }
   function isScrubbing(){ return dragging || raf !== 0 || performance.now() - lastWheel < 160; }
   function tc(p){
     var f = Math.max(0, Math.round(p / pitch * SEC_PER_CLIP * FPS)), s = Math.floor(f / FPS);
     return pad(Math.floor(s / 3600)) + ":" + pad(Math.floor(s / 60) % 60) + ":" + pad(s % 60) + ":" + pad(f % FPS);
   }
 
-  /* ruler marks: one per clip start, labelled with its reel timecode */
-  var marks = P.map(function(p, i){
-    var m = document.createElement("span"); m.className = "ct-mark"; ruler.appendChild(m); return m;
-  });
+  /* loop copies: enough either side that the view never runs past the ends */
+  var before = [], after = [];
+  function buildCopies(k){
+    before.concat(after).forEach(function(ol){ ol.parentNode.removeChild(ol); });
+    before = []; after = [];
+    copies = clips.map(function(c){ return [c]; });
+    function make(n){
+      var ol = works.cloneNode(true);
+      ol.removeAttribute("id"); ol.classList.add("ct-copy"); ol.setAttribute("aria-hidden", "true");
+      [].forEach.call(ol.querySelectorAll(".ct-clip"), function(c){
+        var i = +c.getAttribute("data-i");
+        c.setAttribute("tabindex", "-1"); c.setAttribute("data-copy", n); c.removeAttribute("aria-current");
+        copies[i].push(c);
+      });
+      return ol;
+    }
+    for(var n = 1; n <= k; n++){
+      var b = make(-n); track.insertBefore(b, before[0] || works); before.unshift(b);
+      var a = make(n); track.appendChild(a); after.push(a);
+    }
+    K = k;
+  }
 
   function layout(){
     layoutQ = false;
     var r = clips[0].getBoundingClientRect();
-    var cs = getComputedStyle(works);
     var oldPitch = pitch;
     clipW = r.width || 1;
-    gap = parseFloat(cs.columnGap) || 0;
+    gap = parseFloat(getComputedStyle(works).columnGap) || 0;
     pitch = clipW + gap;
+    L = N * pitch;
     viewW = view.clientWidth || innerWidth;
     small = Math.min(innerWidth, innerHeight) < 600;
     if(oldPitch > 1){ pos = pos / oldPitch * pitch; target = target / oldPitch * pitch; }
-    lo = 1; hi = N * pitch - gap - 1;
-    ruler.style.width = (N * pitch - gap) + "px";
-    ruler.style.setProperty("--tick", (pitch / 10) + "px");
-    marks.forEach(function(m, i){ m.style.transform = "translateX(" + (i * pitch) + "px)"; m.textContent = tc(i * pitch); });
+    var k = Math.max(1, Math.ceil(viewW / 2 / L) + 1);
+    if(k !== K){ buildCopies(k); active = -1; }
     root.style.setProperty("--tl-h", Math.round(tl.getBoundingClientRect().height) + "px");
     render();
   }
@@ -536,10 +537,11 @@
   function queueLayout(){ if(!layoutQ){ layoutQ = true; requestAnimationFrame(layout); } }   /* ResizeObserver → next frame */
 
   function render(){
-    track.style.transform = "translate3d(" + (viewW / 2 - pos).toFixed(2) + "px,0,0)";
-    var i = clamp(Math.floor((pos + gap / 2) / pitch), 0, N - 1);
+    var m = pos - base(pos);                                         /* position within one lap, 0 … L */
+    track.style.transform = "translate3d(" + (viewW / 2 - K * L - m).toFixed(2) + "px,0,0)";
+    var i = wrap(Math.floor((m + gap / 2) / pitch));
     if(i !== active) setActive(i);
-    var t = tc(pos);
+    var t = tc(m);
     if(t !== lastTc){ lastTc = t; elTc.textContent = t; }
   }
 
@@ -553,10 +555,25 @@
     }
     render();
     if(dragging || pos !== target) raf = requestAnimationFrame(frame);
-    else{ last = 0; settle(); }
+    else{
+      last = 0;
+      var b = base(pos); pos -= b; target -= b;                      /* at rest: fold back into the first lap */
+      settle();
+    }
   }
   function kick(){ clearTimeout(settleT); if(!raf) raf = requestAnimationFrame(frame); }
-  function glideTo(i){ target = centre(clamp(i, 0, N - 1)); kick(); }
+  /* glide to clip i by the shortest way round */
+  function glideTo(i){
+    var c = centre(wrap(i));
+    target = c + Math.round((target - c) / L) * L;
+    kick();
+  }
+  /* glide to the exact clip element that was clicked (a copy, or the real one) */
+  function glideToEl(el){
+    var i = +el.getAttribute("data-i"), n = +el.getAttribute("data-copy") || 0;
+    target = base(pos) + n * L + centre(i);
+    kick();
+  }
 
   /* ================= Active project ================= */
   var capT = 0, capWant = 0, prevClearT = 0;
@@ -578,12 +595,11 @@
   function setActive(i){
     var old = active; active = i;
     var p = P[i];
-    clips.forEach(function(c, k){
+    copies.forEach(function(list, k){
       var on = k === i;
-      c.classList.toggle("is-active", on);
-      if(on) c.setAttribute("aria-current", "true"); else c.removeAttribute("aria-current");
+      list.forEach(function(c){ c.classList.toggle("is-active", on); });
+      if(on) clips[k].setAttribute("aria-current", "true"); else clips[k].removeAttribute("aria-current");
     });
-    elCount.textContent = pad(i + 1) + " / " + pad(N);
     hit.href = p.href; hit.setAttribute("data-nav", p.nav);
     if(old < 0) fillCaption(i); else setCaption(i);
 
@@ -615,15 +631,15 @@
         if(active !== i || isScrubbing()) return;
         if(p.vState === 2 && p.vid && p.vid.paused) playVideo(p);
         else startVideo(p, false);
-        [i - 1, i + 1].forEach(function(j){ if(j >= 0 && j < N) ensureLayer(P[j]); });   /* neighbour posters */
+        neighbours(i).forEach(function(j){ ensureLayer(P[j]); });   /* neighbour posters */
       });
-      P.forEach(function(q){ if(Math.abs(q.i - i) > 1 && q.vid) teardown(q); });
+      P.forEach(function(q){ if(ringDist(q.i, i) > 1 && q.vid) teardown(q); });
     }, 260);
   }
 
   /* ================= Input: drag / swipe (timeline and picture), wheel, keys ================= */
   function onDown(e){
-    if(menuOpen || indexOpen) return;
+    if(menuOpen) return;
     if(e.pointerType === "mouse" && e.button !== 0) return;
     lastPointerT = performance.now();
     var onTl = e.currentTarget === view;
@@ -642,7 +658,7 @@
       try{ drag.el.setPointerCapture(drag.id); }catch(err){}
       dx = 0;
     }
-    target = rubber(drag.base - dx * drag.factor);
+    target = drag.base - dx * drag.factor;
     drag.s.push([e.timeStamp, e.clientX]); if(drag.s.length > 6) drag.s.shift();
     kick();
   }
@@ -654,7 +670,7 @@
     suppressUntil = performance.now() + 450;                 /* the click that ends a drag never opens a project */
     var s = d.s, a = s[0], b = s[s.length - 1], v = 0;
     if(e.type !== "pointercancel" && s.length > 1 && b[0] - a[0] > 0 && e.timeStamp - b[0] < 90) v = (b[1] - a[1]) / (b[0] - a[0]);
-    target = clampT(target - v * d.factor * (reduce ? 0 : 240));
+    target = target - v * d.factor * (reduce ? 0 : 240);
     kick();
   }
   [view, hit].forEach(function(el){
@@ -670,12 +686,12 @@
   view.addEventListener("scroll", function(){ view.scrollLeft = 0; });
 
   window.addEventListener("wheel", function(e){
-    if(menuOpen || indexOpen || e.ctrlKey) return;
+    if(menuOpen || e.ctrlKey) return;
     e.preventDefault();
     var d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
     if(e.deltaMode === 1) d *= 16; else if(e.deltaMode === 2) d *= innerHeight;
     lastWheel = performance.now();
-    target = clampT(target + d * 0.9);
+    target = target + d * 0.9;
     kick();
   }, { passive: false });
 
@@ -686,32 +702,9 @@
     glideTo(clips.indexOf(c));
   });
 
-  /* ================= Index list (plain links) ================= */
-  var indexEl = document.getElementById("ct-index"), indexList = document.getElementById("ct-index-list");
-  var indexBtn = document.querySelector('[data-act="index"]');
-  P.forEach(function(p, i){
-    var li = document.createElement("li"), a = document.createElement("a");
-    a.href = p.href; a.setAttribute("data-nav", p.nav);
-    a.innerHTML = '<span class="ix-n mono"></span><span class="ix-t"></span><span class="ix-m mono"></span>';
-    a.children[0].textContent = pad(i + 1);
-    a.children[1].textContent = p.title; if(p.lang) a.children[1].setAttribute("lang", p.lang);
-    a.children[2].textContent = [p.cat, p.meta].filter(Boolean).join(" — ");
-    li.appendChild(a); indexList.appendChild(li);
-  });
-  function openIndex(){
-    indexOpen = true; indexEl.hidden = false; body.classList.add("index-open"); indexBtn.setAttribute("aria-expanded", "true"); indexBtn.textContent = "close";
-    [].forEach.call(indexList.querySelectorAll("a"), function(a, i){ if(i === active) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current"); });
-    var f = indexList.querySelectorAll("a")[active] || indexList.querySelector("a"); if(f) f.focus();
-  }
-  function closeIndex(){
-    indexOpen = false; indexEl.hidden = true; body.classList.remove("index-open"); indexBtn.setAttribute("aria-expanded", "false"); indexBtn.textContent = "index";
-    indexBtn.focus();
-  }
-
   /* ================= Menu (same behaviour as personal.html) ================= */
   var menu = document.getElementById("menu"), menuBtn = document.querySelector("header .brandBtn");
   function openMenu(){
-    if(indexOpen) closeIndex();
     var lb = menuBtn.querySelector(".logo-img-b");                 /* the black logo is only needed on the open menu */
     if(lb && !lb.src && lb.getAttribute("data-src")) lb.src = lb.getAttribute("data-src");
     menu.classList.add("open"); menuOpen = true; body.classList.add("menu-is-open");
@@ -726,22 +719,20 @@
 
   /* ================= One delegated click handler (data-nav / data-act) ================= */
   var ACTS = {
-    "menu-toggle": function(){ if(menuOpen) go("landing"); else openMenu(); },   /* inside the open menu the logo is home */
-    "index": function(){ if(indexOpen) closeIndex(); else openIndex(); }
+    "menu-toggle": function(){ if(menuOpen) go("landing"); else openMenu(); }    /* inside the open menu the logo is home */
   };
   document.addEventListener("click", function(e){
     if(performance.now() < suppressUntil && e.target.closest(".ct-view,.ct-hit")){ e.preventDefault(); e.stopPropagation(); return; }
     var n = e.target.closest("[data-nav]");
     if(n){
-      var ci = clips.indexOf(n);
-      if(ci >= 0 && ci !== active){ e.preventDefault(); glideTo(ci); return; }   /* a clip that isn't under the playhead: bring it there */
+      var ci = n.hasAttribute("data-i") ? +n.getAttribute("data-i") : -1;
+      if(ci >= 0 && ci !== active){ e.preventDefault(); glideToEl(n); return; }   /* a clip that isn't under the playhead: bring that one there */
       if(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button === 1) return;   /* new tab etc.: the real href */
       e.preventDefault(); go(n.getAttribute("data-nav"), n); return;
     }
     var a = e.target.closest("[data-act]");
     if(a && ACTS[a.getAttribute("data-act")]){ e.preventDefault(); ACTS[a.getAttribute("data-act")](a, e); return; }
-    if(menuOpen && e.target.closest("#menu") && !e.target.closest("a,button")){ closeMenu(); return; }
-    if(indexOpen && e.target === indexEl){ closeIndex(); }
+    if(menuOpen && e.target.closest("#menu") && !e.target.closest("a,button")){ closeMenu(); }
   }, true);
 
   function trap(container, e, extra){
@@ -758,22 +749,18 @@
       else if(e.key === "Tab") trap(menu, e, menuBtn);
       return;
     }
-    if(indexOpen){
-      if(e.key === "Escape"){ e.preventDefault(); closeIndex(); }
-      else if(e.key === "Tab") trap(indexEl, e, indexBtn);
-      return;
-    }
     if(e.altKey || e.metaKey || e.ctrlKey) return;
-    var to = -1;
-    if(e.key === "ArrowRight") to = active + 1;
+    var to;
+    if(e.key === "ArrowRight") to = active + 1;            /* wraps round: the reel is a loop */
     else if(e.key === "ArrowLeft") to = active - 1;
     else if(e.key === "Home") to = 0;
     else if(e.key === "End") to = N - 1;
-    if(to < 0 && e.key !== "ArrowLeft") return;
+    else return;
     e.preventDefault();
-    to = clamp(to, 0, N - 1);
+    to = wrap(to);
     glideTo(to);
     if(clips.indexOf(document.activeElement) >= 0){ lastPointerT = performance.now(); clips[to].focus({ preventScroll: true }); lastPointerT = 0; }
+    /* (focus on the real clip; glideTo already chose the nearest copy, so the reel doesn't jump) */
   });
 
   /* ================= Environment ================= */
@@ -803,7 +790,7 @@
   /* read-only hook for testing the draft */
   window.__ct = {
     stats: function(){
-      return { active: active, pos: pos, target: target, pitch: pitch, n: N, scrubbing: isScrubbing(), reduce: reduce, lite: lite, noAutoplay: noAutoplay,
+      return { active: active, pos: pos, target: target, pitch: pitch, n: N, lap: L, copies: K, scrubbing: isScrubbing(), reduce: reduce, lite: lite, noAutoplay: noAutoplay,
                media: P.map(function(p){ return { nav: p.nav, type: p.type, vState: p.vState, hasVideo: !!p.vid,
                  playing: !!(p.vid && !p.vid.paused), poster: p.posterDone, layer: !!p.layer,
                  fit: p.img && p.img.classList.contains("fit-contain"), vfit: !!(p.vid && p.vid.classList.contains("fit-contain")),
