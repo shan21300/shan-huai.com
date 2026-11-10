@@ -5082,7 +5082,7 @@
     "#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#endif",
     "uniform sampler2D uTex; uniform vec4 uCrop; uniform vec2 uRes, uEdge, uScr;",
     "uniform float uAlpha, uDim, uReveal, uFocus, uFx0, uFw, uZone, uK, uFcy, uFh, uFa, uFp;",
-    "uniform float uIntro, uWarp, uOp, uShade, uFy0, uLabel;",           /* ring preloader controls (0,1,1,1 when idle) */
+    "uniform float uIntro, uWarp, uOp, uShade, uFy0, uLabel, uSdfR, uDpr; uniform vec2 uTexSz;",           /* ring preloader controls (0,1,1,1 when idle) */
     "uniform vec2 uSz; uniform float uRad;",                /* ring cards: size and corner radius in card px (0 = square) */
     "varying vec2 vUV;",
     "void main(){",
@@ -5100,9 +5100,21 @@
     "  float yy = (1.0 - gl_FragCoord.y/uRes.y)*uScr.y;",
     "  float sc = 1.0 + uFa*pow(clamp(s/uScr.x, 0.0, 1.25), uFp);",
     "  float v = clamp(((yy - uFcy)/sc - uFy0)/uFh, 0.0, 1.0);",
-    "  if(uLabel > 0.5){",                                 /* year label: same bend and edge drag, ink from the texture's alpha */
-    "    vec4 lt = texture2D(uTex, vec2(u, v));",
-    "    gl_FragColor = vec4(mix(lt.rgb, vec3(1.0), uDim*0.55), lt.a*uOp*uReveal);",
+    "  if(uLabel > 0.5){",                                 /* year label: same bend and edge drag, drawn from a distance field */
+    "    vec2 q0 = vec2(u, v), tp = 1.0/uTexSz;",
+    "    float a0 = texture2D(uTex, q0).a;",
+    "    vec2 g = vec2(texture2D(uTex, q0 + vec2(tp.x, 0.0)).a - texture2D(uTex, q0 - vec2(tp.x, 0.0)).a,",
+    "                  texture2D(uTex, q0 + vec2(0.0, tp.y)).a - texture2D(uTex, q0 - vec2(0.0, tp.y)).a);",
+    "    g /= max(length(g), 1e-5);",                         /* the edge's direction in the texture */
+    /* how many texels one device pixel spans: across, the drag compresses the source by
+       exp(-K t); down, the bend scales it by sc */
+    "    float ds = 1.0;",
+    "    if(s < z) ds = exp(-uK*(z - s)/z); else if(s > uScr.x - z) ds = exp(-uK*(s - uScr.x + z)/z);",
+    "    ds = mix(1.0, ds, uWarp);",
+    "    vec2 tpp = vec2(uTexSz.x*ds/uFw, uTexSz.y/(uFh*sc))/uDpr;",
+    "    float D = (0.5 - a0)*2.0*uSdfR;",                    /* texels outside the glyph edge (negative inside) */
+    "    float cov = clamp(0.5 - D/max(length(g*tpp), 1e-4), 0.0, 1.0);",   /* ≈ one device pixel of anti-aliasing */
+    "    gl_FragColor = vec4(mix(vec3(0.082, 0.082, 0.086), vec3(1.0), uDim*0.55), cov*uOp*uReveal);",
     "    return;",
     "  }",
     "  vec2 uv = mix(vec2(u, v), vUV, uIntro);",            /* on the ring: plain card coordinates */
@@ -5140,7 +5152,7 @@
     if(!gl.getProgramParameter(prog, gl.LINK_STATUS) && !gl.isContextLost()) throw new Error(gl.getProgramInfoLog(prog));
     gl.useProgram(prog);
     ["uView","uX0","uW","uH","uCy","uA","uP","uTex","uCrop","uRes","uEdge","uAlpha","uDim","uReveal","uFocus","uZone","uK","uScr","uFx0","uFw","uFcy","uFh","uFa","uFp",
-     "uC","uRx","uUy","uF","uMix","uO","uIntro","uWarp","uOp","uShade","uSz","uRad","uY0","uFy0","uLabel","uVZone","uVK","uVWarp"]
+     "uC","uRx","uUy","uF","uMix","uO","uIntro","uWarp","uOp","uShade","uSz","uRad","uY0","uFy0","uLabel","uVZone","uVK","uVWarp","uTexSz","uSdfR","uDpr"]
       .forEach(function(n){ U[n] = gl.getUniformLocation(prog, n); });
     var v = [];
     for(var s = 0; s <= SEG; s++){ v.push(s/SEG, 0, s/SEG, 1); }
@@ -5764,19 +5776,57 @@
     var tl = m.actualBoundingBoxLeft || 0, tw = (m.actualBoundingBoxRight || m.width) + tl;
     /* draw at about twice the screen size (the bend doubles it on the right), DPR included */
     var k = Math.min(4, len*dpr*2/tw); px *= k; asc *= k; des *= k; tl *= k; tw *= k;
-    var pad = Math.ceil(px*0.02) + 2;
+    /* stored as a signed distance field (spread R texels), so the shader can redraw a crisp
+       edge however hard the edge drag stretches it; the pad holds the field's outer ramp */
+    var pad0 = Math.ceil(px*0.02) + 2, R = Math.max(6, Math.round(px*0.05)), pad = R + 4;
     c.width = Math.ceil(asc + des) + pad*2; c.height = Math.ceil(tw) + pad*2;
     x = c.getContext("2d"); x.font = yearFont.replace("{px}", px.toFixed(1));
     try{ x.fontStretch = "expanded"; }catch(e){}   /* only the 125% width is loaded, so it is matched either way */
     x.fillStyle = "#151516";
     x.translate(pad + asc, c.height - pad); x.rotate(-Math.PI/2);   /* reads bottom to top */
     x.fillText(y, tl, 0);
+    var cw = c.width, ch = c.height, img = x.getImageData(0, 0, cw, ch).data;
+    var sdf = toSDF(img, cw, ch, R), out = new Uint8Array(cw*ch*4);
+    for(var i = 0; i < cw*ch; i++){ out[i*4] = out[i*4+1] = out[i*4+2] = 255; out[i*4+3] = sdf[i]; }
     var t = newTex(isGL2);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, c);
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, cw, ch, 0, gl.RGBA, gl.UNSIGNED_BYTE, out);
     if(isGL2) gl.generateMipmap(gl.TEXTURE_2D);
-    /* the label's on-screen box: len along the text; its thickness keeps the canvas's ratio */
-    var s = len/(c.height - pad*2);
-    return { tex:t, w:c.width*s, h:c.height*s, len:len };
+    /* the label's on-screen box: len along the text; its thickness keeps the canvas's ratio.
+       off: how much wider the pad is than the old plain-text one, so the glyphs sit where they did */
+    var s = len/(ch - pad*2);
+    return { tex:t, w:cw*s, h:ch*s, len:len, tw:cw, th:ch, R:R, off:(pad - pad0)*s };
+  }
+  /* signed distance field from the canvas's alpha (Felzenszwalb EDT on both sides, seeded with
+     the anti-aliased coverage for sub-pixel edges): 128 = the edge, ±R texels map to 0 / 255 */
+  function edt1(f, n, stride, off, d, v, z){
+    var k = 0, q, sv; v[0] = 0; z[0] = -1e20; z[1] = 1e20;
+    for(q = 0; q < n; q++) d[q] = f[off + q*stride];
+    for(q = 1; q < n; q++){
+      do{ var r = v[k]; sv = ((d[q] + q*q) - (d[r] + r*r))/(2*q - 2*r); }while(sv <= z[k] && --k > -1);
+      k++; v[k] = q; z[k] = sv; z[k + 1] = 1e20;
+    }
+    for(q = 0, k = 0; q < n; q++){ while(z[k + 1] < q) k++; var r2 = v[k]; f[off + q*stride] = (q - r2)*(q - r2) + d[r2]; }
+  }
+  function edt(g, w, h){
+    var n = Math.max(w, h), d = new Float64Array(n), v = new Int32Array(n), z = new Float64Array(n + 1);
+    for(var x = 0; x < w; x++) edt1(g, h, w, x, d, v, z);
+    for(var y = 0; y < h; y++) edt1(g, w, 1, y*w, d, v, z);
+  }
+  function toSDF(img, w, h, R){
+    var N = w*h, INF = 1e20, go = new Float64Array(N), gi = new Float64Array(N), out = new Uint8Array(N);
+    for(var i = 0; i < N; i++){
+      var a = img[i*4 + 3]/255;
+      if(a >= 1){ go[i] = 0; gi[i] = INF; }
+      else if(a <= 0){ go[i] = INF; gi[i] = 0; }
+      else{ var dd = 0.5 - a; go[i] = dd > 0 ? dd*dd : 0; gi[i] = dd < 0 ? dd*dd : 0; }
+    }
+    edt(go, w, h); edt(gi, w, h);
+    for(var j = 0; j < N; j++){
+      var dist = Math.sqrt(go[j]) - Math.sqrt(gi[j]);          /* > 0 outside the glyphs */
+      out[j] = Math.max(0, Math.min(255, Math.round((0.5 - dist/(2*R))*255)));
+    }
+    return out;
   }
   var yearsReady = !(document.fonts && document.fonts.load);
   if(!yearsReady) document.fonts.load(yearFont.replace("{px}", 100), "2026").then(function(){ yearsReady = true; yearTex = {}; dirty = true; }, function(){ yearsReady = true; dirty = true; });
@@ -5788,11 +5838,12 @@
       var p = inst[k], w = p.w, x0 = x0Of(k);
       if(!w.yearFirst) continue;
       var lt = yearTex[w.year] || (yearTex[w.year] = buildYear(w.year, len));
-      var gx = p.len*GROW*w.grow/2; x0 -= gx;          /* rides the frame's top-left corner as it grows */
+      var gx = p.len*GROW*w.grow/2; x0 -= gx + lt.off;   /* rides the frame's top-left corner as it grows */
       if(!onScreen(x0, lt.w)) continue;
       if(!on){ on = true; gl.uniform1f(U.uLabel, 1); gl.uniform1f(U.uOp, rg.warp); gl.uniform4f(U.uCrop, 0, 0, 1, 1); }
-      var y0 = -baseH*(1 + GROW*w.grow)/2 - baseH*0.04 - lt.h;
+      var y0 = -baseH*(1 + GROW*w.grow)/2 - baseH*0.04 - lt.h + lt.off;
       gl.bindTexture(gl.TEXTURE_2D, lt.tex);
+      gl.uniform2f(U.uTexSz, lt.tw, lt.th); gl.uniform1f(U.uSdfR, lt.R); gl.uniform1f(U.uDpr, dpr);
       gl.uniform1f(U.uX0, x0); gl.uniform1f(U.uW, lt.w); gl.uniform1f(U.uFx0, x0); gl.uniform1f(U.uFw, lt.w);
       gl.uniform1f(U.uH, lt.h); gl.uniform1f(U.uY0, y0); gl.uniform1f(U.uFh, lt.h); gl.uniform1f(U.uFy0, y0);
       gl.uniform1f(U.uReveal, reveal(w, t)); gl.uniform1f(U.uDim, w.dim);   /* greys out with its frame */
