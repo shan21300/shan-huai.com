@@ -6342,7 +6342,7 @@
 
   var STREAM = "https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/";
   // Reels, in order. Copied from each Instagram post (captions keep their line breaks).
-  // url: the post's own link when known; otherwise the account page is used for comments/share.
+  // url: the post's own link (comments panel + share); without one the account page is used.
   // cover (optional): a local image shown if Stream has no thumbnail for the video.
   // Counts: a number shows it (0 shows just the icon); null hides it. Comments include replies.
   var PARK = { handle:"local.local_park", avatar:"/images/projects/llp-reel-avatar.webp" };
@@ -6351,18 +6351,18 @@
   var REELS = [
     reel(PARK, { stream:"8a5e45ea42b98e6b222669c74e2d4b49", url:"https://www.instagram.com/reel/DXUQPRzE89q/",
       caption:"爆點在最後...", audio:"Original audio", likes:197, comments:1 }),
-    reel(PARK, { stream:"5b0e031d107e1abdf6f73b25d48fc184", url:null,
+    reel(PARK, { stream:"5b0e031d107e1abdf6f73b25d48fc184", url:"https://www.instagram.com/reel/DbuXASyB3Sf/",
       caption:"Super Local Doe 系列全面調降，帶著Local Local Park的餐點去野餐吧！\n\n👕 非常不熱的遮陽防曬-超輕鬆口袋襯衫：1580\n🥤 外帶飲料不累贅-迷你餐刀多用掛飾：880\n👜可以變單肩包的-百變造型 Belt Bag：1580\n🥐 野餐最大容量超方便-酸種麵包 Tote Bag：1080",
       audio:"Original audio", likes:71, comments:0 }),
-    reel(PARK, { stream:"cd717d008a71678857f7081671ea4053", url:null,
+    reel(PARK, { stream:"cd717d008a71678857f7081671ea4053", url:"https://www.instagram.com/reel/DWT0zYIk4Nb/",
       caption:"Threads上45萬人圍觀的披薩盒打拋飯，外賣已經爆單啦😭", audio:"Original audio", likes:56, comments:2 }),
-    reel(ZS, { stream:"3af7975e4a1795453e61cc177848c289", url:null,
+    reel(ZS, { stream:"3af7975e4a1795453e61cc177848c289", url:"https://www.instagram.com/reel/Da5AHhQBvYN/",
       caption:"最近我們常常收到客人提問：欸？這裡不是Local Local 中山店嗎？\n\n這裡還是Local Local 中山！\n\n我們日前完成品牌全面改裝升級，回歸更質樸的街邊小店樣貌，將空間轉化為台北少見、充滿泰北度假感的「再地清邁茶室」。\n\n我們希望提供中山商圈上班族與逛街人潮的飲食更多選擇，準備了出餐快速、風味道地卻不過於厚重的清邁街頭飯食，讓一個人用餐或三五好友聚餐，都能輕鬆享受熟悉又溫暖的泰北滋味。\n\n八月起也將營業時間延長至晚間九點，滿足晚餐時段的泰式口味用餐需求🥥\n\n#中山美食 #中山餐廳 #泰式料理 #泰式早午餐 #泰式咖啡廳",
       audio:"Original audio", likes:182, comments:5 }),
-    reel(ZS, { stream:"0ed604b8f3428dd06ea694668885e0d4", url:null,
+    reel(ZS, { stream:"0ed604b8f3428dd06ea694668885e0d4", url:"https://www.instagram.com/reel/DWfkw5MgTtR/",
       caption:"大概只有我們這邊會在法吐上加希臘優格🤌\n吃起來有甜有脆有奶香有療癒，又沒那麼負擔！\n難怪這道一直穩坐甜點冠軍✨\n\n#中山早午餐 #中山下午茶 #焦糖布里歐 #法式吐司早午餐",
       audio:"Local Local Coffee 咖啡再地", likes:87, comments:4 }),
-    reel(ZS, { stream:"fbebca987e880fd248e0c55b04224d56", url:null,
+    reel(ZS, { stream:"fbebca987e880fd248e0c55b04224d56", url:"https://www.instagram.com/reel/DWTJjCygTPJ/",
       caption:"在戶外座舒服喝飲料的季節\n🍋🍋\u200d🟩🍓🍒🍑🥭🍍🍐", audio:"Local Local Coffee 咖啡再地", likes:32, comments:0 })
   ];
   REELS.forEach(function(d){ d.link = d.url || ("https://www.instagram.com/" + d.handle + "/"); });
