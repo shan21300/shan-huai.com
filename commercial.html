@@ -122,6 +122,12 @@
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-bottom:.08em}
   /* data-logo on a clip: its title wordmark (white PNG) stands in for the text title */
   .ct-title-logo{display:block;width:4.5em;max-width:100%;height:auto}
+  /* LLP: wide lockup with ~4.16% transparent padding on the left; sized/offset as on /projects */
+  .ct-title-logo[src="/images/projects/LLP_title.png"]{width:9em;transform:translateX(-4.16%)}
+  /* SUB / 黑松沙士: trimmed light copies of the /projects title PNGs, matched to their size there */
+  .ct-title-logo[src="/images/commercial/title-sub.webp"]{width:auto;height:2em}
+  .ct-title-logo[src="/images/commercial/title-heysong.webp"]{width:auto;height:2.5em}
+  .ct-title-logo[src="/images/projects/FRM_title.png"]{width:7em}
   .ct-meta{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(237,234,227,.74);margin-top:10px;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .ct-open{display:inline-block;margin-top:16px;font-size:11px;letter-spacing:.12em;text-transform:lowercase;text-decoration:none;
@@ -185,7 +191,7 @@
 
     <div class="ct-cap" id="ct-cap">
       <div class="ct-cap-in">
-        <h2 class="ct-title" id="ct-title">SUB</h2>
+        <h2 class="ct-title" id="ct-title"><img class="ct-title-logo" src="/images/commercial/title-sub.webp" alt="SUB"></h2>
         <p class="ct-meta mono" id="ct-meta">Branding — Local Remote · 2026</p>
         <a class="ct-open mono" id="ct-open" href="/project/sub" data-nav="proj-sub">view project ↗</a>
       </div>
@@ -201,19 +207,19 @@
           <!-- Projects, newest first (the landing page's order). Name / category / meta / route /
                Stream UID / images are the ones index.html already uses for these projects. -->
           <ol class="ct-works" id="ct-works">
-            <li><a class="ct-clip" href="/project/sub" data-nav="proj-sub" draggable="false"
+            <li><a class="ct-clip" href="/project/sub" data-nav="proj-sub" draggable="false" data-logo="/images/commercial/title-sub.webp"
                    data-stream="e997d71eb8270f43dddcebf6eeefa9fa" data-cat="Branding" data-meta="Local Remote · 2026"><img
                    src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/e997d71eb8270f43dddcebf6eeefa9fa/thumbnails/thumbnail.jpg?width=480" width="480" height="320" alt="" decoding="async" draggable="false"><span class="ct-clip-name mono">SUB</span></a></li>
-            <li><a class="ct-clip" href="/project/heysong-sarsaparilla" data-nav="proj-heysong" draggable="false" data-lang="zh-Hant"
+            <li><a class="ct-clip" href="/project/heysong-sarsaparilla" data-nav="proj-heysong" draggable="false" data-logo="/images/commercial/title-heysong.webp" data-lang="zh-Hant"
                    data-stream="0b36c9ded9204e7376cbc535b745884f" data-cat="Branding" data-meta="Local Remote · 2026"><img
                    src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/0b36c9ded9204e7376cbc535b745884f/thumbnails/thumbnail.jpg?width=480" width="480" height="270" alt="" decoding="async" draggable="false"><span class="ct-clip-name mono" lang="zh-Hant">黑松沙士</span></a></li>
-            <li><a class="ct-clip" href="/project/frometo" data-nav="proj-frometo" draggable="false"
+            <li><a class="ct-clip" href="/project/frometo" data-nav="proj-frometo" draggable="false" data-logo="/images/projects/FRM_title.png"
                    data-stream="5d5a347fdc546fa2904564d13861d576" data-cat="Branding" data-meta="Local Remote · 2026"><img
                    src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/5d5a347fdc546fa2904564d13861d576/thumbnails/thumbnail.jpg?width=480" width="480" height="270" alt="" decoding="async" draggable="false"><span class="ct-clip-name mono">FROMETO</span></a></li>
             <li><a class="ct-clip" href="/project/martoni-super-e" data-nav="proj-martoni" draggable="false" data-logo="/images/projects/MARTONI_title.png"
                    data-stream="8d9b3df3dd9fd9d25b34955a51e46079" data-poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/8d9b3df3dd9fd9d25b34955a51e46079/thumbnails/thumbnail.jpg?width=1920&time=20s" data-cat="Colorist" data-meta="Modular Agency · 2026"><img
                    src="/images/commercial/thumb-martoni.webp" width="480" height="201" alt="" decoding="async" draggable="false"><span class="ct-clip-name mono">Martoni Super-E</span></a></li>
-            <li><a class="ct-clip" href="/project/local-local-park" data-nav="proj-locallocalpark" draggable="false"
+            <li><a class="ct-clip" href="/project/local-local-park" data-nav="proj-locallocalpark" draggable="false" data-logo="/images/projects/LLP_title.png"
                    data-poster="/images/projects/LLP_1.avif"
                    data-poster-srcset="/images/carousel/proj-locallocalpark.webp 1200w, /images/projects/LLP_1.avif 3000w"
                    data-cat="Branding" data-meta="Local Remote · 2026"><img
