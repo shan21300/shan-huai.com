@@ -1388,7 +1388,7 @@
         <li><a class="cc-work" href="/project/sub" data-nav="proj-sub" data-logo="/images/carousel/logos/sub.webp" data-stream="e997d71eb8270f43dddcebf6eeefa9fa" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-sub.webp" width="1200" height="800" alt="SUB"><span class="cc-work-name">SUB</span><span class="cc-work-meta">Branding — Local Remote · 2026</span></a></li>
         <li><a class="cc-work" href="/project/heysong-sarsaparilla" data-nav="proj-heysong" data-logo="/images/carousel/logos/heysong.webp" data-stream="0b36c9ded9204e7376cbc535b745884f" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-heysong.webp" width="1422" height="800" alt="黑松沙士"><span class="cc-work-name">黑松沙士</span><span class="cc-work-meta">Branding — Local Remote · 2026</span></a></li>
         <li><a class="cc-work" href="/project/frometo" data-nav="proj-frometo" data-logo="/images/carousel/logos/frometo.webp" data-stream="5d5a347fdc546fa2904564d13861d576" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-frometo.webp" width="1422" height="800" alt="FROMETO"><span class="cc-work-name">FROMETO</span><span class="cc-work-meta">Branding — Local Remote · 2026</span></a></li>
-        <li><a class="cc-work" href="/project/martoni-super-e" data-nav="proj-martoni" data-logo="/images/carousel/logos/martoni.webp" data-stream="8d9b3df3dd9fd9d25b34955a51e46079" data-cat="Colorist" data-meta="Modular Agency · 2026"><img data-src="/images/carousel/proj-martoni.webp" width="1910" height="800" alt="Martoni Super-E"><span class="cc-work-name">Martoni Super-E</span><span class="cc-work-meta">Colorist — Modular Agency · 2026</span></a></li>
+        <li><a class="cc-work" href="https://www.kickstarter.com/projects/martoni/martoni-super-e-the-micro-mobility-device-that-flies?ref=creator_tab" data-nav="proj-martoni" data-logo="/images/carousel/logos/martoni.webp" data-stream="8d9b3df3dd9fd9d25b34955a51e46079" data-cat="Colorist" data-meta="Modular Agency · 2026"><img data-src="/images/carousel/proj-martoni.webp" width="1910" height="800" alt="Martoni Super-E"><span class="cc-work-name">Martoni Super-E</span><span class="cc-work-meta">Colorist — Modular Agency · 2026</span></a></li>
         <li><a class="cc-work" href="/project/local-local-park" data-nav="proj-locallocalpark" data-logo="/images/carousel/logos/locallocalpark.webp" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-locallocalpark.webp" width="1200" height="800" alt="Local Local Park"><span class="cc-work-name">Local Local Park</span><span class="cc-work-meta">Branding — Local Remote · 2026</span></a></li>
         <li><a class="cc-work" href="/live/cornelius" data-nav="gig-cornelius" data-cat="Live" data-meta="Chillout Music Festival · 2025"><img data-src="/images/carousel/gig-cornelius.webp" width="533" height="800" alt="Cornelius"><span class="cc-work-name">Cornelius</span><span class="cc-work-meta">Live — Chillout Music Festival · 2025</span></a></li>
         <li><a class="cc-work" href="/live/someshiit-sam" data-nav="gig-someshiitsam" data-cat="Live" data-meta="Chillout Music Festival · 2025"><img data-src="/images/carousel/gig-someshiitsam.webp" width="533" height="800" alt="someshiit 山姆"><span class="cc-work-name">someshiit 山姆</span><span class="cc-work-meta">Live — Chillout Music Festival · 2025</span></a></li>
@@ -3799,7 +3799,6 @@
     "proj-sub":"/project/sub",
     "proj-locallocalpark":"/project/local-local-park",
     "proj-frometo":"/project/frometo",
-    "proj-martoni":"/project/martoni-super-e",
     "gig-cornelius":"/live/cornelius","gig-someshiitsam":"/live/someshiit-sam",
     "gig-elephantgym":"/live/elephant-gym","gig-hillsong":"/live/hillsong",
     "gig-thehope":"/live/the-hope","gig-mosaic":"/live/mosaic",
@@ -3959,7 +3958,12 @@
     });
   });
 
+  /* For now Martoni Super-E has no project page: its cover links out to the Kickstarter.
+     (The #proj-martoni section is still in the HTML, just unreachable; to bring it back,
+     drop this entry, restore its ROUTES line and set the hrefs back to /project/martoni-super-e.) */
+  var EXTERNAL = { "proj-martoni":"https://www.kickstarter.com/projects/martoni/martoni-super-e-the-micro-mobility-device-that-flies?ref=creator_tab" };
   function go(target){                 // curtain transition (logo -> landing)
+    if(EXTERNAL[target]){ window.open(EXTERNAL[target], "_blank", "noopener"); return; }
     if(target===current) return;
     if(reduce || !hasGSAP){ swap(target); return; }
     var inc=document.getElementById(target);

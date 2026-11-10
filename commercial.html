@@ -216,7 +216,7 @@
             <li><a class="ct-clip" href="/project/frometo" data-nav="proj-frometo" draggable="false" data-logo="/images/projects/FRM_title.png"
                    data-stream="5d5a347fdc546fa2904564d13861d576" data-cat="Branding" data-meta="Local Remote · 2026"><img
                    src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/5d5a347fdc546fa2904564d13861d576/thumbnails/thumbnail.jpg?width=480" width="480" height="270" alt="" decoding="async" draggable="false"><span class="ct-clip-name mono">FROMETO</span></a></li>
-            <li><a class="ct-clip" href="/project/martoni-super-e" data-nav="proj-martoni" draggable="false" data-logo="/images/projects/MARTONI_title.png"
+            <li><a class="ct-clip" href="https://www.kickstarter.com/projects/martoni/martoni-super-e-the-micro-mobility-device-that-flies?ref=creator_tab" data-nav="proj-martoni" draggable="false" data-logo="/images/projects/MARTONI_title.png"
                    data-stream="8d9b3df3dd9fd9d25b34955a51e46079" data-poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/8d9b3df3dd9fd9d25b34955a51e46079/thumbnails/thumbnail.jpg?width=1920&time=20s" data-cat="Colorist" data-meta="Modular Agency · 2026"><img
                    src="/images/commercial/thumb-martoni.webp" width="480" height="201" alt="" decoding="async" draggable="false"><span class="ct-clip-name mono">Martoni Super-E</span></a></li>
             <li><a class="ct-clip" href="/project/local-local-park" data-nav="proj-locallocalpark" draggable="false" data-logo="/images/projects/LLP_title.png"
@@ -272,7 +272,6 @@
   // Standalone page: a data-nav click goes to the real URL; the main site's router renders it.
   var ROUTES = {
     "landing":"/","about":"/about","contact":"/contact",
-    "proj-martoni":"/project/martoni-super-e",
     "proj-sub":"/project/sub",
     "proj-heysong":"/project/heysong-sarsaparilla",
     "proj-frometo":"/project/frometo",
@@ -283,7 +282,12 @@
     "gig-elephantgym":"/live/elephant-gym",
     "danieljuny":"/wedding/daniel-and-juny"
   };
+  /* For now Martoni Super-E has no project page: its cover links out to the Kickstarter.
+     (The #proj-martoni section is still in the HTML, just unreachable; to bring it back,
+     drop this entry, restore its ROUTES line and set the hrefs back to /project/martoni-super-e.) */
+  var EXTERNAL = { "proj-martoni":"https://www.kickstarter.com/projects/martoni/martoni-super-e-the-micro-mobility-device-that-flies?ref=creator_tab" };
   function go(target, el){
+    if(EXTERNAL[target]){ window.open(EXTERNAL[target], "_blank", "noopener"); return; }
     var url = ROUTES[target] || (el && el.getAttribute("href"));
     if(url) location.href = url;
   }
