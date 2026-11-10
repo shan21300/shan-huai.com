@@ -88,16 +88,19 @@
 
   /* ---------- Stage: the active project's media, full screen ---------- */
   .ct-stage{position:fixed;inset:0;z-index:0;background:var(--ink);overflow:hidden}
-  .ct-layer{position:absolute;inset:0;opacity:0;transition:opacity .6s cubic-bezier(.3,0,.2,1);contain:strict}
-  .ct-layer.is-on{opacity:1;z-index:2}
-  .ct-layer.is-prev{opacity:1;z-index:1;transition:none}
+  /* switching projects: only the incoming picture fades in, over the outgoing one held still underneath
+     (its video hidden at once). When the fade is done the outgoing layer is cut, never faded out over
+     anything, so nothing from the previous project shows through, whichever way you scroll. */
+  .ct-layer{position:absolute;inset:0;opacity:0;transition:none;contain:strict}
+  .ct-layer.is-on{opacity:1;z-index:2;transition:opacity .45s cubic-bezier(.3,0,.2,1)}
+  .ct-layer.is-prev{opacity:1;z-index:1}
+  .ct-layer:not(.is-on) .ct-video{opacity:0;transition:none}
   .ct-media{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;display:block;
     opacity:0;transition:opacity .5s ease;-webkit-user-drag:none;user-select:none}
   .ct-media.is-ready{opacity:1}
   /* portrait / vertical media: always the full screen height, top to bottom, centred. Wide screens
      get dark space either side; a screen narrower than the picture trims its sides, never top/bottom. */
   .ct-media.fit-contain{width:auto;max-width:none;height:100%;left:50%;transform:translateX(-50%);object-fit:fill}
-  .ct-video{z-index:1}
   /* light shading only where text sits: top band for the header, bottom for caption + timeline */
   .ct-shade{position:fixed;inset:0;z-index:5;pointer-events:none;
     background:
@@ -612,7 +615,7 @@
     whenPoster(p, function(){
       if(active !== i) return;
       clearTimeout(prevClearT);
-      prevClearT = setTimeout(function(){ P.forEach(function(q){ if(q !== P[active] && q.layer) q.layer.classList.remove("is-prev"); }); }, reduce ? 0 : 650);
+      prevClearT = setTimeout(function(){ P.forEach(function(q){ if(q !== P[active] && q.layer) q.layer.classList.remove("is-prev"); }); }, reduce ? 0 : 520);
     });
 
     /* moving: no new video. The previous project's video pauses (its poster shows again). */
@@ -750,15 +753,19 @@
       return;
     }
     if(e.altKey || e.metaKey || e.ctrlKey) return;
-    var to;
-    if(e.key === "ArrowRight") to = active + 1;            /* wraps round: the reel is a loop */
-    else if(e.key === "ArrowLeft") to = active - 1;
-    else if(e.key === "Home") to = 0;
-    else if(e.key === "End") to = N - 1;
-    else return;
-    e.preventDefault();
-    to = wrap(to);
-    glideTo(to);
+    var to, ti = Math.round((target - clipW / 2) / pitch);   /* the clip the reel is heading for, so quick presses all count */
+    if(e.key === "ArrowRight" || e.key === "ArrowLeft"){     /* wraps round: the reel is a loop */
+      e.preventDefault();
+      ti += e.key === "ArrowRight" ? 1 : -1;
+      target = ti * pitch + clipW / 2; kick();
+      to = wrap(ti);
+    }else{
+      if(e.key === "Home") to = 0;
+      else if(e.key === "End") to = N - 1;
+      else return;
+      e.preventDefault();
+      glideTo(to);
+    }
     if(clips.indexOf(document.activeElement) >= 0){ lastPointerT = performance.now(); clips[to].focus({ preventScroll: true }); lastPointerT = 0; }
     /* (focus on the real clip; glideTo already chose the nearest copy, so the reel doesn't jump) */
   });
