@@ -5129,6 +5129,7 @@
     "uniform sampler2D uTex; uniform vec4 uCrop; uniform vec2 uRes, uEdge, uScr;",
     "uniform float uAlpha, uDim, uReveal, uFocus, uFx0, uFw, uZone, uK, uFcy, uFh, uFa, uFp;",
     "uniform float uIntro, uWarp, uOp, uShade;",           /* ring preloader controls (0,1,1,1 when idle) */
+    "uniform vec2 uSz; uniform float uRad;",                /* ring cards: size and corner radius in card px (0 = square) */
     "varying vec2 vUV;",
     "void main(){",
     /* Liquid edge drag: inside the outer zone on each side, the image is sampled from a
@@ -5156,7 +5157,15 @@
     "  vec2 e = min(vUV, 1.0 - vUV)/uEdge;",
     "  c = mix(c, vec3(0.929, 0.918, 0.89), step(min(e.x, e.y), 1.0)*uFocus);", /* keyboard focus ring */
     "  c = mix(ink, c, uShade);",                           /* ring cards facing away sit in shadow */
-    "  gl_FragColor = vec4(c, uOp);",
+    /* rounded corners: distance to a rounded box in the card's own pixels (perspective-correct
+       through vUV), softened over about a pixel; off entirely in the carousel so it stays exact */
+    "  float m = 1.0;",
+    "  if(uRad > 0.0){",
+    "    vec2 q = abs((vUV - 0.5)*uSz) - (uSz*0.5 - vec2(uRad));",
+    "    float d = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - uRad;",
+    "    m = 1.0 - smoothstep(-0.75, 0.75, d);",
+    "  }",
+    "  gl_FragColor = vec4(c, uOp*m);",
     "}"].join("\n");
 
   function compile(type, src){
@@ -5172,7 +5181,7 @@
     if(!gl.getProgramParameter(prog, gl.LINK_STATUS) && !gl.isContextLost()) throw new Error(gl.getProgramInfoLog(prog));
     gl.useProgram(prog);
     ["uView","uX0","uW","uH","uCy","uA","uP","uTex","uCrop","uRes","uEdge","uAlpha","uDim","uReveal","uFocus","uZone","uK","uScr","uFx0","uFw","uFcy","uFh","uFa","uFp",
-     "uC","uRx","uUy","uF","uMix","uO","uIntro","uWarp","uOp","uShade"]
+     "uC","uRx","uUy","uF","uMix","uO","uIntro","uWarp","uOp","uShade","uSz","uRad"]
       .forEach(function(n){ U[n] = gl.getUniformLocation(prog, n); });
     var v = [];
     for(var s = 0; s <= SEG; s++){ v.push(s/SEG, 0, s/SEG, 1); }
@@ -5190,6 +5199,7 @@
     gl.uniform3f(U.uC, 0, 0, 0); gl.uniform3f(U.uRx, 0, 0, 0); gl.uniform3f(U.uUy, 0, 0, 0);
     gl.uniform1f(U.uF, 1000); gl.uniform1f(U.uMix, 1); gl.uniform2f(U.uO, 0, 0);
     gl.uniform1f(U.uIntro, 0); gl.uniform1f(U.uOp, 1); gl.uniform1f(U.uShade, 1);
+    gl.uniform2f(U.uSz, 1, 1); gl.uniform1f(U.uRad, 0);
   }
   function newTex(mips){
     var t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
@@ -5512,6 +5522,7 @@
      depends on how many projects there are or where they sit. */
   var MIN_MS = 2400, MAX_MS = 6500;          /* counter never finishes before MIN; MAX lands with what has loaded */
   var DEAL0 = 250, DEAL_GAP = 85, DEAL_DUR = 950;
+  var RADIUS = 0.05;                         /* ring card corner radius, as a share of the card's short side */
   var TILT = 0.33, ROLL = -0.2;              /* ≈19° viewed from above, ≈−11° roll (right side higher) */
   var OMEGA = 0.07, SPIN0 = OMEGA*MAX_MS/1000; /* slow spin, front moving left, reaching 0 no earlier than MAX */
   var TR_RING = 900, TR_DELAY = 120, TR_STAGGER = 55, TR_FLY = 1050, TR_FADE = 650;
@@ -5679,12 +5690,16 @@
       gl.uniform1f(U.uX0, x0); gl.uniform1f(U.uW, len); gl.uniform1f(U.uFx0, x0); gl.uniform1f(U.uFw, len);
       gl.uniform3f(U.uC, q.C[0], q.C[1], q.C[2]); gl.uniform3f(U.uRx, q.Rx[0], q.Rx[1], q.Rx[2]); gl.uniform3f(U.uUy, q.Uy[0], q.Uy[1], q.Uy[2]);
       gl.uniform1f(U.uMix, q.e); gl.uniform1f(U.uOp, q.op); gl.uniform1f(U.uShade, q.shade);
+      /* corner radius: about 5% of the ring card's short side, easing to square as it lands */
+      var sw = G.w + (len - G.w)*q.e, sh = G.h + (baseH - G.h)*q.e;
+      gl.uniform2f(U.uSz, sw, sh); gl.uniform1f(U.uRad, home ? 0 : RADIUS*Math.min(G.w, G.h)*(1 - q.e));
       gl.uniform1f(U.uAlpha, tex ? 1 : 0);
       gl.uniform2f(U.uEdge, 2/len, 2/baseH);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, (SEG + 1)*2);
     }
     /* back to the plain-carousel values */
     gl.uniform1f(U.uIntro, 0); gl.uniform1f(U.uMix, 1); gl.uniform1f(U.uOp, 1); gl.uniform1f(U.uShade, 1);
+    gl.uniform1f(U.uRad, 0);
   }
 
   /* ---------- Frame loop ---------- */
