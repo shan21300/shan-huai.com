@@ -5043,7 +5043,7 @@
     var m = s/t; return [0, (1-m)/2, 1, m];
   }
 
-  var gl = null, prog = null, buf = null, blankTex = null, U = {}, SEG = 48, isGL2 = false;
+  var gl = null, prog = null, buf = null, blankTex = null, U = {}, SEG = 128, isGL2 = false;
   var VS = [
     "attribute vec2 aUV;",
     "uniform vec2 uView; uniform float uX0, uW, uH, uY0, uCy, uA, uP;",
@@ -5051,9 +5051,21 @@
        vectors uRx / uUy, perspective distance uF, screen origin uO), blended by uMix
        (0 = on the ring, 1 = in its carousel slot) */
     "uniform vec3 uC, uRx, uUy; uniform float uF, uMix; uniform vec2 uO;",
+    /* the liquid edge drag moves the frames themselves: each vertex goes to the screen x
+       that the fragment shader's drag maps back onto it (the exact inverse of that drag),
+       so outlines stretch with their pictures instead of the picture sliding under them */
+    "uniform float uVZone, uVK, uVWarp;",
     "varying vec2 vUV;",
+    "float unwarp(float x){",
+    "  float z = uVZone, W = uView.x, lim = z*(1.0 - exp(-uVK))/uVK, s = x;",   /* lim: how far past the zone line the screen edge reaches */
+    "  if(x < z){ float d = z - x;",
+    "    s = d < lim ? z + z*log(1.0 - uVK*d/z)/uVK : -(d - lim); }",          /* beyond reach: off screen, continuing outward */
+    "  else if(x > W - z){ float d = x - (W - z);",
+    "    s = d < lim ? W - z - z*log(1.0 - uVK*d/z)/uVK : W + (d - lim); }",
+    "  return mix(x, s, uVWarp);",
+    "}",
     "void main(){",
-    "  float x = uView.x*0.5 + uX0 + aUV.x*uW;",          /* widths stay constant across the screen… */
+    "  float x = unwarp(uView.x*0.5 + uX0 + aUV.x*uW);",  /* widths stay constant across the screen (outside the edge zones)… */
     "  float u = clamp(x/uView.x, 0.0, 1.25);",
     "  float s = 1.0 + uA*pow(u, uP);",                    /* …height is flat on the left and rises to the right */
     "  float y = uCy + (uY0 + aUV.y*uH)*s;",                /* uY0 = top, unbent (frames: -uH/2) */
@@ -5126,7 +5138,7 @@
     if(!gl.getProgramParameter(prog, gl.LINK_STATUS) && !gl.isContextLost()) throw new Error(gl.getProgramInfoLog(prog));
     gl.useProgram(prog);
     ["uView","uX0","uW","uH","uCy","uA","uP","uTex","uCrop","uRes","uEdge","uAlpha","uDim","uReveal","uFocus","uZone","uK","uScr","uFx0","uFw","uFcy","uFh","uFa","uFp",
-     "uC","uRx","uUy","uF","uMix","uO","uIntro","uWarp","uOp","uShade","uSz","uRad","uY0","uFy0","uLabel"]
+     "uC","uRx","uUy","uF","uMix","uO","uIntro","uWarp","uOp","uShade","uSz","uRad","uY0","uFy0","uLabel","uVZone","uVK","uVWarp"]
       .forEach(function(n){ U[n] = gl.getUniformLocation(prog, n); });
     var v = [];
     for(var s = 0; s <= SEG; s++){ v.push(s/SEG, 0, s/SEG, 1); }
@@ -5232,9 +5244,16 @@
   var drag = null, hoverInst = -1, focusWork = -1, capWork = -2;
 
   function centreOf(k){ return inst[k].s + inst[k].len/2; }
-  /* exact inverse of the vertex shader: x is linear, height depends on screen x */
+  /* exact inverse of the vertex shader: undo the edge drag, then x is linear; height depends on screen x */
+  /* the fragment shader's edge drag, screen x → carousel x (frames are drawn through its inverse) */
+  function dragX(sx){
+    var w = sx;
+    if(sx < zone){ var t = (zone - sx)/zone; w = zone - zone*(1 - Math.exp(-K*t))/K; }
+    else if(sx > W - zone){ var t2 = (sx - W + zone)/zone; w = W - zone + zone*(1 - Math.exp(-K*t2))/K; }
+    return sx + (w - sx)*rg.warp;
+  }
   function hitTest(px, py){
-    var tx = px - W/2;
+    var tx = dragX(px) - W/2;
     for(var k = 0; k < inst.length; k++){
       var x0 = x0Of(k);
       if(tx >= x0 && tx <= x0 + inst[k].len) return Math.abs(py - cy) <= baseH*bend(px)/2 ? k : -1;
@@ -5607,6 +5626,7 @@
     gl.uniform1f(U.uH, baseH); gl.uniform1f(U.uZone, zone); gl.uniform1f(U.uK, K);
     gl.uniform1f(U.uFcy, cy); gl.uniform1f(U.uFh, baseH); gl.uniform1f(U.uFa, A); gl.uniform1f(U.uFp, P);
     gl.uniform1f(U.uY0, -baseH/2); gl.uniform1f(U.uFy0, -baseH/2);
+    gl.uniform1f(U.uVZone, zone); gl.uniform1f(U.uVK, K); gl.uniform1f(U.uVWarp, 0);
     gl.uniform1f(U.uIntro, 1); gl.uniform1f(U.uWarp, 0); gl.uniform1f(U.uDim, 0); gl.uniform1f(U.uFocus, 0); gl.uniform1f(U.uReveal, 1);
     gl.uniform1f(U.uF, G.F); gl.uniform2f(U.uO, G.ox, G.oy);
     gl.activeTexture(gl.TEXTURE0);
@@ -5757,13 +5777,11 @@
       var p = inst[k], w = p.w, x0 = x0Of(k);
       if(!w.yearFirst) continue;
       var lt = yearTex[w.year] || (yearTex[w.year] = buildYear(w.year, len));
-      if(!onScreen(x0 - zone, lt.w + zone*2)) continue;
+      if(!onScreen(x0, lt.w)) continue;
       if(!on){ on = true; gl.uniform1f(U.uLabel, 1); gl.uniform1f(U.uOp, rg.warp); gl.uniform4f(U.uCrop, 0, 0, 1, 1); }
       var y0 = -baseH/2 - baseH*0.04 - lt.h;
       gl.bindTexture(gl.TEXTURE_2D, lt.tex);
-      /* the quad reaches a zone further each side: the edge drag stretches the glyphs past
-         the label's own box, and they'd be cut off at it (frames don't show this, they touch) */
-      gl.uniform1f(U.uX0, x0 - zone); gl.uniform1f(U.uW, lt.w + zone*2); gl.uniform1f(U.uFx0, x0); gl.uniform1f(U.uFw, lt.w);
+      gl.uniform1f(U.uX0, x0); gl.uniform1f(U.uW, lt.w); gl.uniform1f(U.uFx0, x0); gl.uniform1f(U.uFw, lt.w);
       gl.uniform1f(U.uH, lt.h); gl.uniform1f(U.uY0, y0); gl.uniform1f(U.uFh, lt.h); gl.uniform1f(U.uFy0, y0);
       gl.uniform1f(U.uReveal, reveal(w, t));
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, (SEG + 1)*2);
@@ -5779,6 +5797,7 @@
     gl.uniform1f(U.uFcy, cy); gl.uniform1f(U.uFh, baseH); gl.uniform1f(U.uFa, A); gl.uniform1f(U.uFp, P);
     gl.uniform1f(U.uY0, -baseH/2); gl.uniform1f(U.uFy0, -baseH/2);
     gl.uniform1f(U.uWarp, rg.warp);
+    gl.uniform1f(U.uVZone, zone); gl.uniform1f(U.uVK, K); gl.uniform1f(U.uVWarp, rg.warp);
     gl.activeTexture(gl.TEXTURE0);
     for(var k = 0; k < inst.length; k++){
       var p = inst[k], x0 = x0Of(k);
