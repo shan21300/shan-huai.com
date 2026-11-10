@@ -1,5 +1,6 @@
 // Serves the site's static files and logs one visit per page load, with the
-// visitor's approximate city / region / country (from Cloudflare's IP lookup).
+// visitor's approximate city / region / postal code / country (from Cloudflare's
+// IP lookup — postal code is often the ISP's area, not the visitor's).
 // No IP addresses or cookies are stored.
 //
 // Visits go to two places:
@@ -41,6 +42,7 @@ export default {
           path: url.pathname,
           city: cf.city || "",
           region: cf.region || "",
+          postalCode: cf.postalCode || "",
           country: cf.country || "",
           referrer: externalReferrer(request, url),
           device: /Mobi|Android|iPhone|iPad/i.test(ua) ? "mobile" : "desktop",
@@ -58,6 +60,7 @@ export default {
             visit.referrer,
             visit.device,
             visit.bot ? "bot" : "human",
+            visit.postalCode,
           ],
           doubles: [1],
           indexes: [visit.country || "unknown"],
