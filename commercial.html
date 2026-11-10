@@ -120,6 +120,8 @@
   .ct-cap.is-out .ct-cap-in{opacity:0;transform:translateY(6px)}
   .ct-title{font-family:"Cormorant Garamond",serif;font-weight:300;font-size:clamp(36px,5vw,72px);line-height:1;letter-spacing:-.02em;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-bottom:.08em}
+  /* data-logo on a clip: its title wordmark (white PNG) stands in for the text title */
+  .ct-title-logo{display:block;width:4.5em;max-width:100%;height:auto}
   .ct-meta{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(237,234,227,.74);margin-top:10px;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .ct-open{display:inline-block;margin-top:16px;font-size:11px;letter-spacing:.12em;text-transform:lowercase;text-decoration:none;
@@ -208,7 +210,7 @@
             <li><a class="ct-clip" href="/project/frometo" data-nav="proj-frometo" draggable="false"
                    data-stream="5d5a347fdc546fa2904564d13861d576" data-cat="Branding" data-meta="Local Remote · 2026"><img
                    src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/5d5a347fdc546fa2904564d13861d576/thumbnails/thumbnail.jpg?width=480" width="480" height="270" alt="" decoding="async" draggable="false"><span class="ct-clip-name mono">FROMETO</span></a></li>
-            <li><a class="ct-clip" href="/project/martoni-super-e" data-nav="proj-martoni" draggable="false"
+            <li><a class="ct-clip" href="/project/martoni-super-e" data-nav="proj-martoni" draggable="false" data-logo="/images/projects/MARTONI_title.png"
                    data-stream="8d9b3df3dd9fd9d25b34955a51e46079" data-poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/8d9b3df3dd9fd9d25b34955a51e46079/thumbnails/thumbnail.jpg?width=1920&time=20s" data-cat="Colorist" data-meta="Modular Agency · 2026"><img
                    src="/images/commercial/thumb-martoni.webp" width="480" height="201" alt="" decoding="async" draggable="false"><span class="ct-clip-name mono">Martoni Super-E</span></a></li>
             <li><a class="ct-clip" href="/project/local-local-park" data-nav="proj-locallocalpark" draggable="false"
@@ -321,6 +323,7 @@
       i: i, a: a, nav: a.getAttribute("data-nav"),
       title: (a.querySelector(".ct-clip-name") || a).textContent.trim(),
       lang: a.getAttribute("data-lang") || "",
+      logo: a.getAttribute("data-logo") || "",
       cat: a.getAttribute("data-cat") || "", meta: a.getAttribute("data-meta") || "",
       href: a.getAttribute("href"),
       type: stream ? "stream" : video ? "file" : "image",
@@ -594,6 +597,7 @@
   function fillCaption(i){
     var p = P[i];
     elTitle.textContent = p.title;
+    if(p.logo){ var lg = new Image(); lg.className = "ct-title-logo"; lg.src = p.logo; lg.alt = p.title; elTitle.textContent = ""; elTitle.appendChild(lg); }
     if(p.lang) elTitle.setAttribute("lang", p.lang); else elTitle.removeAttribute("lang");
     elMeta.textContent = [p.cat, p.meta].filter(Boolean).join(" — ");
     elOpen.href = p.href; elOpen.setAttribute("data-nav", p.nav);
