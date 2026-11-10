@@ -361,7 +361,12 @@
   function whenPoster(p, f){ ensureLayer(p); if(p.posterDone) f(); else p.posterWaiters.push(f); }
 
   /* ================= Video ================= */
-  var useHlsJs = !!(window.MediaSource || window.ManagedMediaSource);
+  /* iPhone/iPad (every browser there is WebKit): use the built-in HLS player. iOS 17.1+ exposes
+     ManagedMediaSource, which would otherwise route these devices through hls.js, where playback
+     can stall before the first frame. Apple's native HLS is the reliable path on those devices. */
+  var appleTouch = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  var nativeHls = appleTouch && !!document.createElement("video").canPlayType("application/vnd.apple.mpegurl");
+  var useHlsJs = !nativeHls && !!(window.MediaSource || window.ManagedMediaSource);
   var hlsState = 0, hlsWaiters = [];        /* 0 not loaded · 1 loading · 2 ready · -1 unavailable */
   function withHls(cb){
     if(!useHlsJs){ cb(); return; }
@@ -402,6 +407,7 @@
     v.muted = true; v.defaultMuted = true; v.loop = true; v.playsInline = true; v.controls = false;
     v.setAttribute("muted", ""); v.setAttribute("playsinline", ""); v.setAttribute("disablepictureinpicture", "");
     v.setAttribute("aria-hidden", "true"); v.tabIndex = -1;
+    v.disableRemotePlayback = true;                         /* ManagedMediaSource (hls.js on Safari) won't stream without it */
     v.preload = warm ? "metadata" : "auto";
     p.vid = v; p.vState = warm ? 3 : 1;
     v.addEventListener("loadedmetadata", function(){ fitEl(p, v, v.videoWidth, v.videoHeight); });
