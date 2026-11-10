@@ -625,15 +625,15 @@
      MAG magnifies the centre; negative K1/K2 stretch the outer band (pincushion);
      REFRACT/REFRACT_POW squeeze a thin band just inside the rim (glass refraction). */
   var EDGE = {
-    MAG: 1.08,        // centre magnification (1 = none)
+    MAG: 1.3,         // centre magnification (1 = none)
     K1: -0.10,        // ρ² term: < 0 stretches the outer band
     K2: -0.06,        // ρ⁴ term: < 0 stretches the outermost band harder
     REFRACT: 0.135,   // strength of the compression band just inside the rim
     REFRACT_POW: 20,  // how thin that band is (higher = thinner, hugs the rim)
-    RIM: 0.98,        // lens radius, as a fraction of half the shorter side
+    RIM: 1.2,         // lens radius, as a fraction of half the shorter side (> 1 overflows the short side)
     CA: 0.008,        // chromatic aberration at the rim (R out / B in; zero at the centre, grows ~ρ³)
     BLUR: 2.2,        // focus falloff: blur radius at the rim, in CSS px
-    FOCUS: 0.75,      // where the softening starts (ρ); the outer ~25% blurs progressively
+    FOCUS: 1,         // where the softening starts (ρ); 1 = no focus falloff (0.75 = outer 25% blurs)
     VIGNETTE: 0.15,   // darkening at the rim inside the lens (0.15 = 15% darker)
     HIGHLIGHT: 0.10,  // specular arc at the top-left of the rim (opacity, screen blend)
     TINT: 0.5,        // warm glass tint strength (0 = neutral, 1 = full TINT_COL)
@@ -767,7 +767,7 @@
       "  vec2 src = p * sc;",
       // focus falloff + chromatic aberration, one loop: 4 disc taps, each reads R, G, B at its own
       // radial offset (R pushed out, B pulled in, spread over the taps so fringes stay soft).
-      "  float bl = uBlur * smoothstep(uFocus, 1.0, rho);",
+      "  float bl = uBlur * smoothstep(min(uFocus, 0.999), 1.0, rho);",
       "  float k = uCA * rho * r2;",
       "  float a0 = ign(gl_FragCoord.xy) * 6.2831853;",
       "  vec3 c = vec3(0.0);",
@@ -953,7 +953,7 @@
       var sc = lensScale(L, r / L.rim);
       return { x:W / 2 + px * sc * m, y:H / 2 + py * sc * m };
     };
-    api.refresh = function(){ needPost = true; dirty = true; };
+    api.refresh = function(){ needPost = true; dirty = true; };   // call after changing EDGE from the console
 
     api.tick = function(now, dt, layoutChanged){
       if(!api.on) return;
@@ -1045,50 +1045,6 @@
     window.__wallEdge = { api:api, EDGE:EDGE };   // for tuning from the console / tests
     return api;
   })();
-
-  /* ?loupe-debug=1: sliders for the loupe values in EDGE (live; "copy" puts the current EDGE values on the clipboard). */
-  if(EDGE_ON && /(^|[?&])loupe-debug=1(&|$)/.test(location.search.slice(1))){
-    (function(){
-      var defs = [
-        ["MAG", 1, 1.3, 0.005], ["K1", -0.4, 0.2, 0.005], ["K2", -0.4, 0.2, 0.005],
-        ["REFRACT", 0, 0.5, 0.005], ["REFRACT_POW", 4, 40, 1], ["RIM", 0.6, 1.2, 0.005],
-        ["CA", 0, 0.04, 0.0005], ["BLUR", 0, 8, 0.1], ["FOCUS", 0, 1, 0.01],
-        ["VIGNETTE", 0, 0.6, 0.01], ["HIGHLIGHT", 0, 0.5, 0.01], ["TINT", 0, 1, 0.01],
-        ["LIFT", 0, 0.1, 0.002], ["SPEED", 0, 1, 0.01],
-        ["OUTSIDE", 0, 1, 0.01], ["OUTSIDE_BLUR", 0, 80, 1], ["OUTSIDE_SAT", 0, 1, 0.01], ["OUTSIDE_LIP", 0, 60, 1]
-      ];
-      var box = document.createElement("div");
-      box.style.cssText = "position:fixed;right:12px;top:72px;z-index:99;width:310px;padding:10px 12px;border-radius:8px;" +
-        "background:rgba(11,11,12,.86);border:1px solid rgba(237,234,227,.15);color:#edeae3;" +
-        "font:11px/1.2 'IBM Plex Mono',monospace;letter-spacing:.04em;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)";
-      var html = "<div style='display:flex;justify-content:space-between;margin-bottom:6px'><b>LOUPE</b>" +
-        "<span><button data-a=copy>copy</button> <button data-a=hide>–</button></span></div><div data-body>";
-      defs.forEach(function(d){
-        html += "<label style='display:grid;grid-template-columns:92px 1fr 56px;gap:6px;align-items:center;margin:3px 0'>" +
-          d[0] + "<input type=range min=" + d[1] + " max=" + d[2] + " step=" + d[3] + " value=" + EDGE[d[0]] + " data-k=" + d[0] + ">" +
-          "<output style='text-align:right'>" + EDGE[d[0]] + "</output></label>";
-      });
-      box.innerHTML = html + "</div>";
-      box.querySelectorAll("button").forEach(function(b){ b.style.cssText = "font:inherit;color:inherit;background:none;border:1px solid rgba(237,234,227,.3);border-radius:4px;padding:1px 6px;cursor:pointer"; });
-      ["pointerdown", "wheel", "keydown", "touchstart"].forEach(function(t){ box.addEventListener(t, function(e){ e.stopPropagation(); }, { passive:true }); });
-      box.addEventListener("input", function(e){
-        var k = e.target.getAttribute("data-k"); if(!k) return;
-        EDGE[k] = parseFloat(e.target.value); e.target.nextSibling.textContent = e.target.value;
-        Edge.refresh();
-      });
-      box.addEventListener("click", function(e){
-        var a = e.target.getAttribute && e.target.getAttribute("data-a");
-        if(a === "hide"){ var b = box.querySelector("[data-body]"); b.style.display = b.style.display ? "" : "none"; }
-        if(a === "copy"){
-          var out = {}; defs.forEach(function(d){ out[d[0]] = EDGE[d[0]]; });
-          var txt = JSON.stringify(out, null, 2);
-          if(navigator.clipboard) navigator.clipboard.writeText(txt).catch(function(){});
-          if(window.console) console.log(txt);
-        }
-      });
-      document.body.appendChild(box);
-    })();
-  }
 
   /* ---------- Hover: glass cell, hovered tile only ---------- */
   var hovT = null;
