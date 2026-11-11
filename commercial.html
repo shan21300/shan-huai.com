@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="preconnect" href="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&family=Archivo:wdth,wght@100..125,400..800&family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@400;500&display=swap" rel="stylesheet" />
 <script>
   document.documentElement.classList.add("js");
   if(matchMedia("(prefers-reduced-motion: reduce)").matches) document.documentElement.classList.add("reduce");
@@ -49,9 +49,9 @@
 
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{height:100%}
-  body{background:var(--ink);color:var(--paper);font-family:"DM Sans",system-ui,sans-serif;
+  body{background:var(--ink);color:var(--paper);font-family:"Archivo","Noto Sans TC",system-ui,sans-serif;
     -webkit-font-smoothing:antialiased;overflow:hidden;overscroll-behavior:none}
-  .mono{font-family:"IBM Plex Mono",monospace;font-weight:400}
+  .mono{font-family:"IBM Plex Mono","Noto Sans TC",monospace;font-weight:400}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   button{font:inherit;color:inherit}
   a{color:inherit}
@@ -79,7 +79,7 @@
   #menu.open{opacity:1;visibility:visible;transition:opacity .35s ease}
   .menu-cats{display:flex;flex-direction:column;align-items:flex-start;gap:clamp(24px,3vh,44px);margin:auto 0}
   .m-link,.m-sub,.menu-mini a{display:block;background:none;border:none;color:var(--ink);cursor:pointer;text-align:left;width:fit-content;
-    font-family:"Cormorant Garamond";font-weight:300;font-size:clamp(30px,3.9vw,53px);line-height:1.1;letter-spacing:-.02em;
+    font-family:"Cormorant Garamond","Noto Serif TC";font-weight:400;font-size:clamp(30px,3.9vw,53px);line-height:1.1;letter-spacing:-.02em;
     text-transform:lowercase;text-decoration:none}
   .m-link:hover,.m-sub:hover,.menu-mini a:hover{font-style:italic}
   .m-link[aria-current="page"]{font-style:italic;cursor:default}
@@ -124,7 +124,7 @@
     z-index:20;width:min(78vw,680px);pointer-events:none;text-shadow:0 1px 18px rgba(0,0,0,.45)}
   .ct-cap-in{transition:opacity .2s ease,transform .2s ease}
   .ct-cap.is-out .ct-cap-in{opacity:0;transform:translateY(6px)}
-  .ct-title{font-family:"Cormorant Garamond",serif;font-weight:300;font-size:clamp(36px,5vw,72px);line-height:1;letter-spacing:-.02em;
+  .ct-title{font-family:"Cormorant Garamond","Noto Serif TC",serif;font-weight:400;font-size:clamp(36px,5vw,72px);line-height:1;letter-spacing:-.02em;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-bottom:.08em}
   /* data-logo on a clip: its title wordmark (white PNG) stands in for the text title */
   .ct-title-logo{display:block;width:4.5em;max-width:100%;height:auto}
