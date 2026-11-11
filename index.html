@@ -1484,6 +1484,227 @@
   @keyframes rlFade{from{opacity:0}to{opacity:1}}
   #landing .cc-sr:focus{outline:none}
 </style>
+<script>
+/* ===== Bio page switch (draft) =====
+   ?bio=1 → the editorial one-page resume on /about (default in this draft)
+   ?bio=0 → the previous bio page, unchanged
+   The choice is kept for the session, since the router drops the query string. */
+(function(){
+  var d = document.documentElement, q = null;
+  try{ q = new URLSearchParams(location.search).get("bio"); }catch(e){}
+  if(q === "0" || q === "1"){ try{ sessionStorage.setItem("bio", q); }catch(e){} }
+  else { try{ q = sessionStorage.getItem("bio"); }catch(e){} }
+  if(q !== "0") d.classList.add("bio-new");
+})();
+</script>
+<style>
+  /* ===== Bio resume (#about, html.bio-new) =====
+     .rzb = the top bar (self-contained: own markup, styles and script, so it can later
+     become the site-wide menu). .rz = the page itself. Both only show with html.bio-new. */
+  html:not(.bio-new) #about > .rzb,
+  html:not(.bio-new) #about > .rzb-panel,
+  html:not(.bio-new) #about > .rz{display:none}
+  /* everything else in #about is the previous page (its slides aren't all inside
+     .bio-scroll-wrap, so hide by exclusion) */
+  html.bio-new #about > :not(.rzb):not(.rzb-panel):not(.rz){display:none}
+  /* the global header / footer step aside on this page; the top bar links to every page */
+  body.on-rz > header,
+  body.on-rz > footer{display:none}
+
+  /* ---------- Top bar ---------- */
+  .rzb{--rzb-pad:clamp(16px,1.4vw,24px);
+    position:fixed;top:0;left:0;right:0;z-index:40;
+    display:grid;grid-template-columns:repeat(4,minmax(0,1fr));column-gap:var(--rzb-pad);
+    align-items:center;padding:14px var(--rzb-pad);
+    background:rgba(11,11,12,.86);
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+    font-family:"DM Sans",system-ui,sans-serif;font-size:14px;font-weight:500;color:var(--paper)}
+  .rzb a{color:inherit;text-decoration:none}
+  .rzb-logo{justify-self:start;white-space:nowrap;font-family:"Archivo",sans-serif;font-weight:800;font-stretch:125%;
+    font-size:15px;letter-spacing:.02em;line-height:1;padding:6px 0}
+  .rzb-time{font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:400;
+    letter-spacing:.02em;white-space:nowrap;color:var(--paper)}
+  .rzb-time time{color:var(--paper)}
+  .rzb nav{display:flex;gap:clamp(14px,1.4vw,22px);align-items:center}
+  .rzb-sec{justify-self:end}
+  .rzb-site{justify-self:end}
+  .rzb-site a{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:400;
+    letter-spacing:.06em;text-transform:uppercase}
+  /* link hover: a thin rule that draws in from the left */
+  .rzb-ln{background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;
+    padding:4px 0;transition:background-size .35s cubic-bezier(.2,.7,.2,1),opacity .2s}
+  .rzb-ln:hover,.rzb-ln:focus-visible{background-size:100% 1px}
+  .rzb-menu{display:none;justify-self:end;background:none;border:0;color:var(--paper);cursor:pointer;
+    font:inherit;padding:6px 0}
+  .rzb a:focus-visible,.rzb-menu:focus-visible,
+  .rzb-panel a:focus-visible,.rzb-panel button:focus-visible,
+  .rz a:focus-visible{outline:1px solid var(--paper);outline-offset:4px}
+
+  /* small screens: logo, time, Menu */
+  @media(max-width:1099px){
+    .rzb{grid-template-columns:auto 1fr auto}
+    .rzb-time{justify-self:center}
+    .rzb nav{display:none}
+    .rzb-menu{display:block}
+  }
+  @media(max-width:420px){ .rzb-time{font-size:11.5px} }
+
+  /* Mobile panel (a sibling of the bar, so the page transition can't trap it) */
+  .rzb-panel{position:fixed;inset:0;z-index:72;background:var(--paper);color:var(--ink);
+    display:flex;flex-direction:column;padding:14px clamp(16px,1.4vw,24px) 28px;
+    font-family:"DM Sans",system-ui,sans-serif}
+  .rzb-panel[hidden]{display:none}
+  .rzb-panel.is-open{animation:rzbIn .45s cubic-bezier(.2,.7,.2,1) both}
+  @keyframes rzbIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+  .rzb-panel a{text-decoration:none}
+  .rzb-panel-top{display:flex;justify-content:space-between;align-items:center}
+  .rzb-panel-top .rzb-logo{color:var(--ink)}
+  .rzb-close{background:none;border:0;color:var(--ink);font:500 14px "DM Sans",system-ui,sans-serif;
+    cursor:pointer;padding:6px 0}
+  .rzb-panel-word{flex:1;display:flex;align-items:center;font-family:"Cormorant Garamond",serif;
+    font-weight:300;font-size:clamp(64px,22vw,140px);line-height:.9;letter-spacing:-.02em}
+  .rzb-panel ol{list-style:none;border-top:1px solid rgba(11,11,12,.16)}
+  .rzb-panel li a{display:flex;justify-content:space-between;align-items:baseline;
+    padding:10px 0;border-bottom:1px solid rgba(11,11,12,.16);color:var(--ink);text-decoration:none;
+    font-size:20px;font-weight:500;text-transform:uppercase;letter-spacing:.01em}
+  .rzb-panel li a span{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:400}
+  .rzb-panel-h{margin:22px 0 6px;font-family:"IBM Plex Mono",monospace;font-size:12px;
+    font-weight:400;letter-spacing:.06em;color:#5d5a55}
+  html.rzb-lock,html.rzb-lock body{overflow:hidden}
+
+  /* ---------- Page ---------- */
+  .rz{--m:clamp(16px,1.4vw,24px);--gap:clamp(16px,1.4vw,24px);
+    padding:calc(var(--rzb-h,56px) + clamp(24px,4vw,56px)) var(--m) 0;
+    color:var(--paper);font-family:"DM Sans",system-ui,sans-serif}
+  .rz a{color:inherit;text-decoration:none}
+  .rz [id^="rz-"]{scroll-margin-top:calc(var(--rzb-h,56px) + 20px)}
+  .rz h2:focus,.rz h1:focus{outline:none}
+  .rz-g{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));column-gap:var(--gap)}
+  .rz-mono{font-family:"IBM Plex Mono",monospace;font-weight:400;letter-spacing:.02em}
+  .rz-dim{color:var(--grey)}
+
+  /* name block */
+  .rz-name{font-family:"Cormorant Garamond",serif;font-weight:300;
+    font-size:clamp(64px,13.9vw,330px);line-height:.86;letter-spacing:-.035em;
+    white-space:nowrap;margin-left:-.04em}
+  .rz-name span{display:inline}
+  .rz-meta{margin-top:clamp(40px,9vw,150px);font-size:14px;line-height:1.35;font-weight:500}
+  .rz-meta p:last-child{justify-self:end}
+
+  /* bio */
+  .rz-bio{margin-top:clamp(120px,16vw,260px)}
+  .rz-lede{grid-column:1/-1;font-family:"Cormorant Garamond",serif;font-weight:400;
+    font-size:clamp(28px,3.75vw,62px);line-height:1.06;letter-spacing:-.012em;
+    text-indent:calc(25% + var(--gap) * .25)}
+  .rz-body{grid-column:2/4;margin-top:clamp(36px,4vw,64px);font-size:clamp(16px,1.15vw,18px);
+    line-height:1.6;color:#c9c6bf;max-width:62ch}
+
+  /* skills */
+  .rz-skills{margin-top:clamp(90px,11vw,180px)}
+  .rz-label{font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:400;letter-spacing:.02em}
+  .rz-skills ol{grid-column:2/-1;list-style:none}
+  .rz-skills li{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:var(--gap);
+    padding:14px 0;border-top:1px solid var(--line);font-size:17px;font-weight:500}
+  .rz-skills li:last-child{border-bottom:1px solid var(--line)}
+  .rz-skills li .rz-mono{grid-column:3;justify-self:end;font-size:13px}
+
+  /* numbered sections */
+  .rz-sec{margin-top:clamp(140px,18vw,300px)}
+  .rz-num{display:block;text-align:right;font-family:"IBM Plex Mono",monospace;
+    font-size:clamp(14px,1.5vw,22px);letter-spacing:0}
+  .rz-h2{font-family:"Cormorant Garamond",serif;font-weight:300;
+    font-size:clamp(64px,13vw,220px);line-height:.9;letter-spacing:-.03em;margin:4px 0 0 -.03em}
+  .rz-rows{margin-top:clamp(32px,4vw,64px);list-style:none}
+  .rz-row{padding:clamp(18px,1.8vw,28px) 0 clamp(24px,2.6vw,40px);border-top:1px solid var(--line);
+    font-size:16px;line-height:1.4}
+  .rz-row:last-child{border-bottom:1px solid var(--line)}
+  .rz-row h3{font-size:17px;font-weight:500}
+  .rz-row .rz-co{font-size:13px}
+  .rz-row .rz-txt{color:#c9c6bf}
+  .rz-row .rz-txt p + p{margin-top:4px}
+  .rz-row .rz-yr{justify-self:end;text-align:right;font-size:13px;white-space:nowrap}
+
+  /* work */
+  .rz-work{margin-top:clamp(32px,4vw,64px);list-style:none;
+    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(48px,5vw,88px) var(--gap)}
+  .rz-card{display:block}
+  .rz-frame{aspect-ratio:4/3;display:flex;align-items:flex-end;justify-content:flex-start}
+  .rz-frame img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;
+    opacity:.9;transition:opacity .45s ease,filter .45s ease;filter:grayscale(.15)}
+  .rz-card:hover .rz-frame img,.rz-card:focus-visible .rz-frame img{opacity:1;filter:none}
+  .rz-cap{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) auto;column-gap:var(--gap);
+    margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:14px;line-height:1.35}
+  .rz-cap h3{font-size:16px;font-weight:500;display:flex;gap:.5em;align-items:baseline}
+  .rz-arrow{display:inline-block;transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+  .rz-card:hover .rz-arrow,.rz-card:focus-visible .rz-arrow{transform:translate(3px,-3px)}
+  .rz-cap .rz-mono{font-size:12.5px}
+  .rz-cap > :last-child{justify-self:end;text-align:right}
+  .rz-cap h3 span:first-child{background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;
+    transition:background-size .35s cubic-bezier(.2,.7,.2,1)}
+  .rz-card:hover .rz-cap h3 span:first-child,.rz-card:focus-visible .rz-cap h3 span:first-child{background-size:100% 1px}
+
+  /* contact */
+  .rz-contact .rz-row{align-items:baseline}
+  .rz-contact .rz-val{grid-column:2/4;font-family:"Cormorant Garamond",serif;font-weight:400;
+    font-size:clamp(26px,2.6vw,44px);line-height:1.1}
+  .rz-contact .rz-val a{background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;
+    transition:background-size .35s cubic-bezier(.2,.7,.2,1)}
+  .rz-contact .rz-val a:hover,.rz-contact .rz-val a:focus-visible{background-size:100% 1px}
+
+  /* footer */
+  .rz-foot{margin-top:clamp(140px,16vw,260px);padding:28px 0 32px;border-top:1px solid var(--line);
+    font-size:14px;line-height:1.45;font-weight:500}
+  .rz-foot ul{list-style:none}
+  .rz-foot a{background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;
+    transition:background-size .35s cubic-bezier(.2,.7,.2,1)}
+  .rz-foot a:hover,.rz-foot a:focus-visible{background-size:100% 1px}
+  .rz-foot > :last-child{justify-self:end;text-align:right}
+
+  /* scroll reveal: only when the script has run and motion is allowed */
+  .rz.rz-anim .rz-rv{opacity:0;transform:translateY(16px);
+    transition:opacity .9s ease,transform .9s cubic-bezier(.2,.7,.2,1)}
+  .rz.rz-anim .rz-rv.is-in{opacity:1;transform:none}
+
+  /* tablet / mobile: four columns fold to two */
+  @media(max-width:809px){
+    .rz-g{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .rz-name{white-space:normal;font-size:clamp(56px,20.5vw,170px);line-height:.86}
+    .rz-name span{display:block;white-space:nowrap}
+    .rz-meta{row-gap:16px}
+    .rz-meta p:nth-child(3){grid-column:1}
+    .rz-meta p:last-child{grid-column:2;grid-row:2}
+    .rz-lede{text-indent:0}
+    .rz-body{grid-column:1/-1}
+    .rz-skills .rz-label{grid-column:1/-1;margin-bottom:14px}
+    .rz-skills ol{grid-column:1/-1}
+    .rz-skills li{grid-template-columns:1fr auto}
+    .rz-skills li .rz-mono{grid-column:2}
+    .rz-row{row-gap:8px}
+    .rz-row h3{grid-column:1}
+    .rz-row .rz-co{grid-column:1}
+    .rz-row .rz-txt{grid-column:2;grid-row:1/3}
+    .rz-row .rz-yr{grid-column:2;justify-self:start;text-align:left;margin-top:8px}
+    .rz-work{grid-template-columns:1fr}
+    .rz-frame{aspect-ratio:auto}
+    .rz-frame img{width:100%;max-height:none}
+    .rz-contact .rz-val{grid-column:1/-1;grid-row:2;margin-top:6px}
+    .rz-contact .rz-row .rz-mono:last-child{grid-column:2;grid-row:1}
+    .rz-foot{row-gap:22px}
+    .rz-foot > :nth-child(3){grid-column:1}
+    .rz-foot > :last-child{grid-column:2;grid-row:2}
+  }
+  @media(max-width:480px){
+    .rz-row .rz-txt{grid-column:1/-1;grid-row:auto}
+    .rz-row .rz-yr{grid-column:1/-1}
+    .rz-cap{grid-template-columns:minmax(0,1fr) auto}
+    .rz-cap > :nth-child(2){grid-column:1;grid-row:2}
+    .rz-cap > :last-child{grid-row:1/3;align-self:start}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .rz.rz-anim .rz-rv{opacity:1;transform:none;transition:none}
+    .rzb-panel.is-open{animation:none}
+  }
+</style>
 </head>
 <body>
 
@@ -3361,6 +3582,198 @@
     </section>
 
     <section class="page" id="about">
+      <!-- ===== Bio resume (html.bio-new; ?bio=0 shows the previous page below) ===== -->
+      <div class="rzb">
+        <a class="rzb-logo" href="/" data-nav="landing" aria-label="Shan-Huai — home">SHAN-HUAI</a>
+        <p class="rzb-time">Taipei, Taiwan <time data-rz-clock></time></p>
+        <nav class="rzb-sec" aria-label="Bio sections">
+          <a class="rzb-ln" href="#rz-about">About</a>
+          <a class="rzb-ln" href="#rz-experience">Experience</a>
+          <a class="rzb-ln" href="#rz-education">Education</a>
+          <a class="rzb-ln" href="#rz-work">Work</a>
+          <a class="rzb-ln" href="#rz-contact">Contact</a>
+        </nav>
+        <nav class="rzb-site" aria-label="Site">
+          <a class="rzb-ln" href="/commercial">Commercial ↗</a>
+          <a class="rzb-ln" href="/personal">Personal ↗</a>
+        </nav>
+        <button class="rzb-menu" type="button" aria-expanded="false" aria-controls="rzb-panel">Menu</button>
+      </div>
+      <div class="rzb-panel" id="rzb-panel" role="dialog" aria-modal="true" aria-label="Menu" hidden>
+        <div class="rzb-panel-top">
+          <a class="rzb-logo" href="/" data-nav="landing">SHAN-HUAI</a>
+          <button class="rzb-close" type="button">Close</button>
+        </div>
+        <p class="rzb-panel-word" aria-hidden="true">Chiang</p>
+        <ol>
+          <li><a href="#rz-about">About <span>001</span></a></li>
+          <li><a href="#rz-experience">Experience <span>002</span></a></li>
+          <li><a href="#rz-education">Education <span>003</span></a></li>
+          <li><a href="#rz-work">Work <span>004</span></a></li>
+          <li><a href="#rz-contact">Contact <span>005</span></a></li>
+        </ol>
+        <p class="rzb-panel-h">(Site)</p>
+        <ol>
+          <li><a href="/" data-nav="landing">Home <span>↗</span></a></li>
+          <li><a href="/commercial">Commercial <span>↗</span></a></li>
+          <li><a href="/personal">Personal <span>↗</span></a></li>
+          <li><a href="https://www.instagram.com/shanhuai.c/" target="_blank" rel="noopener">Instagram <span>↗</span></a></li>
+        </ol>
+      </div>
+
+      <div class="rz">
+        <section id="rz-about" aria-labelledby="rz-name">
+          <h1 class="rz-name" id="rz-name"><span>Shan-Huai</span> <span>Chiang</span></h1>
+          <div class="rz-meta rz-g">
+            <p>Shan-Huai Chiang<br>Video Producer, Local Remote</p>
+            <p>Born in Taipei, 2000<br>Raised in Shanghai</p>
+            <p>Based in<br>Taipei, Taiwan</p>
+            <p class="rz-mono">©2026</p>
+          </div>
+
+          <div class="rz-bio rz-g">
+            <p class="rz-lede rz-rv">Born in Taipei in 2000 and raised in Shanghai, Shan-Huai graduated from Central Saint Martins, University of the Arts London, with First Class Honours in Performance Design and Practice. His background spans backstage theatre, performance art, and photography — built on cross-disciplinary collaboration, often stepping into producer and art-director roles to guide production and visual direction.</p>
+            <p class="rz-body rz-rv">He is now based in Taipei, working at Local Remote as an Image Maker. Using lens-based media as his primary medium, he translates brand values and design thinking into concept-driven, narrative-led work — carrying ideas from development, scripting, and storyboarding through on-set direction and post, keeping tone, rhythm, and visual coherence intact.</p>
+          </div>
+
+          <div class="rz-skills rz-g rz-rv">
+            <h2 class="rz-label">(Practice)</h2>
+            <ol>
+              <li><span>Moving Image</span><span class="rz-mono">(01)</span></li>
+              <li><span>Photography</span><span class="rz-mono">(02)</span></li>
+              <li><span>Art Direction</span><span class="rz-mono">(03)</span></li>
+            </ol>
+          </div>
+        </section>
+
+        <section class="rz-sec" id="rz-experience" aria-labelledby="rz-h-exp">
+          <span class="rz-num" aria-hidden="true">(1)</span>
+          <h2 class="rz-h2 rz-rv" id="rz-h-exp">Experience</h2>
+          <ol class="rz-rows">
+          <li class="rz-row rz-g rz-rv"><h3>Photography &amp; Visual Production</h3><p class="rz-co rz-mono">(Freelance)</p><div class="rz-txt"><p>Freelance Art Direction &amp; Photography</p><p><span lang="zh-Hant">自由接案 藝術指導與攝影 · 影像與視覺創作</span></p></div><p class="rz-yr rz-mono">(2019 – Present)</p></li>
+          <li class="rz-row rz-g rz-rv"><h3>Video Producer</h3><p class="rz-co rz-mono">(Local Remote)</p><div class="rz-txt"><p>Taipei, Taiwan</p><p><span lang="zh-Hant">Local Remote — 台北，台灣 · 影像企劃製作</span></p></div><p class="rz-yr rz-mono">(Nov 2025 – Present)</p></li>
+          <li class="rz-row rz-g rz-rv"><h3>Marketing &amp; Foreign Relations</h3><p class="rz-co rz-mono">(Kuang Hong Arts Management)</p><div class="rz-txt"><p>Taipei, Taiwan</p><p><span lang="zh-Hant">寬宏藝術經紀公司（實習）· 行銷與國際聯繫</span></p></div><p class="rz-yr rz-mono">(Jun 2023 – Aug 2023)</p></li>
+          <li class="rz-row rz-g rz-rv"><h3>Content Creation</h3><p class="rz-co rz-mono">(The Hope)</p><div class="rz-txt"><p>Taipei, Taiwan</p><p><span lang="zh-Hant">社團法人國際基督教合盼協會 · 內容企劃</span></p></div><p class="rz-yr rz-mono">(Oct 2020 – Jan 2021)</p></li>
+          <li class="rz-row rz-g rz-rv"><h3>Photography Lab Technician</h3><p class="rz-co rz-mono">(Otis College of Art and Design)</p><div class="rz-txt"><p>LA, United States</p><p><span lang="zh-Hant">奧蒂斯藝術與設計學院 · 攝影暗房管理員</span></p></div><p class="rz-yr rz-mono">(Mar 2019 – Mar 2020)</p></li>
+          </ol>
+        </section>
+
+        <section class="rz-sec" id="rz-education" aria-labelledby="rz-h-edu">
+          <span class="rz-num" aria-hidden="true">(2)</span>
+          <h2 class="rz-h2 rz-rv" id="rz-h-edu">Education</h2>
+          <ol class="rz-rows">
+          <li class="rz-row rz-g rz-rv"><h3>Performance Design &amp; Practice</h3><p class="rz-co rz-mono">(Central Saint Martins, UAL)</p><div class="rz-txt"><p>BA (Hons) — First Class</p><p>University of the Arts London</p></div></li>
+          </ol>
+        </section>
+
+        <section class="rz-sec" id="rz-work" aria-labelledby="rz-h-work">
+          <span class="rz-num" aria-hidden="true">(3)</span>
+          <h2 class="rz-h2 rz-rv" id="rz-h-work">Work</h2>
+          <ol class="rz-work" aria-label="Selected work, newest first">
+          <li class="rz-rv"><a class="rz-card" href="/project/sub" data-nav="proj-sub">
+            <div class="rz-frame"><img src="/images/carousel/proj-sub.webp" width="1200" height="800" alt="" decoding="async"></div>
+            <div class="rz-cap"><h3><span>SUB</span><span class="rz-arrow" aria-hidden="true">→</span></h3><p>Branding <span class="rz-mono rz-dim">(Local Remote)</span></p><p class="rz-mono">(2026)</p></div>
+          </a></li>
+          <li class="rz-rv"><a class="rz-card" href="/project/heysong-sarsaparilla" data-nav="proj-heysong">
+            <div class="rz-frame"><img src="/images/carousel/proj-heysong.webp" width="1422" height="800" alt="" decoding="async"></div>
+            <div class="rz-cap"><h3><span lang="zh-Hant">黑松沙士</span><span class="rz-arrow" aria-hidden="true">→</span></h3><p>Branding <span class="rz-mono rz-dim">(Local Remote)</span></p><p class="rz-mono">(2026)</p></div>
+          </a></li>
+          <li class="rz-rv"><a class="rz-card" href="/project/frometo" data-nav="proj-frometo">
+            <div class="rz-frame"><img src="/images/carousel/proj-frometo.webp" width="1422" height="800" alt="" loading="lazy" decoding="async"></div>
+            <div class="rz-cap"><h3><span>FROMETO</span><span class="rz-arrow" aria-hidden="true">→</span></h3><p>Branding <span class="rz-mono rz-dim">(Local Remote)</span></p><p class="rz-mono">(2026)</p></div>
+          </a></li>
+          <li class="rz-rv"><a class="rz-card" href="https://www.kickstarter.com/projects/martoni/martoni-super-e-the-micro-mobility-device-that-flies?ref=creator_tab" target="_blank" rel="noopener">
+            <div class="rz-frame"><img src="/images/carousel/proj-martoni.webp" width="1910" height="800" alt="" loading="lazy" decoding="async"></div>
+            <div class="rz-cap"><h3><span>Martoni Super-E</span><span class="rz-arrow" aria-hidden="true">↗</span></h3><p>Colorist <span class="rz-mono rz-dim">(Modular Agency)</span></p><p class="rz-mono">(2026)</p></div>
+          </a></li>
+          <li class="rz-rv"><a class="rz-card" href="/project/local-local-park" data-nav="proj-locallocalpark">
+            <div class="rz-frame"><img src="/images/carousel/proj-locallocalpark.webp" width="1200" height="800" alt="" loading="lazy" decoding="async"></div>
+            <div class="rz-cap"><h3><span>Local Local Park</span><span class="rz-arrow" aria-hidden="true">→</span></h3><p>Branding <span class="rz-mono rz-dim">(Local Remote)</span></p><p class="rz-mono">(2026)</p></div>
+          </a></li>
+          <li class="rz-rv"><a class="rz-card" href="/live/cornelius" data-nav="gig-cornelius">
+            <div class="rz-frame"><img src="/images/carousel/gig-cornelius.webp" width="533" height="800" alt="" loading="lazy" decoding="async"></div>
+            <div class="rz-cap"><h3><span>Cornelius</span><span class="rz-arrow" aria-hidden="true">→</span></h3><p>Live <span class="rz-mono rz-dim">(Chillout Music Festival)</span></p><p class="rz-mono">(2025)</p></div>
+          </a></li>
+          <li class="rz-rv"><a class="rz-card" href="/live/someshiit-sam" data-nav="gig-someshiitsam">
+            <div class="rz-frame"><img src="/images/carousel/gig-someshiitsam.webp" width="533" height="800" alt="" loading="lazy" decoding="async"></div>
+            <div class="rz-cap"><h3><span lang="zh-Hant">someshiit 山姆</span><span class="rz-arrow" aria-hidden="true">→</span></h3><p>Live <span class="rz-mono rz-dim">(Chillout Music Festival)</span></p><p class="rz-mono">(2025)</p></div>
+          </a></li>
+          <li class="rz-rv"><a class="rz-card" href="/wedding/julian-and-judy" data-nav="julianjudy">
+            <div class="rz-frame"><img src="/images/carousel/julianjudy.webp" width="1200" height="800" alt="" loading="lazy" decoding="async"></div>
+            <div class="rz-cap"><h3><span>Julian and Judy</span><span class="rz-arrow" aria-hidden="true">→</span></h3><p>Wedding <span class="rz-mono rz-dim">(Engagement Session)</span></p><p class="rz-mono">(2025)</p></div>
+          </a></li>
+          <li class="rz-rv"><a class="rz-card" href="/live/elephant-gym" data-nav="gig-elephantgym">
+            <div class="rz-frame"><img src="/images/carousel/gig-elephantgym.webp" width="533" height="800" alt="" loading="lazy" decoding="async"></div>
+            <div class="rz-cap"><h3><span>Elephant Gym</span><span class="rz-arrow" aria-hidden="true">→</span></h3><p>Live <span class="rz-mono rz-dim">(Bristol)</span></p><p class="rz-mono">(2024)</p></div>
+          </a></li>
+          <li class="rz-rv"><a class="rz-card" href="/archive/girlfriend" data-nav="girlfriend">
+            <div class="rz-frame"><img src="/images/carousel/girlfriend.webp" width="1422" height="800" alt="" loading="lazy" decoding="async"></div>
+            <div class="rz-cap"><h3><span>Girlfriend</span><span class="rz-arrow" aria-hidden="true">→</span></h3><p>Archive <span class="rz-mono rz-dim">(PDP Year 2 Music Video)</span></p><p class="rz-mono">(2024)</p></div>
+          </a></li>
+          <li class="rz-rv"><a class="rz-card" href="/archive/making-ordinary-sense" data-nav="making-ordinary-sense">
+            <div class="rz-frame"><img src="/images/carousel/making-ordinary-sense.webp" width="1422" height="800" alt="" loading="lazy" decoding="async"></div>
+            <div class="rz-cap"><h3><span>Making Ordinary Sense</span><span class="rz-arrow" aria-hidden="true">→</span></h3><p>Archive <span class="rz-mono rz-dim">(PDP Year 2 Project)</span></p><p class="rz-mono">(2024)</p></div>
+          </a></li>
+          <li class="rz-rv"><a class="rz-card" href="/project/butoh-experiment" data-nav="proj-butoh">
+            <div class="rz-frame"><img src="/images/carousel/proj-butoh.webp" width="533" height="800" alt="" loading="lazy" decoding="async"></div>
+            <div class="rz-cap"><h3><span>Butoh Experiment</span><span class="rz-arrow" aria-hidden="true">→</span></h3><p>Performance <span class="rz-mono rz-dim">(Central Saint Martins)</span></p><p class="rz-mono">(2023)</p></div>
+          </a></li>
+          <li class="rz-rv"><a class="rz-card" href="/photojournalism/kenya-slum" data-nav="pj-kenyaslum">
+            <div class="rz-frame"><img src="/images/carousel/pj-kenyaslum.webp" width="1200" height="800" alt="" loading="lazy" decoding="async"></div>
+            <div class="rz-cap"><h3><span>Kenya Slum</span><span class="rz-arrow" aria-hidden="true">→</span></h3><p>Photo-Journalism <span class="rz-mono rz-dim">(Nairobi)</span></p><p class="rz-mono">(2023)</p></div>
+          </a></li>
+          <li class="rz-rv"><a class="rz-card" href="/live/hillsong" data-nav="gig-hillsong">
+            <div class="rz-frame"><img src="/images/carousel/gig-hillsong.webp" width="533" height="800" alt="" loading="lazy" decoding="async"></div>
+            <div class="rz-cap"><h3><span>Hillsong</span><span class="rz-arrow" aria-hidden="true">→</span></h3><p>Live <span class="rz-mono rz-dim">(London)</span></p><p class="rz-mono">(2022)</p></div>
+          </a></li>
+          <li class="rz-rv"><a class="rz-card" href="/photojournalism/slava-ukraini" data-nav="pj-slavaukraini">
+            <div class="rz-frame"><img src="/images/carousel/pj-slavaukraini.webp" width="533" height="800" alt="" loading="lazy" decoding="async"></div>
+            <div class="rz-cap"><h3><span>Slava Ukraini</span><span class="rz-arrow" aria-hidden="true">→</span></h3><p>Photo-Journalism <span class="rz-mono rz-dim">(London)</span></p><p class="rz-mono">(2022)</p></div>
+          </a></li>
+          <li class="rz-rv"><a class="rz-card" href="/project/zero-case-policy" data-nav="proj-zerocase">
+            <div class="rz-frame"><img src="/images/carousel/proj-zerocase.webp" width="533" height="800" alt="" loading="lazy" decoding="async"></div>
+            <div class="rz-cap"><h3><span>Zero-Case Policy</span><span class="rz-arrow" aria-hidden="true">→</span></h3><p>Photography <span class="rz-mono rz-dim">(Performance)</span></p><p class="rz-mono">(2021)</p></div>
+          </a></li>
+          <li class="rz-rv"><a class="rz-card" href="/portraiture/duality-within" data-nav="pt-dualitywithin">
+            <div class="rz-frame"><img src="/images/carousel/pt-dualitywithin.webp" width="533" height="800" alt="" loading="lazy" decoding="async"></div>
+            <div class="rz-cap"><h3><span>Duality Within</span><span class="rz-arrow" aria-hidden="true">→</span></h3><p>Portraiture <span class="rz-mono rz-dim">(Portrait)</span></p><p class="rz-mono">(2021)</p></div>
+          </a></li>
+          <li class="rz-rv"><a class="rz-card" href="/live/the-hope" data-nav="gig-thehope">
+            <div class="rz-frame"><img src="/images/carousel/gig-thehope.webp" width="533" height="800" alt="" loading="lazy" decoding="async"></div>
+            <div class="rz-cap"><h3><span>The Hope</span><span class="rz-arrow" aria-hidden="true">→</span></h3><p>Live <span class="rz-mono rz-dim">(Taipei)</span></p><p class="rz-mono">(2021)</p></div>
+          </a></li>
+          <li class="rz-rv"><a class="rz-card" href="/live/mosaic" data-nav="gig-mosaic">
+            <div class="rz-frame"><img src="/images/carousel/gig-mosaic.webp" width="533" height="800" alt="" loading="lazy" decoding="async"></div>
+            <div class="rz-cap"><h3><span>Mosaic</span><span class="rz-arrow" aria-hidden="true">→</span></h3><p>Live <span class="rz-mono rz-dim">(Hollywood)</span></p><p class="rz-mono">(2018–2020)</p></div>
+          </a></li>
+          <li class="rz-rv"><a class="rz-card" href="/photojournalism/the-umbrella-movement" data-nav="pj-hkprotest">
+            <div class="rz-frame"><img src="/images/carousel/pj-hkprotest.webp" width="1200" height="800" alt="" loading="lazy" decoding="async"></div>
+            <div class="rz-cap"><h3><span>The Umbrella Movement</span><span class="rz-arrow" aria-hidden="true">→</span></h3><p>Photo-Journalism <span class="rz-mono rz-dim">(Hong Kong)</span></p><p class="rz-mono">(2019)</p></div>
+          </a></li>
+          </ol>
+        </section>
+
+        <section class="rz-sec rz-contact" id="rz-contact" aria-labelledby="rz-h-contact">
+          <span class="rz-num" aria-hidden="true">(4)</span>
+          <h2 class="rz-h2 rz-rv" id="rz-h-contact">Contact</h2>
+          <ul class="rz-rows">
+            <li class="rz-row rz-g rz-rv"><p>Email</p><p class="rz-val"><a href="mailto:shanhuaichiang@gmail.com">shanhuaichiang@gmail.com</a></p><p class="rz-mono rz-yr">(EM)</p></li>
+            <li class="rz-row rz-g rz-rv"><p>Instagram</p><p class="rz-val"><a href="https://www.instagram.com/shanhuai.c/" target="_blank" rel="noopener">@shanhuai.c ↗</a></p><p class="rz-mono rz-yr">(IG)</p></li>
+          </ul>
+        </section>
+
+        <div class="rz-foot rz-g">
+          <p>Shan-Huai Chiang<br>Video Producer</p>
+          <p>Taipei, Taiwan<br><time data-rz-clock></time></p>
+          <ul aria-label="Site">
+            <li><a href="/" data-nav="landing">Home</a></li>
+            <li><a href="/commercial">Commercial ↗</a></li>
+            <li><a href="/personal">Personal ↗</a></li>
+          </ul>
+          <p><span class="rz-mono">©2026</span><br><a href="#rz-about">Back to top ↑</a></p>
+        </div>
+      </div>
+
       <div class="pinfo">
         <div class="pinfo-card">
           <div class="pinfo-head">
@@ -3948,6 +4361,7 @@
     document.body.classList.toggle("on-landing", t==="landing");
     var el=document.getElementById(t);
     document.body.classList.toggle("on-proj", !!(el && (el.classList.contains("proj-page")||el.classList.contains("proj-marquee")||el.classList.contains("proj-detail"))));
+    document.body.classList.toggle("on-rz", t==="about" && document.documentElement.classList.contains("bio-new"));   // bio resume: its own top bar
   }
   setLanding("landing");
 
@@ -6795,6 +7209,125 @@
   if(sec.clientHeight) layout();
 })();
 /* ===== /LLP REELS ===== */
+</script>
+<script>
+/* ===== Bio resume: top bar (.rzb) + page (.rz) =====
+   Taipei clock, smooth anchor links under the bar, the small-screen menu panel and a
+   subtle scroll reveal. Site links use data-nav: the "main [data-nav]" handler runs
+   go() → swap(); this only stops the href from reloading the page on a plain click. */
+(function(){
+  "use strict";
+  var about = document.getElementById("about");
+  var bar = about && about.querySelector(".rzb");
+  var page = about && about.querySelector(".rz");
+  if(!bar || !page) return;
+  var root = document.documentElement;
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* --- Taipei time, whatever the visitor's own time zone: "{ 3.28PM }" --- */
+  var fmt = null;
+  try{ fmt = new Intl.DateTimeFormat("en-US", { timeZone:"Asia/Taipei", hour:"numeric", minute:"2-digit", hour12:true }); }catch(e){}
+  var clocks = [].slice.call(document.querySelectorAll("[data-rz-clock]"));
+  function tick(){
+    if(!fmt) return;
+    var p = {}, now = new Date();
+    fmt.formatToParts(now).forEach(function(x){ p[x.type] = x.value; });
+    var t = p.hour + "." + p.minute + (p.dayPeriod || "").toUpperCase();
+    clocks.forEach(function(c){ c.textContent = "{ " + t + " }"; });
+    setTimeout(tick, 60000 - (now.getSeconds() * 1000 + now.getMilliseconds()) + 50);
+  }
+  tick();
+
+  /* --- bar height → anchor offset (layout read deferred to the next frame) --- */
+  var rafId = 0;
+  function measure(){
+    rafId = 0;
+    var h = bar.offsetHeight;
+    if(h) about.style.setProperty("--rzb-h", h + "px");
+  }
+  if(typeof ResizeObserver === "function"){
+    new ResizeObserver(function(){ if(!rafId) rafId = requestAnimationFrame(measure); }).observe(bar);
+  } else { window.addEventListener("resize", function(){ if(!rafId) rafId = requestAnimationFrame(measure); }); }
+
+  /* --- small-screen menu panel --- */
+  var panel = about.querySelector(".rzb-panel");
+  var openBtn = bar.querySelector(".rzb-menu");
+  var closeBtn = panel && panel.querySelector(".rzb-close");
+  function setPanel(open, restoreFocus){
+    if(!panel) return;
+    if(open){
+      panel.hidden = false;
+      panel.classList.add("is-open");
+      root.classList.add("rzb-lock");
+      openBtn.setAttribute("aria-expanded", "true");
+      setTimeout(function(){ if(closeBtn) closeBtn.focus({ preventScroll:true }); }, 30);
+    } else if(!panel.hidden){
+      panel.hidden = true;
+      panel.classList.remove("is-open");
+      root.classList.remove("rzb-lock");
+      openBtn.setAttribute("aria-expanded", "false");
+      if(restoreFocus) openBtn.focus({ preventScroll:true });
+    }
+  }
+  if(openBtn) openBtn.addEventListener("click", function(){ setPanel(true); });
+  if(closeBtn) closeBtn.addEventListener("click", function(){ setPanel(false, true); });
+  document.addEventListener("keydown", function(e){
+    if(!panel || panel.hidden) return;
+    if(e.key === "Escape"){ setPanel(false, true); return; }
+    if(e.key === "Tab"){                         // keep Tab inside the open panel
+      var f = [].slice.call(panel.querySelectorAll("a[href],button"));
+      var first = f[0], last = f[f.length - 1];
+      if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+      else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+    }
+  });
+  /* leaving the page (or widening past the breakpoint) closes the panel */
+  new MutationObserver(function(){ if(!about.classList.contains("is-active")) setPanel(false); })
+    .observe(about, { attributes:true, attributeFilter:["class"] });
+  matchMedia("(min-width:1100px)").addEventListener("change", function(m){ if(m.matches) setPanel(false); });
+
+  /* --- clicks: site links (data-nav) and section anchors --- */
+  about.addEventListener("click", function(e){
+    var a = e.target.closest && e.target.closest("a");
+    if(!a || !about.contains(a)) return;
+    if(a.hasAttribute("data-nav")){
+      // modifier-click: let the browser open the href, and keep go() from running too
+      if(e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey){ e.stopPropagation(); return; }
+      e.preventDefault();
+      setPanel(false);
+      return;
+    }
+    var href = a.getAttribute("href") || "";
+    if(href.charAt(0) === "#"){
+      var target = document.getElementById(href.slice(1));
+      if(!target) return;
+      e.preventDefault();
+      var wasOpen = panel && !panel.hidden;
+      setPanel(false);
+      var go = function(){
+        target.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block:"start" });
+        var h = target.matches("h1,h2") ? target : target.querySelector("h1,h2");
+        if(h){ h.setAttribute("tabindex", "-1"); h.focus({ preventScroll:true }); }
+        if(history.replaceState) history.replaceState(history.state, "", location.pathname + href);
+      };
+      wasOpen ? requestAnimationFrame(go) : go();
+      return;
+    }
+    if(a.closest(".rzb-panel")) setPanel(false);   // Instagram etc. from the panel
+  }, true);
+
+  /* --- scroll reveal (content stays visible if this never runs) --- */
+  if(!reduce && "IntersectionObserver" in window){
+    var items = [].slice.call(page.querySelectorAll(".rz-rv"));
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(en.isIntersecting){ en.target.classList.add("is-in"); io.unobserve(en.target); }
+      });
+    }, { rootMargin:"0px 0px -8% 0px", threshold:0.01 });
+    page.classList.add("rz-anim");
+    items.forEach(function(el){ io.observe(el); });
+  }
+})();
 </script>
 </body>
 </html>
