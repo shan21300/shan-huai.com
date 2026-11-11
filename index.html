@@ -1345,11 +1345,11 @@
   /* projects with a wordmark show it (a small black copy in /images/carousel/logos) in place
      of the text name; the box keeps tall marks and long lockups at a similar visual weight */
   #landing .cc-cap-logo{display:block;margin:0 auto;width:auto;height:auto;max-height:60px;max-width:min(230px,100%)}
-  #landing .cc-cap-logo[src$="/heysong.webp"]{max-height:90px}   /* 1.5x: its lockup reads small at the shared size */
+  #landing .cc-cap-logo[src$="/heysong.webp"]{max-height:90px}#landing .cc-cap-logo[src$="/mosaic.webp"]{max-width:160px}   /* 1.5x: its lockup reads small at the shared size */
   /* LLP: wide thin wordmark, sized to its ratio against the other titles on the commercial page */
   #landing .cc-cap-logo[src$="/locallocalpark.webp"]{max-width:min(280px,100%)}
   @media (max-width:760px){ #landing .cc-cap-name{font-size:20px} #landing .cc-cap-logo{max-height:50px;max-width:min(200px,100%)}
-    #landing .cc-cap-logo[src$="/heysong.webp"]{max-height:75px}
+    #landing .cc-cap-logo[src$="/heysong.webp"]{max-height:75px}#landing .cc-cap-logo[src$="/mosaic.webp"]{max-width:140px}
     #landing .cc-cap-logo[src$="/locallocalpark.webp"]{max-width:min(240px,100%)} }
   /* ---- Curve gallery: photo-only project pages (.proj-page) ----
      Cards sit on a convex drum (CSS 3D); wheel / drag / swipe / arrow keys move along it.
@@ -1483,6 +1483,349 @@
   html.rl-fade #landing.is-active{animation:rlFade .5s ease both}
   @keyframes rlFade{from{opacity:0}to{opacity:1}}
   #landing .cc-sr:focus{outline:none}
+
+  /* ===== Header name / logo flip (every page) =====
+     SHAN-HUAI stays where it is. The logo shares its spot: left edges aligned, tops level. */
+  .bf-btn{perspective:600px}
+  .bf{display:block;position:relative;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.16,1,.3,1)}
+  .bf-name,.bf-logo{display:block;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+  .bf-name{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:800;font-stretch:125%;font-size:15px;line-height:1;
+    letter-spacing:.02em;white-space:nowrap;color:#fff;opacity:.92;padding:6px 0;transition:color .35s ease}
+  /* the logo, set horizontally (善懷 side by side), each character about 1.7x its old size (1.3x the first horizontal version);
+     placed as it must be before the turn (the turn mirrors it) */
+  header .brandBtn .bf-logo .logo-img,header .brandBtn .bf-logo .logo-img-b{height:calc(var(--cc-logo) * 0.854)}
+  /* left edges aligned and centred on the letters' middle line (measured: the letters start about
+     1px in, and their ink runs 7.5px to 18.25px down inside the name's box, middle 12.875px) */
+  .bf-logo{position:absolute;left:0;top:100%;transform:translate(1.25px,calc(-50% - 12.875px)) rotateX(180deg)}
+  body.menu-is-open .brandBtn .bf,.brandBtn.bf-home .bf{transform:rotateX(180deg)}
+  @media(hover:hover){
+    .bf-btn:hover .bf{transform:rotateX(180deg)}
+    body.menu-is-open .brandBtn:hover .bf{transform:none}
+  }
+  .bf-btn:focus-visible .bf{transform:rotateX(180deg)}
+  body.menu-is-open .brandBtn:focus-visible .bf{transform:none}
+  @media(prefers-reduced-motion:reduce){ .bf{transition:none !important} }
+  /* menu items set at the name's size */
+  #menu .m-link,#menu .m-sub,#menu .menu-mini a{font-size:15px;letter-spacing:.02em}
+  body.on-landing:not(.menu-is-open) header .bf-name,body.menu-is-open:not(.menu-inv) header .bf-name{color:#0B0B0C}
+  /* the opening logo animation: the logo alone, in its old top-left spot */
+  .brandBtn.bf-intro .bf{transform:rotateX(180deg);transition:none}
+  .brandBtn.bf-intro .bf-name{position:absolute;visibility:hidden}
+  .brandBtn.bf-intro .bf-logo{position:relative;left:auto;top:auto;transform:rotateX(180deg);transition:none}
+</style>
+<script>
+/* ===== Bio page switch (draft) =====
+   ?bio=1 → the editorial one-page resume on /about (default in this draft)
+   ?bio=0 → the previous bio page, unchanged
+   ?smooth=0 → the resume without its smooth (inertia) wheel scrolling
+   Choices are kept for the session, since the router drops the query string. */
+(function(){
+  var d = document.documentElement, q = null, s = null, P = null;
+  try{ P = new URLSearchParams(location.search); q = P.get("bio"); s = P.get("smooth"); }catch(e){}
+  if(q === "0" || q === "1"){ try{ sessionStorage.setItem("bio", q); }catch(e){} }
+  else { try{ q = sessionStorage.getItem("bio"); }catch(e){} }
+  if(s === "0" || s === "1"){ try{ sessionStorage.setItem("rz-smooth", s); }catch(e){} }
+  else { try{ s = sessionStorage.getItem("rz-smooth"); }catch(e){} }
+  if(q === "0") return;
+  d.classList.add("bio-new");
+  if(s === "0") d.classList.add("rz-nosmooth");
+  /* landing straight on /about: the resume's own name animation is the intro */
+  if(/^\/about\/?$/.test(location.pathname)) d.classList.add("rz-skip");
+})();
+</script>
+<style>
+  /* ===== Bio resume (#about, html.bio-new) =====
+     .rzb = the top bar (self-contained: own markup, styles and script, so it can later
+     become the site-wide menu). .rz = the page. .rz-cursor = its pointer.
+     Motion is added by the script only (.rz-js), so nothing is hidden if it never runs. */
+  html:not(.bio-new) #about > .rzb,
+  html:not(.bio-new) #about > .rzb-panel,
+  html:not(.bio-new) #about > .rz,
+  html:not(.bio-new) #about > .rz-cursor{display:none}
+  /* everything else in #about is the previous page (its slides aren't all inside
+     .bio-scroll-wrap, so hide by exclusion) */
+  html.bio-new #about > :not(.rzb):not(.rzb-panel):not(.rz):not(.rz-cursor){display:none}
+  html.rz-skip #loader{display:none}
+  /* the global header / footer / cursor step aside on this page; the bar links everywhere */
+  body.on-rz:not(.menu-is-open) > header,
+  body.on-rz > footer,
+  body.on-rz:not(.menu-is-open) .fc-layer{display:none !important}
+  /* over the open menu the site's own (inverting) cursor takes over, as on every other page */
+  body.menu-is-open .rz-cursor{display:none !important}
+
+  /* ---------- Top bar ---------- */
+  .rzb{--rzb-pad:clamp(16px,1.4vw,24px);
+    position:fixed;top:0;left:0;right:0;z-index:40;
+    display:grid;grid-template-columns:repeat(4,minmax(0,1fr));column-gap:var(--rzb-pad);
+    align-items:center;padding:calc(var(--cc-py,14px) + env(safe-area-inset-top,0px)) var(--rzb-pad) 14px calc(var(--cc-px,16px) + env(safe-area-inset-left,0px));   /* the name sits exactly where it does on every other page */
+    font-family:"Archivo","Noto Sans TC",system-ui,sans-serif;font-size:14px;font-weight:500;color:var(--paper);
+    /* solid, in the page colour, so page text never shows through; it slides away while
+       scrolling down and comes back on any scroll up (as the reference does). `translate`
+       is used rather than `transform` so the site's page transition can't override it. */
+    background:var(--ink);
+    transition:color .35s ease,background-color .35s ease,translate .55s cubic-bezier(.16,1,.3,1)}
+  .rzb.is-light{color:var(--ink);background:var(--paper)}
+  .rzb.is-hidden{translate:0 calc(-100% - 2px)}
+  .rzb a{color:inherit;text-decoration:none}
+  .rzb-logo{justify-self:start;white-space:nowrap;font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:800;font-stretch:125%;
+    font-size:15px;letter-spacing:.02em;line-height:1;padding:6px 0}
+  /* the name flips over to the logo as the cursor crosses it */
+  .rzb-logo{display:inline-block;perspective:600px;padding:0}
+  /* the bar's name uses the site-wide name/logo flip (.bf); only its logo files differ */
+  .rzb .bf-logo img{display:block;height:calc(var(--cc-logo,38px) * 0.854);width:auto}
+  .rzb .bf-logo .k,.rzb.is-light .bf-logo .w{display:none}
+  .rzb.is-light .bf-logo .k{display:block}
+  .rzb.is-light .bf-name{color:#0B0B0C}
+  .rzb-time{font-family:"IBM Plex Mono","Noto Sans TC",monospace;font-size:12.5px;font-weight:400;
+    letter-spacing:.02em;white-space:nowrap}
+  .rzb nav{display:flex;gap:clamp(14px,1.4vw,22px);align-items:center}
+  .rzb-sec{justify-self:end}
+  .rzb-site{justify-self:end}
+  .rzb-site a{font-family:"IBM Plex Mono","Noto Sans TC",monospace;font-size:12px;font-weight:400;
+    letter-spacing:.06em;text-transform:uppercase}
+  /* link hover: a thin rule that draws in from the left */
+  .rzb-ln{background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;
+    padding:4px 0;transition:background-size .35s cubic-bezier(.2,.7,.2,1)}
+  .rzb-ln:hover,.rzb-ln:focus-visible{background-size:100% 1px}
+  .rzb-menu{display:none;justify-self:end;background:none;border:0;color:inherit;cursor:pointer;
+    font:inherit;padding:6px 0}
+  .rzb a:focus-visible,.rzb-menu:focus-visible,
+  .rzb-panel a:focus-visible,.rzb-panel button:focus-visible,
+  .rz a:focus-visible{outline:1px solid currentColor;outline-offset:4px}
+  @media(max-width:1099px){
+    .rzb{grid-template-columns:auto 1fr auto}
+    .rzb-time{justify-self:center}
+    .rzb nav{display:none}
+    .rzb-menu{display:block}
+  }
+  @media(max-width:420px){ .rzb-time{font-size:11.5px} }
+
+  /* Menu panel (a sibling of the bar, so the page transition can't trap it) */
+  .rzb-panel{position:fixed;inset:0;z-index:72;background:var(--paper);color:var(--ink);
+    display:flex;flex-direction:column;padding:14px clamp(16px,1.4vw,24px) 28px;
+    font-family:"Archivo","Noto Sans TC",system-ui,sans-serif;overflow-y:auto}
+  .rzb-panel[hidden]{display:none}
+  .rzb-panel a{text-decoration:none}
+  .rzb-panel-top{display:flex;justify-content:space-between;align-items:center}
+  .rzb-panel-top .rzb-logo{color:var(--ink)}
+  .rzb-close{background:none;border:0;color:var(--ink);font:500 14px "Archivo","Noto Sans TC",system-ui,sans-serif;
+    cursor:pointer;padding:6px 0}
+  .rzb-panel-word{flex:1;display:flex;align-items:center;min-height:120px;overflow:hidden}
+  .rzb-panel-word span{display:block;font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:800;font-stretch:125%;
+    font-size:clamp(56px,17vw,120px);line-height:1;letter-spacing:-.01em}
+  .rzb-panel ol{list-style:none}
+  .rzb-panel li a{display:flex;justify-content:space-between;align-items:baseline;
+    padding:6px 0;color:var(--ink);font-size:18px;font-weight:500;text-transform:uppercase;letter-spacing:.01em}
+  .rzb-panel li a span{font-family:"IBM Plex Mono","Noto Sans TC",monospace;font-size:12px;font-weight:400}
+  .rzb-panel-h{margin:18px 0 4px;font-family:"IBM Plex Mono","Noto Sans TC",monospace;font-size:12px;
+    font-weight:400;letter-spacing:.06em;color:#5d5a55}
+  /* panel motion: fade in, the word rises out of its mask, the list follows */
+  .rzb-panel.is-open{animation:rzbFade .45s ease both}
+  .rzb-panel.is-open .rzb-panel-word span{animation:rzUp .9s cubic-bezier(.16,1,.3,1) .08s both}
+  .rzb-panel.is-open li{animation:rzbItem .6s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(.18s + var(--i,0) * 40ms)}
+  .rzb-panel.is-closing{animation:rzbFadeOut .3s ease both}
+  @keyframes rzbFade{from{opacity:0}to{opacity:1}}
+  @keyframes rzbFadeOut{from{opacity:1}to{opacity:0}}
+  @keyframes rzbItem{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  @keyframes rzUp{from{transform:translateY(105%)}to{transform:none}}
+  html.rzb-lock,html.rzb-lock body{overflow:hidden}
+
+  /* ---------- Page ---------- */
+  .rz{--m:clamp(16px,1.4vw,24px);--gap:clamp(16px,1.4vw,24px);
+    padding:calc(var(--rzb-h,56px) + clamp(8px,1.6vw,28px)) var(--m) 0;
+    color:var(--paper);font-family:"Archivo","Noto Sans TC",system-ui,sans-serif}
+  .rz a{color:inherit;text-decoration:none}
+  .rz{position:relative}
+  /* cursor trail over the first section: photos appear at the cursor and are never clickable */
+  .rz-trail{position:absolute;left:0;top:0;width:100%;height:0;z-index:6;pointer-events:none}
+  .rz-tr{position:absolute;left:0;top:0;width:200px;height:250px;background-size:cover;background-position:center;
+    background-repeat:no-repeat;pointer-events:none;opacity:0;will-change:transform,opacity,filter}
+  .rz [id^="rz-"]{scroll-margin-top:calc(var(--rzb-h,56px) + 20px)}
+  .rz h2:focus,.rz h1:focus{outline:none}
+  .rz-g{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));column-gap:var(--gap)}
+  .rz-mono{font-family:"IBM Plex Mono","Noto Sans TC",monospace;font-weight:400;letter-spacing:.02em}
+  .rz-dim{color:var(--grey)}
+  /* a mask that a line of text rises out of */
+  .rz-mask{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.14em;margin-bottom:-.14em}
+  .rz-mask > span{display:inline-block;will-change:transform}
+
+  /* name block */
+  .rz-name{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:800;font-stretch:125%;
+    font-size:clamp(40px,9vw,220px);line-height:1;letter-spacing:-.02em;
+    white-space:nowrap;margin-left:-.04em}
+  .rz-meta{margin-top:clamp(40px,9vw,150px);font-size:14px;line-height:1.35;font-weight:500}
+  .rz-meta > p:last-child{justify-self:end}
+  .rz-meta .rz-mask{display:block}
+
+  /* bio */
+  .rz-bio{margin-top:clamp(140px,20vw,320px)}
+  .rz-lede{grid-column:1/-1;font-family:"Cormorant Garamond","Noto Serif TC",serif;font-weight:500;
+    font-size:clamp(28px,3.75vw,62px);line-height:1.06;letter-spacing:-.012em;
+    text-indent:calc(25% + var(--gap) * .25)}
+  .rz-lede p + p{margin-top:.7em}
+  .rz-lede .rz-w{transition:opacity .2s linear}
+  .rz-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  .rz-body{grid-column:2/4;margin-top:clamp(36px,4vw,64px);font-size:clamp(16px,1.15vw,18px);
+    line-height:1.6;color:#c9c6bf;max-width:62ch}
+
+  /* skills / practice: the label stays pinned while its list passes */
+  .rz-skills{margin-top:clamp(120px,14vw,220px);align-items:start}
+  .rz-label{font-family:"IBM Plex Mono","Noto Sans TC",monospace;font-size:13px;font-weight:400;letter-spacing:.02em;
+    position:sticky;top:calc(var(--rzb-h,56px) + 16px)}
+  .rz-skills ol{grid-column:2/-1;list-style:none}
+  .rz-skills li{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:var(--gap);
+    padding:16px 0 clamp(40px,6vw,96px);border-top:1px solid var(--line);font-size:18px;font-weight:500}
+  .rz-skills li .rz-mono{grid-column:3;justify-self:end;font-size:13px}
+
+  /* numbered sections */
+  .rz-sec{margin-top:clamp(160px,20vw,340px)}
+  .rz-num{display:block;text-align:right;font-family:"IBM Plex Mono","Noto Sans TC",monospace;
+    font-size:clamp(16px,2vw,30px);letter-spacing:-.02em}
+  .rz-h2{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:800;font-stretch:125%;
+    font-size:clamp(44px,9vw,150px);line-height:.95;letter-spacing:-.02em;margin:6px 0 0 -.03em}
+  .rz-rows{margin-top:clamp(32px,4vw,64px);list-style:none}
+  .rz-row{padding:clamp(18px,1.8vw,28px) 0 clamp(28px,3vw,48px);border-top:1px solid var(--line);
+    font-size:16px;line-height:1.4}
+  .rz-row h3{font-size:17px;font-weight:500}
+  .rz-row .rz-co{font-size:13px}
+  .rz-row .rz-txt{color:#c9c6bf}
+  .rz-row .rz-txt p + p{margin-top:4px}
+  .rz-row .rz-yr{justify-self:end;text-align:right;font-size:13px;white-space:nowrap}
+
+  /* ---------- works through the page (three behaviours from the reference) ----------
+     .rz-hero-card  a small card under the name that zooms to fill the screen as you start
+                    scrolling, then leaves as a full-screen image (desktop/tablet, motion on)
+     .rz-feat       a wide frame that grows from 62% and fades up as it rises into view
+     .rz-tiles      rows of 4:5 frames with captions                                        */
+  .rz-hero{position:relative;overflow:clip}
+  .rz-hero-slot{position:relative;margin:clamp(40px,5vw,80px) auto 0;
+    width:clamp(220px,19.5vw,320px);aspect-ratio:280/362}
+  .rz-hero-card{position:absolute;inset:0;z-index:3;display:block;border-radius:10px;overflow:hidden;
+    background:#050505;transform-origin:50% 50%}
+  .rz-hero-slot.is-zoom .rz-hero-card{inset:auto;left:50%;top:50%;border-radius:0;overflow:visible}
+  .rz-hero-card img,.rz-feat img,.rz-tile img,.rz-fr-img img{width:100%;height:100%;object-fit:cover;display:block}
+  .rz-hero-cap{margin-top:14px;text-align:center;font-size:12.5px;color:var(--grey)}
+
+  .rz-feat{display:block;margin:clamp(120px,14vw,230px) calc(14px - var(--m)) 0;color:#fff}
+  .rz-feat-frame{position:relative;aspect-ratio:1411/900;border-radius:6px;overflow:hidden;background:#050505;
+    transform-origin:50% 50%}
+  /* full-bleed frames, one straight after another; each image is taller than its frame and settles as it passes */
+  .rz-frames{list-style:none;margin:clamp(140px,18vw,300px) calc(var(--m) * -1) 0}
+  .rz-fr{position:relative;display:block;height:100vh;height:100svh;min-height:480px;overflow:clip;background:#050505;color:#fff}
+  .rz-fr-img{position:absolute;left:0;right:0;top:-20%;height:140%}
+  .rz-fr-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;
+    transition:opacity .6s ease;pointer-events:none}
+  .rz-fr-img img{width:100%;height:100%;object-fit:cover;display:block}
+  .rz-over{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);z-index:1;
+    padding:0 var(--m);align-items:center;font-size:14px;font-weight:600;line-height:1.3;
+    text-transform:uppercase;letter-spacing:.01em;
+    color:#fff;mix-blend-mode:difference}   /* fallback; the script sets each block to pure black or white */
+  .rz-over.is-set{mix-blend-mode:normal}
+  .rz-over.is-set > *{transition:color .3s ease}
+  .rz-over h3{font:inherit}
+  .rz-over > :last-child{justify-self:end;text-align:right}
+  .rz-over .rz-mono{font-weight:500;font-size:12.5px}
+
+  .rz-tiles{list-style:none;margin-top:clamp(100px,12vw,200px);
+    display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(36px,4vw,64px) var(--gap)}
+  .rz-tile{display:block}
+  .rz-tile-frame{aspect-ratio:4/5;border-radius:4px;overflow:hidden;background:#050505}
+  .rz-tile-frame img{transition:transform 1.1s cubic-bezier(.16,1,.3,1)}
+  .rz-tile:hover .rz-tile-frame img,.rz-tile:focus-visible .rz-tile-frame img{transform:scale(1.03)}
+  .rz-tile-cap{display:grid;grid-template-columns:1fr auto;column-gap:12px;margin-top:12px;
+    font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.01em;line-height:1.35}
+  .rz-tile-cap h3{font:inherit;display:flex;gap:.6em;align-items:baseline}
+  .rz-tile-cap .rz-mono{font-weight:400;font-size:12px}
+  .rz-tile-cap .rz-dim{grid-column:1/-1;font-weight:500;text-transform:none;letter-spacing:0;font-size:13px}
+  .rz-tile-cap h3 > span:first-child{background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;
+    transition:background-size .35s cubic-bezier(.2,.7,.2,1)}
+  .rz-tile:hover h3 > span:first-child,.rz-tile:focus-visible h3 > span:first-child{background-size:100% 1px}
+
+  /* contact */
+  .rz-contact .rz-row{align-items:baseline}
+  .rz-contact .rz-val{grid-column:2/4;font-family:"Cormorant Garamond","Noto Serif TC",serif;font-weight:500;
+    font-size:clamp(26px,2.6vw,44px);line-height:1.1}
+  .rz-ul{background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;
+    transition:background-size .35s cubic-bezier(.2,.7,.2,1)}
+  .rz-ul:hover,.rz-ul:focus-visible{background-size:100% 1px}
+
+  /* ending: a light block with the name set across it */
+  .rz-end{margin:clamp(160px,20vw,320px) calc(var(--m) * -1) 0;padding:clamp(24px,2.4vw,40px) var(--m) 0;
+    background:var(--paper);color:var(--ink);overflow:hidden;
+    min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:space-between}
+  .rz-end-rows{font-size:14px;line-height:1.45;font-weight:500}
+  .rz-end-rows ul{list-style:none}
+  .rz-end-rows > :last-child{justify-self:end;text-align:right}
+  .rz-end-name{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:800;font-stretch:125%;white-space:nowrap;
+    font-size:clamp(52px,14.8vw,370px);line-height:.82;letter-spacing:-.02em;
+    margin:clamp(80px,12vw,200px) 0 0 -.05em;padding-bottom:.06em}
+
+  /* pointer: a small dot that becomes a "view" disc over the work */
+  .rz-cursor{position:fixed;left:0;top:0;z-index:2147483000;pointer-events:none;
+    width:84px;height:84px;margin:-42px 0 0 -42px;display:none;mix-blend-mode:difference}
+  .rz-cursor.is-view{mix-blend-mode:normal}
+  html.fc-on body.on-rz .rz-cursor.is-on{display:block}
+  .rz-cursor i{position:absolute;inset:0;border-radius:50%;background:#fff;
+    transform:scale(.1);transition:transform .45s cubic-bezier(.16,1,.3,1),background-color .3s}
+  .rz-cursor span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font:500 11px "IBM Plex Mono","Noto Sans TC",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);
+    opacity:0;transform:scale(.6);transition:opacity .25s,transform .45s cubic-bezier(.16,1,.3,1)}
+  .rz-cursor.is-link i{transform:scale(.24)}
+  .rz-cursor.is-view i{transform:scale(1);background:rgba(237,234,227,.72);
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+  .rz-cursor.is-view span{opacity:1;transform:none}
+  .rz-cursor.is-down i{transform:scale(.08)}
+  .rz-cursor.is-view.is-down i{transform:scale(.9)}
+
+  /* load-in (only once the script has marked the page; replays each time you arrive) */
+  .rz.rz-js .rz-name .rz-mask > span{transform:translateY(105%)}
+  .rz.rz-js .rz-meta .rz-mask > span{transform:translateY(110%)}
+  .rz.rz-js.rz-play .rz-name .rz-mask > span{transform:none;transition:transform 1.5s cubic-bezier(.16,1,.3,1) .15s}
+  .rz.rz-js.rz-play .rz-name .rz-mask + .rz-mask > span{transition-delay:.24s}
+  .rz.rz-js.rz-play .rz-meta .rz-mask > span{transform:none;transition:transform 1.3s cubic-bezier(.16,1,.3,1) .45s}
+  html.bio-new body.on-rz .rzb{animation:rzbFade .8s ease .3s both}
+
+  /* tablet / mobile: four columns fold to two */
+  @media(max-width:809px){
+    .rz-g{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .rz-name{white-space:normal;font-size:clamp(36px,12.6vw,110px);line-height:1}
+    .rz-name .rz-mask{display:block;white-space:nowrap}
+    .rz-meta{row-gap:16px}
+    .rz-meta > p:nth-child(3){grid-column:1}
+    .rz-meta > p:last-child{grid-column:2;grid-row:2}
+    .rz-lede{text-indent:0}
+    .rz-body{grid-column:1/-1}
+    .rz-skills .rz-label{grid-column:1/-1;margin-bottom:14px;position:static}
+    .rz-skills ol{grid-column:1/-1}
+    .rz-skills li{grid-template-columns:1fr auto;padding-bottom:28px}
+    .rz-skills li .rz-mono{grid-column:2}
+    .rz-row{row-gap:8px}
+    .rz-row h3{grid-column:1}
+    .rz-row .rz-co{grid-column:1}
+    .rz-row .rz-txt{grid-column:2;grid-row:1/3}
+    .rz-row .rz-yr{grid-column:2;justify-self:start;text-align:left;margin-top:8px}
+    .rz-hero-slot{width:100%;aspect-ratio:350/453}
+    .rz-feat-frame{aspect-ratio:4/5}
+    .rz-fr{height:min(100svh,141vw);min-height:0}
+    .rz-over{grid-template-columns:repeat(3,minmax(0,1fr));column-gap:12px;font-size:12px}
+    .rz-over > span:empty{display:none}
+    .rz-tiles{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:12px}
+    .rz-tile-cap{font-size:12px}
+    .rz-contact .rz-val{grid-column:1/-1;grid-row:2;margin-top:6px}
+    .rz-contact .rz-row .rz-mono:last-child{grid-column:2;grid-row:1}
+    .rz-end-rows{row-gap:22px}
+    .rz-end-rows > :nth-child(3){grid-column:1}
+    .rz-end-rows > :last-child{grid-column:2;grid-row:2}
+  }
+  @media(max-width:480px){
+    .rz-row .rz-txt{grid-column:1/-1;grid-row:auto}
+    .rz-row .rz-yr{grid-column:1/-1}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .rz-tile-frame img{transition:none}
+    .rz.rz-js .rz-mask > span{transform:none !important;transition:none !important}
+    .rzb-panel.is-open,.rzb-panel.is-open *,.rzb-panel.is-closing,html.bio-new body.on-rz .rzb{animation:none !important}
+  }
 </style>
 </head>
 <body>
@@ -1496,7 +1839,7 @@
 
   <header>
     <span class="header-spacer" aria-hidden="true"></span>
-    <button class="brandBtn" aria-label="Open menu" aria-expanded="false" aria-controls="menu"><img src="/images/system/shanhuailogoinversed_white.png" alt="Shan-Huai" class="logo-img"><img src="/images/system/shanhuailogoinversed_black.png" alt="" class="logo-img-b" aria-hidden="true"></button>
+    <button class="brandBtn bf-btn" aria-label="Open menu" aria-expanded="false" aria-controls="menu"><span class="bf"><span class="bf-name" aria-hidden="true">SHAN-HUAI</span><span class="bf-logo"><img src="/images/system/shanhuailogo_horizontal_white.webp" alt="Shan-Huai" class="logo-img"><img src="/images/system/shanhuailogo_horizontal_black.webp" alt="" class="logo-img-b" aria-hidden="true"></span></span></button>
     <button class="menuBtn" data-menu-open aria-label="Menu">menu</button>
   </header>
 
@@ -1526,8 +1869,8 @@
         <li><a class="cc-work" href="/photojournalism/slava-ukraini" data-nav="pj-slavaukraini" data-cat="Photo-Journalism" data-meta="London · 2022"><img data-src="/images/carousel/pj-slavaukraini.webp" width="533" height="800" alt="Slava Ukraini"><span class="cc-work-name">Slava Ukraini</span><span class="cc-work-meta">Photo-Journalism — London · 2022</span></a></li>
         <li><a class="cc-work" href="/project/zero-case-policy" data-nav="proj-zerocase" data-cat="Photography" data-meta="Performance · 2021"><img data-src="/images/carousel/proj-zerocase.webp" width="533" height="800" alt="Zero-Case Policy"><span class="cc-work-name">Zero-Case Policy</span><span class="cc-work-meta">Photography — Performance · 2021</span></a></li>
         <li><a class="cc-work" href="/portraiture/duality-within" data-nav="pt-dualitywithin" data-cat="Portraiture" data-meta="Portrait · 2021"><img data-src="/images/carousel/pt-dualitywithin.webp" width="533" height="800" alt="Duality Within"><span class="cc-work-name">Duality Within</span><span class="cc-work-meta">Portraiture — Portrait · 2021</span></a></li>
-        <li><a class="cc-work" href="/live/the-hope" data-nav="gig-thehope" data-cat="Live" data-meta="Taipei · 2021"><img data-src="/images/carousel/gig-thehope.webp" width="533" height="800" alt="The Hope"><span class="cc-work-name">The Hope</span><span class="cc-work-meta">Live — Taipei · 2021</span></a></li>
-        <li><a class="cc-work" href="/live/mosaic" data-nav="gig-mosaic" data-cat="Live" data-meta="Hollywood · 2018–2020"><img data-src="/images/carousel/gig-mosaic.webp" width="533" height="800" alt="Mosaic"><span class="cc-work-name">Mosaic</span><span class="cc-work-meta">Live — Hollywood · 2018–2020</span></a></li>
+        <li><a class="cc-work" href="/live/the-hope" data-nav="gig-thehope" data-logo="/images/carousel/logos/thehope.webp" data-cat="Live" data-meta="Taipei · 2021"><img data-src="/images/carousel/gig-thehope.webp" width="533" height="800" alt="The Hope"><span class="cc-work-name">The Hope</span><span class="cc-work-meta">Live — Taipei · 2021</span></a></li>
+        <li><a class="cc-work" href="/live/mosaic" data-nav="gig-mosaic" data-logo="/images/carousel/logos/mosaic.webp" data-cat="Live" data-meta="Hollywood · 2018–2020"><img data-src="/images/carousel/gig-mosaic.webp" width="533" height="800" alt="Mosaic"><span class="cc-work-name">Mosaic</span><span class="cc-work-meta">Live — Hollywood · 2018–2020</span></a></li>
         <li><a class="cc-work" href="/photojournalism/the-umbrella-movement" data-nav="pj-hkprotest" data-cat="Photo-Journalism" data-meta="Hong Kong · 2019"><img data-src="/images/carousel/pj-hkprotest.webp" width="1200" height="800" alt="The Umbrella Movement"><span class="cc-work-name">The Umbrella Movement</span><span class="cc-work-meta">Photo-Journalism — Hong Kong · 2019</span></a></li>
       </ol>
       <div class="cc-cap" aria-live="polite"><span class="cc-cap-name"></span><span class="cc-cap-meta mono"></span></div>
@@ -3361,6 +3704,134 @@
     </section>
 
     <section class="page" id="about">
+      <!-- ===== Bio resume (html.bio-new; ?bio=0 shows the previous page below) ===== -->
+      <div class="rzb">
+        <a class="rzb-logo bf-btn" href="/" aria-label="Open menu"><span class="bf" aria-hidden="true"><span class="bf-name">SHAN-HUAI</span><span class="bf-logo"><img class="w" src="/images/system/shanhuailogo_horizontal_white.webp" alt=""><img class="k" src="/images/system/shanhuailogo_horizontal_black.webp" alt=""></span></span></a>
+      </div>
+      <div class="rz-cursor" aria-hidden="true"><i></i><span>View</span></div>
+
+      <div class="rz">
+        <div class="rz-trail" aria-hidden="true"></div>
+        <section id="rz-about" aria-labelledby="rz-name">
+          <div class="rz-hero">
+          <h1 class="rz-name" id="rz-name"><span class="rz-mask"><span>Shan-Huai</span></span> <span class="rz-mask"><span>Chiang</span></span></h1>
+          <div class="rz-meta rz-g">
+            <p><span class="rz-mask"><span>Shan-Huai Chiang</span></span><span class="rz-mask"><span>Video Producer, Local Remote</span></span></p>
+            <p><span class="rz-mask"><span>Born in Taipei, 2000</span></span><span class="rz-mask"><span>Raised in the third culture</span></span></p>
+            <p><span class="rz-mask"><span>Based in</span></span><span class="rz-mask"><span>Taipei, Taiwan</span></span></p>
+            <p class="rz-mono"><span class="rz-mask"><span>©2026</span></span></p>
+          </div>
+          <div class="rz-hero-slot"><div class="rz-hero-card" data-focus="50" role="img" aria-label="Mosaic — Live, Hollywood, 2018–2020"><img src="/images/Concerts/Mosaic-17.jpg" width="2000" height="1333" alt="" fetchpriority="high" decoding="async"></div></div>
+
+          </div>
+
+          <div class="rz-bio rz-g">
+            <div class="rz-lede"><p>Born in Taipei in 2000 and raised in Shanghai, Shan-Huai graduated from Central Saint Martins, University of the Arts London, with First Class Honours in Performance Design and Practice. His background spans backstage theatre, performance art, and photography — built on cross-disciplinary collaboration, often stepping into producer and art-director roles to guide production and visual direction.</p>
+            <p>He is now based in Taipei, working at Local Remote as an Image Maker. Using lens-based media as his primary medium, he translates brand values and design thinking into concept-driven, narrative-led work — carrying ideas from development, scripting, and storyboarding through on-set direction and post, keeping tone, rhythm, and visual coherence intact.</p></div>
+          </div>
+
+
+
+          <div class="rz-skills rz-g">
+            <h2 class="rz-label">(Practice)</h2>
+            <ol>
+              <li><span>Moving Image</span><span class="rz-mono">(01)</span></li>
+              <li><span>Photography</span><span class="rz-mono">(02)</span></li>
+              <li><span>Art Direction</span><span class="rz-mono">(03)</span></li>
+            </ol>
+          </div>
+        <a class="rz-feat rz-view" href="/wedding/julian-and-judy" data-nav="julianjudy" aria-label="Julian and Judy — Wedding, Engagement Session, 2025">
+          <div class="rz-feat-frame"><img src="/images/wedding-engagement/Julian%26Judy_engagement-07.jpg" width="2000" height="1333" alt="" loading="lazy" decoding="async"></div>
+        </a>
+        </section>
+
+        <section class="rz-sec" id="rz-experience" aria-labelledby="rz-h-exp">
+          <span class="rz-num" aria-hidden="true">(1)</span>
+          <h2 class="rz-h2" id="rz-h-exp">Experience</h2>
+          <ol class="rz-rows">
+          <li class="rz-row rz-g"><h3>Photography &amp; Visual Production</h3><p class="rz-co rz-mono">(Freelance)</p><div class="rz-txt"><p>Freelance Art Direction &amp; Photography</p><p><span lang="zh-Hant">自由接案 藝術指導與攝影 · 影像與視覺創作</span></p></div><p class="rz-yr rz-mono">(2019 – Present)</p></li>
+          <li class="rz-row rz-g"><h3>Video Producer</h3><p class="rz-co rz-mono">(Local Remote)</p><div class="rz-txt"><p>Taipei, Taiwan</p><p><span lang="zh-Hant">Local Remote — 台北，台灣 · 影像企劃製作</span></p></div><p class="rz-yr rz-mono">(Nov 2025 – Present)</p></li>
+          <li class="rz-row rz-g"><h3>Marketing &amp; Foreign Relations</h3><p class="rz-co rz-mono">(Kuang Hong Arts Management)</p><div class="rz-txt"><p>Taipei, Taiwan</p><p><span lang="zh-Hant">寬宏藝術經紀公司（實習）· 行銷與國際聯繫</span></p></div><p class="rz-yr rz-mono">(Jun 2023 – Aug 2023)</p></li>
+          <li class="rz-row rz-g"><h3>Content Creation</h3><p class="rz-co rz-mono">(The Hope)</p><div class="rz-txt"><p>Taipei, Taiwan</p><p><span lang="zh-Hant">社團法人國際基督教合盼協會 · 內容企劃</span></p></div><p class="rz-yr rz-mono">(Oct 2020 – Jan 2021)</p></li>
+          <li class="rz-row rz-g"><h3>Photography Lab Technician</h3><p class="rz-co rz-mono">(Otis College of Art and Design)</p><div class="rz-txt"><p>LA, United States</p><p><span lang="zh-Hant">奧蒂斯藝術與設計學院 · 攝影暗房管理員</span></p></div><p class="rz-yr rz-mono">(Mar 2019 – Mar 2020)</p></li>
+          </ol>
+        </section>
+
+        <section class="rz-flow" aria-label="Selected work, newest first">
+        <ol class="rz-frames">
+          <li><a class="rz-fr rz-view" href="/project/sub" data-nav="proj-sub">
+            <div class="rz-fr-img"><img src="/images/carousel/proj-sub.webp" width="1200" height="800" alt="" loading="lazy" decoding="async"><video class="rz-fr-vid" muted playsinline loop preload="none" data-stream="e997d71eb8270f43dddcebf6eeefa9fa" aria-hidden="true"></video></div>
+            <div class="rz-over rz-g"><h3><span>SUB</span></h3><p>Branding<br><span class="rz-mono">2026</span></p><span></span><p>Local Remote →</p></div>
+          </a></li>
+          <li><a class="rz-fr rz-view" href="/project/heysong-sarsaparilla" data-nav="proj-heysong">
+            <div class="rz-fr-img"><img src="/images/carousel/proj-heysong.webp" width="1422" height="800" alt="" loading="lazy" decoding="async"><video class="rz-fr-vid" muted playsinline loop preload="none" data-stream="0b36c9ded9204e7376cbc535b745884f" aria-hidden="true"></video></div>
+            <div class="rz-over rz-g"><h3><span lang="zh-Hant">黑松沙士</span></h3><p>Branding<br><span class="rz-mono">2026</span></p><span></span><p>Local Remote →</p></div>
+          </a></li>
+          <li><a class="rz-fr rz-view" href="/project/frometo" data-nav="proj-frometo">
+            <div class="rz-fr-img"><img src="/images/carousel/proj-frometo.webp" width="1422" height="800" alt="" loading="lazy" decoding="async"><video class="rz-fr-vid" muted playsinline loop preload="none" data-stream="5d5a347fdc546fa2904564d13861d576" aria-hidden="true"></video></div>
+            <div class="rz-over rz-g"><h3><span>FROMETO</span></h3><p>Branding<br><span class="rz-mono">2026</span></p><span></span><p>Local Remote →</p></div>
+          </a></li>
+          <li><a class="rz-fr rz-view" href="https://www.kickstarter.com/projects/martoni/martoni-super-e-the-micro-mobility-device-that-flies?ref=creator_tab" target="_blank" rel="noopener">
+            <div class="rz-fr-img"><img src="/images/carousel/proj-martoni.webp" width="1910" height="800" alt="" loading="lazy" decoding="async"><video class="rz-fr-vid" muted playsinline loop preload="none" data-stream="8d9b3df3dd9fd9d25b34955a51e46079" aria-hidden="true"></video></div>
+            <div class="rz-over rz-g"><h3><span>Martoni Super-E</span></h3><p>Colorist<br><span class="rz-mono">2026</span></p><span></span><p>Modular Agency ↗</p></div>
+          </a></li>
+          <li><a class="rz-fr rz-view" href="/project/local-local-park" data-nav="proj-locallocalpark">
+            <div class="rz-fr-img"><img src="/images/carousel/proj-locallocalpark.webp" width="1200" height="800" alt="" loading="lazy" decoding="async"></div>
+            <div class="rz-over rz-g"><h3><span>Local Local Park</span></h3><p>Branding<br><span class="rz-mono">2026</span></p><span></span><p>Local Remote →</p></div>
+          </a></li>
+        </ol>
+        <ul class="rz-tiles">
+          <li><a class="rz-tile rz-view" href="/live/elephant-gym" data-nav="gig-elephantgym">
+            <div class="rz-tile-frame"><img src="/images/carousel/gig-elephantgym.webp" width="533" height="800" alt="" loading="lazy" decoding="async"></div>
+            <div class="rz-tile-cap"><h3><span>Elephant Gym</span></h3><p class="rz-mono">(2024)</p><p class="rz-dim">Live — Bristol →</p></div>
+          </a></li>
+          <li><a class="rz-tile rz-view" href="/project/butoh-experiment" data-nav="proj-butoh">
+            <div class="rz-tile-frame"><img src="/images/carousel/proj-butoh.webp" width="533" height="800" alt="" loading="lazy" decoding="async"></div>
+            <div class="rz-tile-cap"><h3><span>Butoh Experiment</span></h3><p class="rz-mono">(2023)</p><p class="rz-dim">Performance — Central Saint Martins →</p></div>
+          </a></li>
+          <li><a class="rz-tile rz-view" href="/photojournalism/kenya-slum" data-nav="pj-kenyaslum">
+            <div class="rz-tile-frame"><img src="/images/carousel/pj-kenyaslum.webp" width="1200" height="800" alt="" loading="lazy" decoding="async"></div>
+            <div class="rz-tile-cap"><h3><span>Kenya Slum</span></h3><p class="rz-mono">(2023)</p><p class="rz-dim">Photo-Journalism — Nairobi →</p></div>
+          </a></li>
+          <li><a class="rz-tile rz-view" href="/photojournalism/slava-ukraini" data-nav="pj-slavaukraini">
+            <div class="rz-tile-frame"><img src="/images/carousel/pj-slavaukraini.webp" width="533" height="800" alt="" loading="lazy" decoding="async"></div>
+            <div class="rz-tile-cap"><h3><span>Slava Ukraini</span></h3><p class="rz-mono">(2022)</p><p class="rz-dim">Photo-Journalism — London →</p></div>
+          </a></li>
+          <li><a class="rz-tile rz-view" href="/project/zero-case-policy" data-nav="proj-zerocase">
+            <div class="rz-tile-frame"><img src="/images/carousel/proj-zerocase.webp" width="533" height="800" alt="" loading="lazy" decoding="async"></div>
+            <div class="rz-tile-cap"><h3><span>Zero-Case Policy</span></h3><p class="rz-mono">(2021)</p><p class="rz-dim">Photography — Performance →</p></div>
+          </a></li>
+          <li><a class="rz-tile rz-view" href="/photojournalism/the-umbrella-movement" data-nav="pj-hkprotest">
+            <div class="rz-tile-frame"><img src="/images/carousel/pj-hkprotest.webp" width="1200" height="800" alt="" loading="lazy" decoding="async"></div>
+            <div class="rz-tile-cap"><h3><span>The Umbrella Movement</span></h3><p class="rz-mono">(2019)</p><p class="rz-dim">Photo-Journalism — Hong Kong →</p></div>
+          </a></li>
+        </ul>
+        </section>
+
+        <section class="rz-sec rz-contact" id="rz-contact" aria-labelledby="rz-h-contact">
+          <span class="rz-num" aria-hidden="true">(2)</span>
+          <h2 class="rz-h2" id="rz-h-contact">Contact</h2>
+          <ul class="rz-rows">
+            <li class="rz-row rz-g"><p>Email</p><p class="rz-val"><a class="rz-ul" href="mailto:shanhuaichiang@gmail.com">shanhuaichiang@gmail.com</a></p><p class="rz-mono rz-yr">(EM)</p></li>
+            <li class="rz-row rz-g"><p>Instagram</p><p class="rz-val"><a class="rz-ul" href="https://www.instagram.com/shanhuai.c/" target="_blank" rel="noopener">@shanhuai.c ↗</a></p><p class="rz-mono rz-yr">(IG)</p></li>
+          </ul>
+        </section>
+
+        <div class="rz-end">
+          <div class="rz-end-rows rz-g">
+            <p>Shan-Huai Chiang<br>Video Producer</p>
+            <p>Taipei, Taiwan<br><time data-rz-clock></time></p>
+            <ul aria-label="Site">
+              <li><a class="rz-ul" href="/" data-nav="landing">Home</a></li>
+              <li><a class="rz-ul" href="/commercial">Commercial ↗</a></li>
+              <li><a class="rz-ul" href="/personal">Personal ↗</a></li>
+            </ul>
+            <p><span class="rz-mono">©2026</span><br><a class="rz-ul" href="#rz-about">Back to top ↑</a></p>
+          </div>
+          <p class="rz-end-name" aria-hidden="true">Shan-Huai</p>
+        </div>
+      </div>
+
       <div class="pinfo">
         <div class="pinfo-card">
           <div class="pinfo-head">
@@ -3797,7 +4268,8 @@
   function reveal(){
     var loader=document.getElementById("loader");
     /* the home page's ring preloader (or its skip / fade versions) replaces this intro */
-    if(document.documentElement.classList.contains("rl-intro")){ if(loader && loader.parentNode) loader.parentNode.removeChild(loader); return; }
+    /* (the bio resume, opened directly, has its own name animation instead) */
+    if(document.documentElement.classList.contains("rl-intro") || document.documentElement.classList.contains("rz-skip")){ if(loader && loader.parentNode) loader.parentNode.removeChild(loader); return; }
     if(reduce || !hasGSAP){ if(loader && loader.parentNode) loader.parentNode.removeChild(loader); return; }
 
     // --- Smooth trickle progress (YouTube/Medium pattern) ---
@@ -3885,6 +4357,9 @@
       if(!brand){ gsap.to(loader,{opacity:0,duration:.5,onComplete:removeLoader}); return; }
 
       var img=brand.querySelector(".logo-img");
+      // For this intro the logo is laid out alone in its top-left spot; when it lands it
+      // flips over to the name.
+      brand.classList.add("bf-intro");
 
       // Resting geometry, measured BEFORE we touch anything.
       var rest=brand.getBoundingClientRect();
@@ -3934,6 +4409,8 @@
       //    flash at full size for a frame.
       tl.call(function(){
         if(img) img.style.height="";
+        brand.classList.add("bf-home"); brand.classList.remove("bf-intro");
+        requestAnimationFrame(function(){ requestAnimationFrame(function(){ brand.classList.remove("bf-home"); }); });
         gsap.set(brand,{clearProps:"transform,transformOrigin,opacity,willChange"});
         gsap.set(menuBtn,{clearProps:"opacity"});
         gsap.set(header,{clearProps:"zIndex"});
@@ -3948,6 +4425,7 @@
     document.body.classList.toggle("on-landing", t==="landing");
     var el=document.getElementById(t);
     document.body.classList.toggle("on-proj", !!(el && (el.classList.contains("proj-page")||el.classList.contains("proj-marquee")||el.classList.contains("proj-detail"))));
+    document.body.classList.toggle("on-rz", t==="about" && document.documentElement.classList.contains("bio-new"));   // bio resume: its own top bar
   }
   setLanding("landing");
 
@@ -6795,6 +7273,518 @@
   if(sec.clientHeight) layout();
 })();
 /* ===== /LLP REELS ===== */
+</script>
+<script>
+/* ===== Bio resume: top bar (.rzb) + page (.rz) =====
+   - Taipei clock; section anchors that land under the bar; the menu panel
+   - load-in: the name rises out of its mask each time the page is entered
+   - scroll-linked motion: titles rise and sharpen, numbers fade up, the bio reads in
+     word by word, work images drift slower than the page (all reversible)
+   - smooth (inertia) wheel scrolling on mouse/trackpad (?smooth=0 turns it off)
+   - a dot pointer that becomes a "view" disc over the work
+   Site links use data-nav: the "main [data-nav]" handler runs go() → swap(); this only
+   stops their href from reloading the page on a plain click. No libraries. */
+(function(){
+  "use strict";
+  var about = document.getElementById("about");
+  var bar = about && about.querySelector(".rzb");
+  var page = about && about.querySelector(".rz");
+  if(!bar || !page) return;
+  var root = document.documentElement, body = document.body;
+  var reduceMQ = matchMedia("(prefers-reduced-motion: reduce)");
+  var fineMQ = matchMedia("(hover:hover) and (pointer:fine)");
+  var reduce = reduceMQ.matches;
+  function on(){ return root.classList.contains("bio-new") && about.classList.contains("is-active"); }
+  function clamp(v, a, b){ return v < a ? a : v > b ? b : v; }
+  function easeOut(p){ return 1 - (1 - p) * (1 - p) * (1 - p); }
+
+  /* ---------- Taipei time, whatever the visitor's own time zone: "{ 3.28PM }" ---------- */
+  var fmt = null;
+  try{ fmt = new Intl.DateTimeFormat("en-US", { timeZone:"Asia/Taipei", hour:"numeric", minute:"2-digit", hour12:true }); }catch(e){}
+  var clocks = [].slice.call(document.querySelectorAll("[data-rz-clock]"));
+  function tick(){
+    if(!fmt) return;
+    var p = {}, now = new Date();
+    fmt.formatToParts(now).forEach(function(x){ p[x.type] = x.value; });
+    var t = p.hour + "." + p.minute + (p.dayPeriod || "").toUpperCase();
+    clocks.forEach(function(c){ c.textContent = "{ " + t + " }"; });
+    setTimeout(tick, 60000 - (now.getSeconds() * 1000 + now.getMilliseconds()) + 50);
+  }
+  tick();
+
+  /* ---------- bio: split the lede into words for the read-in ---------- */
+  var lede = page.querySelector(".rz-lede"), words = [];
+  if(lede && !reduce){
+    [].slice.call(lede.querySelectorAll("p")).forEach(function(par){   // each paragraph keeps its own text for screen readers
+      var full = par.textContent.trim(), txt = full.split(/\s+/);
+      var sr = document.createElement("span"); sr.className = "rz-sr"; sr.textContent = full;
+      par.textContent = "";
+      par.appendChild(sr);
+      txt.forEach(function(w, i){
+        var s = document.createElement("span");
+        s.className = "rz-w"; s.setAttribute("aria-hidden", "true"); s.textContent = w;
+        par.appendChild(s);
+        if(i < txt.length - 1) par.appendChild(document.createTextNode(" "));
+        words.push(s);
+      });
+    });
+  }
+
+  /* ---------- layout cache (document offsets ignore transforms) ---------- */
+  var titles = [].slice.call(page.querySelectorAll(".rz-h2"));
+  var nums = [].slice.call(page.querySelectorAll(".rz-num"));
+  var labels = [].slice.call(page.querySelectorAll(".rz-label"));
+  var heroEl = page.querySelector(".rz-hero"), heroSlot = page.querySelector(".rz-hero-slot");
+  var heroCard = page.querySelector(".rz-hero-card");
+  var feats = [].slice.call(page.querySelectorAll(".rz-feat-frame"));
+  var frames = [].slice.call(page.querySelectorAll(".rz-fr"));
+  var frameImgs = frames.map(function(f){ return f.querySelector(".rz-fr-img"); });
+  var wideMQ = matchMedia("(min-width:810px)");
+  // which part of the first photo shows at the start: 0 = left edge, 100 = right edge.
+  // Set by data-focus on the card; ?focus=30 tries a value without changing anything.
+  var heroFocus = 0.5;
+  if(heroCard){
+    var fq = null;
+    try{ fq = new URLSearchParams(location.search).get("focus"); }catch(e){}
+    var fv = parseFloat(fq !== null ? fq : heroCard.getAttribute("data-focus"));
+    if(!isNaN(fv)) heroFocus = clamp(fv, 0, 100) / 100;
+    heroCard.querySelector("img").style.objectPosition = (heroFocus * 100) + "% 50%";
+  }
+  var endEl = page.querySelector(".rz-end");
+  var L = null, vh = innerHeight, barH = 56;
+  function docTop(el){ var y = 0; while(el){ y += el.offsetTop; el = el.offsetParent; } return y; }
+  var rafM = 0;
+  function measure(){
+    rafM = 0;
+    if(!on()) return;
+    vh = innerHeight;
+    barH = bar.offsetHeight || 56;
+    about.style.setProperty("--rzb-h", barH + "px");
+    // first image: laid out at its full, uncropped size and clipped to a small window. Scrolling
+    // opens the window and grows the photo together until the whole photo fills the width.
+    var Z = null;
+    if(heroEl && heroSlot && heroCard){
+      heroEl.style.paddingBottom = "";
+      heroSlot.classList.remove("is-zoom");
+      heroCard.style.width = heroCard.style.height = heroCard.style.transform = heroCard.style.clipPath = "";
+      if(motion && wideMQ.matches){
+        var heroImg = heroCard.querySelector("img");
+        var sw = heroSlot.offsetWidth, sh = heroSlot.offsetHeight, vw = root.clientWidth;
+        var fullH = vw * (+heroImg.getAttribute("height")) / (+heroImg.getAttribute("width"));
+        var c = docTop(heroSlot) + sh / 2, dist = vh * 0.7;
+        var endY = fullH < vh ? vh / 2 : fullH / 2;              // where the photo's centre lands on screen
+        var natural = docTop(heroEl) + heroEl.offsetHeight;
+        heroEl.style.paddingBottom = Math.max(0, dist + endY + fullH / 2 - natural) + "px";
+        heroSlot.classList.add("is-zoom");
+        heroCard.style.width = vw + "px";
+        heroCard.style.height = fullH.toFixed(1) + "px";
+        Z = { sw:sw, sh:sh, W:vw, H:fullH, c:c, dist:dist, endY:endY, s0:Math.max(sh / fullH, sw / vw) };
+      }
+    }
+    L = {
+      zoom: Z,
+      titles: titles.map(function(e){ return { t: docTop(e), fs: parseFloat(getComputedStyle(e).fontSize) }; }),
+      nums: nums.map(docTop),
+      labels: labels.map(docTop),
+      trailBottom: heroSlot ? docTop(heroSlot) + heroSlot.offsetHeight : 0,
+      feats: feats.map(docTop),
+      frames: frames.map(function(f){ return { t: docTop(f), h: f.offsetHeight }; }),
+      lede: lede ? { t: docTop(lede), h: lede.offsetHeight } : null,
+      end: endEl ? docTop(endEl) : 1e9
+    };
+    lastY = -1;
+    sampleCaps();
+  }
+  function queueMeasure(){ if(!rafM) rafM = requestAnimationFrame(measure); }
+  if(typeof ResizeObserver === "function"){
+    var ro = new ResizeObserver(queueMeasure); ro.observe(page); ro.observe(bar);
+  }
+  addEventListener("resize", queueMeasure);
+  wideMQ.addEventListener && wideMQ.addEventListener("change", queueMeasure);
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(queueMeasure);
+
+  /* ---------- work captions: each block goes black or white, opposite to the picture behind it ---------- */
+  function linear(c){ c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
+  var capCv = document.createElement("canvas"), capCx = capCv.getContext("2d", { willReadFrequently:true });
+  function capFrame(f, vid){
+    var img = f.querySelector("img"), over = f.querySelector(".rz-over"), px, nw, nh;
+    if(!over || !f.offsetWidth) return;
+    if(vid){                                                   // a playing video: read its current picture
+      nw = vid.videoWidth; nh = vid.videoHeight;
+      if(!nw || f._noRead) return;
+      try{
+        capCv.width = 160; capCv.height = Math.max(1, Math.round(160 * nh / nw));
+        capCx.drawImage(vid, 0, 0, capCv.width, capCv.height);
+        px = capCx.getImageData(0, 0, capCv.width, capCv.height);
+      }catch(err){                                             // browser won't let us read it: letters invert instead
+        f._noRead = true; over.classList.remove("is-set");
+        [].slice.call(over.children).forEach(function(c){ c.style.color = ""; });
+        return;
+      }
+    } else {
+      if(f._noRead || !img || !img.complete || !img.naturalWidth) return;
+      nw = img.naturalWidth; nh = img.naturalHeight;
+      if(!img._px){
+        try{
+          var cv = document.createElement("canvas");
+          cv.width = 160; cv.height = Math.max(1, Math.round(160 * nh / nw));
+          var cx = cv.getContext("2d", { willReadFrequently:true });
+          cx.drawImage(img, 0, 0, cv.width, cv.height);
+          img._px = cx.getImageData(0, 0, cv.width, cv.height);
+        }catch(err){ return; }                                 // keeps the difference-blend fallback
+      }
+      px = img._px;
+    }
+    var W = f.offsetWidth, H = f.offsetHeight;
+    var boxH = H * 1.4, sc = Math.max(W / nw, boxH / nh), dw = nw * sc, dh = nh * sc;
+    var x0 = (W - dw) / 2, y0 = -H * 0.23 + (boxH - dh) / 2;     // the image as it sits when the frame is on screen
+    var fr = f.getBoundingClientRect(), range = document.createRange();
+    [].slice.call(over.children).forEach(function(block){
+      if(!block.textContent.trim()) return;
+      range.selectNodeContents(block);
+      var r = range.getBoundingClientRect();
+      var u0 = Math.floor((r.left - fr.left - x0) / dw * px.width), u1 = Math.ceil((r.right - fr.left - x0) / dw * px.width);
+      var v0 = Math.floor((r.top - fr.top - y0) / dh * px.height), v1 = Math.ceil((r.bottom - fr.top - y0) / dh * px.height);
+      u0 = clamp(u0, 0, px.width - 1); u1 = clamp(u1, u0 + 1, px.width); v0 = clamp(v0, 0, px.height - 1); v1 = clamp(v1, v0 + 1, px.height);
+      var sum = 0, n = 0;
+      for(var v = v0; v < v1; v++) for(var u = u0; u < u1; u++){
+        var k = (v * px.width + u) * 4;
+        sum += 0.2126 * linear(px.data[k]) + 0.7152 * linear(px.data[k + 1]) + 0.0722 * linear(px.data[k + 2]); n++;
+      }
+      var m = sum / n, dark = (vid && block._dark !== undefined) ? (block._dark ? m > 0.13 : m > 0.24) : m > 0.179;   // 0.179: where black and white contrast equally; the gap stops flicker on video
+      block._dark = dark;
+      block.style.color = dark ? "#0B0B0C" : "#fff";
+    });
+    over.classList.add("is-set");
+  }
+  function sampleCaps(){ if(on()) frames.forEach(capFrame); }
+  frames.forEach(function(f){ var im = f.querySelector("img"); if(im) im.addEventListener("load", function(){ if(on()) capFrame(f); }); });
+
+  /* ---------- scroll-linked motion ---------- */
+  var lastY = -1, motion = !reduce;
+  function apply(sy){
+    if(!L) return;
+    var i, p, e;
+    if(motion){
+      // section titles: rise ~1em and sharpen from a 2px blur, over the viewport and a bit
+      for(i = 0; i < titles.length; i++){
+        var T = L.titles[i];
+        p = clamp((sy + vh - T.t) / (vh * 1.35), 0, 1); e = easeOut(p);
+        titles[i].style.transform = p >= 1 ? "" : "translate3d(0," + (T.fs * 1.05 * (1 - e)).toFixed(1) + "px,0)";
+        titles[i].style.filter = p >= 1 ? "" : "blur(" + (2 * (1 - e)).toFixed(2) + "px)";
+      }
+      // (1) (2) … numbers: fade up 60px, sharpening
+      for(i = 0; i < nums.length; i++){
+        p = clamp((sy + vh - L.nums[i]) / (vh * 1.2), 0, 1); e = easeOut(p);
+        nums[i].style.opacity = p >= 1 ? "" : (p * p).toFixed(3);
+        nums[i].style.transform = p >= 1 ? "" : "translate3d(0," + (60 * (1 - e)).toFixed(1) + "px,0)";
+        nums[i].style.filter = p >= 1 ? "" : "blur(" + (2 * (1 - e)).toFixed(2) + "px)";
+      }
+      // labels: a short fade up as they enter
+      for(i = 0; i < labels.length; i++){
+        p = clamp((sy + vh * .9 - L.labels[i]) / (vh * .4), 0, 1);
+        labels[i].style.opacity = p >= 1 ? "" : p.toFixed(3);
+      }
+      // bio: words read in as the paragraph moves up the screen
+      if(L.lede && words.length){
+        p = clamp((sy + vh * .92 - L.lede.t) / (L.lede.h + vh * .45), 0, 1);
+        var n = words.length, k = p * (n + 6);
+        for(i = 0; i < n; i++){
+          var w = clamp((k - i) / 6, 0, 1);
+          var o = (0.14 + 0.86 * w).toFixed(2);
+          if(words[i]._o !== o){ words[i]._o = o; words[i].style.opacity = o; words[i].style.filter = w > 0 && w < 1 ? "blur(" + (1.5 * (1 - w)).toFixed(2) + "px)" : ""; }
+        }
+      }
+      // first image: the window's sides open while the photo inside grows to its full size
+      if(L.zoom){
+        var Q = L.zoom;
+        p = clamp(sy / Q.dist, 0, 1);
+        var s = Q.s0 + (1 - Q.s0) * p;
+        var lw = Math.min(Q.W, (Q.sw + (Q.W - Q.sw) * p) / s), lh = Math.min(Q.H, (Q.sh + (Q.H - Q.sh) * p) / s);
+        var cx = Q.W / 2 + (heroFocus - 0.5) * (Q.W - lw);       // the starting position, easing to centred
+        var il = clamp(cx - lw / 2, 0, Q.W - lw), it = (Q.H - lh) / 2;
+        var dx = (Q.W / 2 - (il + lw / 2)) * s, dy = (Q.endY - Q.c) * p + Math.min(sy, Q.dist);
+        heroCard.style.transform = "translate(-50%,-50%) translate3d(" + dx.toFixed(1) + "px," + dy.toFixed(1) + "px,0) scale(" + s.toFixed(4) + ")";
+        heroCard.style.clipPath = p >= 1 ? "none" : "inset(" + it.toFixed(1) + "px " + (Q.W - il - lw).toFixed(1) + "px " + it.toFixed(1) + "px " + il.toFixed(1) + "px round " + (10 * (1 - p) / s).toFixed(1) + "px)";
+      }
+      // wide image: 50% size and opacity until its top enters the screen, 100% when its top reaches the top
+      for(i = 0; i < feats.length; i++){
+        p = clamp((sy + vh - L.feats[i]) / vh, 0, 1);
+        var g = 0.5 + 0.5 * p;
+        feats[i].style.transform = p >= 1 ? "" : "scale(" + g.toFixed(4) + ")";
+        feats[i].style.opacity = p >= 1 ? "" : g.toFixed(3);
+      }
+    }
+    // full-bleed frames: the image sits 160/900 of a frame high and settles as the frame passes
+    if(motion) for(var fi = 0; fi < frames.length; fi++){
+      var F = L.frames[fi];
+      var q = clamp((vh * 1.19 - (F.t - sy)) / (vh * 1.41), 0, 1);
+      var ty = (-0.1778 * F.h * (1 - q)).toFixed(1);
+      if(frameImgs[fi]._y !== ty){ frameImgs[fi]._y = ty; frameImgs[fi].style.transform = "translate3d(0," + ty + "px,0)"; }
+    }
+    // bar turns dark over the light ending
+    bar.classList.toggle("is-light", L.end - sy <= barH * 0.5);
+  }
+
+  /* ---------- smooth wheel scrolling (inertia) ---------- */
+  var smoothOK = function(){ return !reduce && fineMQ.matches && !root.classList.contains("rz-nosmooth"); };
+  var cur = 0, target = 0, gliding = false, lastT = 0;
+  function maxScroll(){ return Math.max(0, root.scrollHeight - innerHeight); }
+  function glideTo(y){
+    if(!gliding){ cur = scrollY; }
+    target = clamp(y, 0, maxScroll());
+    if(!gliding){ gliding = true; lastT = performance.now(); }
+  }
+  addEventListener("wheel", function(e){
+    if(!on() || !smoothOK() || e.ctrlKey || e.defaultPrevented) return;
+    if(panel && !panel.hidden) return;
+    if(Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;          // sideways trackpad swipes
+    e.preventDefault();
+    var d = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? innerHeight : 1);
+    if(!gliding) target = scrollY;
+    glideTo(target + d);
+  }, { passive:false });
+  // keyboard, scrollbar, find-in-page: the page moved by itself, so follow it
+  addEventListener("scroll", function(){ if(!gliding){ cur = target = scrollY; } }, { passive:true });
+  addEventListener("keydown", function(){ gliding = false; }, true);
+  addEventListener("pointerdown", function(e){ if(e.target === root || e.target === body) gliding = false; }, true);
+
+  /* ---------- the bar hides while scrolling down, returns on any scroll up ---------- */
+  var barY = 0, barHidden = false;
+  function setBarHidden(h){ if(h !== barHidden){ barHidden = h; bar.classList.toggle("is-hidden", h); } }
+  function barFollow(sy){
+    var dy = sy - barY;
+    if(sy <= barH){ setBarHidden(false); barY = sy; return; }
+    if(Math.abs(dy) < 6) return;
+    if(!(panel && !panel.hidden) && !bar.contains(document.activeElement)) setBarHidden(dy > 0);
+    barY = sy;
+  }
+  bar.addEventListener("focusin", function(){ setBarHidden(false); });   // keyboard users can always reach it
+
+  /* ---------- one frame loop, only while the page is showing ---------- */
+  var running = false;
+  function frame(now){
+    if(!on()){ running = false; gliding = false; return; }
+    if(gliding){
+      var dt = Math.min(64, now - lastT); lastT = now;
+      cur += (target - cur) * (1 - Math.exp(-dt / 95));
+      if(Math.abs(target - cur) < 0.5){ cur = target; gliding = false; }
+      scrollTo(0, cur);
+    }
+    var sy = scrollY;
+    if(sy !== lastY){ lastY = sy; apply(sy); barFollow(sy); }
+    requestAnimationFrame(frame);
+  }
+  function start(){ if(!running){ running = true; requestAnimationFrame(frame); } }
+
+  /* ---------- entering / leaving the page ---------- */
+  var wasOn = false;
+  function sync(){
+    var now = on();
+    if(now && !wasOn){
+      setBarHidden(false); barY = scrollY;
+      page.classList.remove("rz-play");
+      if(!reduce){
+        page.classList.add("rz-js");
+        void page.offsetWidth;                                  // restart the load-in
+        requestAnimationFrame(function(){ page.classList.add("rz-play"); });
+      }
+      measure(); start(); trailLoad();
+    }
+    if(!now && wasOn){ setPanel(false); page.classList.remove("rz-play"); }
+    wasOn = now;
+  }
+  new MutationObserver(sync).observe(about, { attributes:true, attributeFilter:["class"] });
+
+  /* ---------- menu panel ---------- */
+  var panel = about.querySelector(".rzb-panel");
+  var openBtn = bar.querySelector(".rzb-menu");
+  var closeBtn = panel && panel.querySelector(".rzb-close");
+  if(panel) [].slice.call(panel.querySelectorAll("li")).forEach(function(li, i){ li.style.setProperty("--i", i); });
+  var closeTimer = 0;
+  function setPanel(open, restoreFocus){
+    if(!panel) return;
+    clearTimeout(closeTimer);
+    if(open){
+      panel.classList.remove("is-closing");
+      panel.hidden = false;
+      panel.classList.add("is-open");
+      root.classList.add("rzb-lock");
+      openBtn.setAttribute("aria-expanded", "true");
+      setTimeout(function(){ if(closeBtn) closeBtn.focus({ preventScroll:true }); }, 30);
+    } else if(!panel.hidden){
+      openBtn.setAttribute("aria-expanded", "false");
+      root.classList.remove("rzb-lock");
+      panel.classList.remove("is-open");
+      var done = function(){ panel.hidden = true; panel.classList.remove("is-closing"); };
+      if(reduce || !on()) done(); else { panel.classList.add("is-closing"); closeTimer = setTimeout(done, 300); }
+      if(restoreFocus) openBtn.focus({ preventScroll:true });
+    }
+  }
+  if(openBtn) openBtn.addEventListener("click", function(){ setPanel(true); });
+  if(closeBtn) closeBtn.addEventListener("click", function(){ setPanel(false, true); });
+  document.addEventListener("keydown", function(e){
+    if(!panel || panel.hidden) return;
+    if(e.key === "Escape"){ setPanel(false, true); return; }
+    if(e.key === "Tab"){                                         // keep Tab inside the open panel
+      var f = [].slice.call(panel.querySelectorAll("a[href],button"));
+      var first = f[0], last = f[f.length - 1];
+      if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+      else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+    }
+  });
+  matchMedia("(min-width:1100px)").addEventListener("change", function(m){ if(m.matches) setPanel(false); });
+
+  /* ---------- clicks: site links (data-nav) and section anchors ---------- */
+  function scrollToId(id){
+    var t = document.getElementById(id); if(!t) return;
+    var y = t.getBoundingClientRect().top + scrollY - (barH + 20);
+    if(reduce) scrollTo(0, y);
+    else if(smoothOK()){ glideTo(y); start(); }
+    else scrollTo({ top:y, behavior:"smooth" });
+    var h = t.matches("h1,h2") ? t : t.querySelector("h1,h2");
+    if(h){ h.setAttribute("tabindex", "-1"); h.focus({ preventScroll:true }); }
+    if(history.replaceState) history.replaceState(history.state, "", location.pathname + "#" + id);
+  }
+  about.addEventListener("click", function(e){
+    var a = e.target.closest && e.target.closest("a");
+    if(!a || !about.contains(a)) return;
+    if(a.classList.contains("rzb-logo")){                       // the name opens the site menu, as on every other page
+      if(e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault();
+      var siteBtn = document.querySelector("header .brandBtn");
+      if(siteBtn) siteBtn.click();
+      return;
+    }
+    if(a.hasAttribute("data-nav")){
+      // modifier-click: let the browser open the href, and keep go() from running too
+      if(e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey){ e.stopPropagation(); return; }
+      e.preventDefault();
+      gliding = false;
+      setPanel(false);
+      return;
+    }
+    var href = a.getAttribute("href") || "";
+    if(href.charAt(0) === "#"){
+      e.preventDefault();
+      var wasOpen = panel && !panel.hidden;
+      setPanel(false);
+      if(wasOpen){ panel.hidden = true; panel.classList.remove("is-closing"); }
+      requestAnimationFrame(function(){ scrollToId(href.slice(1)); });
+      return;
+    }
+    if(a.closest(".rzb-panel")) setPanel(false);
+  }, true);
+
+  /* ---------- pointer ---------- */
+  var cursor = about.querySelector(".rz-cursor");
+  if(cursor){
+    var mx = -100, my = -100, cx = -100, cy = -100, seen = false, crun = false;
+    function cframe(){
+      if(!on() || !seen){ crun = false; return; }
+      var k = reduce ? 1 : 0.22;
+      cx += (mx - cx) * k; cy += (my - cy) * k;
+      cursor.style.transform = "translate3d(" + cx.toFixed(1) + "px," + cy.toFixed(1) + "px,0)";
+      if(Math.abs(mx - cx) > 0.1 || Math.abs(my - cy) > 0.1) requestAnimationFrame(cframe); else crun = false;
+    }
+    function moveTo(x, y){
+      mx = x; my = y;
+      if(!seen){ seen = true; cx = x; cy = y; cursor.classList.add("is-on"); }
+      if(!crun){ crun = true; requestAnimationFrame(cframe); }
+    }
+    document.addEventListener("pointermove", function(e){
+      if(e.pointerType !== "mouse" || !on()) return;
+      moveTo(e.clientX, e.clientY);
+      var t = e.target;
+      cursor.classList.toggle("is-view", !!(t.closest && t.closest(".rz-view")));
+      cursor.classList.toggle("is-link", !!(t.closest && t.closest("a,button")));
+    }, { passive:true });
+    document.addEventListener("pointerdown", function(){ cursor.classList.add("is-down"); });
+    document.addEventListener("pointerup", function(){ cursor.classList.remove("is-down"); });
+    document.addEventListener("mouseleave", function(){ seen = false; cursor.classList.remove("is-on"); });
+    // after a smooth scroll the element under a still pointer changes
+    addEventListener("scroll", function(){
+      if(!seen || !on()) return;
+      var t = document.elementFromPoint(mx, my);
+      cursor.classList.toggle("is-view", !!(t && t.closest(".rz-view")));
+    }, { passive:true });
+  }
+
+  /* ---------- cover videos on the full-screen frames: muted, looping, only while on screen ---------- */
+  var frameVids = [].slice.call(page.querySelectorAll(".rz-fr-vid"));
+  if(frameVids.length && !reduce && "IntersectionObserver" in window){
+    var vidPlay = function(v){ var pr = v.play(); if(pr && pr.catch) pr.catch(function(){}); };
+    var vidIO = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        var v = en.target; v._in = en.isIntersecting && on();
+        if(v._in){ if(window._hsStream) window._hsStream(v, v.dataset.stream); vidPlay(v); }
+        else { try{ v.pause(); }catch(err){} }
+      });
+    }, { threshold:0.01 });
+    frameVids.forEach(function(v){
+      v.addEventListener("playing", function(){ v.style.opacity = "1"; });   // the still cover shows until it really plays
+      vidIO.observe(v);
+    });
+    document.addEventListener("visibilitychange", function(){
+      if(!document.hidden && on()) frameVids.forEach(function(v){ if(v._in) vidPlay(v); });
+    });
+    setInterval(function(){                                     // captions keep following the moving picture
+      if(document.hidden || !on()) return;
+      frameVids.forEach(function(v){ if(v._in && !v.paused && v.readyState >= 2 && v.style.opacity === "1") capFrame(v.closest(".rz-fr"), v); });
+    }, 350);
+  }
+
+  /* ---------- cursor trail over the first section (name down to the first photo) ----------
+     As measured on the reference: a 200x250 photo centred on the cursor, one per 168px of
+     cursor travel, easing in for about 0.5s and then out with a blur. */
+  var trailLayer = page.querySelector(".rz-trail"), trailSrcs = ["/images/trail/elephantgym_bristol-10.webp", "/images/trail/Mosaic-18.webp", "/images/trail/Hillsong_London-02.webp", "/images/trail/someshiitSam_chillout_-06.webp", "/images/trail/TheHope_Taipei_2021_cover.webp", "/images/trail/Mosaic-15.webp", "/images/trail/someshiitSam_chillout_-18.webp", "/images/trail/Mosaic-21.webp", "/images/trail/someshiitSam_chillout_-20.webp", "/images/trail/Mosaic-23.webp", "/images/trail/someshiitSam_chillout_-11.webp", "/images/trail/Mosaic_02.webp", "/images/trail/someshiitSam_chillout_-01.webp", "/images/trail/Hillsong_London-09.webp", "/images/trail/someshiitSam_chillout_-07.webp", "/images/trail/cornelius_chillout_-5.webp", "/images/trail/Mosaic-22.webp", "/images/trail/cornelius_chillout_-1.webp", "/images/trail/someshiitSam_chillout_-05.webp", "/images/trail/Mosaic_01.webp", "/images/trail/Hillsong_London-01.webp", "/images/trail/Mosaic-24.webp", "/images/trail/Hillsong_London-10.webp", "/images/trail/Mosaic-19.webp", "/images/trail/elephantgym_bristol-06.webp", "/images/trail/Mosaic-20.webp", "/images/trail/cornelius_chillout_-2.webp", "/images/trail/someshiitSam_chillout_-03.webp", "/images/trail/elephantgym_bristol-07.webp", "/images/trail/Mosaic-16.webp", "/images/trail/elephantgym_bristol-09.webp", "/images/trail/cornelius_chillout_-3.webp", "/images/trail/elephantgym_bristol-08.webp", "/images/trail/cornelius_chillout_-4.webp", "/images/trail/elephantgym_bristol-11.webp", "/images/trail/someshiitSam_chillout_-13.webp"];
+  var trailOK = {}, trailI = 0, trailAlive = [], trailLast = null, trailRun = false, trailLoading = false;
+  function trailLoad(){
+    if(trailLoading || !trailLayer || reduce || !fineMQ.matches) return;
+    trailLoading = true;
+    trailSrcs.forEach(function(src){ var im = new Image(); im.onload = function(){ trailOK[src] = true; }; im.src = src; });
+  }
+  function trailFrame(now){
+    if(!on()){ trailAlive.forEach(function(a){ a.el.remove(); }); trailAlive = []; trailRun = false; return; }
+    trailAlive = trailAlive.filter(function(a){
+      var t = now - a.born, enter = 1 - Math.exp(-Math.max(0, t - 10) / 108);
+      var v = t <= 520 ? enter : 0.991 * Math.exp(-(t - 520) / 100);
+      if(t > 1200){ a.el.remove(); return false; }
+      var blur = t <= 520 ? 5 * (1 - v) : 10 * (1 - v);
+      a.el.style.opacity = v.toFixed(3);
+      a.el.style.filter = "blur(" + blur.toFixed(2) + "px)";
+      a.el.style.transform = "translate3d(" + (a.x - 100) + "px," + (a.y - 125) + "px,0) scale(" + (0.5 + 0.5 * v).toFixed(4) + ") rotateX(" + (50 * (1 - enter)).toFixed(2) + "deg)";
+      return true;
+    });
+    if(trailAlive.length) requestAnimationFrame(trailFrame); else trailRun = false;
+  }
+  function trailSpawn(x, y){
+    var src = null;
+    for(var n = 0; n < trailSrcs.length && !src; n++){ var c = trailSrcs[trailI]; trailI = (trailI + 1) % trailSrcs.length; if(trailOK[c]) src = c; }
+    if(!src) return;
+    var el = document.createElement("div");
+    el.className = "rz-tr"; el.style.backgroundImage = 'url("' + src + '")';
+    trailLayer.appendChild(el);
+    trailAlive.push({ el:el, x:x, y:y, born:performance.now() });
+    if(!trailRun){ trailRun = true; requestAnimationFrame(trailFrame); }
+  }
+  document.addEventListener("pointermove", function(e){
+    if(e.pointerType !== "mouse" || !trailLayer || reduce || !on() || !L || (panel && !panel.hidden)) return;
+    var x = e.clientX, y = e.clientY + scrollY;
+    var bottom = L.trailBottom;                                  // down to the first photo's bottom edge, wherever it is now
+    if(L.zoom){
+      var Tz = L.zoom, tp = clamp(scrollY / Tz.dist, 0, 1);
+      bottom = Tz.c + (Tz.endY - Tz.c) * tp + Math.min(scrollY, Tz.dist) + (Tz.sh + (Tz.H - Tz.sh) * tp) / 2;
+    }
+    if(y < barH || y > bottom) return;
+    if(!trailLast || Math.sqrt((x - trailLast[0]) * (x - trailLast[0]) + (y - trailLast[1]) * (y - trailLast[1])) >= 168){
+      trailLast = [x, y];
+      trailSpawn(x, y);
+    }
+  }, { passive:true });
+
+  sync();
+})();
 </script>
 </body>
 </html>

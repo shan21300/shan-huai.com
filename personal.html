@@ -263,6 +263,31 @@
   @media (prefers-reduced-motion: reduce){
     .tile,.tile .sharp,.tile .blur,.tile .cap,.viewer,.v-img,.hud-hint,#menu,.vg-media img,.vg-hit,.vg-pill,.modeBtn .sw,.modeBtn .sw::before,.modeBtn .opt{transition:none !important}
   }
+
+  /* ===== Header name / logo flip (every page) =====
+     SHAN-HUAI stays where it is. The logo shares its spot: left edges aligned, tops level. */
+  .bf-btn{perspective:600px}
+  .bf{display:block;position:relative;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.16,1,.3,1)}
+  .bf-name,.bf-logo{display:block;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+  .bf-name{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:800;font-stretch:125%;font-size:15px;line-height:1;
+    letter-spacing:.02em;white-space:nowrap;color:#fff;opacity:.92;padding:6px 0;transition:color .35s ease}
+  /* the logo, set horizontally (善懷 side by side), each character about 1.7x its old size (1.3x the first horizontal version);
+     placed as it must be before the turn (the turn mirrors it) */
+  header .brandBtn .bf-logo .logo-img,header .brandBtn .bf-logo .logo-img-b{height:calc(var(--cc-logo) * 0.854)}
+  /* left edges aligned and centred on the letters' middle line (measured: the letters start about
+     1px in, and their ink runs 7.5px to 18.25px down inside the name's box, middle 12.875px) */
+  .bf-logo{position:absolute;left:0;top:100%;transform:translate(1.25px,calc(-50% - 12.875px)) rotateX(180deg)}
+  body.menu-is-open .brandBtn .bf,.brandBtn.bf-home .bf{transform:rotateX(180deg)}
+  @media(hover:hover){
+    .bf-btn:hover .bf{transform:rotateX(180deg)}
+    body.menu-is-open .brandBtn:hover .bf{transform:none}
+  }
+  .bf-btn:focus-visible .bf{transform:rotateX(180deg)}
+  body.menu-is-open .brandBtn:focus-visible .bf{transform:none}
+  @media(prefers-reduced-motion:reduce){ .bf{transition:none !important} }
+  /* menu items set at the name's size */
+  #menu .m-link,#menu .m-sub,#menu .menu-mini a{font-size:15px;letter-spacing:.02em}
+  body.menu-is-open .bf-name{color:#0B0B0C}
 </style>
 </head>
 <body>
@@ -272,7 +297,7 @@
         <span class="opt opt-wall on" aria-hidden="true">wall</span><span class="sw" aria-hidden="true"></span><span class="opt opt-index" aria-hidden="true">index</span>
       </button>
     </div>
-    <button class="brandBtn" data-act="menu-toggle" aria-label="Open menu" aria-controls="menu" aria-expanded="false"><img src="/images/system/shanhuailogoinversed_white.png" alt="Shan-Huai" class="logo-img"><img src="/images/system/shanhuailogoinversed_black.png" alt="" class="logo-img-b" aria-hidden="true" loading="lazy"></button>
+    <button class="brandBtn bf-btn" data-act="menu-toggle" aria-label="Open menu" aria-controls="menu" aria-expanded="false"><span class="bf"><span class="bf-name" aria-hidden="true">SHAN-HUAI</span><span class="bf-logo"><img src="/images/system/shanhuailogo_horizontal_white.webp" alt="Shan-Huai" class="logo-img"><img src="/images/system/shanhuailogo_horizontal_black.webp" alt="" class="logo-img-b" aria-hidden="true" loading="lazy"></span></span></button>
     <button class="hdr-btn menuBtn" data-menu-open aria-label="Menu" aria-controls="menu" aria-expanded="false">menu</button>
   </header>
 
