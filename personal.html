@@ -8,7 +8,7 @@
 <link rel="icon" type="image/png" href="/images/system/favicon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&family=Archivo:wdth,wght@100..125,400..800&family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@400;500&display=swap" rel="stylesheet" />
 <script>document.documentElement.classList.add("js");</script>
 <!--
   PERSONAL — the covers of every Live, Photo-Journalism, Portraiture and Wedding project
@@ -34,10 +34,10 @@
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{height:100%}
-  body{background:var(--ink);color:var(--paper);font-family:"DM Sans",system-ui,sans-serif;
+  body{background:var(--ink);color:var(--paper);font-family:"Archivo","Noto Sans TC",system-ui,sans-serif;
     -webkit-font-smoothing:antialiased;overflow-x:hidden}
   html.js body{overflow:hidden;overscroll-behavior:none}
-  .mono{font-family:"IBM Plex Mono",monospace;font-weight:400;letter-spacing:.04em}
+  .mono{font-family:"IBM Plex Mono","Noto Sans TC",monospace;font-weight:400;letter-spacing:.04em}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   button{font:inherit;color:inherit}
   a{color:inherit}
@@ -54,7 +54,7 @@
     background:linear-gradient(to bottom,rgba(11,11,12,.85) 0%,rgba(11,11,12,.5) 45%,transparent 100%)}
   .hdr-btn{position:absolute;top:calc(var(--hy) + env(safe-area-inset-top,0px));height:var(--hdr);
     display:flex;align-items:center;gap:14px;background:none;border:none;color:var(--paper);cursor:pointer;
-    font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.12em;text-transform:lowercase;
+    font-family:"IBM Plex Mono","Noto Sans TC",monospace;font-size:13px;letter-spacing:.12em;text-transform:lowercase;
     padding:4px 0;pointer-events:auto;opacity:.9}
   .hdr-btn:hover{opacity:1}
   .menuBtn{display:none}   /* the logo is the menu button, as on the rest of the site */
@@ -99,13 +99,13 @@
     display:flex;flex-direction:column;opacity:0;visibility:hidden;transition:opacity .35s ease,visibility 0s linear .35s}
   #menu.open{opacity:1;visibility:visible;transition:opacity .35s ease}
   .menu-close{position:absolute;top:calc(var(--hy) + env(safe-area-inset-top,0px));right:var(--hx);background:none;border:none;color:var(--ink);
-    cursor:pointer;font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.12em;text-transform:lowercase;
+    cursor:pointer;font-family:"IBM Plex Mono","Noto Sans TC",monospace;font-size:13px;letter-spacing:.12em;text-transform:lowercase;
     padding:4px 0;opacity:.9;display:flex;align-items:center;height:var(--hdr)}
   .menu-logo{position:absolute;left:50%;top:calc(var(--hy) + env(safe-area-inset-top,0px));transform:translateX(-50%);background:none;border:none;cursor:pointer;padding:0;line-height:0}
   .menu-logo-img{height:var(--hdr);width:auto;display:block;opacity:.9}
   .menu-cats{display:flex;flex-direction:column;align-items:flex-start;gap:clamp(24px,3vh,44px);margin:auto 0}
   .m-link,.m-sub,.menu-mini a{display:block;background:none;border:none;color:var(--ink);cursor:pointer;text-align:left;width:fit-content;
-    font-family:"Cormorant Garamond";font-weight:300;font-size:clamp(30px,3.9vw,53px);line-height:1.1;letter-spacing:-.02em;
+    font-family:"Cormorant Garamond","Noto Serif TC";font-weight:400;font-size:clamp(30px,3.9vw,53px);line-height:1.1;letter-spacing:-.02em;
     text-transform:lowercase;text-decoration:none}
   .m-link:hover,.m-sub:hover,.menu-mini a:hover{font-style:italic}
   .m-link[aria-current="page"]{font-style:italic}
@@ -140,7 +140,7 @@
   .tile.ready .sharp{opacity:1}
   .tile.instant .sharp{transition:none}
   .tile .cap{position:absolute;left:var(--pad);right:var(--pad);bottom:var(--pad);display:flex;justify-content:space-between;
-    align-items:baseline;gap:8px;font-family:"IBM Plex Mono",monospace;font-size:var(--capfs);line-height:1.2;
+    align-items:baseline;gap:8px;font-family:"IBM Plex Mono","Noto Sans TC",monospace;font-size:var(--capfs);line-height:1.2;
     letter-spacing:.06em;color:#808080;white-space:nowrap}
   .tile .cap-n{font-weight:500;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;min-width:0}
   .tile .cap-y{flex:none}
@@ -168,7 +168,7 @@
     display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
     padding:0 clamp(20px,4vw,48px) calc(clamp(18px,3vh,30px) + env(safe-area-inset-bottom,0px))}
   .hud > *{pointer-events:none}   /* labels only: drags/taps pass through to the wall */
-  .hud-meta,.hud-hint{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);
+  .hud-meta,.hud-hint{font-family:"IBM Plex Mono","Noto Sans TC",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);
     text-shadow:0 1px 14px rgba(11,11,12,.85)}
   .hud-hint{transition:opacity .6s ease}
   .hud-hint.dim{opacity:0}
@@ -176,7 +176,7 @@
   @media(hover:none),(pointer:coarse){.hud-hint .fine{display:none}}
   @media(hover:hover) and (pointer:fine){.hud-hint .coarse{display:none}}
 
-  .nojs{list-style:none;padding:calc(var(--hdr) + 80px) clamp(20px,4vw,48px);font-family:"Cormorant Garamond";font-weight:300;font-size:clamp(28px,3.4vw,46px);line-height:1.3}
+  .nojs{list-style:none;padding:calc(var(--hdr) + 80px) clamp(20px,4vw,48px);font-family:"Cormorant Garamond","Noto Serif TC";font-weight:400;font-size:clamp(28px,3.4vw,46px);line-height:1.3}
   .nojs a{color:var(--paper);text-decoration:none}
   html.js .nojs{display:none}
 
@@ -195,14 +195,14 @@
   .vg-media{display:block;position:relative;width:100%;height:100%;overflow:hidden;background:#151516;
     transform-origin:50% 50%;will-change:transform;border-radius:4px}
   .vg-pill{position:fixed;left:0;top:0;z-index:35;pointer-events:none;padding:5px 10px 4px;border-radius:999px;
-    background:var(--paper);color:var(--ink);font-family:"IBM Plex Mono",monospace;font-size:9px;line-height:1;
+    background:var(--paper);color:var(--ink);font-family:"IBM Plex Mono","Noto Sans TC",monospace;font-size:9px;line-height:1;
     letter-spacing:.14em;text-transform:uppercase;opacity:0;transform:translate3d(-100px,-100px,0);
     transition:opacity .2s ease;will-change:transform}
   .vg-pill.on{opacity:1}
   /* Meta beside each image, where the reference puts its "(n)" order: bottom-aligned, to the
      right of compact images and to the left of the open one (desktop; phones keep it under the title). */
   .vg-meta{position:absolute;left:0;top:0;width:var(--metaw,140px);pointer-events:none;visibility:hidden;will-change:transform,opacity;
-    font-family:"IBM Plex Mono",monospace;font-size:10px;line-height:1.5;letter-spacing:.08em;text-transform:uppercase;color:var(--edge)}
+    font-family:"IBM Plex Mono","Noto Sans TC",monospace;font-size:10px;line-height:1.5;letter-spacing:.08em;text-transform:uppercase;color:var(--edge)}
   .vg-meta span{display:block}
   .vg-meta.is-left{text-align:right;color:var(--paper)}
   @media (min-width:720px){ #vg-info .m{display:none} }
@@ -212,7 +212,7 @@
   .vg-hit:focus-visible .vg-media{outline:1px solid var(--paper);outline-offset:4px}
   .vg-titles{position:fixed;left:var(--sp);top:0;z-index:10;width:0;height:0}
   .vg-tl{position:absolute;left:0;top:0;display:block;padding:0;border:0;background:none;color:var(--paper);
-    font-family:"Cormorant Garamond",serif;font-weight:300;font-size:30px;line-height:1.08;letter-spacing:-.005em;
+    font-family:"Cormorant Garamond","Noto Serif TC",serif;font-weight:400;font-size:30px;line-height:1.08;letter-spacing:-.005em;
     white-space:nowrap;text-align:left;transform-origin:0 0;will-change:transform,opacity;cursor:pointer;
     max-width:var(--tlw,none);overflow:hidden;text-overflow:ellipsis}
   .vg-tl:focus-visible{outline:1px solid var(--paper);outline-offset:3px}
@@ -242,14 +242,14 @@
   .v-bar{grid-row:3;display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;
     padding:0 clamp(20px,4vw,48px) calc(clamp(18px,3vh,30px) + env(safe-area-inset-bottom,0px))}
   .v-cap{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
-  .v-title{font-family:"Cormorant Garamond";font-weight:300;font-size:clamp(26px,3vw,40px);line-height:1;letter-spacing:-.02em}
-  .v-meta,.v-count{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey)}
+  .v-title{font-family:"Cormorant Garamond","Noto Serif TC";font-weight:400;font-size:clamp(26px,3vw,40px);line-height:1;letter-spacing:-.02em}
+  .v-meta,.v-count{font-family:"IBM Plex Mono","Noto Sans TC",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey)}
   .v-right{display:flex;align-items:baseline;gap:20px}
-  .v-link{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:lowercase;color:var(--paper);
+  .v-link{font-family:"IBM Plex Mono","Noto Sans TC",monospace;font-size:11px;letter-spacing:.12em;text-transform:lowercase;color:var(--paper);
     text-decoration:none;border-bottom:1px solid var(--edge);padding-bottom:2px}
   .v-link:hover{border-color:var(--paper)}
   .v-btn{position:absolute;background:none;border:none;color:var(--paper);cursor:pointer;opacity:.85;
-    font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.12em;text-transform:lowercase;padding:12px}
+    font-family:"IBM Plex Mono","Noto Sans TC",monospace;font-size:13px;letter-spacing:.12em;text-transform:lowercase;padding:12px}
   .v-btn:hover{opacity:1}
   .v-close{top:calc(var(--hy) + env(safe-area-inset-top,0px));right:calc(var(--hx) - 12px);height:var(--hdr);display:flex;align-items:center}
   .v-prev,.v-next{top:50%;transform:translateY(-50%)}
@@ -843,7 +843,7 @@
       TEX = W * Math.min(window.devicePixelRatio || 1, EDGE.DPR_MAX) >= 1000 ? 512 : 256;
       setOn(true);
       if(document.fonts && document.fonts.load){
-        Promise.all([document.fonts.load('500 12px "IBM Plex Mono"'), document.fonts.load('400 12px "IBM Plex Mono"')])
+        Promise.all([document.fonts.load('500 12px "IBM Plex Mono","Noto Sans TC"'), document.fonts.load('400 12px "IBM Plex Mono","Noto Sans TC"')])
           .then(function(){ if(gl && !lost){ buildCaptions(); needTiles = true; dirty = true; } }, function(){});
       }
     }
@@ -881,7 +881,7 @@
     function buildCaptions(){
       if(!gl) return;
       capFs = clamp(CW * 0.05, 8.5, 12); capW = CW - 1 - 2 * PADC; capH = Math.ceil(capFs * 1.2);
-      var ls = 0.06 * capFs, fam = '"IBM Plex Mono", monospace';
+      var ls = 0.06 * capFs, fam = '"IBM Plex Mono","Noto Sans TC", monospace';
       var cv = document.createElement("canvas"), cx = cv.getContext("2d");
       var cs = Math.min(3, dpr * 1.5);   // a little extra resolution so captions stay sharp when zoomed in
       cv.width = Math.max(1, Math.ceil(capW * cs)); cv.height = Math.max(1, Math.ceil(capH * cs));
