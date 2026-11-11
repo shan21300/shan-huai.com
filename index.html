@@ -1726,20 +1726,22 @@
   .rz-over > :last-child{justify-self:end;text-align:right}
   .rz-over .rz-mono{font-weight:500;font-size:12.5px}
 
-  .rz-tiles{list-style:none;margin-top:clamp(100px,12vw,200px);
-    display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(36px,4vw,64px) var(--gap)}
+  /* Journal: the reference's grid — three 4:5 frames a row, one gutter all round, a square
+     bullet + title and the year on one line beneath; hovering blurs the picture under the
+     "view" disc */
+  .rz-tiles{list-style:none;margin-top:clamp(48px,8vw,120px);
+    display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gap)}
   .rz-tile{display:block}
   .rz-tile-frame{aspect-ratio:4/5;border-radius:4px;overflow:hidden;background:#050505}
-  .rz-tile-frame img{transition:transform 1.1s cubic-bezier(.16,1,.3,1)}
-  .rz-tile:hover .rz-tile-frame img,.rz-tile:focus-visible .rz-tile-frame img{transform:scale(1.03)}
-  .rz-tile-cap{display:grid;grid-template-columns:1fr auto;column-gap:12px;margin-top:12px;
-    font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.01em;line-height:1.35}
-  .rz-tile-cap h3{font:inherit;display:flex;gap:.6em;align-items:baseline}
-  .rz-tile-cap .rz-mono{font-weight:400;font-size:12px}
-  .rz-tile-cap .rz-dim{grid-column:1/-1;font-weight:500;text-transform:none;letter-spacing:0;font-size:13px}
-  .rz-tile-cap h3 > span:first-child{background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;
-    transition:background-size .35s cubic-bezier(.2,.7,.2,1)}
-  .rz-tile:hover h3 > span:first-child,.rz-tile:focus-visible h3 > span:first-child{background-size:100% 1px}
+  .rz-tile-frame img{border-radius:4px;transition:filter .32s cubic-bezier(.2,.8,.25,1.05)}
+  @media(hover:hover){ .rz-tile:hover .rz-tile-frame img{filter:blur(6px)} }
+  .rz-tile:focus-visible .rz-tile-frame img{filter:blur(6px)}
+  .rz-tile-cap{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:8px;
+    font-size:14px;font-weight:600;line-height:18px;letter-spacing:-.04em;text-transform:uppercase}
+  .rz-tile-cap h3{font:inherit;display:flex;align-items:center;gap:10px;min-width:0}
+  .rz-tile-cap h3 i{flex:none;width:8px;height:8px;border-radius:1px;background:currentColor}
+  .rz-tile-cap h3 span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rz-tile-cap p{flex:none}
 
   /* contact */
   .rz-contact .rz-row{align-items:baseline}
@@ -1809,8 +1811,10 @@
     .rz-fr{height:min(100svh,141vw);min-height:0}
     .rz-over{grid-template-columns:repeat(3,minmax(0,1fr));column-gap:12px;font-size:12px}
     .rz-over > span:empty{display:none}
-    .rz-tiles{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:12px}
-    .rz-tile-cap{font-size:12px}
+    .rz-tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .rz-tile-cap{font-size:12px;line-height:16px}
+    .rz-tile-cap h3{gap:8px}
+    .rz-tile-cap h3 i{width:6px;height:6px}
     .rz-contact .rz-val{grid-column:1/-1;grid-row:2;margin-top:6px}
     .rz-contact .rz-row .rz-mono:last-child{grid-column:2;grid-row:1}
     .rz-end-rows{row-gap:22px}
@@ -3780,36 +3784,41 @@
             <div class="rz-over rz-g"><h3><span>Local Local Park</span></h3><p>Branding<br><span class="rz-mono">2026</span></p><span></span><p>Local Remote →</p></div>
           </a></li>
         </ol>
+        </section>
+
+        <section class="rz-sec rz-journal" id="rz-journal" aria-labelledby="rz-h-journal">
+          <span class="rz-num" aria-hidden="true">(2)</span>
+          <h2 class="rz-h2" id="rz-h-journal">Journal</h2>
         <ul class="rz-tiles">
-          <li><a class="rz-tile rz-view" href="/live/elephant-gym" data-nav="gig-elephantgym">
+          <li><a class="rz-tile rz-view" href="/live/elephant-gym" data-nav="gig-elephantgym" aria-label="Elephant Gym — Live, Bristol, 2024">
             <div class="rz-tile-frame"><img src="/images/carousel/gig-elephantgym.webp" width="533" height="800" alt="" loading="lazy" decoding="async"></div>
-            <div class="rz-tile-cap"><h3><span>Elephant Gym</span></h3><p class="rz-mono">(2024)</p><p class="rz-dim">Live — Bristol →</p></div>
+            <div class="rz-tile-cap" aria-hidden="true"><h3><i></i><span>Elephant Gym</span></h3><p>2024</p></div>
           </a></li>
-          <li><a class="rz-tile rz-view" href="/project/butoh-experiment" data-nav="proj-butoh">
+          <li><a class="rz-tile rz-view" href="/project/butoh-experiment" data-nav="proj-butoh" aria-label="Butoh Experiment — Performance, Central Saint Martins, 2023">
             <div class="rz-tile-frame"><img src="/images/carousel/proj-butoh.webp" width="533" height="800" alt="" loading="lazy" decoding="async"></div>
-            <div class="rz-tile-cap"><h3><span>Butoh Experiment</span></h3><p class="rz-mono">(2023)</p><p class="rz-dim">Performance — Central Saint Martins →</p></div>
+            <div class="rz-tile-cap" aria-hidden="true"><h3><i></i><span>Butoh Experiment</span></h3><p>2023</p></div>
           </a></li>
-          <li><a class="rz-tile rz-view" href="/photojournalism/kenya-slum" data-nav="pj-kenyaslum">
+          <li><a class="rz-tile rz-view" href="/photojournalism/kenya-slum" data-nav="pj-kenyaslum" aria-label="Kenya Slum — Photo-Journalism, Nairobi, 2023">
             <div class="rz-tile-frame"><img src="/images/carousel/pj-kenyaslum.webp" width="1200" height="800" alt="" loading="lazy" decoding="async"></div>
-            <div class="rz-tile-cap"><h3><span>Kenya Slum</span></h3><p class="rz-mono">(2023)</p><p class="rz-dim">Photo-Journalism — Nairobi →</p></div>
+            <div class="rz-tile-cap" aria-hidden="true"><h3><i></i><span>Kenya Slum</span></h3><p>2023</p></div>
           </a></li>
-          <li><a class="rz-tile rz-view" href="/photojournalism/slava-ukraini" data-nav="pj-slavaukraini">
+          <li><a class="rz-tile rz-view" href="/photojournalism/slava-ukraini" data-nav="pj-slavaukraini" aria-label="Slava Ukraini — Photo-Journalism, London, 2022">
             <div class="rz-tile-frame"><img src="/images/carousel/pj-slavaukraini.webp" width="533" height="800" alt="" loading="lazy" decoding="async"></div>
-            <div class="rz-tile-cap"><h3><span>Slava Ukraini</span></h3><p class="rz-mono">(2022)</p><p class="rz-dim">Photo-Journalism — London →</p></div>
+            <div class="rz-tile-cap" aria-hidden="true"><h3><i></i><span>Slava Ukraini</span></h3><p>2022</p></div>
           </a></li>
-          <li><a class="rz-tile rz-view" href="/project/zero-case-policy" data-nav="proj-zerocase">
+          <li><a class="rz-tile rz-view" href="/project/zero-case-policy" data-nav="proj-zerocase" aria-label="Zero-Case Policy — Photography, Performance, 2021">
             <div class="rz-tile-frame"><img src="/images/carousel/proj-zerocase.webp" width="533" height="800" alt="" loading="lazy" decoding="async"></div>
-            <div class="rz-tile-cap"><h3><span>Zero-Case Policy</span></h3><p class="rz-mono">(2021)</p><p class="rz-dim">Photography — Performance →</p></div>
+            <div class="rz-tile-cap" aria-hidden="true"><h3><i></i><span>Zero-Case Policy</span></h3><p>2021</p></div>
           </a></li>
-          <li><a class="rz-tile rz-view" href="/photojournalism/the-umbrella-movement" data-nav="pj-hkprotest">
+          <li><a class="rz-tile rz-view" href="/photojournalism/the-umbrella-movement" data-nav="pj-hkprotest" aria-label="The Umbrella Movement — Photo-Journalism, Hong Kong, 2019">
             <div class="rz-tile-frame"><img src="/images/carousel/pj-hkprotest.webp" width="1200" height="800" alt="" loading="lazy" decoding="async"></div>
-            <div class="rz-tile-cap"><h3><span>The Umbrella Movement</span></h3><p class="rz-mono">(2019)</p><p class="rz-dim">Photo-Journalism — Hong Kong →</p></div>
+            <div class="rz-tile-cap" aria-hidden="true"><h3><i></i><span>The Umbrella Movement</span></h3><p>2019</p></div>
           </a></li>
         </ul>
         </section>
 
         <section class="rz-sec rz-contact" id="rz-contact" aria-labelledby="rz-h-contact">
-          <span class="rz-num" aria-hidden="true">(2)</span>
+          <span class="rz-num" aria-hidden="true">(3)</span>
           <h2 class="rz-h2" id="rz-h-contact">Contact</h2>
           <ul class="rz-rows">
             <li class="rz-row rz-g"><p>Email</p><p class="rz-val"><a class="rz-ul" href="mailto:shanhuaichiang@gmail.com">shanhuaichiang@gmail.com</a></p><p class="rz-mono rz-yr">(EM)</p></li>
