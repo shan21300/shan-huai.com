@@ -167,6 +167,27 @@
   #menu .m-link:focus,#menu .m-sub:focus,#menu .menu-mini a:focus{outline:none}
   #menu .m-link:focus-visible,#menu .m-sub:focus-visible,#menu .menu-mini a:focus-visible{font-style:italic}
   #menu .m-link.m-soon:focus-visible{font-style:normal}
+  /* DRAFT: hand-drawn scribble beside commercial / personal. Hidden until the link is
+     hovered (or keyboard-focused), then it flickers like a badly-lit sign, with a tiny
+     hand-drawn "boil" jitter. Pointer events off, so only the word itself triggers it. */
+  .m-has-scribble{position:relative}
+  .m-scribble{position:absolute;left:calc(100% + clamp(10px,1.4vw,20px));top:50%;
+    width:min(280px,50vw);height:auto;max-width:none;pointer-events:none;
+    opacity:0;visibility:hidden;transform:translateY(-50%)}
+  .m-has-scribble:hover .m-scribble,
+  .m-has-scribble:focus-visible .m-scribble{visibility:visible;
+    animation:m-flicker 1.1s steps(1,end) infinite, m-boil .36s steps(1,end) infinite}
+  #menu.menu-inverted .m-scribble{filter:invert(1) brightness(.93)}
+  @keyframes m-flicker{
+    0%{opacity:1} 6%{opacity:.15} 9%{opacity:1} 14%{opacity:0} 17%{opacity:.9}
+    31%{opacity:1} 44%{opacity:.25} 47%{opacity:1} 63%{opacity:.85} 66%{opacity:0}
+    70%{opacity:1} 82%{opacity:.6} 85%{opacity:1} 100%{opacity:1}}
+  @keyframes m-boil{
+    0%{transform:translate(0,-50%) rotate(0deg)}
+    33%{transform:translate(1px,calc(-50% - 1px)) rotate(-.4deg)}
+    66%{transform:translate(-1px,calc(-50% + .5px)) rotate(.3deg)}}
+  @media (prefers-reduced-motion:reduce){
+    .m-has-scribble:hover .m-scribble,.m-has-scribble:focus-visible .m-scribble{animation:none;opacity:1}}
   header .logo{background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center}
   header .logo,header .menuBtn{pointer-events:auto}
   .logo-img{height:clamp(75px,7.5vw,102px);width:auto;display:block;opacity:.9;transition:opacity .2s}
@@ -4238,8 +4259,9 @@
     <div class="menu-cats">
       <!-- Navigation is Commercial / Personal for now. The earlier page links stay below,
            hidden (not deleted), so they can be brought back by removing "hidden". -->
-      <a class="m-link" href="/commercial">commercial</a>
-      <a class="m-link" href="/personal">personal</a>
+      <!-- DRAFT: hand-drawn scribbles that flicker beside each link on hover -->
+      <a class="m-link m-has-scribble" href="/commercial">commercial<img class="m-scribble" src="/images/system/scribble-dope.png" alt="" aria-hidden="true"></a>
+      <a class="m-link m-has-scribble" href="/personal">personal<img class="m-scribble" src="/images/system/scribble-sensitive.png" alt="" aria-hidden="true"></a>
       <button class="m-link" data-nav="projects" hidden>project</button>
       <button class="m-link" data-nav="live" hidden>live</button>
       <button class="m-link" data-nav="photojournalism" hidden>photo-journalism</button>
