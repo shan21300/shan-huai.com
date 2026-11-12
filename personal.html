@@ -885,6 +885,11 @@
     SPEED_REF: 2.0,   // drag speed (same measure as the speed zoom) that counts as "full speed"
     SPEED_UP: 90, SPEED_DOWN: 450,   // ms to ease into / back out of the speed bend
     REDUCED: 0.35,    // lens strength (curve, magnification, CA) with prefers-reduced-motion; no speed response then
+    ASPECT: 1,        // lens height ÷ width on portrait screens (1 = circle, > 1 = oval, taller)
+    // Phone-sized screens (shorter side < 700px) use these instead, where set. RIM there is
+    // relative to the screen WIDTH, so past ~1.2 a circle only crops off the sides; ASPECT
+    // stretches it into the tall screen instead. Tune live with ?loupe-debug=1.
+    PHONE: { RIM: 1.2, ASPECT: 1, MAG: 1.3 },
     DPR_MAX: 2,       // device-pixel-ratio cap for the canvas
     DPR_MAX_SMALL: 2  // ... on phone-sized screens (1.5 looked soft on a 3x iPhone)
   };
@@ -980,7 +985,7 @@
       "uniform sampler2D uTex;",
       "uniform vec2 uHalf;",          // half the screen in lens units (≥ 1 on each axis)
       "uniform vec4 uK;",             // K1, K2, REFRACT, REFRACT_POW
-      "uniform float uMag, uRim, uCA, uBlur, uFocus, uVig, uHi, uLift, uPx;",   // uBlur, uPx in lens units
+      "uniform float uMag, uRim, uCA, uBlur, uFocus, uVig, uHi, uLift, uPx, uAsp;",   // uAsp: lens height ÷ width   // uBlur, uPx in lens units
       "uniform vec3 uTint, uBarrel;",
       "uniform sampler2D uSmall;",    // 1/8-size copy of the wall, for the out-of-focus area outside the rim
       "uniform vec4 uOut;",           // outside: blur radius (lens units), brightness, saturation, lip shadow width
@@ -1002,7 +1007,8 @@
       "}",
       "void main(){",
       "  vec2 p = (vUv * 2.0 - 1.0) * uHalf;",
-      "  float r = length(p);",
+      "  vec2 q = vec2(p.x, p.y / uAsp);",                                         // the oval, as a circle
+      "  float r = length(q);",
       "  float inLens = 1.0 - smoothstep(uRim - uPx, uRim + uPx, r);",          // 1px anti-aliased hard rim
       "  if(inLens <= 0.0){ gl_FragColor = vec4(outside(p, r), 1.0); return; }",
       "  float rho = min(r / uRim, 1.0), r2 = rho * rho;",
@@ -1032,7 +1038,7 @@
       "  float d = uRim - r;",                                                    // distance inside the rim
       "  c *= 1.0 - 0.45 * (1.0 - smoothstep(0.0, 0.07, d)) * (1.0 - smoothstep(0.0, 0.07, d));",
       "  c *= 1.0 - 0.75 * (1.0 - smoothstep(uPx * 1.0, uPx * 2.5, d));",
-      "  float ang = dot(p / max(r, 1e-4), vec2(-0.70710678, 0.70710678));",   // 1 toward the top-left
+      "  float ang = dot(q / max(r, 1e-4), vec2(-0.70710678, 0.70710678));",   // 1 toward the top-left
       "  float arc = smoothstep(0.5, 0.95, ang);",                                // cos 60° → ~120° sweep
       "  float band = exp(-pow((d - 0.022) / 0.009, 2.0));",
       "  float h = clamp(uHi * arc * band, 0.0, 1.0);",
@@ -1104,7 +1110,7 @@
       // The wall is drawn MAG× larger than the screen: the loupe magnifies the centre by MAG, so a
       // screen-sized wall would be upscaled (soft) there. Capped by the GPU's texture limit.
       var maxT = gl.getParameter(gl.MAX_TEXTURE_SIZE) || 4096;
-      fbS = Math.max(1, Math.min(EDGE.MAG, maxT / cw, maxT / ch));
+      fbS = Math.max(1, Math.min(E("MAG"), maxT / cw, maxT / ch));
       var fw = Math.round(cw * fbS), fh = Math.round(ch * fbS);
       if(fbW !== fw || fbH !== fh || !fbo){
         if(fboTex) gl.deleteTexture(fboTex); if(fbo) gl.deleteFramebuffer(fbo);
@@ -1170,14 +1176,18 @@
     };
     // The live lens: EDGE scaled by prefers-reduced-motion and the drag/throw speed boost
     // (speed adds a little magnification and CA). Shared by the shader uniforms and api.src.
+    function isPhone(){ return Math.min(W, H) < 700; }
+    function E(key){ var ph = isPhone() && EDGE.PHONE; return ph && ph[key] !== undefined ? ph[key] : EDGE[key]; }
     function lens(){
       var k = reduce ? EDGE.REDUCED : 1, b = reduce ? 0 : boost;
       return {
-        mag: (1 + (EDGE.MAG - 1) * k) * (1 + 0.25 * b),
-        k1: EDGE.K1 * k, k2: EDGE.K2 * k, kr: EDGE.REFRACT * k, kp: EDGE.REFRACT_POW,
-        rim: EDGE.RIM, ca: EDGE.CA * k * (1 + 1.5 * b)
+        mag: (1 + (E("MAG") - 1) * k) * (1 + 0.25 * b),
+        k1: E("K1") * k, k2: E("K2") * k, kr: E("REFRACT") * k, kp: E("REFRACT_POW"),
+        rim: E("RIM"), ca: E("CA") * k * (1 + 1.5 * b),
+        asp: H > W ? Math.max(1, E("ASPECT")) : 1           // oval only on portrait screens
       };
     }
+    api.isPhone = isPhone;
     // Same curve as FS_P: the source point is p · lensScale(ρ).
     function lensScale(L, rho){
       var r2 = rho * rho;
@@ -1187,12 +1197,12 @@
     api.src = function(x, y){
       if(!api.on || !W || !H) return { x:x, y:y };
       var L = lens(), m = Math.min(W, H) / 2;
-      var px = (x - W / 2) / m, py = (y - H / 2) / m, r = Math.hypot(px, py);
+      var px = (x - W / 2) / m, py = (y - H / 2) / m, r = Math.hypot(px, py / L.asp);
       if(r > L.rim) return null;
       var sc = lensScale(L, r / L.rim);
       return { x:W / 2 + px * sc * m, y:H / 2 + py * sc * m };
     };
-    api.refresh = function(){ needPost = true; dirty = true; };   // call after changing EDGE from the console
+    api.refresh = function(){ needPost = true; needTiles = true; dirty = true; };   // call after changing EDGE from the console
 
     api.tick = function(now, dt, layoutChanged){
       if(!api.on) return;
@@ -1285,7 +1295,7 @@
       var L = lens(), m = Math.min(W, H) / 2, tw = EDGE.TINT;
       gl.uniform2f(u.uHalf, W / 2 / m, H / 2 / m);
       gl.uniform4f(u.uK, L.k1, L.k2, L.kr, L.kp);
-      gl.uniform1f(u.uMag, L.mag); gl.uniform1f(u.uRim, L.rim); gl.uniform1f(u.uCA, L.ca);
+      gl.uniform1f(u.uMag, L.mag); gl.uniform1f(u.uRim, L.rim); gl.uniform1f(u.uCA, L.ca); gl.uniform1f(u.uAsp, L.asp);
       gl.uniform1f(u.uBlur, EDGE.BLUR / m); gl.uniform1f(u.uFocus, EDGE.FOCUS);
       gl.uniform1f(u.uVig, EDGE.VIGNETTE); gl.uniform1f(u.uHi, EDGE.HIGHLIGHT); gl.uniform1f(u.uLift, EDGE.LIFT);
       gl.uniform1f(u.uPx, 1 / (m * dpr));
@@ -2054,9 +2064,66 @@
   function onMQ(){ reduce = mqReduce.matches; fine = mqFine.matches; if(reduce){ vx = vy = 0; s = zoomTarget; glide = null; } dirty = true; Stack.kick(); }
   if(mqReduce.addEventListener){ mqReduce.addEventListener("change", onMQ); mqFine.addEventListener("change", onMQ); }
 
+  /* ---------- Loupe tuning panel (?loupe-debug=1 only) ----------
+     Sliders write straight into EDGE (desktop) or EDGE.PHONE (phone-sized screens), so the
+     loupe changes live. "copy" puts the values on the clipboard to paste back into EDGE. */
+  function loupePanel(){
+    if(!/(^|[?&])loupe-debug=1(&|$)/.test(location.search.slice(1)) || !Edge.on) return;
+    (function(){
+      var phone = Edge.isPhone(), tgt = phone ? EDGE.PHONE : EDGE;
+      function cur(k){ return tgt[k] !== undefined ? tgt[k] : EDGE[k]; }
+      var C = [
+        ["RIM", "size", 0.4, 4, 0.01], ["ASPECT", "oval height (portrait)", 1, 3.5, 0.01], ["MAG", "magnify", 0.6, 3, 0.01],
+        ["K1", "edge stretch", -0.5, 0.3, 0.005], ["K2", "outer stretch", -0.4, 0.2, 0.005], ["REFRACT", "rim squeeze", 0, 0.4, 0.005],
+        ["CA", "colour fringe", 0, 0.03, 0.001], ["VIGNETTE", "vignette", 0, 0.6, 0.01], ["OUTSIDE", "outside brightness", 0, 1, 0.01]
+      ];
+      var box = document.createElement("div");
+      box.style.cssText = "position:fixed;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:90;max-width:380px;margin:0 auto;" +
+        "background:rgba(11,11,12,.86);border:1px solid rgba(237,234,227,.2);border-radius:12px;padding:10px 12px;color:#EDEAE3;" +
+        "font:11px/1.3 'IBM Plex Mono',monospace;letter-spacing:.03em;max-height:48vh;overflow:auto;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)";
+      var head = document.createElement("div");
+      head.style.cssText = "display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px";
+      head.innerHTML = "<b>LOUPE · " + (phone ? "PHONE" : "DESKTOP") + "</b>";
+      var btns = document.createElement("span");
+      function btn(label, fn){ var b = document.createElement("button"); b.textContent = label;
+        b.style.cssText = "font:inherit;color:#0B0B0C;background:#EDEAE3;border:0;border-radius:999px;padding:5px 10px;margin-left:6px;cursor:pointer";
+        b.addEventListener("click", fn); btns.appendChild(b); return b; }
+      var body = document.createElement("div"), out = document.createElement("textarea");
+      out.readOnly = true; out.rows = 3;
+      out.style.cssText = "width:100%;margin-top:8px;font:inherit;color:#EDEAE3;background:#000;border:1px solid rgba(237,234,227,.2);border-radius:6px;padding:6px;display:none";
+      function text(){
+        var o = {}; C.forEach(function(c){ o[c[0]] = +cur(c[0]).toFixed(3); });
+        return (phone ? "PHONE: " : "DESKTOP: ") + JSON.stringify(o).replace(/"/g, "").replace(/,/g, ", ").replace(/:/g, ": ");
+      }
+      var copyB = btn("copy", function(){
+        var t = text(); out.value = t; out.style.display = "block"; out.select();
+        var ok = function(){ copyB.textContent = "copied"; setTimeout(function(){ copyB.textContent = "copy"; }, 1200); };
+        if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok, function(){});
+        else { try{ document.execCommand("copy"); ok(); }catch(_){} }
+      });
+      btn("hide", function(){ var h = body.style.display !== "none"; body.style.display = h ? "none" : ""; out.style.display = "none"; this.textContent = h ? "show" : "hide"; });
+      head.appendChild(btns); box.appendChild(head); box.appendChild(body); box.appendChild(out);
+      C.forEach(function(c){
+        var row = document.createElement("label");
+        row.style.cssText = "display:grid;grid-template-columns:1fr 46px;gap:2px 8px;align-items:center;margin:6px 0";
+        var name = document.createElement("span"); name.textContent = c[1];
+        var val = document.createElement("span"); val.style.textAlign = "right";
+        var r = document.createElement("input"); r.type = "range"; r.min = c[2]; r.max = c[3]; r.step = c[4]; r.value = cur(c[0]);
+        r.style.cssText = "grid-column:1 / span 2;width:100%;accent-color:#EDEAE3";
+        val.textContent = (+r.value).toFixed(3);
+        r.addEventListener("input", function(){ tgt[c[0]] = +r.value; val.textContent = (+r.value).toFixed(3); Edge.refresh(); dirty = true; });
+        r.addEventListener("change", function(){ if(c[0] === "MAG") Edge.layout(); });   // the wall's render size follows MAG
+        row.appendChild(name); row.appendChild(val); row.appendChild(r); body.appendChild(row);
+      });
+      ["pointerdown", "touchstart", "wheel", "keydown"].forEach(function(ev){ box.addEventListener(ev, function(e){ e.stopPropagation(); }, { passive:true }); });
+      document.body.appendChild(box);
+    })();
+  }
+
   /* ---------- Boot ---------- */
   computeLayout();
   camX = 0; camY = 0;                          // cell (0,0) — ORDER[0] — at the centre
+  loupePanel();
   requestAnimationFrame(frame);
   if(location.hash === "#index") setMode("index", false);
 
