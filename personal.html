@@ -807,7 +807,7 @@
   }
 
   /* ---------- Per-frame placement ---------- */
-  var kfKey = null, kfPos = null;
+  var kfKey = null, kfPos = null, kfShow = false;   // kfShow: the focus ring only shows for keyboard use
   function layoutFrame(){
     gen++;
     var hw = (W / 2 + MARGIN + Math.abs(px)) / s, hh = (H / 2 + MARGIN + Math.abs(py)) / s;
@@ -829,7 +829,7 @@
         t.el.style.transform = "translate3d(" + (sx - CW / 2).toFixed(2) + "px," + ty + tail;
         t.gx = sx - CW / 2; t.gy = sy - CH / 2; t.gz = z; t.gth = th * d2r; t.gop = op;   // same placement, for WebGL
         if(Math.abs(op - t.op) > 0.004){ t.el.style.opacity = op.toFixed(3); t.op = op; }
-        var isKf = key === kfKey;
+        var isKf = kfShow && key === kfKey;
         if(isKf !== t.kf){ t.el.classList.toggle("kfocus", isKf); t.kf = isKf; }
       }
     }
@@ -1353,6 +1353,7 @@
     return { d: Math.max(1, Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y)), mx:(a[0].x + a[1].x) / 2, my:(a[0].y + a[1].y) / 2 };
   }
   wall.addEventListener("pointerdown", function(e){
+    if(kfShow){ kfShow = false; dirty = true; }    // back to the mouse/touch: hide the keyboard ring
     if(e.pointerType === "mouse" && e.button !== 0) return;
     try{ wall.setPointerCapture(e.pointerId); }catch(_){}
     pointers.set(e.pointerId, { x:e.clientX, y:e.clientY });
@@ -1488,7 +1489,7 @@
   }
   wall.addEventListener("keydown", function(e){
     var map = { ArrowLeft:"left", ArrowRight:"right", ArrowUp:"up", ArrowDown:"down" };
-    if(map[e.key]){ e.preventDefault(); moveFocus(map[e.key]); dimHint(); return; }
+    if(map[e.key]){ e.preventDefault(); kfShow = true; moveFocus(map[e.key]); dimHint(); return; }
     if(e.key === "+" || e.key === "=" || e.key === "-" || e.key === "_" || e.key === "0"){   // keyboard zoom
       e.preventDefault();
       zoomTo(e.key === "0" ? 1 : userZoom * (e.key === "-" || e.key === "_" ? 1 / 1.2 : 1.2), W / 2, H / 2);
@@ -1500,7 +1501,11 @@
       var i = kfItem(); if(i >= 0) openViewer(i, wall);
     }
   });
-  wall.addEventListener("focus", function(){ if(!kfPos) setKf(nearestKey()); announce(); dirty = true; });
+  wall.addEventListener("focus", function(){
+    var kb = false; try{ kb = wall.matches(":focus-visible"); }catch(_){}
+    kfShow = kb;                                   // tabbed in: show the ring; clicked in: don't
+    if(!kfPos) setKf(nearestKey()); announce(); dirty = true;
+  });
   wall.addEventListener("blur", function(){ setKf(null); });
 
   if(window.ResizeObserver){
@@ -1955,7 +1960,9 @@
     V.classList.remove("open"); viewerOpen = false; dirty = true;
     vHideT = setTimeout(function(){ V.hidden = true; }, reduce ? 0 : 260);
     if(mode === "index"){ Stack.goTo(vi); Stack.kick(); if(vOpener && vOpener.closest && vOpener.closest(".vg-stage")) vOpener = Stack.hitFor(vi); }
+    var keepRing = kfShow;                          // back from the viewer: the ring only if it was showing before
     if(vOpener && vOpener.focus) vOpener.focus({ preventScroll:true });
+    if(vOpener === wall && kfShow !== keepRing){ kfShow = keepRing; dirty = true; }
   }
   var swipe = null;
   V.addEventListener("pointerdown", function(e){ if(e.pointerType !== "mouse") swipe = { x:e.clientX, y:e.clientY }; });
