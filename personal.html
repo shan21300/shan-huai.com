@@ -353,7 +353,7 @@
       <div class="vignette" aria-hidden="true"></div>
     </div>
     <!-- No on-screen labels at the bottom; the instructions stay for screen readers only. -->
-    <p class="sr-only" id="wall-help">Drag to explore; scroll, pinch or press + and − to zoom; click a cover to expand it, click it again to open the project. Keyboard: arrow keys move between projects, Enter opens one.</p>
+    <p class="sr-only" id="wall-help">Drag to explore; scroll, pinch or press + and − to zoom; click a cover to expand it, click it again to open the project. On a touch screen the cover at the centre is selected: tap a cover to select it, tap it again to expand it. Keyboard: arrow keys move between projects, Enter opens one.</p>
 
     <!-- STACK INDEX -->
     <div class="stack-view" id="stack-view">
@@ -1357,7 +1357,14 @@
     el = el && el.closest ? el.closest(".tile") : null;
     return el ? byEl.get(el) || null : null;
   }
+  /* Touch has no hover: the frame at the centre of the loupe is the pick. Dragging marks
+     whichever frame comes to the centre (once the wall is moving slowly enough); a tap on an
+     unmarked frame marks it and glides it to the centre; a tap on the marked frame opens it. */
+  var touchPick = false, pickKey = null, pickTick = 0, pickPending = false, PICK_SPEED = 0.6;   // pickKey: the picked cell, "c|r"
+  function pick(t){ pickKey = t ? t.key : null; if(t && t !== hovT) hover(t); }
+  function pickCentre(){ var t = tileAt(W / 2, H / 2); if(t) pick(t); }
   function updateHover(){
+    if(touchPick) return;                              // touch: the mark is the centre pick, not hover
     if(!fine || !mouseIn || pointerDown || wallPaused()){ if(hovT) unhover(hovT); return; }
     hover(tileAt(mx, my));
   }
@@ -1391,7 +1398,10 @@
       pointerDown = true; dragging = false; moved = false; zoomHeld = false;
       startX = lastX = e.clientX; startY = lastY = e.clientY; downT = e.timeStamp;
       samples = [{ x:e.clientX, y:e.clientY, t:e.timeStamp }];
-      if(hovT) unhover(hovT);
+      var wasTouch = touchPick;
+      touchPick = pType !== "mouse";
+      if(!touchPick && hovT) unhover(hovT);
+      if(wasTouch && !touchPick) pickKey = null;
       clearTimeout(holdTimer);
       if(pType !== "touch"){
         holdTimer = setTimeout(function(){
@@ -1404,7 +1414,7 @@
     }
   });
   wall.addEventListener("pointermove", function(e){
-    if(e.pointerType === "mouse"){ mx = e.clientX; my = e.clientY; mouseIn = true; }
+    if(e.pointerType === "mouse"){ mx = e.clientX; my = e.clientY; mouseIn = true; if(touchPick && !pointerDown){ touchPick = false; pickKey = null; } }
     var p = pointers.get(e.pointerId);
     if(!p){ if(e.pointerType === "mouse") updateHover(); return; }
     p.x = e.clientX; p.y = e.clientY;
@@ -1461,7 +1471,9 @@
     }
     if(e.type === "pointerup" && !moved && !zoomHeld && !wasPinch && e.timeStamp - downT < TAP_MAX_MS){
       var t = tileAt(e.clientX, e.clientY);
-      if(t){
+      if(t && touchPick && t !== hovT){                 // touch, first tap: mark it and bring it to the centre
+        pick(t); var kp = t.key.split("|"); centreOn({ c:+kp[0], r:+kp[1] });
+      } else if(t){
         setKf(t.key); openViewer(t.idx, wall);
         // The browser's own click for this tap/click arrives next — on touch it lands at the
         // tap point, i.e. on the viewer's image link. Swallow that one click so opening the
@@ -1605,6 +1617,12 @@
     if(laid){
       layoutFrame(); dirty = false; preloadAround(now);
       if(fine && mouseIn && !pointerDown && ++hoverTick % 6 === 0) updateHover();
+      if(touchPick && !glide && !pinch && (pointerDown ? dragging : true)){
+        if(dragSpeed < PICK_SPEED){ if(++pickTick % 3 === 0){ pickCentre(); pickPending = false; } else pickPending = true; }
+        else pickPending = true;                       // too fast to mark: mark once it settles
+      }
+    } else if(pickPending && touchPick && (!pointerDown || dragging) && !glide){
+      pickPending = false; pickCentre();               // the wall has come to rest
     }
     if(Edge.on) Edge.tick(now, dt, laid);
   }
@@ -1991,6 +2009,7 @@
     var keepRing = kfShow;                          // back from the viewer: the ring only if it was showing before
     if(vOpener && vOpener.focus) vOpener.focus({ preventScroll:true });
     if(vOpener === wall && kfShow !== keepRing){ kfShow = keepRing; dirty = true; }
+    if(touchPick && pickKey && live.get(pickKey)) hover(live.get(pickKey));   // touch: the pick stays marked
   }
   var swipe = null;
   V.addEventListener("pointerdown", function(e){ if(e.pointerType !== "mouse") swipe = { x:e.clientX, y:e.clientY }; });
@@ -2129,7 +2148,7 @@
 
   // test/debug hook for the draft (read-only numbers)
   window.__portraitWall = {
-    stats: function(){ return { mode: mode, pool: poolSize, live: live.size, inDom: stage.children.length, camX: camX, camY: camY, s: s, px: px, py: py, vx: vx, vy: vy, cw: CW, ch: CH, k: K, n: NI, reduce: reduce, fine: fine }; },
+    stats: function(){ return { pick: pickKey, hov: hovT ? hovT.key : null, touch: touchPick, ds: +dragSpeed.toFixed(3), pt: pickTick, glide: !!glide, pd: pointerDown, mode: mode, pool: poolSize, live: live.size, inDom: stage.children.length, camX: camX, camY: camY, s: s, px: px, py: py, vx: vx, vy: vy, cw: CW, ch: CH, k: K, n: NI, reduce: reduce, fine: fine }; },
     order: function(){ return ORDER.slice(); },
     stack: function(){ return Stack.stats(); }
   };
