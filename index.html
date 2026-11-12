@@ -1564,6 +1564,82 @@
   .brandBtn.bf-intro .bf-logo{position:relative;left:auto;top:auto;transform:rotateX(180deg);transition:none}
 </style>
 <script>
+/* ===== Bio floating section nav switch (draft) =====
+   ?nav=1 shows the floating section nav on /about (default), ?nav=0 hides it.
+   Kept for the session, since the router drops the query string. */
+(function(){
+  var q = null;
+  try{ q = new URLSearchParams(location.search).get("nav"); }catch(e){}
+  if(q === "0" || q === "1"){ try{ sessionStorage.setItem("rz-snav", q); }catch(e){} }
+  else { try{ q = sessionStorage.getItem("rz-snav"); }catch(e){} }
+  if(q === "0") document.documentElement.classList.add("snav-off");
+})();
+</script>
+<style>
+  /* ===== Bio floating section nav (.rz-snav) =====
+     A capsule that floats over the page on the right edge; it takes no layout space.
+     Vertically centred with inset + auto margins (not translateY), because the page
+     transition animates the transform of #about's children. */
+  .rz-snav{display:none}
+  html.bio-new body.on-rz .rz-snav{display:block}
+  html.snav-off .rz-snav,
+  body.menu-is-open .rz-snav,
+  html.rzb-lock .rz-snav{display:none !important}
+  .rz-snav{--seg-w:4px;--seg-h:12px;--seg-cur:34px;--snav-w:44px;--snav-r:22px;--snav-px:19px;--snav-py:16px;
+    position:fixed;right:20px;top:0;bottom:0;margin:auto 0;height:max-content;z-index:30;
+    box-sizing:border-box;width:var(--snav-w);border-radius:var(--snav-r);padding:var(--snav-py) var(--snav-px);
+    background:rgba(22,22,22,.74);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+    border:1px solid rgba(255,255,255,.10);box-shadow:0 12px 40px rgba(0,0,0,.45);overflow:hidden;
+    color:var(--paper);-webkit-tap-highlight-color:transparent;
+    transition:width .38s cubic-bezier(.2,.8,.2,1),border-radius .38s cubic-bezier(.2,.8,.2,1)}
+  .rz-snav.is-open{width:196px;border-radius:18px}
+  /* over the light ending the .74 glass reads grey on paper: go nearly opaque there */
+  .rz-snav.is-light{background:rgba(22,22,22,.94)}
+  .rz-snav ol{list-style:none;margin:0;padding:0}
+  .rz-snav a{display:flex;align-items:center;justify-content:flex-end;gap:10px;
+    min-height:22px;height:calc(var(--h,var(--seg-h)) + 8px);
+    color:inherit;text-decoration:none;white-space:nowrap;outline:none;border-radius:6px;
+    transition:height .32s cubic-bezier(.2,.8,.2,1)}
+  .rz-snav .snav-lbl,.rz-snav .snav-num{font-family:"IBM Plex Mono","Noto Sans TC",monospace;
+    opacity:0;transform:translateX(10px);
+    transition:opacity .22s ease,transform .22s ease,color .22s ease}
+  .rz-snav .snav-lbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+  .rz-snav .snav-num{font-size:10px;letter-spacing:.06em;color:#8a8a8a}
+  .rz-snav .snav-seg{position:relative;flex:none;width:var(--seg-w);height:var(--h,var(--seg-h));
+    border-radius:2px;background:#4a4a4a;overflow:hidden;
+    transition:height .32s cubic-bezier(.2,.8,.2,1),background-color .22s ease}
+  .rz-snav .snav-seg i{position:absolute;left:0;top:0;width:100%;height:100%;background:var(--paper);
+    transform-origin:50% 0;transform:scaleY(0);display:none}
+  /* the current section: a long pill, its fill = progress through the section */
+  .rz-snav li.is-cur{--h:var(--seg-cur) !important}
+  .rz-snav li.is-cur .snav-seg{background:#3a3a3a}
+  .rz-snav li.is-cur .snav-seg i{display:block;transform:scaleY(var(--p,0))}
+  /* open: labels + numbers slide in; the dock swell is set per row by the script (--h, data-d) */
+  .rz-snav.is-open .snav-lbl,.rz-snav.is-open .snav-num{opacity:.62;transform:none}
+  .rz-snav.is-open li.is-hov .snav-lbl,.rz-snav.is-open li.is-hov .snav-num,
+  .rz-snav.is-open li.is-cur .snav-lbl,.rz-snav.is-open li.is-cur .snav-num{opacity:1;color:var(--paper)}
+  .rz-snav.is-open li[data-d="0"] .snav-seg{background:#bdbdbd}
+  .rz-snav.is-open li[data-d="1"] .snav-seg{background:#7a7a7a}
+  .rz-snav.is-open li.is-cur .snav-seg{background:#3a3a3a}
+  .rz-snav a:focus-visible{box-shadow:inset 0 0 0 1px var(--paper)}
+  .rz-snav.is-open a:focus-visible .snav-lbl{text-decoration:underline;text-underline-offset:3px}
+  /* phone */
+  @media (max-width:767px){
+    .rz-snav{--seg-w:3px;--seg-h:9px;--seg-cur:24px;--snav-w:26px;--snav-r:13px;--snav-px:10.5px;--snav-py:10px;right:12px}
+      }
+  /* touch: at least 44px to hit, even where the capsule is drawn smaller */
+  @media (pointer:coarse){
+    .rz-snav:not(.is-open){overflow:visible}
+    .rz-snav:not(.is-open) .snav-lbl,.rz-snav:not(.is-open) .snav-num{pointer-events:none}
+    .rz-snav:not(.is-open)::before{content:"";position:absolute;top:-10px;bottom:-10px;width:44px;
+      right:calc((var(--snav-w) - 44px) / 2 - 1px)}
+    .rz-snav.is-open a{min-height:44px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .rz-snav,.rz-snav a,.rz-snav .snav-seg,.rz-snav .snav-lbl,.rz-snav .snav-num{transition:none !important}
+  }
+</style>
+<script>
 /* ===== Bio page switch (draft) =====
    ?bio=1 → the editorial one-page resume on /about (default in this draft)
    ?bio=0 → the previous bio page, unchanged
@@ -1594,7 +1670,7 @@
   html:not(.bio-new) #about > .rz-cursor{display:none}
   /* everything else in #about is the previous page (its slides aren't all inside
      .bio-scroll-wrap, so hide by exclusion) */
-  html.bio-new #about > :not(.rzb):not(.rzb-panel):not(.rz):not(.rz-cursor){display:none}
+  html.bio-new #about > :not(.rzb):not(.rzb-panel):not(.rz):not(.rz-cursor):not(.rz-snav){display:none}
   html.rz-skip #loader{display:none}
   /* the global header / footer / cursor step aside on this page; the bar links everywhere */
   body.on-rz:not(.menu-is-open) > header,
@@ -3781,6 +3857,15 @@
         <a class="rzb-logo bf-btn" href="/" aria-label="Open menu"><span class="bf" aria-hidden="true"><span class="bf-name">SHAN-HUAI</span><span class="bf-logo"><img class="w" src="/images/system/shanhuailogo_horizontal_white.webp" alt=""><img class="k" src="/images/system/shanhuailogo_horizontal_black.webp" alt=""></span></span></a>
       </div>
       <div class="rz-cursor" aria-hidden="true"><i></i><span>View</span></div>
+      <nav class="rz-snav" aria-label="Page sections">
+        <ol>
+          <li><a href="#rz-about"><span class="snav-lbl">About</span><span class="snav-num">00</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a href="#rz-experience"><span class="snav-lbl">Experience</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a href="#rz-work"><span class="snav-lbl">Selected Work</span><span class="snav-num">02</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a href="#rz-journal"><span class="snav-lbl">Journal</span><span class="snav-num">03</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a href="#rz-contact"><span class="snav-lbl">Contact</span><span class="snav-num">04</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+        </ol>
+      </nav>
 
       <div class="rz">
         <div class="rz-trail" aria-hidden="true"></div>
@@ -3829,7 +3914,7 @@
           </ol>
         </section>
 
-        <section class="rz-flow" aria-label="Selected work, newest first">
+        <section class="rz-flow" id="rz-work" aria-label="Selected work, newest first">
         <ol class="rz-frames">
           <li><a class="rz-fr rz-view" href="/project/sub" data-nav="proj-sub">
             <div class="rz-fr-img"><img src="/images/carousel/proj-sub.webp" width="1200" height="800" alt="" loading="lazy" decoding="async"><video class="rz-fr-vid" muted playsinline loop preload="none" data-stream="e997d71eb8270f43dddcebf6eeefa9fa" aria-hidden="true"></video></div>
@@ -7357,6 +7442,156 @@
   if(sec.clientHeight) layout();
 })();
 /* ===== /LLP REELS ===== */
+</script>
+<script>
+/* ===== Bio floating section nav (.rz-snav) =====
+   - at rest: a slim capsule of segments; the current section is a long pill whose
+     fill shows reading progress through it
+   - hover / keyboard focus (or a tap on touch) opens it leftward into a labelled panel,
+     with a dock-style swell around the pointed-at row
+   - its links are plain #anchors: the bio page's own click handler (#about, capture)
+     glides to them under the top bar; this only marks the target current at once
+   - offsets are measured on entry and on resize (ResizeObserver → rAF); scrolling
+     only reads scrollY, once per frame. No libraries. */
+(function(){
+  "use strict";
+  var about = document.getElementById("about");
+  var nav = about && about.querySelector(".rz-snav");
+  if(!nav) return;
+  var root = document.documentElement;
+  var items = [].slice.call(nav.querySelectorAll("li"));
+  var links = items.map(function(li){ return li.querySelector("a"); });
+  var fills = items.map(function(li){ return li.querySelector(".snav-seg i"); });
+  var secs = links.map(function(a){ return document.getElementById(a.getAttribute("href").slice(1)); });
+  if(secs.some(function(s){ return !s; })) return;
+  var reduceMQ = matchMedia("(prefers-reduced-motion: reduce)");
+  var phoneMQ = matchMedia("(max-width:767px)");
+  function on(){ return root.classList.contains("bio-new") && !root.classList.contains("snav-off") && about.classList.contains("is-active"); }
+
+  /* ---------- layout cache ---------- */
+  var tops = [], ends = [], vh = innerHeight, maxY = 0, lightTop = Infinity, light = false;
+  var endEl = about.querySelector(".rz-end");
+  function measure(){
+    if(!on()) return;
+    var sy = scrollY;
+    tops = secs.map(function(s){ return s.getBoundingClientRect().top + sy; });
+    ends = secs.map(function(s, i){ return i < secs.length - 1 ? tops[i + 1] : s.getBoundingClientRect().bottom + sy; });
+    vh = innerHeight;
+    maxY = Math.max(0, root.scrollHeight - vh);
+    lightTop = endEl ? endEl.getBoundingClientRect().top + sy : Infinity;
+    update();
+  }
+  var mRaf = 0;
+  function queueMeasure(){ if(!mRaf) mRaf = requestAnimationFrame(function(){ mRaf = 0; measure(); }); }
+  if(typeof ResizeObserver === "function") new ResizeObserver(queueMeasure).observe(about.querySelector(".rz") || about);
+  addEventListener("resize", queueMeasure);
+
+  /* ---------- current section + progress ---------- */
+  var cur = -1, lockTo = -1, lockUntil = 0;
+  function setCur(i){
+    if(i === cur) return;
+    if(cur >= 0){ items[cur].classList.remove("is-cur"); links[cur].removeAttribute("aria-current"); }
+    cur = i;
+    items[i].classList.add("is-cur"); links[i].setAttribute("aria-current", "true");
+    swell();
+  }
+  function update(){
+    if(!tops.length) return;
+    var sy = scrollY, line = sy + vh * 0.4, i = 0;
+    for(var k = 0; k < tops.length; k++) if(tops[k] <= line) i = k;
+    var p = (line - tops[i]) / Math.max(1, ends[i] - tops[i]);
+    if(sy >= maxY - 2){ i = tops.length - 1; p = 1; }      // the very end of the page reads as the last section, done
+    if(lockTo >= 0){                                         // a clicked item stays current while the glide gets there
+      if(performance.now() < lockUntil && i !== lockTo) i = lockTo, p = Math.max(0, Math.min(1, (line - tops[i]) / Math.max(1, ends[i] - tops[i])));
+      else lockTo = -1;
+    }
+    setCur(i);
+    var l = sy + vh / 2 + 90 >= lightTop;                    // the capsule's lower half reaches the light ending
+    if(l !== light){ light = l; nav.classList.toggle("is-light", l); }
+    var v = Math.max(0, Math.min(1, p)).toFixed(3);
+    if(fills[i]._p !== v){ fills[i]._p = v; items[i].style.setProperty("--p", v); }
+  }
+  var sRaf = 0;
+  addEventListener("scroll", function(){
+    if(!sRaf && on()) sRaf = requestAnimationFrame(function(){ sRaf = 0; update(); });
+  }, { passive:true });
+
+  /* ---------- open / close + dock swell ---------- */
+  var open = false, hov = -1;
+  function swell(){
+    var base = phoneMQ.matches ? 9 : 12, amp = base === 9 ? 7.5 : 10;
+    items.forEach(function(li, i){
+      var d = (open && hov >= 0) ? Math.abs(i - hov) : -1;
+      if(d >= 0 && d <= 1) li.setAttribute("data-d", d); else li.removeAttribute("data-d");
+      li.classList.toggle("is-hov", open && i === hov);
+      var h = d >= 0 ? base + amp * Math.max(0, 1 - d / 2) : base;
+      li.style.setProperty("--h", h + "px");
+    });
+  }
+  function setOpen(v){
+    if(v === open) return;
+    open = v; nav.classList.toggle("is-open", v);
+    if(!v) hov = -1;
+    swell();
+  }
+  function rowOf(t){ var li = t && t.closest && t.closest("li"); return li ? items.indexOf(li) : -1; }
+
+  // mouse: hover opens; the row under the pointer swells
+  nav.addEventListener("pointerenter", function(e){ if(e.pointerType === "mouse") setOpen(true); });
+  nav.addEventListener("pointermove", function(e){
+    if(e.pointerType !== "mouse") return;
+    if(!open) setOpen(true);
+    var i = rowOf(e.target);
+    if(i !== hov){ hov = i; swell(); }
+  });
+  nav.addEventListener("pointerleave", function(e){
+    if(e.pointerType !== "mouse") return;
+    if(nav.contains(document.activeElement) && nav.querySelector(":focus-visible")){ hov = rowOf(document.activeElement); swell(); return; }
+    setOpen(false);
+  });
+  // keyboard: focus opens; the focused row swells; focus leaving closes
+  nav.addEventListener("focusin", function(e){
+    if(!e.target.matches(":focus-visible")) return;
+    setOpen(true); hov = rowOf(e.target); swell();
+  });
+  nav.addEventListener("focusout", function(e){
+    if(!nav.contains(e.relatedTarget) && !nav.matches(":hover")) setOpen(false);
+  });
+
+  // touch: a tap on the closed capsule opens it (and doesn't follow the link);
+  // a tap on an item jumps there and closes; a tap outside closes
+  var lastType = "mouse";
+  nav.addEventListener("pointerdown", function(e){ lastType = e.pointerType; }, true);
+  document.addEventListener("click", function(e){
+    if(!nav.contains(e.target) || lastType === "mouse") return;
+    if(!open){ e.preventDefault(); e.stopPropagation(); setOpen(true); }
+  }, true);
+  document.addEventListener("pointerdown", function(e){
+    if(open && e.pointerType !== "mouse" && !nav.contains(e.target)) setOpen(false);
+  }, true);
+
+  // any click on an item: it is current now, whatever the glide passes through
+  nav.addEventListener("click", function(e){
+    var a = e.target.closest && e.target.closest("a");
+    if(!a || e.button !== 0) return;
+    var i = links.indexOf(a); if(i < 0) return;
+    lockTo = i; lockUntil = performance.now() + 1600;
+    setCur(i); update();
+    if(lastType !== "mouse") setOpen(false);
+  });
+
+  /* ---------- entering / leaving the page ---------- */
+  var wasOn = false;
+  function sync(){
+    var now = on();
+    if(now && !wasOn){ requestAnimationFrame(measure); }
+    if(!now && wasOn){ setOpen(false); }
+    wasOn = now;
+  }
+  new MutationObserver(sync).observe(about, { attributes:true, attributeFilter:["class"] });
+  phoneMQ.addEventListener && phoneMQ.addEventListener("change", function(){ swell(); queueMeasure(); });
+  swell(); sync();
+})();
 </script>
 <script>
 /* ===== Bio resume: top bar (.rzb) + page (.rz) =====
