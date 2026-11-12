@@ -886,7 +886,7 @@
     SPEED_UP: 90, SPEED_DOWN: 450,   // ms to ease into / back out of the speed bend
     REDUCED: 0.35,    // lens strength (curve, magnification, CA) with prefers-reduced-motion; no speed response then
     DPR_MAX: 2,       // device-pixel-ratio cap for the canvas
-    DPR_MAX_SMALL: 1.5   // ... on phone-sized screens (the loupe's softness hides it; ~45% fewer pixels to shade)
+    DPR_MAX_SMALL: 2  // ... on phone-sized screens (1.5 looked soft on a 3x iPhone)
   };
   var EDGE_ON = !/(^|[?&])edge=0(&|$)/.test(location.search.slice(1));
 
@@ -896,7 +896,7 @@
     var progM = null, markTex = [], markCol = [];
     var progT = null, progP = null, progD = null, quad = null, fbo = null, fboTex = null, fbW = 0, fbH = 0;
     var sFbo = null, sTex = null, sW = 0, sH = 0;   // 1/8-size wall for the out-of-focus outside
-    var dpr = 1, TEX = 512, tex = [], texT = [], blurTex = [], capTex = [], capW = 0, capH = 0, capFs = 0;
+    var fbS = 1, dpr = 1, TEX = 512, tex = [], texT = [], blurTex = [], capTex = [], capW = 0, capH = 0, capFs = 0;
     var needTiles = true, needPost = true, boost = 0;
     var cPaper = [237/255, 234/255, 227/255], cGrey = [128/255, 128/255, 128/255], cInk = [11/255, 11/255, 12/255];
     var cFrame = [21/255, 21/255, 22/255], cBase = [21/255, 19/255, 18/255], cPrint = [0.80, 0.76, 0.68], cMark = [0.84, 0.23, 0.17];
@@ -1083,7 +1083,7 @@
         lost = false;
         try{ setup(); sizeCanvas(); buildCaptions(); setOn(true); }catch(_){ setOn(false); }
       }, false);
-      TEX = W * Math.min(window.devicePixelRatio || 1, EDGE.DPR_MAX) >= 1000 ? 512 : 256;
+      TEX = 512;   // per cover (the thumbs are 520×780); 256 made phone covers visibly soft
       setOn(true);
       if(document.fonts && document.fonts.load){
         Promise.all([document.fonts.load('500 12px "IBM Plex Mono","Noto Sans TC"'), document.fonts.load('400 12px "IBM Plex Mono","Noto Sans TC"')])
@@ -1101,14 +1101,19 @@
       dpr = Math.min(window.devicePixelRatio || 1, Math.min(W, H) < 700 ? EDGE.DPR_MAX_SMALL : EDGE.DPR_MAX);
       var cw = Math.max(1, Math.round(W * dpr)), ch = Math.max(1, Math.round(H * dpr));
       if(canvas.width !== cw || canvas.height !== ch){ canvas.width = cw; canvas.height = ch; }
-      if(fbW !== cw || fbH !== ch || !fbo){
+      // The wall is drawn MAG× larger than the screen: the loupe magnifies the centre by MAG, so a
+      // screen-sized wall would be upscaled (soft) there. Capped by the GPU's texture limit.
+      var maxT = gl.getParameter(gl.MAX_TEXTURE_SIZE) || 4096;
+      fbS = Math.max(1, Math.min(EDGE.MAG, maxT / cw, maxT / ch));
+      var fw = Math.round(cw * fbS), fh = Math.round(ch * fbS);
+      if(fbW !== fw || fbH !== fh || !fbo){
         if(fboTex) gl.deleteTexture(fboTex); if(fbo) gl.deleteFramebuffer(fbo);
-        fboTex = mkTex(); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, cw, ch, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+        fboTex = mkTex(); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, fw, fh, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
         fbo = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
         gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fboTex, 0);
         var ok = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-        fbW = cw; fbH = ch;
+        fbW = fw; fbH = fh;
         if(sTex) gl.deleteTexture(sTex); if(sFbo) gl.deleteFramebuffer(sFbo);
         sW = Math.max(1, Math.ceil(cw / 8)); sH = Math.max(1, Math.ceil(ch / 8));
         sTex = mkTex(); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, sW, sH, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
@@ -1123,7 +1128,7 @@
     // Edge print: one alpha texture per project (the whole frame), redrawn on relayout.
     function buildCaptions(){
       if(!gl) return;
-      var cs = Math.min(2.5, dpr * 1.4);   // a little extra resolution so the print stays sharp when zoomed in
+      var cs = Math.min(3, dpr * fbS * 1.1);   // matches the magnified wall, so the print stays sharp in the loupe
       items.forEach(function(it, i){
         var cv = printCanvas(i, cs);
         if(!capTex[i]) capTex[i] = mkTex();
@@ -1229,7 +1234,7 @@
       gl.uniform2f(u.uView, W, H); gl.uniform2f(u.uCell, CW, CH); gl.uniform1f(u.uS, s); gl.uniform1f(u.uPer, 1000);
       gl.uniform3fv(u.uPaper, cPaper); gl.uniform3fv(u.uBase, cBase); gl.uniform3fv(u.uFrameCol, cFrame);
       gl.uniform3fv(u.uPrint, cPrint);
-      gl.uniform1f(u.uAA, 0.8 / (s * dpr)); gl.uniform1f(u.uSX, SX);
+      gl.uniform1f(u.uAA, 0.8 / (s * dpr * fbS)); gl.uniform1f(u.uSX, SX);
       gl.uniform2f(u.uHoleX, SX + HC, CW - SX - HC); gl.uniform4f(u.uHole, HW, HH, HR, HP);
       gl.uniform4f(u.uFrame, FX, FY, WW, WH);
       gl.uniform1i(u.uImg, 0); gl.uniform1i(u.uCap, 2);
@@ -1270,7 +1275,7 @@
       gl.bindFramebuffer(gl.FRAMEBUFFER, sFbo); gl.viewport(0, 0, sW, sH);
       var P = progD; gl.useProgram(P.p);
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, fboTex); gl.uniform1i(P.u.uTex, 0);
-      gl.uniform2f(P.u.uTx, 1 / fbW, 1 / fbH);
+      gl.uniform2f(P.u.uTx, fbS / fbW, fbS / fbH);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
     function drawPost(){
