@@ -153,7 +153,7 @@
      (they still take clicks and keyboard focus). The vignette is lighter so the bent edges show. */
   .wall-gl{position:absolute;left:0;top:0;width:100%;height:100%;display:none;pointer-events:none}
   .wall.gl-on .wall-gl{display:block}
-  .wall.gl-on .stage{opacity:0}
+  .wall.gl-on .stage{display:none}   /* WebGL draws everything; taps are hit-tested in JS (tileAt) */
   .wall.gl-on .vignette{display:none}   /* the loupe shader draws its own vignette and barrel */
 
   .hud{position:fixed;left:0;right:0;bottom:0;z-index:30;pointer-events:none;
@@ -796,7 +796,9 @@
       }
       t.el.classList.remove("ready", "instant");
       var pc = preload(idx);
-      t.img.src = it.thumb; t.src = it.thumb;
+      t.src = it.thumb;
+      if(Edge.on){ t.el.style.visibility = "visible"; return; }   // WebGL draws it from pc.img; no DOM copy
+      t.img.src = it.thumb;
       if(pc.ready) t.el.classList.add("ready", "instant");
       else {
         var fin = function(){ if(t.idx === idx){ t.el.classList.remove("instant"); t.el.classList.add("ready"); } };
@@ -810,10 +812,11 @@
   var kfKey = null, kfPos = null, kfShow = false;   // kfShow: the focus ring only shows for keyboard use
   function layoutFrame(){
     gen++;
-    var hw = (W / 2 + MARGIN + Math.abs(px)) / s, hh = (H / 2 + MARGIN + Math.abs(py)) / s;
+    var mg = Edge.on ? 8 : MARGIN;                       // WebGL only needs what is on screen
+    var hw = (W / 2 + mg + Math.abs(px)) / s, hh = (H / 2 + mg + Math.abs(py)) / s;
     var cA = Math.ceil((camX - hw - CW / 2) / CW), cB = Math.floor((camX + hw + CW / 2) / CW);
     var rA = Math.ceil((camY - hh - CH / 2) / CH), rB = Math.floor((camY + hh + CH / 2) / CH);
-    var halfH = H / 2, R = CURVE_R * H, d2r = Math.PI / 180;
+    var halfH = H / 2, R = CURVE_R * H, d2r = Math.PI / 180, gl = Edge.on;
     for(var r = rA; r <= rB; r++){
       var sy = halfH + (r * CH - camY) * s + py;
       var nd = clamp((sy - halfH) / halfH, -1.6, 1.6);
@@ -826,10 +829,11 @@
         if(!t){ t = acquire(); assign(t, itemAt(c, r), key); }
         t.seen = gen;
         var sx = W / 2 + (c * CW - camX) * s + px;
-        t.el.style.transform = "translate3d(" + (sx - CW / 2).toFixed(2) + "px," + ty + tail;
-        t.gx = sx - CW / 2; t.gy = sy - CH / 2; t.gz = z; t.gth = th * d2r; t.gop = op;   // same placement, for WebGL
-        if(Math.abs(op - t.op) > 0.004){ t.el.style.opacity = op.toFixed(3); t.op = op; }
+        t.gx = sx - CW / 2; t.gy = sy - CH / 2; t.gz = z; t.gth = th * d2r; t.gop = op;   // placement, for WebGL + hit-testing
         var isKf = kfShow && key === kfKey;
+        if(gl){ t.kf = isKf; continue; }                  // WebGL mode: the HTML tiles are not shown
+        t.el.style.transform = "translate3d(" + (sx - CW / 2).toFixed(2) + "px," + ty + tail;
+        if(Math.abs(op - t.op) > 0.004){ t.el.style.opacity = op.toFixed(3); t.op = op; }
         if(isKf !== t.kf){ t.el.classList.toggle("kfocus", isKf); t.kf = isKf; }
       }
     }
@@ -881,7 +885,8 @@
     SPEED_REF: 2.0,   // drag speed (same measure as the speed zoom) that counts as "full speed"
     SPEED_UP: 90, SPEED_DOWN: 450,   // ms to ease into / back out of the speed bend
     REDUCED: 0.35,    // lens strength (curve, magnification, CA) with prefers-reduced-motion; no speed response then
-    DPR_MAX: 2        // device-pixel-ratio cap for the canvas
+    DPR_MAX: 2,       // device-pixel-ratio cap for the canvas
+    DPR_MAX_SMALL: 1.5   // ... on phone-sized screens (the loupe's softness hides it; ~45% fewer pixels to shade)
   };
   var EDGE_ON = !/(^|[?&])edge=0(&|$)/.test(location.search.slice(1));
 
@@ -917,7 +922,7 @@
       "precision highp float;",
       "uniform vec2 uCell, uCrop, uHoleX; uniform vec4 uFrame, uSt, uHole;",
       "uniform sampler2D uImg, uCap; uniform vec3 uPaper, uBase, uFrameCol, uPrint;",
-      "uniform float uAA, uHasImg, uMask, uSeed, uSX;",
+      "uniform float uAA, uHasImg, uSeed, uSX;",
       "varying vec2 vL;",
       "vec4 over(vec4 d, vec4 s){ return s + d * (1.0 - s.a); }",
       "float rbox(vec2 p, vec2 h, float r){ vec2 q = abs(p) - h + r; return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r; }",
@@ -932,7 +937,6 @@
       "  vec4 c = vec4(uBase * (1.0 + 0.12 * g) * fA, fA);",
       "  vec2 hs = uFrame.zw * 0.5, m = l - uFrame.xy - hs;",
       "  float sd = rbox(m, hs, 1.5), fa = clamp(0.5 - sd / uAA, 0.0, 1.0);",
-      "  if(uMask > 0.5){ gl_FragColor = vec4(0.0, 0.0, 0.0, fa * uHasImg * uSt.z); return; }",
       "  if(fa > 0.0){",
       "    vec3 im = uFrameCol;",
       "    if(uHasImg > 0.5){ vec2 uv = 0.5 + ((l - uFrame.xy) / uFrame.zw - 0.5) * uCrop; im = mix(uFrameCol, texture2D(uImg, uv).rgb, uSt.z); }",
@@ -1087,12 +1091,14 @@
       }
     }
     function setOn(v){
+      var was = api.on;
       api.on = !!v && !!gl && !lost;
+      if(was !== api.on){ releaseAll(); free.forEach(function(t){ t.idx = -1; t.op = -1; t.kf = false; t.el.classList.remove("kfocus"); }); }
       wall.classList.toggle("gl-on", api.on);
       needTiles = needPost = true; dirty = true;
     }
     function sizeCanvas(){
-      dpr = Math.min(window.devicePixelRatio || 1, EDGE.DPR_MAX);
+      dpr = Math.min(window.devicePixelRatio || 1, Math.min(W, H) < 700 ? EDGE.DPR_MAX_SMALL : EDGE.DPR_MAX);
       var cw = Math.max(1, Math.round(W * dpr)), ch = Math.max(1, Math.round(H * dpr));
       if(canvas.width !== cw || canvas.height !== ch){ canvas.width = cw; canvas.height = ch; }
       if(fbW !== cw || fbH !== ch || !fbo){
@@ -1117,7 +1123,7 @@
     // Edge print: one alpha texture per project (the whole frame), redrawn on relayout.
     function buildCaptions(){
       if(!gl) return;
-      var cs = Math.min(3, dpr * 1.5);   // a little extra resolution so the print stays sharp when zoomed in
+      var cs = Math.min(2.5, dpr * 1.4);   // a little extra resolution so the print stays sharp when zoomed in
       items.forEach(function(it, i){
         var cv = printCanvas(i, cs);
         if(!capTex[i]) capTex[i] = mkTex();
@@ -1136,8 +1142,6 @@
       tex[i] = mkTex(gl.LINEAR_MIPMAP_LINEAR);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, up);
       gl.generateMipmap(gl.TEXTURE_2D);
-      up.width = up.height = 32; upx.drawImage(im, 0, 0, 32, 32);
-      blurTex[i] = mkTex(); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, up);
       up.width = up.height = 1;
       texT[i] = performance.now();
       return true;
@@ -1230,12 +1234,8 @@
       gl.uniform4f(u.uFrame, FX, FY, WW, WH);
       gl.uniform1i(u.uImg, 0); gl.uniform1i(u.uCap, 2);
       var wa = WW / WH;
-      gl.uniform1f(u.uMask, 0); live.forEach(tileDraw);
-      drawMarks(); gl.useProgram(P.p);
-      // second pass: alpha only = where the cover images are, so the RGB split skips grid lines and captions
-      gl.disable(gl.BLEND); gl.colorMask(false, false, false, true);
-      gl.uniform1f(u.uMask, 1); live.forEach(tileDraw);
-      gl.colorMask(true, true, true, true);
+      live.forEach(tileDraw);
+      drawMarks();
       function tileDraw(t){
         if(t.gx === undefined || t.idx < 0) return;
         var it = items[t.idx], has = tex[t.idx] ? 1 : 0;
@@ -1301,29 +1301,42 @@
     if(t === hovT) return;
     if(hovT) unhover(hovT);
     hovT = t; if(!t) return;
-    clearTimeout(t.blurT);
     if(Edge.on){ t.mv = Edge.mark(); }
     else { t.mk.src = newMark(false).cv.toDataURL(); }
     t.mkOn = true; t.mkP = 1; t.mkA = 1;   // the whole mark at once (no draw-on)
-    if(t.blur.getAttribute("src") !== t.src) t.blur.src = t.src;
-    t.el.classList.add("blur-on");
     requestAnimationFrame(function(){ if(hovT === t) t.el.classList.add("hov"); });
   }
   function unhover(t, now){
     if(!t) return;
     if(hovT === t) hovT = null;
     t.el.classList.remove("hov");
-    clearTimeout(t.blurT);
-    if(now || reduce) t.el.classList.remove("blur-on");
-    else t.blurT = setTimeout(function(){ if(hovT !== t) t.el.classList.remove("blur-on"); }, 420);
+  }
+  // Where a point of a cell (lx, ly) lands on screen: the same curve + perspective as VS_T.
+  function projectPt(t, lx, ly){
+    var cx = (lx - CW / 2) * s, cy = (ly - CH / 2) * s;
+    var y = cy * Math.cos(t.gth), z = t.gz + cy * Math.sin(t.gth);
+    var d = 1000 / (1000 - z);
+    return [W / 2 + (t.gx + CW / 2 + cx - W / 2) * d, H / 2 + (t.gy + CH / 2 + y - H / 2) * d];
+  }
+  function inQuad(px, py, Q){
+    var sgn = 0;
+    for(var i = 0; i < 4; i++){
+      var a = Q[i], b = Q[(i + 1) % 4], c = (b[0] - a[0]) * (py - a[1]) - (b[1] - a[1]) * (px - a[0]);
+      if(c !== 0){ var sc = c > 0 ? 1 : -1; if(sgn && sc !== sgn) return false; sgn = sc; }
+    }
+    return true;
   }
   function tileAt(x, y){
     if(Edge.on){
-      // the bent wall: find the tile drawn under (x, y), i.e. at its source point
+      // the bent wall: find the tile drawn under (x, y), i.e. at its source point. No DOM:
+      // each live tile's cell is projected exactly as the shader draws it.
       var q = Edge.src(x, y); if(!q) return null;   // on the loupe's barrel: nothing under the cursor
-      var els = document.elementsFromPoint(q.x, q.y);
-      for(var i = 0; i < els.length; i++){ var te = els[i].closest && els[i].closest(".tile"); if(te) return byEl.get(te) || null; if(els[i] === wall) break; }
-      return null;
+      var hit = null;
+      live.forEach(function(t){
+        if(hit || t.gx === undefined) return;
+        if(inQuad(q.x, q.y, [projectPt(t, 0, 0), projectPt(t, CW, 0), projectPt(t, CW, CH), projectPt(t, 0, CH)])) hit = t;
+      });
+      return hit;
     }
     var el = document.elementFromPoint(x, y);
     el = el && el.closest ? el.closest(".tile") : null;
