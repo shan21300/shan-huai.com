@@ -1726,17 +1726,31 @@
   .rz-over > :last-child{justify-self:end;text-align:right}
   .rz-over .rz-mono{font-weight:500;font-size:12.5px}
 
-  /* Journal: the reference's grid — three 4:5 frames a row, one gutter all round, a square
-     bullet + title and the year on one line beneath; hovering blurs the picture under the
-     "view" disc */
-  /* Journal header, as the reference sets it: a big light grotesk title and its number in
-     the same face, both inset one more gutter than the grid, 120px clear above the frames (1440px) */
-  .rz-journal .rz-num,.rz-journal .rz-h2{padding:0 var(--m)}
+  /* Journal, set to the reference's spec at its three breakpoints:
+       1200px+     3 a row, held to 1400px wide; title 210px, number 32px
+       810-1199px  2 a row; title 140px, number 26px
+       <810px      1 a row; title 70px, number 18px
+     Every width: 20px gutters, 4:5 frames, a 14px caption 8px below (square bullet + title,
+     year right), 120px from title to frames, title and number inset one gutter past the grid;
+     hovering blurs the picture under the "view" disc. */
+  .rz-journal{margin-left:calc(20px - var(--m));margin-right:calc(20px - var(--m))}   /* 20px from the screen edge, as the reference */
+  @media(min-width:1440px){ .rz-journal{max-width:1400px;margin-left:auto;margin-right:auto} }
+  .rz-journal .rz-num,.rz-journal .rz-h2{padding:0 20px}
   .rz-journal .rz-num{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:400;
-    font-size:clamp(18px,2.22vw,40px);line-height:.9;letter-spacing:-.06em}
-  .rz-journal .rz-h2{font-weight:300;font-stretch:100%;font-size:clamp(60px,14.6vw,260px);
+    font-size:32px;line-height:.9;letter-spacing:-.06em}
+  .rz-journal .rz-h2{font-weight:300;font-stretch:100%;font-size:210px;
     line-height:1.2;letter-spacing:-.06em;margin:10px 0 0}
-  .rz-journal .rz-tiles{margin-top:clamp(40px,8.33vw,140px)}
+  .rz-journal .rz-tiles{margin-top:120px;gap:20px}
+  @media(max-width:1199px){
+    .rz-journal .rz-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .rz-journal .rz-num{font-size:26px}
+    .rz-journal .rz-h2{font-size:140px}
+  }
+  @media(max-width:809px){
+    .rz-journal .rz-tiles{grid-template-columns:minmax(0,1fr)}
+    .rz-journal .rz-num{font-size:18px}
+    .rz-journal .rz-h2{font-size:70px;line-height:1}
+  }
   .rz-tiles{list-style:none;margin-top:clamp(48px,8vw,120px);
     display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gap)}
   .rz-tile{display:block}
@@ -1819,10 +1833,6 @@
     .rz-fr{height:min(100svh,141vw);min-height:0}
     .rz-over{grid-template-columns:repeat(3,minmax(0,1fr));column-gap:12px;font-size:12px}
     .rz-over > span:empty{display:none}
-    .rz-tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-    .rz-tile-cap{font-size:12px;line-height:16px}
-    .rz-tile-cap h3{gap:8px}
-    .rz-tile-cap h3 i{width:6px;height:6px}
     .rz-contact .rz-val{grid-column:1/-1;grid-row:2;margin-top:6px}
     .rz-contact .rz-row .rz-mono:last-child{grid-column:2;grid-row:1}
     .rz-end-rows{row-gap:22px}
