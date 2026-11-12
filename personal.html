@@ -145,7 +145,7 @@
   /* marker pick: a freshly drawn loop on every hover (canvas, see newMark) */
   .tile.hov{z-index:2;overflow:visible}
   .tile .mark{opacity:0;transition:opacity .25s ease}
-  .tile.hov .mark{opacity:1}
+  .tile.hov .mark{opacity:1;transition:none}
   .tile.kfocus .frame{box-shadow:0 0 0 3px var(--ink),0 0 0 4px var(--paper)}
   .vignette{position:absolute;inset:0;pointer-events:none;
     background:radial-gradient(ellipse at center,transparent 38%,rgba(11,11,12,.25) 62%,rgba(11,11,12,.85) 92%,var(--ink) 100%)}
@@ -1304,7 +1304,7 @@
     clearTimeout(t.blurT);
     if(Edge.on){ t.mv = Edge.mark(); }
     else { t.mk.src = newMark(false).cv.toDataURL(); }
-    t.mkOn = true; t.mkP = reduce ? 1 : 0; t.mkA = 1;
+    t.mkOn = true; t.mkP = 1; t.mkA = 1;   // the whole mark at once (no draw-on)
     if(t.blur.getAttribute("src") !== t.src) t.blur.src = t.src;
     t.el.classList.add("blur-on");
     requestAnimationFrame(function(){ if(hovT === t) t.el.classList.add("hov"); });
