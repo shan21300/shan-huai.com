@@ -500,7 +500,7 @@
   // two windows (half above, half below); FX/FY: window origin; HP: sprocket pitch (8 per frame);
   // HC: hole centre distance from the strip edge; HW/HH: hole half-size; HR: hole corner radius.
   var SX = 0, RW = 0, WW = 0, WH = 0, SM = 0, FX = 0, FY = 0, HP = 0, HC = 0, HW = 0, HH = 0, HR = 0, PFS = 9;
-  var FILM_BASE = "#1f1915", posOf = [], printURL = [];
+  var FILM_BASE = "#151312", posOf = [], printURL = [];
   var camX = 0, camY = 0, s = 1, zoomTarget = 1, userZoom = 1;   // userZoom: the zoom the wall rests at
   var px = 0, py = 0, ptx = 0, pty = 0, mx = -1, my = -1, mouseIn = false;
   var vx = 0, vy = 0, glide = null, anchorX = 0, anchorY = 0;
@@ -783,7 +783,7 @@
     var dpr = 1, TEX = 512, tex = [], texT = [], blurTex = [], capTex = [], capW = 0, capH = 0, capFs = 0;
     var needTiles = true, needPost = true, boost = 0;
     var cPaper = [237/255, 234/255, 227/255], cGrey = [128/255, 128/255, 128/255], cInk = [11/255, 11/255, 12/255];
-    var cFrame = [21/255, 21/255, 22/255], cBase = [31/255, 25/255, 21/255], cPrint = [0.80, 0.76, 0.68], cMark = [0.84, 0.23, 0.17];
+    var cFrame = [21/255, 21/255, 22/255], cBase = [21/255, 19/255, 18/255], cPrint = [0.80, 0.76, 0.68], cMark = [0.84, 0.23, 0.17];
     var up = document.createElement("canvas"), upx = up.getContext("2d");
 
     var VS_T = [
