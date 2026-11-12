@@ -144,8 +144,8 @@
   .tile.hov .print{opacity:1}
   /* marker pick: a freshly drawn loop on every hover (canvas, see newMark) */
   .tile.hov{z-index:2;overflow:visible}
-  .tile .mark{opacity:0;transition:opacity .25s ease}
-  .tile.hov .mark{opacity:1;transition:none}
+  .tile .mark{opacity:0}
+  .tile.hov .mark{opacity:1}
   .tile.kfocus .frame{box-shadow:0 0 0 3px var(--ink),0 0 0 4px var(--paper)}
   .vignette{position:absolute;inset:0;pointer-events:none;
     background:radial-gradient(ellipse at center,transparent 38%,rgba(11,11,12,.25) 62%,rgba(11,11,12,.85) 92%,var(--ink) 100%)}
@@ -1209,7 +1209,7 @@
         if(t.gRdy !== rT){ t.gRdy = reduce ? rT : Math.min(rT, t.gRdy + dt / 450); needTiles = true; }
         if(t.mkOn){                                    // marker: draw on while hovered, fade once left
           if(t === hovT){ if(t.mkP < 1){ t.mkP = Math.min(1, t.mkP + dt / 520); needTiles = true; } }
-          else { t.mkA = Math.max(0, t.mkA - dt / 240); needTiles = true; if(!t.mkA) t.mkOn = false; }
+          else { t.mkA = 0; t.mkOn = false; needTiles = true; }   // gone at once (no fade)
         }
       });
       if(needTiles){ drawTiles(); drawSmall(); }
