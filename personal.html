@@ -634,32 +634,91 @@
     run(xl, yn, function(){ cx.font = "500 " + (PFS * 1.15) + "px " + fam; txt(String(n), 0); });
     cx.setTransform(1, 0, 0, 1, 0, 0);
   }
-  /* ---------- Marker picks: every hover draws a new hand-made loop round the frame (random
-     turns, tilt, wobble, overshoot and pressure), so no two picks look the same. A loop is a
+  /* ---------- Marker picks: every hover draws a new hand-made mark round the frame — a round
+     loop, a rounded box, a one-stroke box or four crossing strokes, each with random turns, tilt,
+     wobble, overshoot and pressure — so no two picks look the same. A loop is a
      run of round stamps on a canvas. For WebGL the canvas holds data, not colour: R = how far
      along the stroke (for the draw-on), G = ink density, A = coverage. ---------- */
-  var MARK_SLOTS = 4, markSlot = -1, MW = 0, MH = 0;
+  var MARK_SLOTS = 4, markSlot = -1, MW = 0, MH = 0, lastKind = -1;
   var MARK_COLS = [[0.88, 0.25, 0.17], [0.91, 0.31, 0.16], [0.84, 0.21, 0.18], [0.90, 0.28, 0.20]];
   var markCv = document.createElement("canvas"), markCx = markCv.getContext("2d");
   function markPath(seed){
-    var R = rng(seed), P = [];
-    var loops = R() < 0.22 ? 1.8 + R() * 0.35 : 1.06 + R() * 0.36;   // now and then a double loop
-    var a0 = -Math.PI * 0.5 + (R() - 0.65) * 1.6, dir = R() < 0.75 ? -1 : 1;
-    var tilt = (R() - 0.5) * 0.4, rx = WW * (0.6 + R() * 0.1), ry = WH * (0.56 + R() * 0.08);
-    var drift = (R() - 0.5) * 0.14, ox = (R() - 0.5) * 0.12 * WW, oy = (R() - 0.5) * 0.08 * WH;
-    var p1 = R() * 6.283, p2 = R() * 6.283, p3 = R() * 6.283, e1 = 0.04 + R() * 0.07, e2 = 0.02 + R() * 0.04;
-    var egg = (R() - 0.5) * 0.22, flick = 0.06 + R() * 0.12;   // lopsided loop; the tail flicks outward as the pen lifts
-    var wB = clamp(WW * 0.05, 3.2, 7.5) * (0.8 + R() * 0.4), ct = Math.cos(tilt), st = Math.sin(tilt);
-    var n = Math.ceil(loops * Math.PI * (rx + ry) / 0.5);
-    for(var i = 0; i < n; i++){
-      var t = i / (n - 1), th = a0 + dir * loops * 6.2832 * t;
-      var tail = Math.max(0, (t - 0.9) / 0.1);
-      var r = 1 + drift * t * loops + e1 * Math.sin(2 * th + p1) + e2 * Math.sin(3 * th + p2) + egg * Math.sin(th) + flick * tail * tail;
-      var x = rx * r * Math.cos(th) + ox * t, y = ry * r * Math.sin(th) + oy * t;
-      var press = (0.45 + 0.55 * Math.min(1, t / 0.025)) * (1 - 0.6 * tail) * (0.8 + 0.2 * Math.sin(t * 23 + p3)) * (0.9 + 0.1 * Math.sin(t * 61 + p1));
-      var g = 0.72 + 0.28 * (0.5 + 0.5 * Math.sin(i * 0.05 + p2)) * (0.6 + 0.4 * Math.sin(i * 0.17 + p1)) - 0.25 * tail;   // dry, streaky ink
-      P.push({ x: MW / 2 + x * ct - y * st, y: MH / 2 + x * st + y * ct, w: wB * press, t: t, g: g });
+    var R = rng(seed), hw = WW / 2, hh = WH / 2, strokes = [], k = R(), i, n;
+    var p1 = R() * 6.283, p2 = R() * 6.283, p3 = R() * 6.283;
+    function line(ax, ay, bx, by, bow){         // a slightly bowed straight stroke
+      var pts = [], L = Math.hypot(bx - ax, by - ay), nx = -(by - ay) / L, ny = (bx - ax) / L, m = Math.ceil(L);
+      for(var j = 0; j <= m; j++){ var u = j / m, b = bow * L * Math.sin(Math.PI * u); pts.push([ax + (bx - ax) * u + nx * b, ay + (by - ay) * u + ny * b]); }
+      return pts;
     }
+    function jit(a){ return (R() - 0.5) * 2 * a; }
+    var kind, ki = k < 0.4 ? 0 : k < 0.6 ? 1 : k < 0.8 ? 2 : 3;
+    if(ki === lastKind) ki = (ki + 1 + Math.floor(R() * 3)) % 4;   // never the same kind twice in a row
+    lastKind = ki;
+    if(ki === 0){                                 // round loop (sometimes a double), lopsided, tail flicks out
+      kind = "loop";
+      var loops = R() < 0.22 ? 1.8 + R() * 0.35 : 1.06 + R() * 0.36;
+      var a0 = -Math.PI * 0.5 + (R() - 0.65) * 1.6, dir = R() < 0.75 ? -1 : 1;
+      var rx = WW * (0.6 + R() * 0.1), ry = WH * (0.56 + R() * 0.08);
+      var drift = (R() - 0.5) * 0.14, ox = jit(0.06 * WW), oy = jit(0.04 * WH);
+      var e1 = 0.04 + R() * 0.07, e2 = 0.02 + R() * 0.04, egg = (R() - 0.5) * 0.22, flick = 0.06 + R() * 0.12;
+      var pts = []; n = Math.ceil(loops * 400);
+      for(i = 0; i <= n; i++){
+        var t = i / n, th = a0 + dir * loops * 6.2832 * t, tail = Math.max(0, (t - 0.9) / 0.1);
+        var r = 1 + drift * t * loops + e1 * Math.sin(2 * th + p1) + e2 * Math.sin(3 * th + p2) + egg * Math.sin(th) + flick * tail * tail;
+        pts.push([rx * r * Math.cos(th) + ox * t, ry * r * Math.sin(th) + oy * t]);
+      }
+      strokes.push(pts);
+    } else if(ki === 1){                         // rounded box in one go (a superellipse), overshooting its start
+      kind = "squircle";
+      var turns = 1.05 + R() * 0.25, sq = 2 / (4 + R() * 6), b0 = -Math.PI * 0.75 + jit(0.5), d2 = R() < 0.7 ? -1 : 1;
+      var mx = 4 + R() * 7, my = 4 + R() * 7, dr = jit(0.05);
+      var pts2 = []; n = Math.ceil(turns * 600);
+      for(i = 0; i <= n; i++){
+        var t2 = i / n, a = b0 + d2 * turns * 6.2832 * t2, c = Math.cos(a), sn = Math.sin(a), g = 1 + dr * t2 * turns + 0.015 * Math.sin(3 * a + p1);
+        pts2.push([(hw + mx) * g * Math.sign(c) * Math.pow(Math.abs(c), sq), (hh + my) * g * Math.sign(sn) * Math.pow(Math.abs(sn), sq)]);
+      }
+      strokes.push(pts2);
+    } else if(ki === 2){                         // box in one stroke: sharp corners, carries on past where it began
+      kind = "box";
+      var m3 = 4 + R() * 8, X = hw + m3, Y = hh + m3, j3 = 3;
+      var C = [[-X + jit(j3), -Y + jit(j3)], [X + jit(j3), -Y + jit(j3)], [X + jit(j3), Y + jit(j3)], [-X + jit(j3), Y + jit(j3)]];
+      var st = Math.floor(R() * 4), path = [], o = 0.15 + R() * 0.35;
+      for(i = 0; i < 4; i++){ var A = C[(st + i) % 4], B = C[(st + i + 1) % 4]; path = path.concat(line(A[0], A[1], B[0], B[1], jit(0.02))); }
+      var A2 = C[st], B2 = C[(st + 1) % 4];
+      path = path.concat(line(A2[0] + jit(2), A2[1] + jit(2), A2[0] + (B2[0] - A2[0]) * o, A2[1] + (B2[1] - A2[1]) * o, jit(0.03)));
+      strokes.push(path);
+    } else {                                     // four separate strokes whose ends cross at the corners
+      kind = "lines";
+      var m4 = 3 + R() * 8, X4 = hw + m4, Y4 = hh + m4;
+      var ov = function(){ return 5 + R() * 14; };
+      strokes.push(line(-X4 - ov(), -Y4 + jit(3), X4 + ov(), -Y4 + jit(3), jit(0.02)));
+      strokes.push(line(X4 + jit(3), -Y4 - ov(), X4 + jit(3), Y4 + ov(), jit(0.02)));
+      strokes.push(line(X4 + ov(), Y4 + jit(3), -X4 - ov(), Y4 + jit(3), jit(0.02)));
+      strokes.push(line(-X4 + jit(3), Y4 + ov(), -X4 + jit(3), -Y4 - ov(), jit(0.02)));
+      if(R() < 0.3) strokes.splice(Math.floor(R() * 4), 1);   // now and then one side left undrawn
+    }
+    // common: tilt, hand wobble, stamps every 0.5px with pen pressure (each stroke starts firm and tapers off)
+    var tilt = kind === "loop" ? (R() - 0.5) * 0.4 : (R() - 0.5) * 0.08, ct = Math.cos(tilt), stt = Math.sin(tilt);
+    var wB = clamp(WW * 0.05, 3.2, 7.5) * (0.8 + R() * 0.4), wob = kind === "loop" ? 0 : 1 + R() * 1.2;
+    var total = 0, lens = strokes.map(function(sp){ var L = 0; for(var q = 1; q < sp.length; q++) L += Math.hypot(sp[q][0] - sp[q - 1][0], sp[q][1] - sp[q - 1][1]); total += L; return L; });
+    var P = [], done = 0, idx = 0;
+    strokes.forEach(function(sp, si){
+      var L = lens[si], acc = 0, next = 0;
+      for(var q = 1; q < sp.length; q++){
+        var x0 = sp[q - 1][0], y0 = sp[q - 1][1], x1 = sp[q][0], y1 = sp[q][1], dl = Math.hypot(x1 - x0, y1 - y0);
+        while(next <= acc + dl && dl > 0){
+          var f = (next - acc) / dl, x = x0 + (x1 - x0) * f, y = y0 + (y1 - y0) * f, u = next / L;
+          x += wob * Math.sin(next * 0.045 + p1 + si); y += wob * Math.sin(next * 0.05 + p2 + si * 2);
+          var tail = Math.max(0, (u - 0.88) / 0.12);
+          var press = (0.45 + 0.55 * Math.min(1, u * L / 6)) * (1 - 0.6 * tail) * (0.8 + 0.2 * Math.sin(next * 0.07 + p3)) * (0.9 + 0.1 * Math.sin(next * 0.19 + p1));
+          var g = 0.72 + 0.28 * (0.5 + 0.5 * Math.sin(idx * 0.05 + p2)) * (0.6 + 0.4 * Math.sin(idx * 0.17 + p1)) - 0.25 * tail;   // dry, streaky ink
+          P.push({ x: MW / 2 + x * ct - y * stt, y: MH / 2 + x * stt + y * ct, w: wB * press, t: (done + next) / total, g: g });
+          next += 0.5; idx++;
+        }
+        acc += dl;
+      }
+      done += L;
+    });
     return P;
   }
   // New loop into slot k: returns the canvas (data form for WebGL, coloured for the CSS wall).
@@ -678,6 +737,7 @@
     return { slot: markSlot, cv: markCv, col: col };
   }
 
+  window.__wallMark = function(){ return newMark(false).cv.toDataURL(); };   // for previewing marks from the console
   var printCv = document.createElement("canvas"), printCx = printCv.getContext("2d");
   function printCanvas(i, cs){
     printCv.width = Math.max(1, Math.ceil(CW * cs)); printCv.height = Math.max(1, Math.ceil(CH * cs));
