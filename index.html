@@ -1083,7 +1083,6 @@
   #about .pinfo .pinfo-ck,#about .pinfo .pinfo-cv{font-size:11px}
   /* About: slightly larger body on wide screens */
   #about .about p{font-size:clamp(17px,1.2vw,20px);line-height:1.75;max-width:60ch}
-  .proj-page .pinfo{right:clamp(70px,7vw,96px)} /* clear the thumbnail rail */
   /* isolation + translateZ give the frosted card its own compositing layer, so the
      blend-mode cursor (fluid-cursor.js, mix-blend-mode:difference) passing nearby no
      longer forces partial re-blurs that show up as vertical streaks tracking the cursor. */
@@ -1123,18 +1122,12 @@
   #landing .sw-pinfo .pinfo-cv{overflow-wrap:anywhere}
   .pinfo-scroll{max-height:min(70vh,760px);overflow-y:auto;padding:4px 16px 18px;
     -webkit-overflow-scrolling:touch}
-  .pinfo-desc{font-family:"Archivo","Noto Sans TC",system-ui,sans-serif;font-size:14.5px;line-height:1.6;
-    color:var(--paper);opacity:.9;margin:8px 0 4px}
-  .pinfo-desc p{margin:0 0 12px}
   .pinfo-credits{border-top:1px solid var(--line);margin-top:8px;padding-top:16px;
     display:grid;grid-template-columns:88px 1fr;gap:6px 18px}
   .pinfo-ck{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--grey);
     padding-top:3px}
   .pinfo-cv{font-family:"Archivo","Noto Sans TC",system-ui,sans-serif;font-size:15px;line-height:1.5;
     color:var(--paper);margin-bottom:8px}
-  .pinfo-cv .sub{display:block;color:var(--grey);font-family:"IBM Plex Mono","Noto Sans TC",monospace;
-    font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;margin-top:10px}
-  .pinfo-cv .sub:first-child{margin-top:0}
   .pinfo-scroll::-webkit-scrollbar{width:0}
   /* ===== Pinfo compact/hover/open states (universal) =====
      Anchored to the wrapper's right edge so it grows LEFT on hover/open. */
@@ -1170,7 +1163,7 @@
   .pinfo.open .pinfo-toggle{margin-left:0;margin-right:0}
 
   @media(max-width:640px){
-    .pinfo,.proj-page .pinfo{right:12px;top:clamp(128px,16vh,150px);max-width:80vw}
+    .pinfo{right:12px;top:clamp(128px,16vh,150px);max-width:80vw}
     .pinfo-credits{grid-template-columns:1fr;gap:2px}
     .pinfo-ck{padding-top:12px}
   }
@@ -1564,47 +1557,65 @@
   .brandBtn.bf-intro .bf-logo{position:relative;left:auto;top:auto;transform:rotateX(180deg);transition:none}
 </style>
 <script>
-/* ===== Bio floating section nav switch (draft) =====
-   ?nav=1 shows the floating section nav on /about (default), ?nav=0 hides it.
+/* ===== Floating section nav switch =====
+   ?nav=1 / ?nav=0      the bio page's section nav on /about (default on)
    Kept for the session, since the router drops the query string. */
 (function(){
-  var q = null;
-  try{ q = new URLSearchParams(location.search).get("nav"); }catch(e){}
-  if(q === "0" || q === "1"){ try{ sessionStorage.setItem("rz-snav", q); }catch(e){} }
-  else { try{ q = sessionStorage.getItem("rz-snav"); }catch(e){} }
-  if(q === "0") document.documentElement.classList.add("snav-off");
+  var d = document.documentElement, P = null;
+  try{ P = new URLSearchParams(location.search); }catch(e){}
+  function pick(param, key, ok){
+    var q = P ? P.get(param) : null;
+    if(ok.indexOf(q) > -1){ try{ sessionStorage.setItem(key, q); }catch(e){} }
+    else { q = null; try{ q = sessionStorage.getItem(key); }catch(e){} }
+    return q;
+  }
+  if(pick("nav", "rz-snav", ["0","1"]) === "0") d.classList.add("snav-off");
 })();
 </script>
 <style>
-  /* ===== Bio floating section nav (.rz-snav) =====
+  /* ===== Floating section nav (.rz-snav) — bio page + project pages =====
      A capsule that floats over the page on the right edge; it takes no layout space.
      Vertically centred with inset + auto margins (not translateY), because the page
-     transition animates the transform of #about's children. */
+     transition animates the transform of each page's children.
+     .snav-proj = a project page's nav (wider panel, optional Credits item last). */
   .rz-snav{display:none}
-  html.bio-new body.on-rz .rz-snav{display:block}
-  html.snav-off .rz-snav,
+  html.bio-new body.on-rz #about > .rz-snav{display:flex}
+  .page.is-active > .rz-snav.snav-proj{display:flex}
+  html.snav-off #about > .rz-snav,
   body.menu-is-open .rz-snav,
   html.rzb-lock .rz-snav{display:none !important}
+
   .rz-snav{--seg-w:4px;--seg-h:12px;--seg-cur:34px;--snav-w:44px;--snav-r:22px;--snav-px:19px;--snav-py:16px;
-    position:fixed;right:20px;top:0;bottom:0;margin:auto 0;height:max-content;z-index:30;
+    --snav-open:196px;--snav-bg:rgba(22,22,22,.74);
+    position:fixed;right:20px;top:0;bottom:0;margin:auto 0;height:max-content;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);
+    z-index:30;flex-direction:column;
     box-sizing:border-box;width:var(--snav-w);border-radius:var(--snav-r);padding:var(--snav-py) var(--snav-px);
-    background:rgba(22,22,22,.74);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
-    border:1px solid rgba(255,255,255,.10);box-shadow:0 12px 40px rgba(0,0,0,.45);overflow:hidden;
+    border:1px solid rgba(255,255,255,.10);box-shadow:0 12px 40px rgba(0,0,0,.45);overflow:hidden;isolation:isolate;
     color:var(--paper);-webkit-tap-highlight-color:transparent;
     transition:width .38s cubic-bezier(.2,.8,.2,1),border-radius .38s cubic-bezier(.2,.8,.2,1)}
-  .rz-snav.is-open{width:196px;border-radius:18px}
-  /* over the light ending the .74 glass reads grey on paper: go nearly opaque there */
-  .rz-snav.is-light{background:rgba(22,22,22,.94)}
-  .rz-snav ol{list-style:none;margin:0;padding:0}
-  .rz-snav a{display:flex;align-items:center;justify-content:flex-end;gap:10px;
-    min-height:22px;height:calc(var(--h,var(--seg-h)) + 8px);
-    color:inherit;text-decoration:none;white-space:nowrap;outline:none;border-radius:6px;
+  /* the glass: its own layer (isolate + translateZ), so the fluid cursor's blend mode
+     passing nearby can't force partial re-blurs (the vertical streaks the old card fixed) */
+  .rz-snav::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;
+    background:var(--snav-bg);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+    isolation:isolate;-webkit-transform:translateZ(0);transform:translateZ(0)}
+  .rz-snav.snav-proj{--snav-open:340px}
+  .proj-page > .rz-snav{right:clamp(70px,7vw,96px)}            /* clear the thumbnail rail */
+  .rz-snav.is-open{width:min(var(--snav-open), calc(100vw - 24px));border-radius:18px}
+  /* over light ground the .74 glass reads grey: go nearly opaque there */
+  .rz-snav.is-light,.hs-layout > .rz-snav{--snav-bg:rgba(22,22,22,.94)}
+  .rz-snav ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;min-height:0}
+  .rz-snav li{flex:none}
+  .rz-snav .snav-row{display:flex;align-items:center;justify-content:flex-end;gap:10px;box-sizing:border-box;width:100%;
+    min-height:22px;height:calc(var(--h,var(--seg-h)) + 8px);margin:0;padding:0;border:0;background:none;
+    font:inherit;color:inherit;text-align:right;cursor:pointer;
+    text-decoration:none;white-space:nowrap;outline:none;border-radius:6px;
     transition:height .32s cubic-bezier(.2,.8,.2,1)}
   .rz-snav .snav-lbl,.rz-snav .snav-num{font-family:"IBM Plex Mono","Noto Sans TC",monospace;
     opacity:0;transform:translateX(10px);
     transition:opacity .22s ease,transform .22s ease,color .22s ease}
-  .rz-snav .snav-lbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase}
-  .rz-snav .snav-num{font-size:10px;letter-spacing:.06em;color:#8a8a8a}
+  .rz-snav .snav-lbl{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;
+    font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+  .rz-snav .snav-num{flex:none;font-size:10px;letter-spacing:.06em;color:#8a8a8a}
   .rz-snav .snav-seg{position:relative;flex:none;width:var(--seg-w);height:var(--h,var(--seg-h));
     border-radius:2px;background:#4a4a4a;overflow:hidden;
     transition:height .32s cubic-bezier(.2,.8,.2,1),background-color .22s ease}
@@ -1621,22 +1632,46 @@
   .rz-snav.is-open li[data-d="0"] .snav-seg{background:#bdbdbd}
   .rz-snav.is-open li[data-d="1"] .snav-seg{background:#7a7a7a}
   .rz-snav.is-open li.is-cur .snav-seg{background:#3a3a3a}
-  .rz-snav a:focus-visible{box-shadow:inset 0 0 0 1px var(--paper)}
-  .rz-snav.is-open a:focus-visible .snav-lbl{text-decoration:underline;text-underline-offset:3px}
+  .rz-snav .snav-row:focus-visible{box-shadow:inset 0 0 0 1px var(--paper)}
+  .rz-snav.is-open .snav-row:focus-visible .snav-lbl{text-decoration:underline;text-underline-offset:3px}
+  /* Credits: the last item; its list opens underneath it, inside the floater */
+  .rz-snav li.snav-cr{flex:0 1 auto;min-height:0;display:flex;flex-direction:column}
+  .rz-snav li.snav-cr > .snav-row{flex:none}
+  /* the list eases open/closed: the script sets its height (0 → content, at most 50vh) */
+  .rz-snav .snav-credits{flex:none;min-height:0;height:0;overflow:hidden;overscroll-behavior:contain;
+    margin-top:0;box-shadow:inset 0 1px 0 var(--line);opacity:0;white-space:normal;outline:none;
+    scrollbar-width:none;-webkit-overflow-scrolling:touch;
+    transition:height .3s cubic-bezier(.2,.8,.2,1),margin-top .3s cubic-bezier(.2,.8,.2,1),opacity .2s ease}
+  .rz-snav li.is-xp .snav-credits{margin-top:8px;opacity:1;transition:height .3s cubic-bezier(.2,.8,.2,1),margin-top .3s cubic-bezier(.2,.8,.2,1),opacity .24s ease .06s}
+  .rz-snav .snav-credits.is-settled{overflow-y:auto}
+  .rz-snav .snav-cg{padding:14px 0 6px}
+  /* the floater glides (not jumps) when it moves up to make room for the list */
+  .rz-snav.snav-pinned{transition:width .38s cubic-bezier(.2,.8,.2,1),border-radius .38s cubic-bezier(.2,.8,.2,1),top .3s cubic-bezier(.2,.8,.2,1)}
+  .rz-snav .snav-credits::-webkit-scrollbar{width:0}
+  .rz-snav .snav-credits[hidden]{display:none}
+  .rz-snav .snav-credits:focus-visible{box-shadow:inset 0 0 0 1px var(--paper);border-radius:6px}
+  .snav-cg{display:grid;grid-template-columns:88px 1fr;gap:6px 18px;text-align:left}
+  .snav-ck{font-family:"IBM Plex Mono","Noto Sans TC",monospace;font-size:10px;letter-spacing:.13em;
+    text-transform:uppercase;color:var(--grey);padding-top:3px}
+  .snav-cv{font-family:"Archivo","Noto Sans TC",system-ui,sans-serif;font-size:14px;line-height:1.5;
+    color:var(--paper);margin-bottom:8px}
+  .snav-cv .sub{display:block;color:var(--grey);font-family:"IBM Plex Mono","Noto Sans TC",monospace;
+    font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;margin-top:10px}
+  .snav-cv .sub:first-child{margin-top:0}
   /* phone */
   @media (max-width:767px){
-    .rz-snav{--seg-w:3px;--seg-h:9px;--seg-cur:24px;--snav-w:26px;--snav-r:13px;--snav-px:10.5px;--snav-py:10px;right:12px}
-      }
+    .rz-snav,.proj-page > .rz-snav{--seg-w:3px;--seg-h:9px;--seg-cur:24px;--snav-w:26px;--snav-r:13px;--snav-px:10.5px;--snav-py:10px;right:12px}
+  }
   /* touch: at least 44px to hit, even where the capsule is drawn smaller */
   @media (pointer:coarse){
     .rz-snav:not(.is-open){overflow:visible}
     .rz-snav:not(.is-open) .snav-lbl,.rz-snav:not(.is-open) .snav-num{pointer-events:none}
-    .rz-snav:not(.is-open)::before{content:"";position:absolute;top:-10px;bottom:-10px;width:44px;
+    .rz-snav:not(.is-open)::after{content:"";position:absolute;top:-10px;bottom:-10px;width:44px;
       right:calc((var(--snav-w) - 44px) / 2 - 1px)}
-    .rz-snav.is-open a{min-height:44px}
+    .rz-snav.is-open .snav-row{min-height:44px}
   }
   @media (prefers-reduced-motion:reduce){
-    .rz-snav,.rz-snav a,.rz-snav .snav-seg,.rz-snav .snav-lbl,.rz-snav .snav-num{transition:none !important}
+    .rz-snav,.rz-snav .snav-row,.rz-snav .snav-seg,.rz-snav .snav-lbl,.rz-snav .snav-num,.rz-snav .snav-credits{transition:none !important}
   }
 </style>
 <script>
@@ -2180,40 +2215,31 @@
     </section>
 
     <section class="page proj-detail" id="girlfriend">
-      <div class="pinfo">
-        <div class="pinfo-card">
-          <div class="pinfo-head">
-            <div class="pinfo-tabs"><span class="pinfo-tab is-on" data-view="info">Info</span><span class="pinfo-tab" data-view="desc">Description</span></div>
-            <span class="pinfo-toggle" role="switch" aria-label="Toggle floater" aria-checked="false"></span>
-          </div>
-          <div class="pinfo-body">
-            <div class="pinfo-scroll">
-              <div class="pinfo-view is-on" data-view="info">
-                <div class="pinfo-credits">
-                  <div class="pinfo-ck">Project</div><div class="pinfo-cv">Girlfriend</div>
-                  <div class="pinfo-ck">Artist</div><div class="pinfo-cv">Canty</div>
-                  <div class="pinfo-ck">Context</div><div class="pinfo-cv">CSM PDP Year 2 Music Video</div>
-                  <div class="pinfo-ck">Year</div><div class="pinfo-cv">2024</div>
-                  <div class="pinfo-ck">Cinematography</div><div class="pinfo-cv">Shan Huai Chiang<br>Andrea Proano</div>
-                  <div class="pinfo-ck">Color Grading</div><div class="pinfo-cv">Shan Huai Chiang</div>
-                  <div class="pinfo-ck">Costume</div><div class="pinfo-cv">Yeukai Makoni<br>Anna Cantes-Freeman</div>
-                  <div class="pinfo-ck">Makeup &amp; Styling</div><div class="pinfo-cv">Rothie Jang</div>
-                  <div class="pinfo-ck">Story</div><div class="pinfo-cv">Raphael Godfrey<br>Andrea Proano<br>Yeukai Makoni</div>
-                  <div class="pinfo-ck">Choreography</div><div class="pinfo-cv">Raphael Godfrey<br>Yeukai Makoni</div>
-                  <div class="pinfo-ck">Oyster</div><div class="pinfo-cv">Yeukai Makoni</div>
-                  <div class="pinfo-ck">Octopus</div><div class="pinfo-cv">Anna Cantes-Freeman</div>
-                  <div class="pinfo-ck">Dancers</div><div class="pinfo-cv">Matthew (Newtion)<br>Raphael Godfrey</div>
-                  <div class="pinfo-ck">Extras</div><div class="pinfo-cv">Ben Soltani Stevens<br>Kai<br>Bautista Aragones</div>
-                  <div class="pinfo-ck">Special Thanks</div><div class="pinfo-cv">Canty &amp; Full Time Hobby, for this collaboration</div>
-                </div>
-              </div>
-              <div class="pinfo-view" data-view="desc">
-                <div class="pinfo-desc"><p>A music video for Canty's “Girlfriend,” built on an idea of captivity drawn from the song's lyrics — a spectrum of emotion ranging from sensuality and desire to jealousy and possessiveness, and the duality found within romantic relationships. The lyrics never settle on a single pronoun throughout, a deliberate ambiguity that mirrors the song's own title: is “Girlfriend” a person being addressed, a role being performed, or an identity being projected onto someone else? That instability becomes another layer of the captivity theme — the line between captor and captive, desirer and desired, is never quite fixed.</p><p>This video was created for my Year 2 Performance Design and Practice course. As the music was never officially released by Canty, the project is presented here as a series of visual extracts, shown independently from the audio.</p></div>
+      <nav class="rz-snav snav-proj" aria-label="Page sections" data-snav-end=".proj-detail-wrap">
+        <ol>
+          <li><a class="snav-row" href="#girlfriend-overview"><span class="snav-lbl">Overview</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#girlfriend-scene-1-cinema"><span class="snav-lbl">Scene #1: Cinema</span><span class="snav-num">02</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#girlfriend-scene-3-1-pub"><span class="snav-lbl">Scene #3.1: Pub</span><span class="snav-num">03</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#girlfriend-scene-3-2-pub-dances"><span class="snav-lbl">Scene #3.2: Pub — Dances</span><span class="snav-num">04</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li class="snav-cr"><button class="snav-row" type="button" aria-expanded="false" aria-controls="girlfriend-credits"><span class="snav-lbl">Credits</span><span class="snav-num">05</span><span class="snav-seg" aria-hidden="true"><i></i></span></button>
+            <div class="snav-credits" id="girlfriend-credits" role="region" aria-label="Credits" tabindex="0" hidden>
+              <div class="snav-cg">
+                <div class="snav-ck">Cinematography</div><div class="snav-cv">Shan Huai Chiang<br>Andrea Proano</div>
+                <div class="snav-ck">Color Grading</div><div class="snav-cv">Shan Huai Chiang</div>
+                <div class="snav-ck">Costume</div><div class="snav-cv">Yeukai Makoni<br>Anna Cantes-Freeman</div>
+                <div class="snav-ck">Makeup &amp; Styling</div><div class="snav-cv">Rothie Jang</div>
+                <div class="snav-ck">Story</div><div class="snav-cv">Raphael Godfrey<br>Andrea Proano<br>Yeukai Makoni</div>
+                <div class="snav-ck">Choreography</div><div class="snav-cv">Raphael Godfrey<br>Yeukai Makoni</div>
+                <div class="snav-ck">Oyster</div><div class="snav-cv">Yeukai Makoni</div>
+                <div class="snav-ck">Octopus</div><div class="snav-cv">Anna Cantes-Freeman</div>
+                <div class="snav-ck">Dancers</div><div class="snav-cv">Matthew (Newtion)<br>Raphael Godfrey</div>
+                <div class="snav-ck">Extras</div><div class="snav-cv">Ben Soltani Stevens<br>Kai<br>Bautista Aragones</div>
+                <div class="snav-ck">Special Thanks</div><div class="snav-cv">Canty &amp; Full Time Hobby, for this collaboration</div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </li>
+        </ol>
+      </nav>
 
       <div class="proj-detail-wrap">
         <button class="back" data-nav="archive">← Archive</button>
@@ -2230,7 +2256,7 @@
         <h1 class="proj-detail-title">Girlfriend</h1>
         <span class="proj-detail-sub">CSM PDP Year 2 Music Video &nbsp;·&nbsp; 2024</span>
 
-        <div class="proj-detail-section">
+        <div id="girlfriend-overview" class="proj-detail-section">
           <span class="proj-detail-section-label">Overview</span>
           <div class="proj-detail-body">
             <p>Our project begins with an idea of captivity drawn from Canty's lyrics. It depicts a spectrum of emotions, from sensuality and desire to jealousy and possessiveness, reflecting the complexities of human relationships and emotions.</p>
@@ -2240,7 +2266,7 @@
         </div>
 
         <!-- Scene #1: Cinema — colour grading -->
-        <div class="proj-detail-section">
+        <div id="girlfriend-scene-1-cinema" class="proj-detail-section">
           <span class="proj-detail-section-label">Scene #1: Cinema</span>
 
           <h3 class="proj-detail-h3">Color Grading</h3>
@@ -2278,7 +2304,7 @@
         </div>
 
         <!-- Scene #3.1: Pub — lighting -->
-        <div class="proj-detail-section">
+        <div id="girlfriend-scene-3-1-pub" class="proj-detail-section">
           <span class="proj-detail-section-label">Scene #3.1: Pub</span>
           <h3 class="proj-detail-h3">Lighting</h3>
           <div class="proj-detail-body">
@@ -2287,7 +2313,7 @@
         </div>
 
         <!-- Scene #3.2: Pub, Dances — camera movement -->
-        <div class="proj-detail-section">
+        <div id="girlfriend-scene-3-2-pub-dances" class="proj-detail-section">
           <span class="proj-detail-section-label">Scene #3.2: Pub — Dances</span>
           <h3 class="proj-detail-h3">Camera Movement</h3>
           <div class="proj-detail-body">
@@ -2300,26 +2326,17 @@
     </section>
 
     <section class="page proj-detail" id="making-ordinary-sense">
-      <div class="pinfo">
-        <div class="pinfo-card">
-          <div class="pinfo-head">
-            <div class="pinfo-tabs"><span class="pinfo-tab is-on" data-view="info">Info</span></div>
-            <span class="pinfo-toggle" role="switch" aria-label="Toggle floater" aria-checked="false"></span>
-          </div>
-          <div class="pinfo-body">
-            <div class="pinfo-scroll">
-              <div class="pinfo-view is-on" data-view="info">
-                <div class="pinfo-credits">
-                  <div class="pinfo-ck">Project</div><div class="pinfo-cv">Making Ordinary Sense</div>
-                  <div class="pinfo-ck">Featuring</div><div class="pinfo-cv">Jay Lin</div>
-                  <div class="pinfo-ck">Context</div><div class="pinfo-cv">CSM PDP Year 2 Project</div>
-                  <div class="pinfo-ck">Year</div><div class="pinfo-cv">2024</div>
-                </div>
+      <nav class="rz-snav snav-proj" aria-label="Page sections" data-snav-end=".proj-detail-wrap">
+        <ol>
+          <li class="snav-cr"><button class="snav-row" type="button" aria-expanded="false" aria-controls="making-ordinary-sense-credits"><span class="snav-lbl">Credits</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></button>
+            <div class="snav-credits" id="making-ordinary-sense-credits" role="region" aria-label="Credits" tabindex="0" hidden>
+              <div class="snav-cg">
+                <div class="snav-ck">Featuring</div><div class="snav-cv">Jay Lin</div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </li>
+        </ol>
+      </nav>
 
       <div class="proj-detail-wrap">
         <button class="back" data-nav="archive" style="margin-bottom:40px">← Archive</button>
@@ -2412,32 +2429,22 @@
       </nav>
     </section>
     <section class="page proj-detail" id="gig-elephantgym">
-      <div class="pinfo">
-        <div class="pinfo-card">
-          <div class="pinfo-head">
-            <div class="pinfo-tabs"><span class="pinfo-tab is-on" data-view="info">Info</span><span class="pinfo-tab" data-view="desc">Description</span></div>
-            <span class="pinfo-toggle" role="switch" aria-label="Toggle floater" aria-checked="false"></span>
-          </div>
-          <div class="pinfo-body">
-            <div class="pinfo-scroll">
-              <div class="pinfo-view is-on" data-view="info">
-                <div class="pinfo-credits">
-                  <div class="pinfo-ck">Project</div><div class="pinfo-cv">Elephant Gym</div>
-                  <div class="pinfo-ck">Location</div><div class="pinfo-cv">Bristol, United Kingdom</div>
-                  <div class="pinfo-ck">Date</div><div class="pinfo-cv">June 2024</div>
-                  <div class="pinfo-ck">Role</div><div class="pinfo-cv">Photography</div>
-                  <div class="pinfo-ck">Interview</div><div class="pinfo-cv">Anderson Hung</div>
-                  <div class="pinfo-ck">Commission</div><div class="pinfo-cv">Independent</div>
-                  <div class="pinfo-ck">Context</div><div class="pinfo-cv">Unit 9 Portfolio &mdash; Silence as Resistance</div>
-                </div>
-              </div>
-              <div class="pinfo-view" data-view="desc">
-                <div class="pinfo-desc"><p>Taiwanese math-rock band Elephant Gym photographed on their Bristol date in June 2024, made alongside Anderson Hung&rsquo;s interview. Shot while the band were nominated at that year&rsquo;s Golden Melody Awards, when a politically charged interruption from the audience was met with restraint rather than confrontation. Slow shutter speeds trace that restraint as movement &mdash; the starting point for an ongoing inquiry into silence as resistance.</p></div>
+      <nav class="rz-snav snav-proj" aria-label="Page sections" data-snav-end=".proj-detail-wrap">
+        <ol>
+          <li><a class="snav-row" href="#gig-elephantgym-statement"><span class="snav-lbl">Statement</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#gig-elephantgym-the-commission"><span class="snav-lbl">The Commission</span><span class="snav-num">02</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#gig-elephantgym-identity-restraint"><span class="snav-lbl">Identity &amp; Restraint</span><span class="snav-num">03</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#gig-elephantgym-behind-the-lens"><span class="snav-lbl">Behind the Lens</span><span class="snav-num">04</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#gig-elephantgym-silence-as-authorship"><span class="snav-lbl">Silence as Authorship</span><span class="snav-num">05</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li class="snav-cr"><button class="snav-row" type="button" aria-expanded="false" aria-controls="gig-elephantgym-credits"><span class="snav-lbl">Credits</span><span class="snav-num">06</span><span class="snav-seg" aria-hidden="true"><i></i></span></button>
+            <div class="snav-credits" id="gig-elephantgym-credits" role="region" aria-label="Credits" tabindex="0" hidden>
+              <div class="snav-cg">
+                <div class="snav-ck">Interview</div><div class="snav-cv">Anderson Hung</div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </li>
+        </ol>
+      </nav>
 
       <div class="proj-detail-wrap">
         <button class="back" data-nav="live" style="margin-bottom:40px">&larr; Live</button>
@@ -2447,20 +2454,20 @@
         <h1 class="proj-detail-title">Instead of a Rifle</h1>
         <span class="proj-detail-sub">Bristol &nbsp;&middot;&nbsp; 2024</span>
 
-        <div class="proj-detail-section">
+        <div id="gig-elephantgym-statement" class="proj-detail-section">
           <span class="proj-detail-section-label">Statement</span>
           <div class="proj-detail-body">
             <p>Originally developed as an independent commission in June 2024, this project became part of uni project upon reflecting on such thematic relevance. It was this experience that first prompted me to write my dissertation, and eventually led to the development of the wider theme &mdash; silence as resistance. This project serves as an intro to my collective body of work from CSM: it marked the beginning of this line of inquiry, and continues to inform how I think about photography, performance, and the politics of what remains unspoken.</p>
           </div>
         </div>
-        <div class="proj-detail-section">
+        <div id="gig-elephantgym-the-commission" class="proj-detail-section">
           <span class="proj-detail-section-label">The Commission</span>
           <div class="proj-detail-body">
             <p>The project began when my housemate, Anderson Hung &mdash; a BA Fashion Journalism student &mdash; invited me to photograph his interview with Taiwanese math-rock band Elephant Gym ahead of their Bristol show. As someone with experience in concert and documentary photography, I saw this not only as a personal opportunity but also as a professional collaboration across disciplines.</p>
             <p>Shortly after the interview was arranged, the band was nominated for Best Band and Album of the Year at the 2024 Golden Melody Awards &mdash; an unexpected but timely development that added new urgency and context to the work. As Taiwan&rsquo;s most prestigious music award &mdash; owned and hosted by the Taiwanese Ministry of Culture &mdash; the Golden Melody Awards celebrate musical excellence across the Mandarin-speaking world. However, the event has increasingly become a site of political tension. In 2024, Taiwanese singer Panai used her acceptance speech to commemorate the 35th anniversary of the Tiananmen Square massacre, stating: &ldquo;The Tiananmen Square incident is also exactly 35 years old, let&rsquo;s not forget.&rdquo; Such moments, while affirming Taiwan&rsquo;s commitment to free speech, also expose the geopolitical fault lines between Taiwan and China. That year, despite several nominations, no Chinese artists attended the ceremony. For artists like Elephant Gym &mdash; nominated during this politically sensitive moment &mdash; visibility on that stage carried layered significance. My role involved capturing both the live performance and the quieter, off-stage moments that reflected those tensions &mdash; political, emotional, and cultural.</p>
           </div>
         </div>
-        <div class="proj-detail-section">
+        <div id="gig-elephantgym-identity-restraint" class="proj-detail-section">
           <span class="proj-detail-section-label">Identity &amp; Restraint</span>
           <div class="proj-detail-body">
             <p>What emerged from this shoot was more than just a concert record. In the greenroom, we spoke with the band about Taiwanese identity &mdash; a theme that later surfaced during the performance when an audience member interrupted with a politically charged statement. The band responded with restraint, not confrontation. That moment of silence &mdash; and the visible discomfort &mdash; became a form of live political performance in itself.</p>
@@ -2481,14 +2488,14 @@
             <img src="/images/Concerts/elephantgym_bristol-11.jpg" alt="Elephant Gym" loading="lazy">
           </div>
 
-        <div class="proj-detail-section">
+        <div id="gig-elephantgym-behind-the-lens" class="proj-detail-section">
           <span class="proj-detail-section-label">Behind the Lens</span>
           <div class="proj-detail-body">
             <p>That belief &mdash; that art can do the work &mdash; stayed with me as I photographed them in that moment. I didn&rsquo;t just want to document a performance; I wanted to capture their way of fighting &mdash; not with aggression, but with music, with intention, and with a deep commitment to peace. I chose to use a slower shutter speed, allowing motion blur to express not chaos, but purpose &mdash; as if each gesture, each chord, each sway of the body was part of a larger act of resistance. It was as though they were using their performance to carve out space for who they are and what they stand for: Taiwan, democracy, and freedom.</p>
             <p>There was something steadfast in their presence &mdash; not loud, not confrontational, but unwavering. In that moment, they weren&rsquo;t reacting to the audience interruption; they were performing through it. My approach behind the lens was shaped by this clarity: I wasn&rsquo;t capturing stillness, I was capturing belief in motion. Their belief in this way to fight &mdash; this way to peace &mdash; was made visible not only in sound, but in the physical traces of their movement. Photography, too, could honour that.</p>
           </div>
         </div>
-        <div class="proj-detail-section">
+        <div id="gig-elephantgym-silence-as-authorship" class="proj-detail-section">
           <span class="proj-detail-section-label">Silence as Authorship</span>
           <div class="proj-detail-body">
             <p>This project was not just a reflection on those quiet tensions &mdash; the unsaid, the held-back, the moments before and after the music &mdash; but also an awakening. It marked the beginning of my deeper understanding that silence itself could be a form of authorship. In a context where national identity is contested, and where silence can be safer than speech, the band&rsquo;s choice to respond with calm became an act of political agency. That experience became the spark that shaped the foundation of this body of work: a series of responses made not through confrontation, but through stillness. It was through photography that I began to hold space for what remains unspoken &mdash; and to let that silence speak.</p>
@@ -2798,28 +2805,11 @@
     </section>
 
         <section class="page proj-detail" id="pj-hkprotest">
-      <div class="pinfo">
-        <div class="pinfo-card">
-          <div class="pinfo-head">
-            <div class="pinfo-tabs"><span class="pinfo-tab is-on" data-view="info">Info</span><span class="pinfo-tab" data-view="desc">Description</span></div>
-            <span class="pinfo-toggle" role="switch" aria-label="Toggle floater" aria-checked="false"></span>
-          </div>
-          <div class="pinfo-body">
-            <div class="pinfo-scroll">
-              <div class="pinfo-view is-on" data-view="info">
-                <div class="pinfo-credits">
-                  <div class="pinfo-ck">Project</div><div class="pinfo-cv">The Umbrella Movement</div>
-                  <div class="pinfo-ck">Location</div><div class="pinfo-cv">Sham Shui Po, Hong Kong</div>
-                  <div class="pinfo-ck">Date</div><div class="pinfo-cv">11 August 2019</div>
-                </div>
-              </div>
-              <div class="pinfo-view" data-view="desc">
-                <div class="pinfo-desc"><p>Street photographs from Hong Kong's 2019 anti-extradition protests. The umbrella recurs as both private shelter and collective defence, locking into barricades along the march route. Photographed from an overpass above the Sham Shui Po police station on 11 August 2019.</p></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <nav class="rz-snav snav-proj" aria-label="Page sections" data-snav-end=".proj-detail-wrap">
+        <ol>
+          <li><a class="snav-row" href="#pj-hkprotest-statement"><span class="snav-lbl">Statement</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+        </ol>
+      </nav>
 
       <div class="proj-detail-wrap">
         <button class="back" data-nav="photojournalism" style="margin-bottom:40px">← Photo-journalism</button>
@@ -2829,7 +2819,7 @@
         <h1 class="proj-detail-title">The Umbrella Movement</h1>
         <span class="proj-detail-sub">Hong Kong &nbsp;·&nbsp; 2019</span>
 
-        <div class="proj-detail-section">
+        <div id="pj-hkprotest-statement" class="proj-detail-section">
           <span class="proj-detail-section-label">Statement</span>
           <div class="proj-detail-body">
             <p>An umbrella is an extension of private space. A shelter from rain. A shade from sun. A boundary drawn between the self and the mass. A shield raised against tear gas and rubber bullets. A fragile answer to an overwhelming force. An immediate solution to a slow erosion of collective rights. Held alone, it is the smallest architecture of self-interest — a roof for one, a claim to one's own patch of sky. But on those streets it turned, locking rib to rib, canopy to canopy, until every private shelter became a wall no single body could raise on its own. What began as individualist in every sense — a thing you bought, opened, and held for yourself — became a collective force.</p>
@@ -3000,27 +2990,19 @@
       </nav>
     </section>
 <section class="page proj-marquee" id="pt-dualitywithin">
-      <div class="pinfo">
-        <div class="pinfo-card">
-          <div class="pinfo-head">
-            <div class="pinfo-tabs"><span class="pinfo-tab is-on" data-view="info">Info</span></div>
-            <span class="pinfo-toggle" role="switch" aria-label="Toggle floater" aria-checked="false"></span>
-          </div>
-          <div class="pinfo-body">
-            <div class="pinfo-scroll">
-              <div class="pinfo-view is-on" data-view="info">
-                <div class="pinfo-credits">
-                  <div class="pinfo-ck">In Frame</div><div class="pinfo-cv">Goga</div>
-                  <div class="pinfo-ck">Styled by</div><div class="pinfo-cv">Ashley Chu</div>
-                  <div class="pinfo-ck">Directed by</div><div class="pinfo-cv">Shan Huai</div>
-                  <div class="pinfo-ck">Location</div><div class="pinfo-cv">Shanghai International Brand Jewellery Center</div>
-                  <div class="pinfo-ck">Date</div><div class="pinfo-cv">April 2021</div>
-                </div>
+      <nav class="rz-snav snav-proj" aria-label="Page sections" data-snav-end=".proj-detail-wrap">
+        <ol>
+          <li class="snav-cr"><button class="snav-row" type="button" aria-expanded="false" aria-controls="pt-dualitywithin-credits"><span class="snav-lbl">Credits</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></button>
+            <div class="snav-credits" id="pt-dualitywithin-credits" role="region" aria-label="Credits" tabindex="0" hidden>
+              <div class="snav-cg">
+                <div class="snav-ck">In Frame</div><div class="snav-cv">Goga</div>
+                <div class="snav-ck">Styled by</div><div class="snav-cv">Ashley Chu</div>
+                <div class="snav-ck">Directed by</div><div class="snav-cv">Shan Huai</div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </li>
+        </ol>
+      </nav>
       <div class="proj-head">
         <button class="back" data-nav="portraiture">← Portraiture</button>
         <span class="proj-name">Duality Within</span>
@@ -3056,25 +3038,6 @@
       </div>
     </section>
     <section class="page proj-marquee" id="pt-untitledsketch">
-      <div class="pinfo">
-        <div class="pinfo-card">
-          <div class="pinfo-head">
-            <div class="pinfo-tabs"><span class="pinfo-tab is-on" data-view="info">Info</span></div>
-            <span class="pinfo-toggle" role="switch" aria-label="Toggle floater" aria-checked="false"></span>
-          </div>
-          <div class="pinfo-body">
-            <div class="pinfo-scroll">
-              <div class="pinfo-view is-on" data-view="info">
-                <div class="pinfo-credits">
-                  <div class="pinfo-ck">Project</div><div class="pinfo-cv">Untitled Sketch</div>
-                  <div class="pinfo-ck">Location</div><div class="pinfo-cv">Taipei, Taiwan</div>
-                  <div class="pinfo-ck">Date</div><div class="pinfo-cv">2023</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
       <div class="proj-head">
         <button class="back" data-nav="portraiture">&larr; Portraiture</button>
         <span class="proj-name">Untitled Sketch</span>
@@ -3106,28 +3069,6 @@
       </div>
     </section>
 <section class="page proj-marquee" id="proj-butoh">
-      <div class="pinfo">
-        <div class="pinfo-card">
-          <div class="pinfo-head">
-            <div class="pinfo-tabs"><span class="pinfo-tab is-on" data-view="info">Info</span><span class="pinfo-tab" data-view="desc">Description</span></div>
-            <span class="pinfo-toggle" role="switch" aria-label="Toggle floater" aria-checked="false"></span>
-          </div>
-          <div class="pinfo-body">
-            <div class="pinfo-scroll">
-              <div class="pinfo-view is-on" data-view="info">
-                <div class="pinfo-credits">
-                  <div class="pinfo-ck">Feature</div><div class="pinfo-cv">Nigel Daley</div>
-                  <div class="pinfo-ck">Date</div><div class="pinfo-cv">January 24, 2023</div>
-                  <div class="pinfo-ck">Frames</div><div class="pinfo-cv">8</div>
-                </div>
-              </div>
-              <div class="pinfo-view" data-view="desc">
-                <div class="pinfo-desc"><p>Butoh Experiment approaches the Japanese avant-garde form not as documentation, but as visual translation. Butoh &mdash; literally &ldquo;dance of darkness&rdquo; &mdash; emerged from postwar Japan as a rejection of Western ideals of beauty, embracing the grotesque, the decayed, and the transformative. This session with performer Nigel Daley extends that inquiry into the photographic frame: how does the still image hold what butoh treats as ceaseless becoming?</p><p>Through white body paint, projected shadow, and slow accumulation of gesture, the work uncovers the beauty of distortion from within. The darkroom and butoh share a singular focus: both turn inward. A camera documents the exterior; the darkroom and butoh excavate what already exists inside &mdash; muscle memory, suppressed emotion, the latent self.</p><p>These photographs serve as a response to butoh&rsquo;s core inquiry: what makes us uniquely human? What is our condition as a species? How do we reconcile self-interest with massive inequality? We make the world, and it makes us. Butoh&rsquo;s greatness lies in its refusal to look away &mdash; it uses the body as an instrument for examination and self-awareness, forcing us to witness what we would rather hide.</p></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
       <div class="proj-head">
         <button class="back" data-nav="projects">← Projects</button>
         <span class="proj-name">Butoh Experiment</span>
@@ -3168,29 +3109,11 @@
 <section class="page proj-detail hs-layout" id="proj-heysong">
       <!-- Full-bleed hero, right at the top of the page -->
       <img class="hs-hero" src="/images/projects/黑松-cover.jpg" alt="黑松沙士" loading="eager" fetchpriority="high">
-      <div class="pinfo">
-        <div class="pinfo-card">
-          <div class="pinfo-head">
-            <div class="pinfo-tabs"><span class="pinfo-tab is-on" data-view="info">Info</span><span class="pinfo-tab" data-view="desc">Description</span></div>
-            <span class="pinfo-toggle" role="switch" aria-label="Toggle floater" aria-checked="false"></span>
-          </div>
-          <div class="pinfo-body">
-            <div class="pinfo-scroll">
-              <div class="pinfo-view is-on" data-view="info">
-                <div class="pinfo-credits">
-                  <div class="pinfo-ck">Project</div><div class="pinfo-cv">黑松沙士 (HeySong Sarsaparilla)</div>
-                  <div class="pinfo-ck">Studio</div><div class="pinfo-cv">Local Remote</div>
-                  <div class="pinfo-ck">Category</div><div class="pinfo-cv">Branding</div>
-                  <div class="pinfo-ck">Year</div><div class="pinfo-cv">2026</div>
-                </div>
-              </div>
-              <div class="pinfo-view" data-view="desc">
-                <div class="pinfo-desc"><p>Spanning over seven decades, HeySong Sarsaparilla and Soda stand as iconic touchstones of Taiwanese daily life. Commissioned for a major brand overhaul, Taipei studio Local Remote approached these national symbols through a philosophy of subtraction rather than addition. The heritage brand mark, originally inspired by calligrapher Chen Dunhua&rsquo;s seal-script strokes, has been sharpened with a dynamic 70&deg; forward tilt. The ornate classic ribbon emblem was streamlined into minimal, fluid lines, and the bottle labels were dramatically scaled back to allow the design&mdash;and product&mdash;to breathe. While Sarsaparilla retains its signature deep, refined russet and gold palette, the Soda line evolves with vibrant emerald hues and overlapping teal-and-lime geometric circles that evoke carbonated bubbles. Guided by the ethos 撕掉標籤 (&ldquo;tearing off the label&rdquo;), the redesign distils decades of collective memory into a sleek, contemporary visual language without erasing the public&rsquo;s emotional connection.</p><p>As Local Remote&rsquo;s photography producer, my task was to translate this design philosophy from vector art into raw, lived visual culture. Embracing the core art direction of 台灣感性 (Taiwanese Sensibility) and 台潮 (Taiwanese Wave), I oversaw the photography production to bridge nostalgic warmth with a modern edge. We wanted the imagery to feel intimately grounded in local life yet effortlessly cool&mdash;capturing how a 70-year-old flavor naturally moves through modern night markets, convenience stores, and street corners. Through light, texture, and candid staging, the visual showcase doesn&rsquo;t just display new packaging; it honors the sensory relationship Taiwan has had with HeySong for generations, letting a national classic step confidently into the present.</p></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <nav class="rz-snav snav-proj" aria-label="Page sections" data-snav-end=".proj-detail-wrap">
+        <ol>
+          <li><a class="snav-row" href="#proj-heysong-credits"><span class="snav-lbl">Credits</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+        </ol>
+      </nav>
 
       <div class="proj-detail-wrap">
         <div class="proj-detail-section hs-nav-row">
@@ -3274,7 +3197,7 @@
         <div class="proj-detail-img-full is-wide"><img src="/images/projects/黑松-23.avif" alt="黑松汽水" loading="lazy"></div>
 
         <!-- Credits -->
-        <div class="proj-detail-section" style="margin-top:calc(100%/3);margin-bottom:32px">
+        <div id="proj-heysong-credits" class="proj-detail-section" style="margin-top:calc(100%/3);margin-bottom:32px">
           <span class="proj-detail-section-label">Credits</span>
         </div>
         <div class="proj-detail-img-full is-wide" style="margin-bottom:44px"><img src="/images/projects/黑松-20.jpg" alt="黑松沙士 credits" loading="lazy"></div>
@@ -3325,37 +3248,23 @@
       <video class="hs-hero" data-stream="e997d71eb8270f43dddcebf6eeefa9fa"
         poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/e997d71eb8270f43dddcebf6eeefa9fa/thumbnails/thumbnail.jpg?width=1280"
         muted loop playsinline preload="none"></video>
-      <div class="pinfo">
-        <div class="pinfo-card">
-          <div class="pinfo-head">
-            <div class="pinfo-tabs"><span class="pinfo-tab is-on" data-view="info">Info</span><span class="pinfo-tab" data-view="desc">Description</span></div>
-            <span class="pinfo-toggle" role="switch" aria-label="Toggle floater" aria-checked="false"></span>
-          </div>
-          <div class="pinfo-body">
-            <div class="pinfo-scroll">
-              <div class="pinfo-view is-on" data-view="info">
-                <div class="pinfo-credits">
-                  <div class="pinfo-ck">Project</div><div class="pinfo-cv">SUB</div>
-                  <div class="pinfo-ck">Studio</div><div class="pinfo-cv">Local Remote</div>
-                  <div class="pinfo-ck">Category</div><div class="pinfo-cv">Branding</div>
-                  <div class="pinfo-ck">Year</div><div class="pinfo-cv">2026</div>
-                  <div class="pinfo-ck">Team</div>
-                  <div class="pinfo-cv">
+      <nav class="rz-snav snav-proj" aria-label="Page sections" data-snav-end=".proj-detail-wrap">
+        <ol>
+          <li class="snav-cr"><button class="snav-row" type="button" aria-expanded="false" aria-controls="proj-sub-credits"><span class="snav-lbl">Credits</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></button>
+            <div class="snav-credits" id="proj-sub-credits" role="region" aria-label="Credits" tabindex="0" hidden>
+              <div class="snav-cg">
+                <div class="snav-ck">Team</div><div class="snav-cv">
                     <span class="sub">Creative Director</span>Brian Liu
                     <span class="sub">Art Director</span>Yi Xuan Lu
                     <span class="sub">Designer</span>Thomas Liu<br>Ben Song<br>Darren Mulianto<br>Chen Yang
                     <span class="sub">Photography Production</span>Shan Chiang
                     <span class="sub">Project Management</span>Chuck Yang<br>Lo An
                   </div>
-                </div>
-              </div>
-              <div class="pinfo-view" data-view="desc">
-                <div class="pinfo-desc"><p>Located within the Taipei Music Center, SUB officially launched in late 2024. The brand name weaves together three core concepts&mdash;Subterranean, Sub-bass, and Subculture&mdash;aiming to inject an unprecedented, curated edge into Taipei&rsquo;s live music scene. More than just a performance space, SUB is on a mission to unearth emerging artists and pioneer future sounds, steadily cementing its status as Taiwan&rsquo;s ultimate next-generation venue.</p><p>For its brand identity, SUB boldly takes the mixing console&rsquo;s fader as its central concept. By translating audio control scales into fluid, high-tension visual marks, it shapes a raw aesthetic driven by pure instinct and sensory experience. The signature red tone that runs through both the physical space and the visual assets perfectly captures the rare, authentic underground vibe of an old-school live house. While preserving the unfiltered energy of the underground, SUB also meets the modern generation&rsquo;s demand for refined texture, dialing in a completely new vision for music venues that sits flawlessly between the retro and the avant-garde.</p></div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </li>
+        </ol>
+      </nav>
 
       <div class="proj-detail-wrap">
         <div class="proj-detail-section hs-nav-row">
@@ -3429,22 +3338,12 @@
      is still TBD placeholder text. -->
 <section class="page proj-detail hs-layout" id="proj-locallocalpark">
       <img class="hs-hero" src="/images/projects/LLP_1.avif" alt="Local Local Park" loading="eager">
-      <div class="pinfo">
-        <div class="pinfo-card">
-          <div class="pinfo-head">
-            <div class="pinfo-tabs"><span class="pinfo-tab is-on" data-view="info">Info</span><span class="pinfo-tab" data-view="desc">Description</span></div>
-            <span class="pinfo-toggle" role="switch" aria-label="Toggle floater" aria-checked="false"></span>
-          </div>
-          <div class="pinfo-body">
-            <div class="pinfo-scroll">
-              <div class="pinfo-view is-on" data-view="info">
-                <div class="pinfo-credits">
-                  <div class="pinfo-ck">Project</div><div class="pinfo-cv">Local Local Park</div>
-                  <div class="pinfo-ck">Studio</div><div class="pinfo-cv">Local Remote</div>
-                  <div class="pinfo-ck">Category</div><div class="pinfo-cv">Branding</div>
-                  <div class="pinfo-ck">Year</div><div class="pinfo-cv">2026</div>
-                  <div class="pinfo-ck">Team</div>
-                  <div class="pinfo-cv">
+      <nav class="rz-snav snav-proj" aria-label="Page sections" data-snav-end=".proj-detail-wrap">
+        <ol>
+          <li class="snav-cr"><button class="snav-row" type="button" aria-expanded="false" aria-controls="proj-locallocalpark-credits"><span class="snav-lbl">Credits</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></button>
+            <div class="snav-credits" id="proj-locallocalpark-credits" role="region" aria-label="Credits" tabindex="0" hidden>
+              <div class="snav-cg">
+                <div class="snav-ck">Team</div><div class="snav-cv">
                     <span class="sub">Creative Director</span>Brian Liu
                     <span class="sub">Designer</span>Chen Chi Chen<br>Ben Song<br>Xin Jiang<br>Hao Jun Fu
                     <span class="sub">Project Manager</span>April Cheng
@@ -3452,15 +3351,11 @@
                     <span class="sub">Photography Production</span>Shan Chiang
                     <span class="sub">Video Production</span>Intention Co.
                   </div>
-                </div>
-              </div>
-              <div class="pinfo-view" data-view="desc">
-                <div class="pinfo-desc"><p>Local Local Park is a social space that seamlessly integrates dining, mixology, and live music. Just as a green space becomes a park through the embrace of the city around it, human connections require a dedicated locus for stories to unfold.</p><p>The brand identity centers around the &ldquo;pigeon&rdquo;&mdash;the most ubiquitous yet overlooked entity in the urban landscape. Freely navigating streets, parks, and plazas, pigeons naturally converge wherever people gather. Adopting this figure as our logo, we position Local Local Park as a nodal point for urban interaction, where individuals from diverse backgrounds gather effortlessly to share everyday moments.</p><p>Drawing visual cues from 19th- and 20th-century natural museum catalogs, botanical flora manuals, park signage, and the symbolic compositions of European heraldry, we developed a series of emblems representing the brand&rsquo;s four core pillars: Music, Drinks, Meals, and Social. Functioning as urban crests for Local Local Park, each emblem signifies a distinct reason for connection. While generated from a singular design language to ensure system consistency, each graphic retains a distinct character, creating a highly scalable identity system.</p><p>The color palette features a dialogue between a saturated, vibrant green and a warm, deep burgundy. Applied across packaging, menus, uniforms, signage, and merchandise, this signature green serves as a cohesive thread throughout the space, leaving a lasting impression that is both striking and intuitive.</p><p>Find Your Moment. Make It Local.</p><p>Transform every pause into a defining moment of the city.</p></div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </li>
+        </ol>
+      </nav>
 
       <div class="proj-detail-wrap">
         <div class="proj-detail-section hs-nav-row">
@@ -3604,26 +3499,6 @@
       <video class="hs-hero" data-stream="8d9b3df3dd9fd9d25b34955a51e46079"
         poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/8d9b3df3dd9fd9d25b34955a51e46079/thumbnails/thumbnail.jpg?width=1280&time=20s"
         muted loop playsinline preload="none"></video>
-      <div class="pinfo">
-        <div class="pinfo-card">
-          <div class="pinfo-head">
-            <div class="pinfo-tabs"><span class="pinfo-tab is-on" data-view="info">Info</span></div>
-            <span class="pinfo-toggle" role="switch" aria-label="Toggle floater" aria-checked="false"></span>
-          </div>
-          <div class="pinfo-body">
-            <div class="pinfo-scroll">
-              <div class="pinfo-view is-on" data-view="info">
-                <div class="pinfo-credits">
-                  <div class="pinfo-ck">Project</div><div class="pinfo-cv">Martoni Super-E</div>
-                  <div class="pinfo-ck">Agency</div><div class="pinfo-cv">Modular Agency</div>
-                  <div class="pinfo-ck">Role</div><div class="pinfo-cv">Colorist</div>
-                  <div class="pinfo-ck">Year</div><div class="pinfo-cv">2026</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <div class="proj-detail-wrap">
         <div class="proj-detail-section hs-nav-row">
@@ -3645,24 +3520,12 @@
       <video class="hs-hero" data-stream="5d5a347fdc546fa2904564d13861d576"
         poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/5d5a347fdc546fa2904564d13861d576/thumbnails/thumbnail.jpg?width=1280"
         muted loop playsinline preload="none"></video>
-      <div class="pinfo">
-        <div class="pinfo-card">
-          <div class="pinfo-head">
-            <div class="pinfo-tabs"><span class="pinfo-tab is-on" data-view="info">Info</span><span class="pinfo-tab" data-view="desc">Description</span></div>
-            <span class="pinfo-toggle" role="switch" aria-label="Toggle floater" aria-checked="false"></span>
-          </div>
-          <div class="pinfo-body">
-            <div class="pinfo-scroll">
-              <div class="pinfo-view is-on" data-view="info">
-                <div class="pinfo-credits">
-                  <div class="pinfo-ck">Project</div><div class="pinfo-cv">FROMETO</div>
-                  <div class="pinfo-ck">Client</div><div class="pinfo-cv">vacanza</div>
-                  <div class="pinfo-ck">Studio</div><div class="pinfo-cv">Local Remote</div>
-                  <div class="pinfo-ck">Category</div><div class="pinfo-cv">Branding</div>
-                  <div class="pinfo-ck">Service</div><div class="pinfo-cv">Brand Identity<br>Packaging<br>Spatial</div>
-                  <div class="pinfo-ck">Year</div><div class="pinfo-cv">2026</div>
-                  <div class="pinfo-ck">Team</div>
-                  <div class="pinfo-cv">
+      <nav class="rz-snav snav-proj" aria-label="Page sections" data-snav-end=".proj-detail-wrap">
+        <ol>
+          <li class="snav-cr"><button class="snav-row" type="button" aria-expanded="false" aria-controls="proj-frometo-credits"><span class="snav-lbl">Credits</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></button>
+            <div class="snav-credits" id="proj-frometo-credits" role="region" aria-label="Credits" tabindex="0" hidden>
+              <div class="snav-cg">
+                <div class="snav-ck">Team</div><div class="snav-cv">
                     <span class="sub">Creative Director</span>Brian Liu
                     <span class="sub">Designer</span>Chen Chen Chi<br>Mark Yen
                     <span class="sub">Motion Design</span>Ben Song
@@ -3670,15 +3533,11 @@
                     <span class="sub">Photography</span>Shan Huai Chiang
                     <span class="sub">Project Manager</span>April Cheng
                   </div>
-                </div>
-              </div>
-              <div class="pinfo-view" data-view="desc">
-                <div class="pinfo-desc"><p>FROMETO is a sustainable fine-jewelry brand by vacanza, built on the idea of &ldquo;Live-in Fine Jewelry&rdquo;: making fine jewelry a natural part of every day. Its name comes from the Italian <em>frammento</em>, meaning fragment, translated into three English words: from-me-to.</p></div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </li>
+        </ol>
+      </nav>
 
       <div class="proj-detail-wrap">
         <div class="proj-detail-section hs-nav-row">
@@ -3857,13 +3716,13 @@
         <a class="rzb-logo bf-btn" href="/" aria-label="Open menu"><span class="bf" aria-hidden="true"><span class="bf-name">SHAN-HUAI</span><span class="bf-logo"><img class="w" src="/images/system/shanhuailogo_horizontal_white.webp" alt=""><img class="k" src="/images/system/shanhuailogo_horizontal_black.webp" alt=""></span></span></a>
       </div>
       <div class="rz-cursor" aria-hidden="true"><i></i><span>View</span></div>
-      <nav class="rz-snav" aria-label="Page sections">
+      <nav class="rz-snav" aria-label="Page sections" data-snav-light=".rz-end">
         <ol>
-          <li><a href="#rz-about"><span class="snav-lbl">About</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
-          <li><a href="#rz-experience"><span class="snav-lbl">Experience</span><span class="snav-num">02</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
-          <li><a href="#rz-work"><span class="snav-lbl">Selected Work</span><span class="snav-num">03</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
-          <li><a href="#rz-journal"><span class="snav-lbl">Journal</span><span class="snav-num">04</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
-          <li><a href="#rz-contact"><span class="snav-lbl">Contact</span><span class="snav-num">05</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#rz-about"><span class="snav-lbl">About</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#rz-experience"><span class="snav-lbl">Experience</span><span class="snav-num">02</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#rz-work"><span class="snav-lbl">Selected Work</span><span class="snav-num">03</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#rz-journal"><span class="snav-lbl">Journal</span><span class="snav-num">04</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#rz-contact"><span class="snav-lbl">Contact</span><span class="snav-num">05</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
         </ol>
       </nav>
 
@@ -4073,31 +3932,6 @@
 
     <!-- ZERO-CASE POLICY PROJECT PAGE -->
     <section class="page proj-detail" id="proj-zerocase">
-      <div class="pinfo">
-        <div class="pinfo-card">
-          <div class="pinfo-head">
-            <div class="pinfo-tabs"><span class="pinfo-tab is-on" data-view="info">Info</span><span class="pinfo-tab" data-view="desc">Description</span></div>
-            <span class="pinfo-toggle" role="switch" aria-label="Toggle floater" aria-checked="false"></span>
-          </div>
-          <div class="pinfo-body">
-            <div class="pinfo-scroll">
-              <div class="pinfo-view is-on" data-view="info">
-                <div class="pinfo-credits">
-        <div class="pinfo-ck">Series</div><div class="pinfo-cv">Zero-Case Policy</div>
-        <div class="pinfo-ck">Year</div><div class="pinfo-cv">2021</div>
-        <div class="pinfo-ck">Role</div><div class="pinfo-cv">Concept, Photography, Direction</div>
-        <div class="pinfo-ck">Actor</div><div class="pinfo-cv">Anderson Hung</div>
-        <div class="pinfo-ck">Location</div><div class="pinfo-cv">London</div>
-        <div class="pinfo-ck">Frames</div><div class="pinfo-cv">5</div>
-              </div>
-              </div>
-              <div class="pinfo-view" data-view="desc">
-                <div class="pinfo-desc"><p>Zero-Case Policy responds to China's zero-case pandemic strategy — the pursuit of an impossible absolute, a world of zero cases held in place by total containment. Shot inside the glasshouses of a botanical garden, a lone figure in a disposable protective suit moves through spaces built to keep life alive under glass.</p><p>The greenhouse becomes a metaphor for quarantine: a sealed, controlled environment where nature is both protected and imprisoned. Beyond the pandemic, the work reaches toward a wider zero-tolerance — the impulse to eliminate rather than accommodate, to seal off whatever cannot be perfectly controlled. The series sits between documentary and staged performance, questioning how far we will go to engineer safety, and what we enclose in the process.</p></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
       <div class="proj-detail-wrap zc-wrap">
         <button class="back" data-nav="projects">← Projects</button>
 
@@ -4124,32 +3958,26 @@
 
     <!-- HOLY COMMUNION PROJECT PAGE -->
     <section class="page proj-detail" id="proj-holycommunion">
-      <div class="pinfo">
-        <div class="pinfo-card">
-          <div class="pinfo-head">
-            <div class="pinfo-tabs"><span class="pinfo-tab is-on" data-view="info">Info</span><span class="pinfo-tab" data-view="desc">Description</span></div>
-            <span class="pinfo-toggle" role="switch" aria-label="Toggle floater" aria-checked="false"></span>
-          </div>
-          <div class="pinfo-body">
-            <div class="pinfo-scroll">
-              <div class="pinfo-view is-on" data-view="info">
-                <div class="pinfo-credits">
-        <div class="pinfo-ck">Project</div><div class="pinfo-cv">Holy Communion: A Reality Check</div>
-        <div class="pinfo-ck">Context</div><div class="pinfo-cv">Live @CSM Experiments Project</div>
-        <div class="pinfo-ck">Year</div><div class="pinfo-cv">2025</div>
-        <div class="pinfo-ck">Role</div><div class="pinfo-cv">Concept, Direction, Performance Design</div>
-        <div class="pinfo-ck">Medium</div><div class="pinfo-cv">Live Performance, VR, Projection</div>
-        <div class="pinfo-ck">Performers</div><div class="pinfo-cv">Anna Cantes<br>Andrea Proano<br>Richard</div>
-        <div class="pinfo-ck">Special Thanks</div><div class="pinfo-cv">Dimitrios Coumados, Michael Breakey, Michael Ste Croix, and Faust Peneyra — for assisting with technological support and guidance.</div>
-              </div>
-              </div>
-              <div class="pinfo-view" data-view="desc">
-                <div class="pinfo-desc"><p><em>Holy Communion: A Reality Check</em> replaces bread and wine with water and blue pills — referencing <em>The Matrix</em> — to explore faith as an act of submission, to truth or to comfort. One participant is isolated inside a VR cathedral while the audience observes from outside through fragmented projections, echoing Plato’s Cave.</p><p>The work stages the tension between collective seeing and the private, immersive narratives we accept alone. It does not dismantle faith, but reveals its scaffolding: repetition, symbolism, and the quiet tension between submission and awareness.</p></div>
+      <nav class="rz-snav snav-proj" aria-label="Page sections" data-snav-end=".proj-detail-wrap">
+        <ol>
+          <li><a class="snav-row" href="#proj-holycommunion-artist-statement"><span class="snav-lbl">Artist Statement</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-holycommunion-context-intention"><span class="snav-lbl">Context &amp; Intention</span><span class="snav-num">02</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-holycommunion-moodboard-concepts"><span class="snav-lbl">Moodboard &amp; Concepts</span><span class="snav-num">03</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-holycommunion-technical-process"><span class="snav-lbl">Technical Process</span><span class="snav-num">04</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-holycommunion-lighting-design"><span class="snav-lbl">Lighting Design</span><span class="snav-num">05</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-holycommunion-execution-work-in-progress"><span class="snav-lbl">Execution &amp; Work in Progress</span><span class="snav-num">06</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-holycommunion-religious-awareness-ethics-in-symbolic-practice"><span class="snav-lbl">Religious Awareness &amp; Ethics in Symbolic Practice</span><span class="snav-num">07</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-holycommunion-reflection-on-health-safety"><span class="snav-lbl">Reflection on Health &amp; Safety</span><span class="snav-num">08</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li class="snav-cr"><button class="snav-row" type="button" aria-expanded="false" aria-controls="proj-holycommunion-credits"><span class="snav-lbl">Credits</span><span class="snav-num">09</span><span class="snav-seg" aria-hidden="true"><i></i></span></button>
+            <div class="snav-credits" id="proj-holycommunion-credits" role="region" aria-label="Credits" tabindex="0" hidden>
+              <div class="snav-cg">
+                <div class="snav-ck">Performers</div><div class="snav-cv">Anna Cantes<br>Andrea Proano<br>Richard</div>
+                <div class="snav-ck">Special Thanks</div><div class="snav-cv">Dimitrios Coumados, Michael Breakey, Michael Ste Croix, and Faust Peneyra — for assisting with technological support and guidance.</div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </li>
+        </ol>
+      </nav>
 
       <div class="proj-detail-wrap">
         <button class="back" data-nav="projects">← Projects</button>
@@ -4170,7 +3998,7 @@
         <span class="proj-detail-sub">Live @CSM Experiments Project &nbsp;·&nbsp; 2025</span>
 
         <!-- Artist Statement -->
-        <div class="proj-detail-section">
+        <div id="proj-holycommunion-artist-statement" class="proj-detail-section">
           <span class="proj-detail-section-label">Artist Statement</span>
           <div class="proj-detail-body">
             <p>Faith—whether religious or ideological—is an act of submission: not to truth alone, but often to comfort. <em>Holy Communion</em> explores this tension by replacing bread and wine with water and blue pills, referencing <em>The Matrix</em>. The ritual becomes a site of inquiry—does belief emerge from conviction, or from convenience?</p>
@@ -4180,7 +4008,7 @@
         </div>
 
         <!-- Context & Intention -->
-        <div class="proj-detail-section">
+        <div id="proj-holycommunion-context-intention" class="proj-detail-section">
           <span class="proj-detail-section-label">Context &amp; Intention</span>
           <div class="proj-detail-body">
             <p>Fast forward to 2020, when the pandemic moved all physical gatherings online—even sacred rituals like Holy Communion. Suddenly, people were performing it at home, with their own bread and wine, through a screen. That shift—blending 2000 years of tradition with digital convenience—made me pause. It felt strange, and yet revealing.</p>
@@ -4194,7 +4022,7 @@
         </div>
 
         <!-- Moodboard & Concepts -->
-        <div class="proj-detail-section">
+        <div id="proj-holycommunion-moodboard-concepts" class="proj-detail-section">
           <span class="proj-detail-section-label">Moodboard &amp; Concepts</span>
           <div class="proj-detail-cross">
             <img src="https://images.squarespace-cdn.com/content/v1/64b8effc2a267405a4c07304/56e7081b-491d-41c5-b294-39b1eeb5d41a/Holy-Eucharist-scaled.jpg" alt="Holy Eucharist" loading="lazy">
@@ -4243,7 +4071,7 @@
         </div>
 
         <!-- Technical Process -->
-        <div class="proj-detail-section">
+        <div id="proj-holycommunion-technical-process" class="proj-detail-section">
           <span class="proj-detail-section-label">Technical Process</span>
 
           <h3 class="proj-detail-h3">Sharktooth Scrim</h3>
@@ -4277,7 +4105,7 @@
         </div>
 
         <!-- Lighting Design -->
-        <div class="proj-detail-section">
+        <div id="proj-holycommunion-lighting-design" class="proj-detail-section">
           <span class="proj-detail-section-label">Lighting Design</span>
           <div class="proj-detail-body">
             <p>The lighting for <em>Holy Communion</em> was designed to resemble a single beam piercing into a cave-like space, referencing Plato's Allegory of the Cave. As shown above, the light falls precisely on the participant's ritual zone, echoing a moment of revelation or clarity entering darkness.</p>
@@ -4288,7 +4116,7 @@
         </div>
 
         <!-- Execution & Work in Progress -->
-        <div class="proj-detail-section">
+        <div id="proj-holycommunion-execution-work-in-progress" class="proj-detail-section">
           <span class="proj-detail-section-label">Execution &amp; Work in Progress</span>
 
           <p class="proj-detail-caption">Captured during the work-in-progress phase</p>
@@ -4350,7 +4178,7 @@
         <span class="proj-detail-coda-label">Notes &amp; Reflections</span>
 
         <!-- Religious Awareness & Ethics -->
-        <div class="proj-detail-section">
+        <div id="proj-holycommunion-religious-awareness-ethics-in-symbolic-practice" class="proj-detail-section">
           <span class="proj-detail-section-label">Religious Awareness &amp; Ethics in Symbolic Practice</span>
           <div class="proj-detail-body">
             <p>My decision to replace the traditional communion elements—bread and wine—with water and a blue pill was not made lightly. It was based on a theological and conceptual understanding of representation in Christian ritual. Communion, at its core, is a reenactment of the Last Supper. Whether one uses actual wine or grape juice, unleavened bread or biscuits, these are already <em>representations</em> of Christ's body and blood. What we receive is not the literal flesh or blood of Jesus, but a symbolic act of remembrance, obedience, and reflection.</p>
@@ -4373,7 +4201,7 @@
         </div>
 
         <!-- Reflection on Health & Safety -->
-        <div class="proj-detail-section">
+        <div id="proj-holycommunion-reflection-on-health-safety" class="proj-detail-section">
           <span class="proj-detail-section-label">Reflection on Health &amp; Safety</span>
           <div class="proj-detail-body">
             <p>The most unexpected resistance I encountered came when I proposed a simple gesture: offering something entirely harmless, fully disclosed, and symbolically charged. The pill was empty, gelatin-based, and entirely inert. From a medical standpoint, there was no risk involved. But the proposal was initially turned down under health and safety guidelines. The concern wasn't about the substance itself—it posed no real danger—but about the act of ingesting it. There was fear it might trigger psychological discomfort, confusion, or evoke the feeling of performing a medicated or ritual act.</p>
@@ -7444,153 +7272,281 @@
 /* ===== /LLP REELS ===== */
 </script>
 <script>
-/* ===== Bio floating section nav (.rz-snav) =====
+/* ===== Floating section nav (.rz-snav) — bio page + project pages =====
+   One script for every .rz-snav (each sits directly inside its .page):
    - at rest: a slim capsule of segments; the current section is a long pill whose
      fill shows reading progress through it
    - hover / keyboard focus (or a tap on touch) opens it leftward into a labelled panel,
      with a dock-style swell around the pointed-at row
-   - its links are plain #anchors: the bio page's own click handler (#about, capture)
-     glides to them under the top bar; this only marks the target current at once
+   - section items are plain #anchors. On the bio page its own click handler (#about,
+     capture) glides to them; elsewhere this scrolls the page's own scroller
+   - Credits (project pages, last item) is a button: its list opens underneath it only
+     while the pointer or focus is on it; Enter/Space (or a tap) toggles it
    - offsets are measured on entry and on resize (ResizeObserver → rAF); scrolling
-     only reads scrollY, once per frame. No libraries. */
+     only reads the scroll position, once per frame. No libraries. */
 (function(){
   "use strict";
-  var about = document.getElementById("about");
-  var nav = about && about.querySelector(".rz-snav");
-  if(!nav) return;
   var root = document.documentElement;
-  var items = [].slice.call(nav.querySelectorAll("li"));
-  var links = items.map(function(li){ return li.querySelector("a"); });
-  var fills = items.map(function(li){ return li.querySelector(".snav-seg i"); });
-  var secs = links.map(function(a){ return document.getElementById(a.getAttribute("href").slice(1)); });
-  if(secs.some(function(s){ return !s; })) return;
   var reduceMQ = matchMedia("(prefers-reduced-motion: reduce)");
   var phoneMQ = matchMedia("(max-width:767px)");
-  function on(){ return root.classList.contains("bio-new") && !root.classList.contains("snav-off") && about.classList.contains("is-active"); }
+  [].forEach.call(document.querySelectorAll(".rz-snav"), function(nav){ init(nav); });
 
-  /* ---------- layout cache ---------- */
-  var tops = [], ends = [], vh = innerHeight, maxY = 0, lightTop = Infinity, light = false;
-  var endEl = about.querySelector(".rz-end");
-  function measure(){
-    if(!on()) return;
-    var sy = scrollY;
-    tops = secs.map(function(s){ return s.getBoundingClientRect().top + sy; });
-    ends = secs.map(function(s, i){ return i < secs.length - 1 ? tops[i + 1] : s.getBoundingClientRect().bottom + sy; });
-    vh = innerHeight;
-    maxY = Math.max(0, root.scrollHeight - vh);
-    lightTop = endEl ? endEl.getBoundingClientRect().top + sy : Infinity;
-    update();
-  }
-  var mRaf = 0;
-  function queueMeasure(){ if(!mRaf) mRaf = requestAnimationFrame(function(){ mRaf = 0; measure(); }); }
-  if(typeof ResizeObserver === "function") new ResizeObserver(queueMeasure).observe(about.querySelector(".rz") || about);
-  addEventListener("resize", queueMeasure);
-
-  /* ---------- current section + progress ---------- */
-  var cur = -1, lockTo = -1, lockUntil = 0;
-  function setCur(i){
-    if(i === cur) return;
-    if(cur >= 0){ items[cur].classList.remove("is-cur"); links[cur].removeAttribute("aria-current"); }
-    cur = i;
-    items[i].classList.add("is-cur"); links[i].setAttribute("aria-current", "true");
-    swell();
-  }
-  function update(){
-    if(!tops.length) return;
-    var sy = scrollY, line = sy + vh * 0.4, i = 0;
-    for(var k = 0; k < tops.length; k++) if(tops[k] <= line) i = k;
-    var p = (line - tops[i]) / Math.max(1, ends[i] - tops[i]);
-    if(sy >= maxY - 2){ i = tops.length - 1; p = 1; }      // the very end of the page reads as the last section, done
-    if(lockTo >= 0){                                         // a clicked item stays current while the glide gets there
-      if(performance.now() < lockUntil && i !== lockTo) i = lockTo, p = Math.max(0, Math.min(1, (line - tops[i]) / Math.max(1, ends[i] - tops[i])));
-      else lockTo = -1;
-    }
-    setCur(i);
-    var l = sy + vh / 2 + 90 >= lightTop;                    // the capsule's lower half reaches the light ending
-    if(l !== light){ light = l; nav.classList.toggle("is-light", l); }
-    var v = Math.max(0, Math.min(1, p)).toFixed(3);
-    if(fills[i]._p !== v){ fills[i]._p = v; items[i].style.setProperty("--p", v); }
-  }
-  var sRaf = 0;
-  addEventListener("scroll", function(){
-    if(!sRaf && on()) sRaf = requestAnimationFrame(function(){ sRaf = 0; update(); });
-  }, { passive:true });
-
-  /* ---------- open / close + dock swell ---------- */
-  var open = false, hov = -1;
-  function swell(){
-    var base = phoneMQ.matches ? 9 : 12, amp = base === 9 ? 7.5 : 10;
-    items.forEach(function(li, i){
-      var d = (open && hov >= 0) ? Math.abs(i - hov) : -1;
-      if(d >= 0 && d <= 1) li.setAttribute("data-d", d); else li.removeAttribute("data-d");
-      li.classList.toggle("is-hov", open && i === hov);
-      var h = d >= 0 ? base + amp * Math.max(0, 1 - d / 2) : base;
-      li.style.setProperty("--h", h + "px");
+  function init(nav){
+    var page = nav.parentElement;
+    if(!page || !page.classList.contains("page")) return;
+    var isBio = page.id === "about";
+    var items = [].slice.call(nav.querySelectorAll("ol > li"));
+    var rows = items.map(function(li){ return li.querySelector(".snav-row"); });
+    var crIdx = -1, crBtn = null, crList = null;
+    items.forEach(function(li, i){ if(li.classList.contains("snav-cr")){ crIdx = i; crBtn = rows[i]; crList = li.querySelector(".snav-credits"); } });
+    // the section items: every row that links to an id on the page
+    var sIdx = [], secs = [];
+    rows.forEach(function(r, i){
+      var h = r.getAttribute("href");
+      if(h && h.charAt(0) === "#"){ var s = document.getElementById(h.slice(1)); if(s){ sIdx.push(i); secs.push(s); } }
     });
+    var endEl = nav.getAttribute("data-snav-end") ? page.querySelector(nav.getAttribute("data-snav-end")) : null;
+    var lightEl = nav.getAttribute("data-snav-light") ? page.querySelector(nav.getAttribute("data-snav-light")) : null;
+
+    function on(){
+      if(!page.classList.contains("is-active")) return false;
+      if(isBio) return root.classList.contains("bio-new") && !root.classList.contains("snav-off");
+      return true;
+    }
+    // the page scrolls itself (.proj-detail: overflow-y auto, 100vh) or the window does
+    var inner = false;
+    function scroller(){ return inner ? page : window; }
+    function getY(){ return inner ? page.scrollTop : scrollY; }
+    function viewH(){ return inner ? page.clientHeight : innerHeight; }
+    function topOf(el){ return el.getBoundingClientRect().top - (inner ? page.getBoundingClientRect().top : 0) + getY(); }
+    function bottomOf(el){ return el.getBoundingClientRect().bottom - (inner ? page.getBoundingClientRect().top : 0) + getY(); }
+
+    /* ---------- layout cache ---------- */
+    var tops = [], ends = [], vh = 0, maxY = 0, lightTop = Infinity, light = false;
+    function measure(){
+      if(!on()) return;
+      var oy = getComputedStyle(page).overflowY;
+      var was = inner; inner = (oy === "auto" || oy === "scroll");
+      if(was !== inner){ (was ? page : window).removeEventListener("scroll", onScroll); scroller().addEventListener("scroll", onScroll, { passive:true }); }
+      vh = viewH();
+      tops = secs.map(topOf);
+      ends = secs.map(function(s, i){
+        if(i < secs.length - 1) return tops[i + 1];
+        return Math.max(bottomOf(s), endEl ? bottomOf(endEl) : 0);
+      });
+      maxY = Math.max(0, (inner ? page.scrollHeight : root.scrollHeight) - vh);
+      lightTop = lightEl ? topOf(lightEl) : Infinity;
+      update();
+    }
+    var mRaf = 0;
+    function queueMeasure(){ if(!mRaf) mRaf = requestAnimationFrame(function(){ mRaf = 0; measure(); }); }
+    if(typeof ResizeObserver === "function"){
+      var ro = new ResizeObserver(queueMeasure);
+      ro.observe(endEl || (isBio && page.querySelector(".rz")) || page);
+    }
+    addEventListener("resize", queueMeasure);
+
+    /* ---------- current section + progress ---------- */
+    // a clicked item stays current until the page has landed and then moves again
+    // (or the visitor takes over with wheel / touch / keys mid-scroll)
+    var cur = -1, lockTo = -1, lockY = 0, landed = false;
+    function unlock(e){ if(lockTo >= 0 && !(e && e.target && e.target.closest && e.target.closest(".rz-snav"))){ lockTo = -1; onScroll(); } }
+    ["wheel", "touchmove", "keydown"].forEach(function(t){ addEventListener(t, unlock, { passive:true, capture:true }); });
+    function setCur(i){                      // i = index into rows (or -1)
+      if(i === cur) return;
+      if(cur >= 0){ items[cur].classList.remove("is-cur"); rows[cur].removeAttribute("aria-current"); }
+      cur = i;
+      if(i >= 0){ items[i].classList.add("is-cur"); rows[i].setAttribute("aria-current", "true"); }
+      swell();
+    }
+    function prog(k, line){ return Math.max(0, Math.min(1, (line - tops[k]) / Math.max(1, ends[k] - tops[k]))); }
+    function update(){
+      if(!tops.length) return;
+      var sy = getY(), line = sy + vh * 0.4, k = 0;
+      for(var j = 0; j < tops.length; j++) if(tops[j] <= line) k = j;
+      var p = prog(k, line);
+      if(sy >= maxY - 2){ k = tops.length - 1; p = 1; }      // the very end reads as the last section, done
+      if(lockTo >= 0){
+        if(landed && Math.abs(sy - lockY) >= 3) lockTo = -1;
+        if(lockTo >= 0 && k !== lockTo){ k = lockTo; p = prog(k, line); }
+      }
+
+      setCur(sIdx[k]);
+      if(lightEl){
+        var l = sy + vh / 2 + 90 >= lightTop;                  // the capsule's lower half reaches the light ending
+        if(l !== light){ light = l; nav.classList.toggle("is-light", l); }
+      }
+      var v = p.toFixed(3), li = items[sIdx[k]];
+      if(li._p !== v){ li._p = v; li.style.setProperty("--p", v); }
+    }
+    var sRaf = 0;
+    function onScroll(){ if(!sRaf && on()) sRaf = requestAnimationFrame(function(){ sRaf = 0; update(); }); }
+    window.addEventListener("scroll", onScroll, { passive:true });
+
+    /* ---------- open / close, dock swell, credits ---------- */
+    var open = false, hov = -1, xp = false;
+    function swell(){
+      var base = phoneMQ.matches ? 9 : 12, amp = base === 9 ? 7.5 : 10;
+      items.forEach(function(li, i){
+        var d = (open && hov >= 0) ? Math.abs(i - hov) : -1;
+        if(d >= 0 && d <= 1) li.setAttribute("data-d", d); else li.removeAttribute("data-d");
+        li.classList.toggle("is-hov", open && i === hov);
+        li.style.setProperty("--h", (d >= 0 ? base + amp * Math.max(0, 1 - d / 2) : base) + "px");
+      });
+    }
+    // Credits list: eases open to its content height (at most 50vh) and back to 0.
+    // While open the floater is pinned where it was, so it grows downward; it glides up
+    // only as far as it must to stay in view, and glides back to centre once closed.
+    var pinned = false, pinTop = 0, xpT = 0, pinT = 0;
+    function after(el, ms, fn){              // run fn when el's height transition ends (or right away with reduced motion)
+      if(reduceMQ.matches) return fn(), 0;
+      var done = false, end = function(e){ if(e && (e.target !== el || e.propertyName !== "height")) return; if(done) return; done = true; el.removeEventListener("transitionend", end); clearTimeout(t); fn(); };
+      el.addEventListener("transitionend", end);
+      var t = setTimeout(end, ms + 80);
+      return t;
+    }
+    function setXp(v){
+      if(!crList || v === xp) return;
+      xp = v;
+      clearTimeout(xpT); clearTimeout(pinT);
+      crBtn.setAttribute("aria-expanded", v ? "true" : "false");
+      var from = crList.offsetHeight;
+      if(v){
+        crList.hidden = false;
+        var rest = nav.offsetHeight - from;      // the floater without the list
+        var target = Math.max(0, Math.min(crList.firstElementChild.offsetHeight, Math.round(innerHeight * 0.5), innerHeight - 32 - rest - 8));
+        var r = nav.getBoundingClientRect();
+        if(!pinned){                            // pin it exactly where it is first, then allow the glide
+          pinned = true; pinTop = r.top; nav.style.top = r.top + "px"; nav.style.bottom = "auto"; nav.style.margin = "0";
+          void nav.offsetHeight; nav.classList.add("snav-pinned");
+        }
+        var finalH = rest + target + 8, room = innerHeight - 16;
+        nav.style.top = (pinTop + finalH > room ? Math.max(16, room - finalH) : pinTop) + "px";
+        crList.classList.remove("is-settled");
+        crList.style.height = from + "px";
+        void crList.offsetHeight;                 // start from where it is (also mid-close)
+        items[crIdx].classList.add("is-xp");
+        crList.style.height = target + "px";
+        xpT = after(crList, 300, function(){ crList.classList.add("is-settled"); });
+      } else {
+        crList.classList.remove("is-settled");
+        crList.style.height = from + "px";
+        void crList.offsetHeight;
+        items[crIdx].classList.remove("is-xp");
+        crList.style.height = "0px";
+        if(pinned) nav.style.top = pinTop + "px";  // glide back to where it was before the list opened
+        xpT = after(crList, 300, function(){ crList.hidden = true; crList.scrollTop = 0; if(!open) unpin(); });
+      }
+    }
+    function unpin(){
+      if(!pinned) return;
+      if(xp) return;
+      // aim for the height it will have at rest (the swell is still easing back as it closes)
+      var cs = getComputedStyle(nav), base = phoneMQ.matches ? 9 : 12, segCur = phoneMQ.matches ? 24 : 34;
+      var restH = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth);
+      items.forEach(function(li, i){ restH += Math.max(22, (i === cur ? segCur : base) + 8); });
+      var centre = Math.round((innerHeight - restH) / 2), now = parseFloat(nav.style.top);
+      if(isNaN(now)) now = centre;
+      var clear = function(){ pinned = false; nav.classList.remove("snav-pinned"); nav.style.top = nav.style.bottom = nav.style.margin = ""; };
+      if(reduceMQ.matches || Math.abs(now - centre) < 1) return clear();
+      nav.style.top = centre + "px";             // glide back to centre, then hand back to CSS
+      pinT = setTimeout(clear, 340);
+    }
+    function setOpen(v){
+      if(v === open) return;
+      open = v; nav.classList.toggle("is-open", v);
+      if(v){ clearTimeout(pinT); }
+      else { hov = -1; if(xp) setXp(false); else unpin(); }
+      swell();
+    }
+    function rowOf(t){ var li = t && t.closest && t.closest(".rz-snav ol > li"); return li ? items.indexOf(li) : -1; }
+    function point(i){                       // the pointer/focus is on row i
+      if(i !== hov){ hov = i; swell(); }
+      if(crIdx >= 0) setXp(i === crIdx);    // credits only while on Credits (or inside its list)
+    }
+
+    // mouse: hover opens; the row under the pointer swells
+    nav.addEventListener("pointerenter", function(e){ if(e.pointerType === "mouse") setOpen(true); });
+    nav.addEventListener("pointermove", function(e){
+      if(e.pointerType !== "mouse") return;
+      if(!open) setOpen(true);
+      var i = rowOf(e.target);
+      if(i >= 0) point(i);
+    });
+    nav.addEventListener("pointerleave", function(e){
+      if(e.pointerType !== "mouse") return;
+      var f = nav.querySelector(":focus-visible");
+      if(f){ point(rowOf(f)); return; }      // keyboard focus is still inside: stay open on it
+      setOpen(false);
+    });
+    // keyboard: focus opens; the focused row swells; focus leaving closes
+    nav.addEventListener("focusin", function(e){
+      if(!e.target.matches(":focus-visible")) return;
+      setOpen(true); point(rowOf(e.target));
+    });
+    nav.addEventListener("focusout", function(e){
+      if(!nav.contains(e.relatedTarget) && !nav.matches(":hover")) setOpen(false);
+    });
+
+    // touch: a tap on the closed capsule opens it (and doesn't follow the link);
+    // a tap on a section jumps there and closes; a tap outside closes everything
+    var lastType = "mouse";
+    nav.addEventListener("pointerdown", function(e){ lastType = e.pointerType; }, true);
+    document.addEventListener("click", function(e){
+      if(!nav.contains(e.target) || lastType === "mouse") return;
+      if(!open){ e.preventDefault(); e.stopPropagation(); setOpen(true); }
+    }, true);
+    document.addEventListener("pointerdown", function(e){
+      if(open && e.pointerType !== "mouse" && !nav.contains(e.target)) setOpen(false);
+    }, true);
+
+    // Credits: never scrolls the page. Keyboard Enter/Space or a tap toggles the list
+    if(crBtn) crBtn.addEventListener("click", function(e){
+      e.preventDefault();
+      if(e.detail === 0 || lastType !== "mouse"){
+        var v = !xp; setXp(v);
+        if(v){ hov = crIdx; swell(); }
+      } else point(crIdx);
+    });
+
+    // section items: scroll there (the bio page's own handler already did) and mark current now
+    nav.addEventListener("click", function(e){
+      var a = e.target.closest && e.target.closest("a.snav-row");
+      if(!a || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      var r = rows.indexOf(a), k = sIdx.indexOf(r); if(k < 0) return;
+      if(!tops.length) measure();
+      var y = Math.max(0, topOf(secs[k]) - Math.round(vh * 0.14));
+      if(!e.defaultPrevented){
+        e.preventDefault();
+        scroller().scrollTo({ top:y, behavior: reduceMQ.matches ? "auto" : "smooth" });
+        if(!secs[k].hasAttribute("tabindex")) secs[k].setAttribute("tabindex", "-1");
+        if(lastType === "mouse" && e.detail === 0) secs[k].focus({ preventScroll:true });   // keyboard: follow focus to the section
+      }
+      lockTo = k; landed = false;
+      (function settle(prev, still){              // landed = the scroll has stopped for ~12 frames
+        requestAnimationFrame(function(){
+          if(lockTo !== k || landed) return;
+          var now = getY();
+          if(Math.abs(now - prev) < 0.5){ if(++still >= 12){ landed = true; lockY = now; return; } } else still = 0;
+          settle(now, still);
+        });
+      })(getY(), 0);
+      setCur(r); update();
+      if(lastType !== "mouse") setOpen(false);
+    });
+
+    /* ---------- entering / leaving the page ---------- */
+    var wasOn = false;
+    function sync(){
+      var now = on();
+      if(now && !wasOn){ requestAnimationFrame(measure); }
+      if(!now && wasOn){ setOpen(false); }
+      wasOn = now;
+    }
+    new MutationObserver(sync).observe(page, { attributes:true, attributeFilter:["class"] });
+    if(phoneMQ.addEventListener) phoneMQ.addEventListener("change", function(){ swell(); queueMeasure(); });
+    swell(); sync();
   }
-  function setOpen(v){
-    if(v === open) return;
-    open = v; nav.classList.toggle("is-open", v);
-    if(!v) hov = -1;
-    swell();
-  }
-  function rowOf(t){ var li = t && t.closest && t.closest("li"); return li ? items.indexOf(li) : -1; }
-
-  // mouse: hover opens; the row under the pointer swells
-  nav.addEventListener("pointerenter", function(e){ if(e.pointerType === "mouse") setOpen(true); });
-  nav.addEventListener("pointermove", function(e){
-    if(e.pointerType !== "mouse") return;
-    if(!open) setOpen(true);
-    var i = rowOf(e.target);
-    if(i !== hov){ hov = i; swell(); }
-  });
-  nav.addEventListener("pointerleave", function(e){
-    if(e.pointerType !== "mouse") return;
-    if(nav.contains(document.activeElement) && nav.querySelector(":focus-visible")){ hov = rowOf(document.activeElement); swell(); return; }
-    setOpen(false);
-  });
-  // keyboard: focus opens; the focused row swells; focus leaving closes
-  nav.addEventListener("focusin", function(e){
-    if(!e.target.matches(":focus-visible")) return;
-    setOpen(true); hov = rowOf(e.target); swell();
-  });
-  nav.addEventListener("focusout", function(e){
-    if(!nav.contains(e.relatedTarget) && !nav.matches(":hover")) setOpen(false);
-  });
-
-  // touch: a tap on the closed capsule opens it (and doesn't follow the link);
-  // a tap on an item jumps there and closes; a tap outside closes
-  var lastType = "mouse";
-  nav.addEventListener("pointerdown", function(e){ lastType = e.pointerType; }, true);
-  document.addEventListener("click", function(e){
-    if(!nav.contains(e.target) || lastType === "mouse") return;
-    if(!open){ e.preventDefault(); e.stopPropagation(); setOpen(true); }
-  }, true);
-  document.addEventListener("pointerdown", function(e){
-    if(open && e.pointerType !== "mouse" && !nav.contains(e.target)) setOpen(false);
-  }, true);
-
-  // any click on an item: it is current now, whatever the glide passes through
-  nav.addEventListener("click", function(e){
-    var a = e.target.closest && e.target.closest("a");
-    if(!a || e.button !== 0) return;
-    var i = links.indexOf(a); if(i < 0) return;
-    lockTo = i; lockUntil = performance.now() + 1600;
-    setCur(i); update();
-    if(lastType !== "mouse") setOpen(false);
-  });
-
-  /* ---------- entering / leaving the page ---------- */
-  var wasOn = false;
-  function sync(){
-    var now = on();
-    if(now && !wasOn){ requestAnimationFrame(measure); }
-    if(!now && wasOn){ setOpen(false); }
-    wasOn = now;
-  }
-  new MutationObserver(sync).observe(about, { attributes:true, attributeFilter:["class"] });
-  phoneMQ.addEventListener && phoneMQ.addEventListener("change", function(){ swell(); queueMeasure(); });
-  swell(); sync();
 })();
 </script>
 <script>
