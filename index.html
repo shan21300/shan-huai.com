@@ -186,6 +186,21 @@
   .m-scribble.m-scribble-up{top:auto;bottom:100%;left:calc(50% - min(280px,50vw) * .958);transform:none;transform-origin:95.8% 95.6%}
   .m-has-scribble:hover .m-scribble-up,
   .m-has-scribble:focus-visible .m-scribble-up{animation-name:m-flicker,m-boil-up}
+  /* logo button: over the open menu, hovering it turns the logo back to SHAN-HUAI and
+     "type shiiii" flickers in, tilted 10deg (left end up), its arrow tip just under the hyphen.
+     The hyphen's ink centre (measured, Archivo 800 125% 15px) is 3.1px in and 8.9px down
+     from the top of its box (the tip sits at 23px, under the letters); the arrow tip is 0.9% across and 14.6% down the image. */
+  .bf-hy{position:relative}
+  .bf-scribble{position:absolute;--w:min(280px,50vw);width:var(--w);height:auto;max-width:none;
+    left:calc(3.1px - var(--w) * .009);top:calc(23px - var(--w) * .144 * .146);
+    rotate:10deg;transform-origin:.9% 14.6%;pointer-events:none;opacity:0;visibility:hidden}
+  @media(hover:hover){
+    body.menu-is-open .brandBtn:hover .bf-scribble{visibility:visible;
+      animation:m-flicker 1.1s steps(1,end) infinite, m-boil-up .36s steps(1,end) infinite}
+  }
+  body.menu-is-open .brandBtn:focus-visible .bf-scribble{visibility:visible;
+    animation:m-flicker 1.1s steps(1,end) infinite, m-boil-up .36s steps(1,end) infinite}
+  body.menu-inv .bf-scribble{filter:invert(1) brightness(.93)}
   @keyframes m-boil-up{
     0%{transform:none}
     33%{transform:translate(1px,-1px) rotate(-.4deg)}
@@ -199,7 +214,8 @@
     33%{transform:translate(1px,calc(-50% - 1px)) rotate(-.4deg)}
     66%{transform:translate(-1px,calc(-50% + .5px)) rotate(.3deg)}}
   @media (prefers-reduced-motion:reduce){
-    .m-has-scribble:hover .m-scribble,.m-has-scribble:focus-visible .m-scribble{animation:none;opacity:1}}
+    .m-has-scribble:hover .m-scribble,.m-has-scribble:focus-visible .m-scribble,
+    body.menu-is-open .brandBtn:hover .bf-scribble,body.menu-is-open .brandBtn:focus-visible .bf-scribble{animation:none;opacity:1}}
   header .logo{background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center}
   header .logo,header .menuBtn{pointer-events:auto}
   .logo-img{height:clamp(75px,7.5vw,102px);width:auto;display:block;opacity:.9;transition:opacity .2s}
@@ -1894,7 +1910,7 @@
 
   <header>
     <span class="header-spacer" aria-hidden="true"></span>
-    <button class="brandBtn bf-btn" aria-label="Open menu" aria-expanded="false" aria-controls="menu"><span class="bf"><span class="bf-name" aria-hidden="true">SHAN-HUAI</span><span class="bf-logo"><img src="/images/system/shanhuailogo_horizontal_white.webp" alt="Shan-Huai" class="logo-img"><img src="/images/system/shanhuailogo_horizontal_black.webp" alt="" class="logo-img-b" aria-hidden="true"></span></span></button>
+    <button class="brandBtn bf-btn" aria-label="Open menu" aria-expanded="false" aria-controls="menu"><span class="bf"><span class="bf-name" aria-hidden="true">SHAN<span class="bf-hy">-<img class="bf-scribble" src="/images/system/scribble-type.png" alt=""></span>HUAI</span><span class="bf-logo"><img src="/images/system/shanhuailogo_horizontal_white.webp" alt="Shan-Huai" class="logo-img"><img src="/images/system/shanhuailogo_horizontal_black.webp" alt="" class="logo-img-b" aria-hidden="true"></span></span></button>
     <button class="menuBtn" data-menu-open aria-label="Menu">menu</button>
   </header>
 
