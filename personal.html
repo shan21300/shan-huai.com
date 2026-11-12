@@ -142,7 +142,10 @@
   .tile .print{left:0;top:0;width:100%;height:100%;opacity:.8;transition:opacity .3s ease}
   .tile .blur{display:none !important}
   .tile.hov .print{opacity:1}
-  .tile.hov .frame{box-shadow:0 0 0 3px var(--ink),0 0 0 5px #d23a2c}   /* grease-pencil pick */
+  /* marker pick: a freshly drawn loop on every hover (canvas, see newMark) */
+  .tile.hov{z-index:2;overflow:visible}
+  .tile .mark{opacity:0;transition:opacity .25s ease}
+  .tile.hov .mark{opacity:1}
   .tile.kfocus .frame{box-shadow:0 0 0 3px var(--ink),0 0 0 4px var(--paper)}
   .vignette{position:absolute;inset:0;pointer-events:none;
     background:radial-gradient(ellipse at center,transparent 38%,rgba(11,11,12,.25) 62%,rgba(11,11,12,.85) 92%,var(--ink) 100%)}
@@ -577,6 +580,7 @@
     if(!ORDER || newK !== K){ K = newK; ORDER = scatter(); }
     posOf = []; ORDER.forEach(function(it, p){ posOf[it] = p; });
     printURL = [];
+    MW = Math.round(CW * 1.35); MH = Math.round(CH * 1.45);   // room for a loop round the window
     stage.style.setProperty("--film", 'url("data:image/svg+xml,' + encodeURIComponent(filmSVG()) + '")');
     if(oldCW){ camX *= CW / oldCW; camY *= CH / oldCH; }
     releaseAll();
@@ -630,6 +634,50 @@
     run(xl, yn, function(){ cx.font = "500 " + (PFS * 1.15) + "px " + fam; txt(String(n), 0); });
     cx.setTransform(1, 0, 0, 1, 0, 0);
   }
+  /* ---------- Marker picks: every hover draws a new hand-made loop round the frame (random
+     turns, tilt, wobble, overshoot and pressure), so no two picks look the same. A loop is a
+     run of round stamps on a canvas. For WebGL the canvas holds data, not colour: R = how far
+     along the stroke (for the draw-on), G = ink density, A = coverage. ---------- */
+  var MARK_SLOTS = 4, markSlot = -1, MW = 0, MH = 0;
+  var MARK_COLS = [[0.88, 0.25, 0.17], [0.91, 0.31, 0.16], [0.84, 0.21, 0.18], [0.90, 0.28, 0.20]];
+  var markCv = document.createElement("canvas"), markCx = markCv.getContext("2d");
+  function markPath(seed){
+    var R = rng(seed), P = [];
+    var loops = R() < 0.22 ? 1.8 + R() * 0.35 : 1.06 + R() * 0.36;   // now and then a double loop
+    var a0 = -Math.PI * 0.5 + (R() - 0.65) * 1.6, dir = R() < 0.75 ? -1 : 1;
+    var tilt = (R() - 0.5) * 0.4, rx = WW * (0.6 + R() * 0.1), ry = WH * (0.56 + R() * 0.08);
+    var drift = (R() - 0.5) * 0.14, ox = (R() - 0.5) * 0.12 * WW, oy = (R() - 0.5) * 0.08 * WH;
+    var p1 = R() * 6.283, p2 = R() * 6.283, p3 = R() * 6.283, e1 = 0.04 + R() * 0.07, e2 = 0.02 + R() * 0.04;
+    var egg = (R() - 0.5) * 0.22, flick = 0.06 + R() * 0.12;   // lopsided loop; the tail flicks outward as the pen lifts
+    var wB = clamp(WW * 0.05, 3.2, 7.5) * (0.8 + R() * 0.4), ct = Math.cos(tilt), st = Math.sin(tilt);
+    var n = Math.ceil(loops * Math.PI * (rx + ry) / 0.5);
+    for(var i = 0; i < n; i++){
+      var t = i / (n - 1), th = a0 + dir * loops * 6.2832 * t;
+      var tail = Math.max(0, (t - 0.9) / 0.1);
+      var r = 1 + drift * t * loops + e1 * Math.sin(2 * th + p1) + e2 * Math.sin(3 * th + p2) + egg * Math.sin(th) + flick * tail * tail;
+      var x = rx * r * Math.cos(th) + ox * t, y = ry * r * Math.sin(th) + oy * t;
+      var press = (0.45 + 0.55 * Math.min(1, t / 0.025)) * (1 - 0.6 * tail) * (0.8 + 0.2 * Math.sin(t * 23 + p3)) * (0.9 + 0.1 * Math.sin(t * 61 + p1));
+      var g = 0.72 + 0.28 * (0.5 + 0.5 * Math.sin(i * 0.05 + p2)) * (0.6 + 0.4 * Math.sin(i * 0.17 + p1)) - 0.25 * tail;   // dry, streaky ink
+      P.push({ x: MW / 2 + x * ct - y * st, y: MH / 2 + x * st + y * ct, w: wB * press, t: t, g: g });
+    }
+    return P;
+  }
+  // New loop into slot k: returns the canvas (data form for WebGL, coloured for the CSS wall).
+  function newMark(asData){
+    markSlot = (markSlot + 1) % MARK_SLOTS;
+    var P = markPath((Math.random() * 1e9) | 0), cs = Math.min(2, (window.devicePixelRatio || 1) * 1.25);
+    markCv.width = Math.ceil(MW * cs); markCv.height = Math.ceil(MH * cs);
+    var cx = markCx; cx.setTransform(cs, 0, 0, cs, 0, 0); cx.clearRect(0, 0, MW, MH);
+    var col = MARK_COLS[markSlot % MARK_COLS.length];
+    for(var j = 0; j < P.length; j++){
+      var q = asData ? P[P.length - 1 - j] : P[j];   // data: earliest on top, so a crossing keeps its first time
+      cx.fillStyle = asData ? "rgb(" + Math.round(q.t * 255) + "," + Math.round(q.g * 255) + ",0)"
+                            : "rgba(" + Math.round(col[0] * 255) + "," + Math.round(col[1] * 255) + "," + Math.round(col[2] * 255) + "," + (0.55 + 0.4 * q.g).toFixed(2) + ")";
+      cx.beginPath(); cx.arc(q.x, q.y, q.w / 2, 0, 6.2832); cx.fill();
+    }
+    return { slot: markSlot, cv: markCv, col: col };
+  }
+
   var printCv = document.createElement("canvas"), printCx = printCv.getContext("2d");
   function printCanvas(i, cs){
     printCv.width = Math.max(1, Math.ceil(CW * cs)); printCv.height = Math.max(1, Math.ceil(CH * cs));
@@ -645,8 +693,9 @@
     var img = document.createElement("img"); img.className = "sharp"; img.alt = ""; img.draggable = false; img.decoding = "async";
     frame.appendChild(img);
     var pr = document.createElement("img"); pr.className = "print"; pr.alt = ""; pr.draggable = false;
-    el.appendChild(blur); el.appendChild(frame); el.appendChild(pr); stage.appendChild(el);
-    var t = { el:el, img:img, blur:blur, frame:frame, pr:pr, key:null, idx:-1, cw:0, op:-1, src:"", blurT:0, kf:false };
+    var mk = document.createElement("img"); mk.className = "mark"; mk.alt = ""; mk.draggable = false;
+    el.appendChild(blur); el.appendChild(frame); el.appendChild(pr); el.appendChild(mk); stage.appendChild(el);
+    var t = { el:el, img:img, blur:blur, frame:frame, pr:pr, mk:mk, mkOn:false, mkP:0, mkA:0, mv:-1, key:null, idx:-1, cw:0, op:-1, src:"", blurT:0, kf:false };
     byEl.set(el, t); poolSize++;
     return t;
   }
@@ -673,6 +722,7 @@
     t.key = key; live.set(key, t);
     if(t.cw !== CW){                                   // cell size: only on (re)layout
       t.el.style.width = CW + "px"; t.el.style.height = CH + "px"; t.cw = CW; t.idx = -1;
+      var ms = t.mk.style; ms.width = MW + "px"; ms.height = MH + "px"; ms.left = ((CW - MW) / 2) + "px"; ms.top = ((CH - MH) / 2) + "px";
     }
     if(t.idx !== idx){                                 // new cover in a recycled cell
       t.idx = idx; unhover(t, true);
@@ -778,6 +828,7 @@
   var Edge = (function(){
     var api = { on:false };
     var canvas = null, gl = null, inited = false, lost = false;
+    var progM = null, markTex = [], markCol = [];
     var progT = null, progP = null, progD = null, quad = null, fbo = null, fboTex = null, fbW = 0, fbH = 0;
     var sFbo = null, sTex = null, sW = 0, sH = 0;   // 1/8-size wall for the out-of-focus outside
     var dpr = 1, TEX = 512, tex = [], texT = [], blurTex = [], capTex = [], capW = 0, capH = 0, capFs = 0;
@@ -805,7 +856,7 @@
     var FS_T = [
       "precision highp float;",
       "uniform vec2 uCell, uCrop, uHoleX; uniform vec4 uFrame, uSt, uHole;",
-      "uniform sampler2D uImg, uCap; uniform vec3 uPaper, uBase, uFrameCol, uPrint, uMark;",
+      "uniform sampler2D uImg, uCap; uniform vec3 uPaper, uBase, uFrameCol, uPrint;",
       "uniform float uAA, uHasImg, uMask, uSeed, uSX;",
       "varying vec2 vL;",
       "vec4 over(vec4 d, vec4 s){ return s + d * (1.0 - s.a); }",
@@ -833,15 +884,17 @@
       "  vec2 off = vec2(min(4.0, uFrame.x - uSX - 2.0), 0.0);",
       "  if(uSt.y > 0.5){ float k = 1.0 - smoothstep(0.5, 0.5 + uAA, abs(rbox(m, hs + off + vec2(0.0, -1.0), 3.0)));",   // keyboard focus
       "    c = over(c, vec4(uPaper * k, k)); }",
-      "  else if(hov > 0.002){",                                                                  // grease pencil: drawn round the frame as hover eases in
-      "    vec2 w = vec2(1.1 * sin(l.y * 0.09 + uSeed * 3.1) + 0.6 * sin(l.y * 0.23 + uSeed), 0.9 * sin(l.x * 0.17 + uSeed * 1.7));",
-      "    float d = rbox(m, hs + off + w - vec2(0.0, 1.0), 5.0);",
-      "    float wd = 1.15 + 0.35 * sin(l.x * 0.31 + l.y * 0.27 + uSeed);",
-      "    float t = fract(atan(m.y / hs.y, m.x / hs.x) / 6.2831853 + 0.375);",                   // 0 at the top-left corner, clockwise
-      "    float k = (1.0 - smoothstep(wd - uAA, wd + uAA, abs(d))) * step(t, hov * 1.04) * (0.85 + 0.15 * hash(floor(l * 0.7)));",
-      "    c = over(c, vec4(uMark * k, k));",
-      "  }",
       "  gl_FragColor = c * uSt.w;",                                                             // tile opacity (premultiplied)
+      "}"].join("\n");
+    // Marker loop: drawn on along the stroke (R = position along it) as uP goes 0 → 1.
+    var FS_M = [
+      "precision highp float;",
+      "uniform sampler2D uM; uniform vec2 uCell; uniform vec3 uCol; uniform float uP, uOp;",
+      "varying vec2 vL;",
+      "void main(){",
+      "  vec4 m = texture2D(uM, vL / uCell);",
+      "  float a = m.a * (1.0 - smoothstep(uP - 0.015, uP, m.r)) * (0.45 + 0.55 * m.g) * uOp;",
+      "  gl_FragColor = vec4(uCol * a, a);",
       "}"].join("\n");
     var VS_P = "attribute vec2 aP; varying vec2 vUv; void main(){ vUv = aP; gl_Position = vec4(aP * 2.0 - 1.0, 0.0, 1.0); }";
     // Downsample: 1/8-size box-filtered copy of the wall (16 bilinear taps cover each 8×8 block),
@@ -943,7 +996,7 @@
       return t;
     }
     function setup(){
-      progT = compile(VS_T, FS_T); progP = compile(VS_P, FS_P); progD = compile(VS_P, FS_D);
+      progT = compile(VS_T, FS_T); progM = compile(VS_T, FS_M); markTex = []; progP = compile(VS_P, FS_P); progD = compile(VS_P, FS_D);
       quad = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, quad);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0,0, 1,0, 0,1, 1,1]), gl.STATIC_DRAW);
       gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
@@ -1030,6 +1083,16 @@
       return true;
     }
 
+    // A new loop for the tile just hovered: returns its texture slot.
+    api.mark = function(){
+      if(!gl) return -1;
+      var m = newMark(true);
+      if(!markTex[m.slot]) markTex[m.slot] = mkTex();
+      gl.bindTexture(gl.TEXTURE_2D, markTex[m.slot]);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, m.cv);
+      markCol[m.slot] = m.col; needTiles = true;
+      return m.slot;
+    };
     api.layout = function(){
       if(!EDGE_ON) return;
       if(!inited) init();
@@ -1084,6 +1147,10 @@
         if(t.gHov !== hT){ var dh = dt / 300; t.gHov = hT > t.gHov ? Math.min(hT, t.gHov + dh) : Math.max(hT, t.gHov - dh); needTiles = true; }
         var rT = tex[t.idx] ? 1 : 0;
         if(t.gRdy !== rT){ t.gRdy = reduce ? rT : Math.min(rT, t.gRdy + dt / 450); needTiles = true; }
+        if(t.mkOn){                                    // marker: draw on while hovered, fade once left
+          if(t === hovT){ if(t.mkP < 1){ t.mkP = Math.min(1, t.mkP + dt / 520); needTiles = true; } }
+          else { t.mkA = Math.max(0, t.mkA - dt / 240); needTiles = true; if(!t.mkA) t.mkOn = false; }
+        }
       });
       if(needTiles){ drawTiles(); drawSmall(); }
       if(needTiles || needPost) drawPost();
@@ -1097,13 +1164,14 @@
       var P = progT, u = P.u; gl.useProgram(P.p);
       gl.uniform2f(u.uView, W, H); gl.uniform2f(u.uCell, CW, CH); gl.uniform1f(u.uS, s); gl.uniform1f(u.uPer, 1000);
       gl.uniform3fv(u.uPaper, cPaper); gl.uniform3fv(u.uBase, cBase); gl.uniform3fv(u.uFrameCol, cFrame);
-      gl.uniform3fv(u.uPrint, cPrint); gl.uniform3fv(u.uMark, cMark);
+      gl.uniform3fv(u.uPrint, cPrint);
       gl.uniform1f(u.uAA, 0.8 / (s * dpr)); gl.uniform1f(u.uSX, SX);
       gl.uniform2f(u.uHoleX, SX + HC, CW - SX - HC); gl.uniform4f(u.uHole, HW, HH, HR, HP);
       gl.uniform4f(u.uFrame, FX, FY, WW, WH);
       gl.uniform1i(u.uImg, 0); gl.uniform1i(u.uCap, 2);
       var wa = WW / WH;
       gl.uniform1f(u.uMask, 0); live.forEach(tileDraw);
+      drawMarks(); gl.useProgram(P.p);
       // second pass: alpha only = where the cover images are, so the RGB split skips grid lines and captions
       gl.disable(gl.BLEND); gl.colorMask(false, false, false, true);
       gl.uniform1f(u.uMask, 1); live.forEach(tileDraw);
@@ -1121,6 +1189,21 @@
         gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, capTex[t.idx] || null);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       }
+    }
+    function drawMarks(){
+      var P = progM, u = P.u, used = false;
+      live.forEach(function(t){
+        if(!t.mkOn || t.mv < 0 || !markTex[t.mv] || t.gx === undefined) return;
+        if(!used){ used = true; gl.useProgram(P.p);
+          gl.uniform2f(u.uView, W, H); gl.uniform2f(u.uCell, MW, MH); gl.uniform1f(u.uS, s); gl.uniform1f(u.uPer, 1000);
+          gl.uniform1i(u.uM, 0); gl.activeTexture(gl.TEXTURE0); }
+        var e = 1 - Math.pow(1 - t.mkP, 2.2);           // quick start, eases into the overshoot
+        gl.uniform4f(u.uT, t.gx + (CW - MW) / 2, t.gy + (CH - MH) / 2, t.gz, t.gth);
+        gl.uniform1f(u.uP, e * 1.03); gl.uniform1f(u.uOp, t.mkA * t.gop);
+        gl.uniform3fv(u.uCol, markCol[t.mv]);
+        gl.bindTexture(gl.TEXTURE_2D, markTex[t.mv]);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      });
     }
     function drawSmall(){
       gl.disable(gl.BLEND);
@@ -1159,6 +1242,9 @@
     if(hovT) unhover(hovT);
     hovT = t; if(!t) return;
     clearTimeout(t.blurT);
+    if(Edge.on){ t.mv = Edge.mark(); }
+    else { t.mk.src = newMark(false).cv.toDataURL(); }
+    t.mkOn = true; t.mkP = reduce ? 1 : 0; t.mkA = 1;
     if(t.blur.getAttribute("src") !== t.src) t.blur.src = t.src;
     t.el.classList.add("blur-on");
     requestAnimationFrame(function(){ if(hovT === t) t.el.classList.add("hov"); });
