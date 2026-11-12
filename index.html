@@ -201,6 +201,7 @@
   body.menu-is-open .brandBtn:focus-visible .bf-scribble{visibility:visible;
     animation:m-flicker 1.1s steps(1,end) infinite, m-boil-up .36s steps(1,end) infinite}
   body.menu-inv .bf-scribble{filter:invert(1) brightness(.93)}
+  header .brandBtn.scribble-hold .bf-scribble{visibility:hidden !important;animation:none !important}
   @keyframes m-boil-up{
     0%{transform:none}
     33%{transform:translate(1px,-1px) rotate(-.4deg)}
@@ -5746,6 +5747,12 @@
   }
   syncBrand();
   new MutationObserver(syncBrand).observe(body, { attributes:true, attributeFilter:["class"] });
+  /* the click that opens the menu leaves the pointer on the logo: hold back its
+     "type shiiii" flicker until the pointer has left the logo once */
+  if(brandBtn){
+    brandBtn.addEventListener("click", function(){ brandBtn.classList.add("scribble-hold"); });
+    brandBtn.addEventListener("mouseleave", function(){ brandBtn.classList.remove("scribble-hold"); });
+  }
 
   /* ---------- Fallback / reduced motion: a plain, natively scrolling strip ---------- */
   var stripOn = false;
