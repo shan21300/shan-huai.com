@@ -1872,6 +1872,9 @@
     transform-origin:50% 50%}
   /* full-bleed frames, one straight after another; each image is taller than its frame and settles as it passes */
   .rz-frames{list-style:none;margin:clamp(140px,18vw,300px) calc(var(--m) * -1) 0}
+  /* Selected Work's title: spaced like every other section's, the frames follow at the rows' distance */
+  .rz-flow-head{margin-top:clamp(160px,20vw,340px)}
+  .rz-flow-head + .rz-frames{margin-top:clamp(32px,4vw,64px)}
   .rz-fr{position:relative;display:block;height:100vh;height:100svh;min-height:480px;overflow:clip;background:#050505;color:#fff}
   .rz-fr-img{position:absolute;left:0;right:0;top:-20%;height:140%}
   .rz-fr-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;
@@ -3773,8 +3776,12 @@
           </ol>
         </section>
 
-        <section class="rz-flow" id="rz-work" aria-label="Selected work, newest first">
-        <ol class="rz-frames">
+        <section class="rz-flow" id="rz-work" aria-labelledby="rz-h-work">
+          <div class="rz-flow-head">
+            <span class="rz-num" aria-hidden="true">(3)</span>
+            <h2 class="rz-h2" id="rz-h-work">Selected Work</h2>
+          </div>
+        <ol class="rz-frames" aria-label="Selected work, newest first">
           <li><a class="rz-fr rz-view" href="/project/sub" data-nav="proj-sub">
             <div class="rz-fr-img"><img src="/images/carousel/proj-sub.webp" width="1200" height="800" alt="" loading="lazy" decoding="async"><video class="rz-fr-vid" muted playsinline loop preload="none" data-stream="e997d71eb8270f43dddcebf6eeefa9fa" aria-hidden="true"></video></div>
             <div class="rz-over rz-g"><h3><span>SUB</span></h3><p>Branding<br><span class="rz-mono">2026</span></p><span></span><p>Local Remote →</p></div>
