@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="/images/system/apple-touch-icon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&family=Archivo:wdth,wght@100..125,400..800&family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&family=Archivo:wdth,wght@100..125,300..800&family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@400;500&display=swap" rel="stylesheet" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <!-- hls.js: Chrome/Firefox can't play Cloudflare Stream in a native <video> without it;
      Safari plays HLS natively. Used to stream cover videos instead of the MP4 download,
@@ -1729,6 +1729,14 @@
   /* Journal: the reference's grid — three 4:5 frames a row, one gutter all round, a square
      bullet + title and the year on one line beneath; hovering blurs the picture under the
      "view" disc */
+  /* Journal header, as the reference sets it: a big light grotesk title and its number in
+     the same face, both inset one more gutter than the grid, 120px clear above the frames (1440px) */
+  .rz-journal .rz-num,.rz-journal .rz-h2{padding:0 var(--m)}
+  .rz-journal .rz-num{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:400;
+    font-size:clamp(18px,2.22vw,40px);line-height:.9;letter-spacing:-.06em}
+  .rz-journal .rz-h2{font-weight:300;font-stretch:100%;font-size:clamp(60px,14.6vw,260px);
+    line-height:1.2;letter-spacing:-.06em;margin:10px 0 0}
+  .rz-journal .rz-tiles{margin-top:clamp(40px,8.33vw,140px)}
   .rz-tiles{list-style:none;margin-top:clamp(48px,8vw,120px);
     display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gap)}
   .rz-tile{display:block}
