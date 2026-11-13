@@ -7878,7 +7878,7 @@
   bar.addEventListener("focusin", function(){ setBarHidden(false); });   // keyboard users can always reach it
 
   /* ---------- one frame loop, only while the page is showing ---------- */
-  var running = false;
+  var running = false, lastMoveT = 0;
   function frame(now){
     if(!on()){ running = false; gliding = false; return; }
     if(gliding){
@@ -7888,7 +7888,7 @@
       scrollTo(0, cur);
     }
     var sy = scrollY;
-    if(sy !== lastY){ lastY = sy; apply(sy); barFollow(sy); }
+    if(sy !== lastY){ lastY = sy; lastMoveT = now; apply(sy); barFollow(sy); }
     requestAnimationFrame(frame);
   }
   function start(){ if(!running){ running = true; requestAnimationFrame(frame); } }
@@ -8046,6 +8046,7 @@
     });
     setInterval(function(){                                     // captions keep following the moving picture
       if(document.hidden || !on()) return;
+      if(performance.now() - lastMoveT < 400) return;          // reading video pixels stalls a frame: never while the page is moving
       frameVids.forEach(function(v){ if(v._in && !v.paused && v.readyState >= 2 && v.style.opacity === "1") capFrame(v.closest(".rz-fr"), v); });
     }, 350);
   }
