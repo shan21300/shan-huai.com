@@ -2032,7 +2032,7 @@
 
   <header>
     <span class="header-spacer" aria-hidden="true"></span>
-    <button class="brandBtn bf-btn" aria-label="Open menu" aria-expanded="false" aria-controls="menu"><span class="bf"><span class="bf-name" aria-hidden="true">SHAN<span class="bf-hy">-<img class="bf-scribble" src="/images/system/scribble-type.png" alt=""></span>HUAI</span><span class="bf-logo"><img src="/images/system/shanhuailogo_horizontal_white.webp" alt="Shan-Huai" class="logo-img"><img src="/images/system/shanhuailogo_horizontal_black.webp" alt="" class="logo-img-b" aria-hidden="true"></span></span></button>
+    <button class="brandBtn bf-btn" aria-label="Open menu" aria-expanded="false" aria-controls="menu"><span class="bf"><span class="bf-name" aria-hidden="true">SHAN<span class="bf-hy">-<img class="bf-scribble" src="/images/system/scribble-type.png" alt=""></span>HUAI</span><span class="bf-logo"><img src="/images/system/shanhuailogo_horizontal_white.svg" alt="Shan-Huai" class="logo-img"><img src="/images/system/shanhuailogo_horizontal_black.svg" alt="" class="logo-img-b" aria-hidden="true"></span></span></button>
     <button class="menuBtn" data-menu-open aria-label="Menu">menu</button>
   </header>
 
@@ -3755,7 +3755,7 @@
     <section class="page" id="about">
       <!-- ===== Bio resume (html.bio-new; ?bio=0 shows the previous page below) ===== -->
       <div class="rzb">
-        <a class="rzb-logo bf-btn" href="/" aria-label="Open menu"><span class="bf" aria-hidden="true"><span class="bf-name">SHAN-HUAI</span><span class="bf-logo"><img class="w" src="/images/system/shanhuailogo_horizontal_white.webp" alt=""><img class="k" src="/images/system/shanhuailogo_horizontal_black.webp" alt=""></span></span></a>
+        <a class="rzb-logo bf-btn" href="/" aria-label="Open menu"><span class="bf" aria-hidden="true"><span class="bf-name">SHAN-HUAI</span><span class="bf-logo"><img class="w" src="/images/system/shanhuailogo_horizontal_white.svg" alt=""><img class="k" src="/images/system/shanhuailogo_horizontal_black.svg" alt=""></span></span></a>
       </div>
       <div class="rz-cursor" aria-hidden="true"><i></i><span>View</span></div>
       <nav class="rz-snav" aria-label="Page sections" data-snav-light=".rz-end">
@@ -4274,7 +4274,7 @@
 
   <div id="menu" role="navigation" aria-label="Menu">
     <button class="menu-close" aria-label="Close">close</button>
-    <button class="menu-logo" data-nav="landing" aria-label="Home"><img loading="lazy" src="/images/system/shanhuailogoinversed_black.png" alt="Shan-Huai" class="menu-logo-img"></button>
+    <button class="menu-logo" data-nav="landing" aria-label="Home"><img loading="lazy" src="/images/system/shanhuailogo_vertical_black.svg" alt="Shan-Huai" class="menu-logo-img"></button>
     <div class="menu-cats">
       <!-- Navigation is Commercial / Personal for now. The earlier page links stay below,
            hidden (not deleted), so they can be brought back by removing "hidden". -->
@@ -4683,8 +4683,8 @@
     document.body.classList.toggle("menu-inv", inverted);   // dark menu: the logo stays white
     var menuLogoImg = document.querySelector(".menu-logo-img");
     if(menuLogoImg) menuLogoImg.src = inverted
-      ? "/images/system/shanhuailogoinversed_white.png"
-      : "/images/system/shanhuailogoinversed_black.png";
+      ? "/images/system/shanhuailogo_vertical_white.svg"
+      : "/images/system/shanhuailogo_vertical_black.svg";
     menuEl.classList.add("open");
     document.body.classList.add("menu-is-open");
     {                                // the page behind can't be tabbed into
