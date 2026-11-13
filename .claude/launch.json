@@ -4,7 +4,10 @@
     {
       "name": "site",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-c", "from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler; ThreadingHTTPServer(('localhost', 8765), SimpleHTTPRequestHandler).serve_forever()"],
+      "runtimeArgs": [
+        ".claude/dev-server.py",
+        "8765"
+      ],
       "port": 8765
     }
   ]
