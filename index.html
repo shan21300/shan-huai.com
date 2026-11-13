@@ -281,6 +281,9 @@
      letters so no offset is needed) — cap by width like LLP. */
   .proj-panel-title .proj-panel-logo[src="/images/projects/FRM_title.png"]{height:auto;width:7em}
   .sw-name .sw-name-logo[src="/images/projects/FRM_title.png"]{height:auto;width:7em}
+  /* HIPPO GARAGE: wide lockup (1748x212, ~8.2:1, cropped flush) — sized like FROMETO. */
+  .proj-panel-title .proj-panel-logo[src="/images/projects/HIPPO_title.png"]{height:auto;width:7em}
+  .sw-name .sw-name-logo[src="/images/projects/HIPPO_title.png"]{height:auto;width:7em}
   /* Martoni's stacked mark + wordmark (2.76:1) reads oversized at 3em tall — cap by width. */
   .proj-panel-title .proj-panel-logo[src="/images/projects/MARTONI_title.png"]{height:auto;width:4.5em}
   .proj-panel-meta{font-family:"IBM Plex Mono","Noto Sans TC",monospace;font-size:12px;
@@ -681,6 +684,10 @@
      read — on desktop the class is simply ignored and everything stays visible. */
   .hs-layout .hs-more-btn{display:none}
   .hs-layout .hs-link-wrap{text-align:center;margin:0 0 72px}
+  /* Placeholder body for a project page whose write-up / gallery isn't ready yet. */
+  .hs-layout .hs-soon{border-top:1px solid var(--line);margin-top:56px;padding:clamp(80px,14vw,180px) 0;
+    text-align:center;font-family:"IBM Plex Mono","Noto Sans TC",monospace;font-size:12px;
+    letter-spacing:.18em;text-transform:uppercase;color:var(--grey)}
   .hs-layout .proj-reel{margin-top:0}
   /* Same pill-button convention as .back ("← Projects") — outline that inverts to a
      filled pill on hover. */
@@ -2041,6 +2048,7 @@
         <li><a class="cc-work" href="/project/sub" data-nav="proj-sub" data-logo="/images/carousel/logos/sub.webp" data-stream="e997d71eb8270f43dddcebf6eeefa9fa" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-sub.webp" width="1200" height="800" alt="SUB"><span class="cc-work-name">SUB</span><span class="cc-work-meta">Branding — Local Remote · 2026</span></a></li>
         <li><a class="cc-work" href="/project/heysong-sarsaparilla" data-nav="proj-heysong" data-logo="/images/carousel/logos/heysong.webp" data-stream="0b36c9ded9204e7376cbc535b745884f" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-heysong.webp" width="1422" height="800" alt="黑松沙士"><span class="cc-work-name">黑松沙士</span><span class="cc-work-meta">Branding — Local Remote · 2026</span></a></li>
         <li><a class="cc-work" href="/project/frometo" data-nav="proj-frometo" data-logo="/images/carousel/logos/frometo.webp" data-stream="5d5a347fdc546fa2904564d13861d576" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-frometo.webp" width="1422" height="800" alt="FROMETO"><span class="cc-work-name">FROMETO</span><span class="cc-work-meta">Branding — Local Remote · 2026</span></a></li>
+        <li><a class="cc-work" href="/project/hippo-garage" data-nav="proj-hippogarage" data-logo="/images/carousel/logos/hippogarage.webp" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-hippogarage.webp" width="1200" height="800" alt="Hippo Garage"><span class="cc-work-name">Hippo Garage</span><span class="cc-work-meta">Branding — Local Remote · 2026</span></a></li>
         <li><a class="cc-work" href="https://www.kickstarter.com/projects/martoni/martoni-super-e-the-micro-mobility-device-that-flies?ref=creator_tab" data-nav="proj-martoni" data-logo="/images/carousel/logos/martoni.webp" data-stream="8d9b3df3dd9fd9d25b34955a51e46079" data-cat="Colorist" data-meta="Modular Agency · 2026"><img data-src="/images/carousel/proj-martoni.webp" width="1910" height="800" alt="Martoni Super-E"><span class="cc-work-name">Martoni Super-E</span><span class="cc-work-meta">Colorist — Modular Agency · 2026</span></a></li>
         <li><a class="cc-work" href="/project/local-local-park" data-nav="proj-locallocalpark" data-logo="/images/carousel/logos/locallocalpark.webp" data-cat="Branding" data-meta="Local Remote · 2026"><img data-src="/images/carousel/proj-locallocalpark.webp" width="1200" height="800" alt="Local Local Park"><span class="cc-work-name">Local Local Park</span><span class="cc-work-meta">Branding — Local Remote · 2026</span></a></li>
         <li><a class="cc-work" href="/live/cornelius" data-nav="gig-cornelius" data-cat="Live" data-meta="Chillout Music Festival · 2025"><img data-src="/images/carousel/gig-cornelius.webp" width="533" height="800" alt="Cornelius"><span class="cc-work-name">Cornelius</span><span class="cc-work-meta">Live — Chillout Music Festival · 2025</span></a></li>
@@ -2126,6 +2134,17 @@
         <div class="proj-panel-info">
           <div class="proj-panel-text">
             <span class="proj-panel-title"><img decoding="async" loading="lazy" class="proj-panel-logo" src="/images/projects/FRM_title.png" alt="FROMETO"></span>
+            <span class="proj-panel-meta">Local Remote · 2026</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="proj-panel" data-nav="proj-hippogarage" style="cursor:pointer">
+        <img class="proj-panel-bg" src="/images/projects/HIPPO_cover.jpg" alt="" loading="lazy">
+        <div class="proj-panel-overlay"></div>
+        <div class="proj-panel-info">
+          <div class="proj-panel-text">
+            <span class="proj-panel-title"><img decoding="async" loading="lazy" class="proj-panel-logo" src="/images/projects/HIPPO_title.png" alt="Hippo Garage"></span>
             <span class="proj-panel-meta">Local Remote · 2026</span>
           </div>
         </div>
@@ -3496,6 +3515,26 @@
       </div>
       <!-- /LLP REELS -->
     </section>
+<!-- HIPPO GARAGE: Local Remote, 2026. Same .hs-layout template as 黑松沙士; only the hero,
+     title and meta for now — write-up, gallery and credits are still to come. -->
+<section class="page proj-detail hs-layout" id="proj-hippogarage">
+      <img decoding="async" class="hs-hero" src="/images/projects/HIPPO_cover.jpg" alt="Hippo Garage" loading="lazy" fetchpriority="high">
+
+      <div class="proj-detail-wrap">
+        <div class="proj-detail-section hs-nav-row">
+          <button class="back" data-nav="projects">← Projects</button>
+        </div>
+
+        <div class="proj-detail-section hs-meta">
+          <div><div class="hs-meta-k">Project</div><div class="hs-meta-v">Hippo Garage</div></div>
+          <div><div class="hs-meta-k">Studio</div><div class="hs-meta-v">Local Remote</div></div>
+          <div><div class="hs-meta-k">Category</div><div class="hs-meta-v">Branding</div></div>
+          <div><div class="hs-meta-k">Year</div><div class="hs-meta-v">2026</div></div>
+        </div>
+
+        <p class="hs-soon">Coming soon</p>
+      </div>
+    </section>
 <!-- MARTONI SUPER-E: colour grade for Modular Agency. Same .hs-layout template as FROMETO;
      hero is the Stream film. Description and credits still to come. -->
 <section class="page proj-detail hs-layout" id="proj-martoni">
@@ -3793,6 +3832,10 @@
           <li><a class="rz-fr rz-view" href="/project/frometo" data-nav="proj-frometo">
             <div class="rz-fr-img"><img src="/images/carousel/proj-frometo.webp" width="1422" height="800" alt="" loading="lazy" decoding="async"><video class="rz-fr-vid" muted playsinline loop preload="none" data-stream="5d5a347fdc546fa2904564d13861d576" aria-hidden="true"></video></div>
             <div class="rz-over rz-g"><h3><span>FROMETO</span></h3><p>Branding<br><span class="rz-mono">2026</span></p><span></span><p>Local Remote →</p></div>
+          </a></li>
+          <li><a class="rz-fr rz-view" href="/project/hippo-garage" data-nav="proj-hippogarage">
+            <div class="rz-fr-img"><img src="/images/carousel/proj-hippogarage.webp" width="1200" height="800" alt="" loading="lazy" decoding="async"></div>
+            <div class="rz-over rz-g"><h3><span>Hippo Garage</span></h3><p>Branding<br><span class="rz-mono">2026</span></p><span></span><p>Local Remote →</p></div>
           </a></li>
           <li><a class="rz-fr rz-view" href="https://www.kickstarter.com/projects/martoni/martoni-super-e-the-micro-mobility-device-that-flies?ref=creator_tab" target="_blank" rel="noopener">
             <div class="rz-fr-img"><img src="/images/carousel/proj-martoni.webp" width="1910" height="800" alt="" loading="lazy" decoding="async"><video class="rz-fr-vid" muted playsinline loop preload="none" data-stream="8d9b3df3dd9fd9d25b34955a51e46079" aria-hidden="true"></video></div>
@@ -4449,6 +4492,7 @@
     "proj-sub":"/project/sub",
     "proj-locallocalpark":"/project/local-local-park",
     "proj-frometo":"/project/frometo",
+    "proj-hippogarage":"/project/hippo-garage",
     "gig-cornelius":"/live/cornelius","gig-someshiitsam":"/live/someshiit-sam",
     "gig-elephantgym":"/live/elephant-gym","gig-hillsong":"/live/hillsong",
     "gig-thehope":"/live/the-hope","gig-mosaic":"/live/mosaic",
