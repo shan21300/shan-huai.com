@@ -1535,7 +1535,7 @@
   #landing .cc-sr:focus{outline:none}
 
   /* ===== Header name / logo flip (every page) =====
-     SHAN-HUAI stays where it is. The logo shares its spot: left edges aligned, tops level. */
+     SHAN-HUAI stays where it is. The logo shares its spot, centred on the name both ways. */
   .bf-btn{perspective:600px}
   .bf{display:block;position:relative;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.16,1,.3,1)}
   .bf-name,.bf-logo{display:block;backface-visibility:hidden;-webkit-backface-visibility:hidden}
@@ -1543,10 +1543,9 @@
     letter-spacing:.02em;white-space:nowrap;color:#fff;opacity:.92;padding:6px 0;transition:color .35s ease}
   /* the logo, set horizontally (善懷 side by side), each character about 1.7x its old size (1.3x the first horizontal version);
      placed as it must be before the turn (the turn mirrors it) */
-  header .brandBtn .bf-logo .logo-img,header .brandBtn .bf-logo .logo-img-b{height:calc(var(--cc-logo) * 0.854)}
-  /* left edges aligned and centred on the letters' middle line (measured: the letters start about
-     1px in, and their ink runs 7.5px to 18.25px down inside the name's box, middle 12.875px) */
-  .bf-logo{position:absolute;left:0;top:100%;transform:translate(1.25px,calc(-50% - 12.875px)) rotateX(180deg)}
+  header .brandBtn .bf-logo .logo-img,header .brandBtn .bf-logo .logo-img-b{height:calc(var(--cc-logo) * 0.65)}
+  /* centred on the name, both ways (a centred logo stays centred through the turn) */
+  .bf-logo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotateX(180deg)}
   body.menu-is-open .brandBtn .bf,.brandBtn.bf-home .bf{transform:rotateX(180deg)}
   @media(hover:hover){
     .bf-btn:hover .bf{transform:rotateX(180deg)}
@@ -1740,7 +1739,7 @@
   /* the name flips over to the logo as the cursor crosses it */
   .rzb-logo{display:inline-block;perspective:600px;padding:0}
   /* the bar's name uses the site-wide name/logo flip (.bf); only its logo files differ */
-  .rzb .bf-logo img{display:block;height:calc(var(--cc-logo,38px) * 0.854);width:auto}
+  .rzb .bf-logo img{display:block;height:calc(var(--cc-logo,38px) * 0.65);width:auto}
   .rzb .bf-logo .k,.rzb.is-light .bf-logo .w{display:none}
   .rzb.is-light .bf-logo .k{display:block}
   .rzb.is-light .bf-name{color:#0B0B0C}
