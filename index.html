@@ -1372,6 +1372,7 @@
     z-index:20;pointer-events:none;text-align:center;width:min(86vw,560px);height:118px;contain:strict;
     display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
   html:not(.cc-gl) #landing .cc-cap{display:none}
+  @media (min-width:760px){ #landing .cc-cap{bottom:calc(16vh + env(safe-area-inset-bottom,0px))} }   /* title lifted off the bottom edge: 133px on a MacBook Air 13" page (1470x830); phones keep the JS-placed spot */
   #landing .cc-cap-name{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:800;font-stretch:125%;font-size:clamp(20px,1.8vw,27px);line-height:1.1;letter-spacing:-.005em;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
   #landing .cc-cap-meta{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-top:4px;
