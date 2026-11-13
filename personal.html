@@ -581,7 +581,7 @@
     if(!ORDER || newK !== K){ K = newK; ORDER = scatter(); }
     posOf = []; ORDER.forEach(function(it, p){ posOf[it] = p; });
     printURL = [];
-    MW = Math.round(CW * 1.35); MH = Math.round(CH * 1.45);   // room for a loop round the window
+    MW = Math.round(CW * 1.35); MH = Math.round(CH * 1.85);   // room for a loop round the window (1.45 clipped ~2% of loops' tops/bottoms; 1.85 none in 160k)
     stage.style.setProperty("--film", 'url("data:image/svg+xml,' + encodeURIComponent(filmSVG()) + '")');
     if(oldCW){ camX *= CW / oldCW; camY *= CH / oldCH; }
     releaseAll();
@@ -696,7 +696,6 @@
       strokes.push(line(X4 + jit(3), -Y4 - ov(), X4 + jit(3), Y4 + ov(), jit(0.02)));
       strokes.push(line(X4 + ov(), Y4 + jit(3), -X4 - ov(), Y4 + jit(3), jit(0.02)));
       strokes.push(line(-X4 + jit(3), Y4 + ov(), -X4 + jit(3), -Y4 - ov(), jit(0.02)));
-      if(R() < 0.3) strokes.splice(Math.floor(R() * 4), 1);   // now and then one side left undrawn
     }
     // common: tilt, hand wobble, stamps every 0.5px with pen pressure (each stroke starts firm and tapers off)
     var tilt = kind === "loop" ? (R() - 0.5) * 0.4 : (R() - 0.5) * 0.08, ct = Math.cos(tilt), stt = Math.sin(tilt);
