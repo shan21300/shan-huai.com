@@ -1667,6 +1667,18 @@
   .snav-cv .sub{display:block;color:var(--grey);font-family:"IBM Plex Mono","Noto Sans TC",monospace;
     font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;margin-top:10px}
   .snav-cv .sub:first-child{margin-top:0}
+  /* Project credits: a section at the bottom of each project page in the site's centred
+     role|names style (.proj-credits); the floater (.rz-snav) only links to it */
+  .pcr-sec{margin-top:120px}
+  .pcr-sec .proj-detail-section-label{margin-bottom:40px}
+  .pcr-sec .cr-names .sub{display:block;color:var(--grey);font-family:"IBM Plex Mono","Noto Sans TC",monospace;
+    font-size:11px;letter-spacing:.08em;margin-top:14px}
+  .pcr-sec .cr-names .sub:first-child{margin-top:0}
+  /* marquee pages: the page scrolls on past the full-height marquee into the credits */
+  .proj-marquee:has(> .pcr-under){overflow-x:hidden;overflow-y:auto}
+  .pcr-under{padding-top:calc(100vh + 24px)}
+  .pcr-under .pcr-sec{margin-top:0}
+  .pcr-after{padding-top:0}
   /* phone */
   @media (max-width:767px){
     .rz-snav,.proj-page > .rz-snav{--seg-w:3px;--seg-h:9px;--seg-cur:24px;--snav-w:26px;--snav-r:13px;--snav-px:10.5px;--snav-py:10px;right:12px}
@@ -2245,23 +2257,7 @@
           <li><a class="snav-row" href="#girlfriend-scene-1-cinema"><span class="snav-lbl">Scene #1: Cinema</span><span class="snav-num">02</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
           <li><a class="snav-row" href="#girlfriend-scene-3-1-pub"><span class="snav-lbl">Scene #3.1: Pub</span><span class="snav-num">03</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
           <li><a class="snav-row" href="#girlfriend-scene-3-2-pub-dances"><span class="snav-lbl">Scene #3.2: Pub — Dances</span><span class="snav-num">04</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
-          <li class="snav-cr"><button class="snav-row" type="button" aria-expanded="false" aria-controls="girlfriend-credits"><span class="snav-lbl">Credits</span><span class="snav-num">05</span><span class="snav-seg" aria-hidden="true"><i></i></span></button>
-            <div class="snav-credits" id="girlfriend-credits" role="region" aria-label="Credits" tabindex="0" hidden>
-              <div class="snav-cg">
-                <div class="snav-ck">Cinematography</div><div class="snav-cv">Shan Huai Chiang<br>Andrea Proano</div>
-                <div class="snav-ck">Color Grading</div><div class="snav-cv">Shan Huai Chiang</div>
-                <div class="snav-ck">Costume</div><div class="snav-cv">Yeukai Makoni<br>Anna Cantes-Freeman</div>
-                <div class="snav-ck">Makeup &amp; Styling</div><div class="snav-cv">Rothie Jang</div>
-                <div class="snav-ck">Story</div><div class="snav-cv">Raphael Godfrey<br>Andrea Proano<br>Yeukai Makoni</div>
-                <div class="snav-ck">Choreography</div><div class="snav-cv">Raphael Godfrey<br>Yeukai Makoni</div>
-                <div class="snav-ck">Oyster</div><div class="snav-cv">Yeukai Makoni</div>
-                <div class="snav-ck">Octopus</div><div class="snav-cv">Anna Cantes-Freeman</div>
-                <div class="snav-ck">Dancers</div><div class="snav-cv">Matthew (Newtion)<br>Raphael Godfrey</div>
-                <div class="snav-ck">Extras</div><div class="snav-cv">Ben Soltani Stevens<br>Kai<br>Bautista Aragones</div>
-                <div class="snav-ck">Special Thanks</div><div class="snav-cv">Canty &amp; Full Time Hobby, for this collaboration</div>
-              </div>
-            </div>
-          </li>
+          <li><a class="snav-row" href="#girlfriend-credits"><span class="snav-lbl">Credits</span><span class="snav-num">05</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
         </ol>
       </nav>
 
@@ -2346,29 +2342,48 @@
             <p>In the video on the left, I had all gimbal axes unlocked, granting complete control over the flow of this FPV (first person view) camera movement.</p>
           </div>
         </div>
+
+        <div id="girlfriend-credits" class="proj-detail-section pcr-sec">
+          <span class="proj-detail-section-label">Credits</span>
+          <div class="proj-credits">
+            <div class="cr-role">Cinematography</div><div class="cr-names">Shan Huai Chiang<br>Andrea Proano</div>
+            <div class="cr-role">Color Grading</div><div class="cr-names">Shan Huai Chiang</div>
+            <div class="cr-role">Costume</div><div class="cr-names">Yeukai Makoni<br>Anna Cantes-Freeman</div>
+            <div class="cr-role">Makeup &amp; Styling</div><div class="cr-names">Rothie Jang</div>
+            <div class="cr-role">Story</div><div class="cr-names">Raphael Godfrey<br>Andrea Proano<br>Yeukai Makoni</div>
+            <div class="cr-role">Choreography</div><div class="cr-names">Raphael Godfrey<br>Yeukai Makoni</div>
+            <div class="cr-role">Oyster</div><div class="cr-names">Yeukai Makoni</div>
+            <div class="cr-role">Octopus</div><div class="cr-names">Anna Cantes-Freeman</div>
+            <div class="cr-role">Dancers</div><div class="cr-names">Matthew (Newtion)<br>Raphael Godfrey</div>
+            <div class="cr-role">Extras</div><div class="cr-names">Ben Soltani Stevens<br>Kai<br>Bautista Aragones</div>
+            <div class="cr-role">Special Thanks</div><div class="cr-names">Canty &amp; Full Time Hobby, for this collaboration</div>
+          </div>
+        </div>
       </div>
     </section>
 
     <section class="page proj-detail" id="making-ordinary-sense">
       <nav class="rz-snav snav-proj" aria-label="Page sections" data-snav-end=".proj-detail-wrap">
         <ol>
-          <li class="snav-cr"><button class="snav-row" type="button" aria-expanded="false" aria-controls="making-ordinary-sense-credits"><span class="snav-lbl">Credits</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></button>
-            <div class="snav-credits" id="making-ordinary-sense-credits" role="region" aria-label="Credits" tabindex="0" hidden>
-              <div class="snav-cg">
-                <div class="snav-ck">Featuring</div><div class="snav-cv">Jay Lin</div>
-              </div>
-            </div>
-          </li>
+          <li><a class="snav-row" href="#making-ordinary-sense-overview"><span class="snav-lbl">Overview</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#making-ordinary-sense-credits"><span class="snav-lbl">Credits</span><span class="snav-num">02</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
         </ol>
       </nav>
 
       <div class="proj-detail-wrap">
         <button class="back" data-nav="archive" style="margin-bottom:40px">← Archive</button>
 
-        <img loading="lazy" class="proj-detail-hero" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/thumbnails/thumbnail.jpg?width=1280&height=720&fit=crop" alt="Making Ordinary Sense">
+        <img id="making-ordinary-sense-overview" loading="lazy" class="proj-detail-hero" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/thumbnails/thumbnail.jpg?width=1280&height=720&fit=crop" alt="Making Ordinary Sense">
 
         <h1 class="proj-detail-title">Making Ordinary Sense</h1>
         <span class="proj-detail-sub">CSM PDP Year 2 Project &nbsp;·&nbsp; 2024</span>
+
+        <div id="making-ordinary-sense-credits" class="proj-detail-section pcr-sec">
+          <span class="proj-detail-section-label">Credits</span>
+          <div class="proj-credits">
+            <div class="cr-role">Featuring</div><div class="cr-names">Jay Lin</div>
+          </div>
+        </div>
       </div>
     </section>
         <section class="page snaplist" id="live">
@@ -2455,18 +2470,9 @@
     <section class="page proj-detail" id="gig-elephantgym">
       <nav class="rz-snav snav-proj" aria-label="Page sections" data-snav-end=".proj-detail-wrap">
         <ol>
-          <li><a class="snav-row" href="#gig-elephantgym-statement"><span class="snav-lbl">Statement</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
-          <li><a class="snav-row" href="#gig-elephantgym-the-commission"><span class="snav-lbl">The Commission</span><span class="snav-num">02</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
-          <li><a class="snav-row" href="#gig-elephantgym-identity-restraint"><span class="snav-lbl">Identity &amp; Restraint</span><span class="snav-num">03</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
-          <li><a class="snav-row" href="#gig-elephantgym-behind-the-lens"><span class="snav-lbl">Behind the Lens</span><span class="snav-num">04</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
-          <li><a class="snav-row" href="#gig-elephantgym-silence-as-authorship"><span class="snav-lbl">Silence as Authorship</span><span class="snav-num">05</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
-          <li class="snav-cr"><button class="snav-row" type="button" aria-expanded="false" aria-controls="gig-elephantgym-credits"><span class="snav-lbl">Credits</span><span class="snav-num">06</span><span class="snav-seg" aria-hidden="true"><i></i></span></button>
-            <div class="snav-credits" id="gig-elephantgym-credits" role="region" aria-label="Credits" tabindex="0" hidden>
-              <div class="snav-cg">
-                <div class="snav-ck">Interview</div><div class="snav-cv">Anderson Hung</div>
-              </div>
-            </div>
-          </li>
+          <li><a class="snav-row" href="#gig-elephantgym-statement"><span class="snav-lbl">About</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#gig-elephantgym-photographs"><span class="snav-lbl">Photographs</span><span class="snav-num">02</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#gig-elephantgym-credits"><span class="snav-lbl">Credits</span><span class="snav-num">03</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
         </ol>
       </nav>
 
@@ -2501,7 +2507,7 @@
           </div>
         </div>
 
-        <div class="proj-detail-img-pair">
+        <div id="gig-elephantgym-photographs" class="proj-detail-img-pair">
             <img src="/images/Concerts/elephantgym_bristol-06.jpg" alt="Elephant Gym" loading="lazy">
             <img src="/images/Concerts/elephantgym_bristol-07.jpg" alt="Elephant Gym" loading="lazy">
           </div>
@@ -2530,7 +2536,12 @@
             <img src="/images/Concerts/elephantgym_bristol-08.jpg" alt="Elephant Gym" loading="lazy">
           </div>
 
-    
+        <div id="gig-elephantgym-credits" class="proj-detail-section pcr-sec">
+          <span class="proj-detail-section-label">Credits</span>
+          <div class="proj-credits">
+            <div class="cr-role">Interview</div><div class="cr-names">Anderson Hung</div>
+          </div>
+        </div>
       </div>
     </section>
     <section class="page proj-page" id="gig-hillsong">
@@ -3016,18 +3027,11 @@
 <section class="page proj-marquee" id="pt-dualitywithin">
       <nav class="rz-snav snav-proj" aria-label="Page sections" data-snav-end=".proj-detail-wrap">
         <ol>
-          <li class="snav-cr"><button class="snav-row" type="button" aria-expanded="false" aria-controls="pt-dualitywithin-credits"><span class="snav-lbl">Credits</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></button>
-            <div class="snav-credits" id="pt-dualitywithin-credits" role="region" aria-label="Credits" tabindex="0" hidden>
-              <div class="snav-cg">
-                <div class="snav-ck">In Frame</div><div class="snav-cv">Goga</div>
-                <div class="snav-ck">Styled by</div><div class="snav-cv">Ashley Chu</div>
-                <div class="snav-ck">Directed by</div><div class="snav-cv">Shan Huai</div>
-              </div>
-            </div>
-          </li>
+          <li><a class="snav-row" href="#pt-dualitywithin-gallery"><span class="snav-lbl">Gallery</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#pt-dualitywithin-credits"><span class="snav-lbl">Credits</span><span class="snav-num">02</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
         </ol>
       </nav>
-      <div class="proj-head">
+      <div id="pt-dualitywithin-gallery" class="proj-head">
         <button class="back" data-nav="portraiture">← Portraiture</button>
         <span class="proj-name">Duality Within</span>
         <span class="proj-meta">Portrait · 2021</span>
@@ -3058,6 +3062,16 @@
           <img src="/images/portraiture/duality_within_2021-9.jpg" alt="Duality Within" loading="lazy">
           <img src="/images/portraiture/duality_within_2021-10.jpg" alt="Duality Within" loading="lazy">
         </div>
+        </div>
+      </div>
+      <div class="proj-detail-wrap pcr-under">
+        <div id="pt-dualitywithin-credits" class="proj-detail-section pcr-sec">
+          <span class="proj-detail-section-label">Credits</span>
+          <div class="proj-credits">
+            <div class="cr-role">In Frame</div><div class="cr-names">Goga</div>
+            <div class="cr-role">Styled by</div><div class="cr-names">Ashley Chu</div>
+            <div class="cr-role">Directed by</div><div class="cr-names">Shan Huai</div>
+          </div>
         </div>
       </div>
     </section>
@@ -3135,7 +3149,11 @@
       <img decoding="async" class="hs-hero" src="/images/projects/黑松-cover.jpg" alt="黑松沙士" loading="lazy" fetchpriority="high">
       <nav class="rz-snav snav-proj" aria-label="Page sections" data-snav-end=".proj-detail-wrap">
         <ol>
-          <li><a class="snav-row" href="#proj-heysong-credits"><span class="snav-lbl">Credits</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-heysong-overview"><span class="snav-lbl">Overview</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-heysong-reel"><span class="snav-lbl">Reel</span><span class="snav-num">02</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-heysong-sarsaparilla"><span class="snav-lbl">黑松沙士 Sarsaparilla</span><span class="snav-num">03</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-heysong-soda"><span class="snav-lbl">黑松汽水 Soda</span><span class="snav-num">04</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-heysong-credits"><span class="snav-lbl">Credits</span><span class="snav-num">05</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
         </ol>
       </nav>
 
@@ -3144,7 +3162,7 @@
           <button class="back" data-nav="projects">← Projects</button>
         </div>
 
-        <div class="proj-detail-section hs-meta">
+        <div id="proj-heysong-overview" class="proj-detail-section hs-meta">
           <div><div class="hs-meta-k">Project</div><div class="hs-meta-v">黑松沙士 (HeySong Sarsaparilla)</div></div>
           <div><div class="hs-meta-k">Studio</div><div class="hs-meta-v">Local Remote</div></div>
           <div><div class="hs-meta-k">Category</div><div class="hs-meta-v">Branding</div></div>
@@ -3172,13 +3190,13 @@
         </p>
 
         <!-- The reel, self-hosted on Cloudflare Stream. 16:9; adaptive player so it plays reliably in Chrome. -->
-        <div class="proj-reel">
+        <div id="proj-heysong-reel" class="proj-reel">
           <iframe data-src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/c296648c4661eaae6b325a4e243acee8/iframe?poster=https%3A%2F%2Fcustomer-8gvoxd7i9ystgmlw.cloudflarestream.com%2Fc296648c4661eaae6b325a4e243acee8%2Fthumbnails%2Fthumbnail.jpg%3Fwidth%3D720" title="黑松沙士 — Local Remote" loading="lazy" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;" allowfullscreen></iframe>
         </div>
         <p class="proj-reel-link"><a href="https://www.instagram.com/reel/DbXpNKStGdU/" target="_blank" rel="noopener">View on Instagram ↗</a></p>
 
         <!-- 黑松沙士 gallery -->
-        <div class="proj-detail-section hs-sec-label" style="margin-top:calc(100%/3)">
+        <div id="proj-heysong-sarsaparilla" class="proj-detail-section hs-sec-label" style="margin-top:calc(100%/3)">
           <img class="hs-sec-logo" src="/images/projects/黑松沙士title_red.png" alt="黑松沙士 Sarsaparilla" loading="lazy">
         </div>
         <div class="proj-detail-img-full is-wide"><img src="/images/projects/黑松-17.jpg" alt="黑松沙士" loading="lazy"></div>
@@ -3206,7 +3224,7 @@
         <p class="hs-quote">與其被時代賦予新標籤，我們選擇大膽留白，將經典的詮釋權交還給大眾。讓這份最熟悉的台式風味，以更從容、自信的姿態，走入未來的日常。</p>
 
         <!-- 黑松汽水 gallery -->
-        <div class="proj-detail-section hs-sec-label">
+        <div id="proj-heysong-soda" class="proj-detail-section hs-sec-label">
           <img class="hs-sec-logo" src="/images/projects/黑松汽水title_green.png" alt="黑松汽水 Soda" loading="lazy">
         </div>
         <div class="proj-detail-img-full is-wide"><img src="/images/projects/黑松-10.jpg" alt="黑松汽水" loading="lazy"></div>
@@ -3274,19 +3292,9 @@
         muted loop playsinline preload="none"></video>
       <nav class="rz-snav snav-proj" aria-label="Page sections" data-snav-end=".proj-detail-wrap">
         <ol>
-          <li class="snav-cr"><button class="snav-row" type="button" aria-expanded="false" aria-controls="proj-sub-credits"><span class="snav-lbl">Credits</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></button>
-            <div class="snav-credits" id="proj-sub-credits" role="region" aria-label="Credits" tabindex="0" hidden>
-              <div class="snav-cg">
-                <div class="snav-ck">Team</div><div class="snav-cv">
-                    <span class="sub">Creative Director</span>Brian Liu
-                    <span class="sub">Art Director</span>Yi Xuan Lu
-                    <span class="sub">Designer</span>Thomas Liu<br>Ben Song<br>Darren Mulianto<br>Chen Yang
-                    <span class="sub">Photography Production</span>Shan Chiang
-                    <span class="sub">Project Management</span>Chuck Yang<br>Lo An
-                  </div>
-              </div>
-            </div>
-          </li>
+          <li><a class="snav-row" href="#proj-sub-overview"><span class="snav-lbl">Overview</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-sub-gallery"><span class="snav-lbl">Gallery</span><span class="snav-num">02</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-sub-credits"><span class="snav-lbl">Credits</span><span class="snav-num">03</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
         </ol>
       </nav>
 
@@ -3295,7 +3303,7 @@
           <button class="back" data-nav="projects">← Projects</button>
         </div>
 
-        <div class="proj-detail-section hs-meta">
+        <div id="proj-sub-overview" class="proj-detail-section hs-meta">
           <div><div class="hs-meta-k">Project</div><div class="hs-meta-v">SUB</div></div>
           <div><div class="hs-meta-k">Studio</div><div class="hs-meta-v">Local Remote</div></div>
           <div><div class="hs-meta-k">Category</div><div class="hs-meta-v">Branding</div></div>
@@ -3319,7 +3327,7 @@
         </p>
 
         <!-- Gallery -->
-        <div class="proj-detail-img-full is-wide" style="margin-top:0"><img src="/images/projects/SUB_cover.jpg" alt="SUB" loading="lazy"></div>
+        <div id="proj-sub-gallery" class="proj-detail-img-full is-wide" style="margin-top:0"><img src="/images/projects/SUB_cover.jpg" alt="SUB" loading="lazy"></div>
         <div class="proj-detail-img-full is-wide">
           <video class="hs-gallery-video" data-stream="131fe7c30b055e74bb56ea353a3acd8b"
             poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/131fe7c30b055e74bb56ea353a3acd8b/thumbnails/thumbnail.jpg?width=1280"
@@ -3354,6 +3362,17 @@
           <img src="/images/projects/SUB_42.jpg" alt="SUB" loading="lazy">
           <img src="/images/projects/SUB_10.jpg" alt="SUB" loading="lazy">
         </div>
+
+        <div id="proj-sub-credits" class="proj-detail-section pcr-sec">
+          <span class="proj-detail-section-label">Credits</span>
+          <div class="proj-credits">
+            <div class="cr-role">Creative Director</div><div class="cr-names">Brian Liu</div>
+            <div class="cr-role">Art Director</div><div class="cr-names">Yi Xuan Lu</div>
+            <div class="cr-role">Designer</div><div class="cr-names">Thomas Liu<br>Ben Song<br>Darren Mulianto<br>Chen Yang</div>
+            <div class="cr-role">Photography Production</div><div class="cr-names">Shan Chiang</div>
+            <div class="cr-role">Project Management</div><div class="cr-names">Chuck Yang<br>Lo An</div>
+          </div>
+        </div>
       </div>
     </section>
 <!-- Local Local Park: clone of the SUB/黑松沙士 (.hs-layout) template. Hero + gallery
@@ -3364,20 +3383,10 @@
       <img decoding="async" class="hs-hero" src="/images/projects/LLP_1.avif" alt="Local Local Park" loading="lazy">
       <nav class="rz-snav snav-proj" aria-label="Page sections" data-snav-end=".proj-detail-wrap">
         <ol>
-          <li class="snav-cr"><button class="snav-row" type="button" aria-expanded="false" aria-controls="proj-locallocalpark-credits"><span class="snav-lbl">Credits</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></button>
-            <div class="snav-credits" id="proj-locallocalpark-credits" role="region" aria-label="Credits" tabindex="0" hidden>
-              <div class="snav-cg">
-                <div class="snav-ck">Team</div><div class="snav-cv">
-                    <span class="sub">Creative Director</span>Brian Liu
-                    <span class="sub">Designer</span>Chen Chi Chen<br>Ben Song<br>Xin Jiang<br>Hao Jun Fu
-                    <span class="sub">Project Manager</span>April Cheng
-                    <span class="sub">Creative Strategy</span>Celine Tung<br>Annie Xue<br>Narci Chang
-                    <span class="sub">Photography Production</span>Shan Chiang
-                    <span class="sub">Video Production</span>Intention Co.
-                  </div>
-              </div>
-            </div>
-          </li>
+          <li><a class="snav-row" href="#proj-locallocalpark-overview"><span class="snav-lbl">Overview</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-locallocalpark-gallery"><span class="snav-lbl">Gallery</span><span class="snav-num">02</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-locallocalpark-reels"><span class="snav-lbl">Reels</span><span class="snav-num">03</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-locallocalpark-credits"><span class="snav-lbl">Credits</span><span class="snav-num">04</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
         </ol>
       </nav>
 
@@ -3386,7 +3395,7 @@
           <button class="back" data-nav="projects">← Projects</button>
         </div>
 
-        <div class="proj-detail-section hs-meta">
+        <div id="proj-locallocalpark-overview" class="proj-detail-section hs-meta">
           <div><div class="hs-meta-k">Project</div><div class="hs-meta-v">Local Local Park</div></div>
           <div><div class="hs-meta-k">Studio</div><div class="hs-meta-v">Local Remote</div></div>
           <div><div class="hs-meta-k">Category</div><div class="hs-meta-v">Branding</div></div>
@@ -3421,7 +3430,7 @@
              (image slots use the curated LLP_N subset; every video slot from the
              source page is kept, using the Cloudflare Stream IDs for this project). -->
         <!-- Carousel: LLP_2-5 and 8-9 as a seamless, slowly self-moving loop (JS clones the set; drag/swipe still works). -->
-        <div class="proj-detail-img-full is-wide llp-carousel" style="margin-top:0">
+        <div id="proj-locallocalpark-gallery" class="proj-detail-img-full is-wide llp-carousel" style="margin-top:0">
           <div class="llp-track" tabindex="0" aria-label="Local Local Park images">
             <figure class="llp-slide is-land"><img data-src="/images/projects/LLP_2.avif" alt="Local Local Park" loading="lazy" draggable="false"></figure>
             <figure class="llp-slide is-land"><img data-src="/images/projects/LLP_3.avif" alt="Local Local Park" loading="lazy" draggable="false"></figure>
@@ -3468,7 +3477,7 @@
       </div>
 
       <!-- LLP REELS (draft): built by the "LLP REELS" script from its REELS list. -->
-      <div class="llp-reels" aria-roledescription="reel player" aria-label="Local Local Park reels">
+      <div id="proj-locallocalpark-reels" class="llp-reels" aria-roledescription="reel player" aria-label="Local Local Park reels">
         <div class="llp-reels-stage">
           <div class="llp-reels-view">
           <div class="llp-reels-col"></div>
@@ -3516,6 +3525,19 @@
         </div>
       </div>
       <!-- /LLP REELS -->
+      <div class="proj-detail-wrap pcr-after">
+        <div id="proj-locallocalpark-credits" class="proj-detail-section pcr-sec">
+          <span class="proj-detail-section-label">Credits</span>
+          <div class="proj-credits">
+            <div class="cr-role">Creative Director</div><div class="cr-names">Brian Liu</div>
+            <div class="cr-role">Designer</div><div class="cr-names">Chen Chi Chen<br>Ben Song<br>Xin Jiang<br>Hao Jun Fu</div>
+            <div class="cr-role">Project Manager</div><div class="cr-names">April Cheng</div>
+            <div class="cr-role">Creative Strategy</div><div class="cr-names">Celine Tung<br>Annie Xue<br>Narci Chang</div>
+            <div class="cr-role">Photography Production</div><div class="cr-names">Shan Chiang</div>
+            <div class="cr-role">Video Production</div><div class="cr-names">Intention Co.</div>
+          </div>
+        </div>
+      </div>
     </section>
 <!-- HIPPO GARAGE: Local Remote, 2026. Same .hs-layout template as 黑松沙士; only the hero,
      title and meta for now — write-up, gallery and credits are still to come. -->
@@ -3566,20 +3588,9 @@
         muted loop playsinline preload="none"></video>
       <nav class="rz-snav snav-proj" aria-label="Page sections" data-snav-end=".proj-detail-wrap">
         <ol>
-          <li class="snav-cr"><button class="snav-row" type="button" aria-expanded="false" aria-controls="proj-frometo-credits"><span class="snav-lbl">Credits</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></button>
-            <div class="snav-credits" id="proj-frometo-credits" role="region" aria-label="Credits" tabindex="0" hidden>
-              <div class="snav-cg">
-                <div class="snav-ck">Team</div><div class="snav-cv">
-                    <span class="sub">Creative Director</span>Brian Liu
-                    <span class="sub">Designer</span>Chen Chen Chi<br>Mark Yen
-                    <span class="sub">Motion Design</span>Ben Song
-                    <span class="sub">3D Design</span>Kumo Hsiao
-                    <span class="sub">Photography</span>Shan Huai Chiang
-                    <span class="sub">Project Manager</span>April Cheng
-                  </div>
-              </div>
-            </div>
-          </li>
+          <li><a class="snav-row" href="#proj-frometo-overview"><span class="snav-lbl">Overview</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-frometo-gallery"><span class="snav-lbl">Gallery</span><span class="snav-num">02</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-frometo-credits"><span class="snav-lbl">Credits</span><span class="snav-num">03</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
         </ol>
       </nav>
 
@@ -3588,7 +3599,7 @@
           <button class="back" data-nav="projects">← Projects</button>
         </div>
 
-        <div class="proj-detail-section hs-meta">
+        <div id="proj-frometo-overview" class="proj-detail-section hs-meta">
           <div><div class="hs-meta-k">Project</div><div class="hs-meta-v">FROMETO</div></div>
           <div><div class="hs-meta-k">Studio</div><div class="hs-meta-v">Local Remote</div></div>
           <div><div class="hs-meta-k">Category</div><div class="hs-meta-v">Branding</div></div>
@@ -3608,7 +3619,7 @@
           <a class="hs-link-btn" href="https://localremote.co/projects/frometo" target="_blank" rel="noopener">View on Local Remote ↗</a>
         </p>
 
-        <div class="proj-detail-img-full is-wide" style="margin-top:0"><img src="/images/projects/FRM_1.avif" alt="FROMETO" loading="lazy"></div>
+        <div id="proj-frometo-gallery" class="proj-detail-img-full is-wide" style="margin-top:0"><img src="/images/projects/FRM_1.avif" alt="FROMETO" loading="lazy"></div>
         <div class="proj-detail-img-full is-wide">
           <video class="hs-gallery-video" data-stream="4dff21a9da448b6604f29f88f0b161ff"
             poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/4dff21a9da448b6604f29f88f0b161ff/thumbnails/thumbnail.jpg?width=1280"
@@ -3695,6 +3706,18 @@
           <img src="/images/projects/FRM_28.avif" alt="FROMETO" loading="lazy">
         </div>
         <div class="proj-detail-img-full is-wide"><img src="/images/projects/FRM_29.avif" alt="FROMETO" loading="lazy"></div>
+
+        <div id="proj-frometo-credits" class="proj-detail-section pcr-sec">
+          <span class="proj-detail-section-label">Credits</span>
+          <div class="proj-credits">
+            <div class="cr-role">Creative Director</div><div class="cr-names">Brian Liu</div>
+            <div class="cr-role">Designer</div><div class="cr-names">Chen Chen Chi<br>Mark Yen</div>
+            <div class="cr-role">Motion Design</div><div class="cr-names">Ben Song</div>
+            <div class="cr-role">3D Design</div><div class="cr-names">Kumo Hsiao</div>
+            <div class="cr-role">Photography</div><div class="cr-names">Shan Huai Chiang</div>
+            <div class="cr-role">Project Manager</div><div class="cr-names">April Cheng</div>
+          </div>
+        </div>
       </div>
     </section>
 <section class="page proj-page" id="pt-inmoodforsmoke">
@@ -4020,14 +4043,7 @@
           <li><a class="snav-row" href="#proj-holycommunion-execution-work-in-progress"><span class="snav-lbl">Execution &amp; Work in Progress</span><span class="snav-num">06</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
           <li><a class="snav-row" href="#proj-holycommunion-religious-awareness-ethics-in-symbolic-practice"><span class="snav-lbl">Religious Awareness &amp; Ethics in Symbolic Practice</span><span class="snav-num">07</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
           <li><a class="snav-row" href="#proj-holycommunion-reflection-on-health-safety"><span class="snav-lbl">Reflection on Health &amp; Safety</span><span class="snav-num">08</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
-          <li class="snav-cr"><button class="snav-row" type="button" aria-expanded="false" aria-controls="proj-holycommunion-credits"><span class="snav-lbl">Credits</span><span class="snav-num">09</span><span class="snav-seg" aria-hidden="true"><i></i></span></button>
-            <div class="snav-credits" id="proj-holycommunion-credits" role="region" aria-label="Credits" tabindex="0" hidden>
-              <div class="snav-cg">
-                <div class="snav-ck">Performers</div><div class="snav-cv">Anna Cantes<br>Andrea Proano<br>Richard</div>
-                <div class="snav-ck">Special Thanks</div><div class="snav-cv">Dimitrios Coumados, Michael Breakey, Michael Ste Croix, and Faust Peneyra — for assisting with technological support and guidance.</div>
-              </div>
-            </div>
-          </li>
+          <li><a class="snav-row" href="#proj-holycommunion-credits"><span class="snav-lbl">Credits</span><span class="snav-num">09</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
         </ol>
       </nav>
 
@@ -4264,6 +4280,14 @@
           </div>
         </div>
         </div><!-- /.proj-detail-coda -->
+
+        <div id="proj-holycommunion-credits" class="proj-detail-section pcr-sec">
+          <span class="proj-detail-section-label">Credits</span>
+          <div class="proj-credits">
+            <div class="cr-role">Performers</div><div class="cr-names">Anna Cantes<br>Andrea Proano<br>Richard</div>
+            <div class="cr-role">Special Thanks</div><div class="cr-names">Dimitrios Coumados, Michael Breakey, Michael Ste Croix, and Faust Peneyra — for assisting with technological support and guidance.</div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -7597,19 +7621,39 @@
       if(!a || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       var r = rows.indexOf(a), k = sIdx.indexOf(r); if(k < 0) return;
       if(!tops.length) measure();
-      var y = Math.max(0, topOf(secs[k]) - Math.round(vh * 0.14));
-      if(!e.defaultPrevented){
+      // The project pages' images are lazy and carry no size, so everything between here
+      // and a far section is 0px tall until it loads (SUB's credits: 2,073px -> 12,463px down).
+      // So: start loading all of it now, and keep re-aiming the glide while the page grows.
+      function aim(){ return Math.max(0, Math.min(topOf(secs[k]) - Math.round(vh * 0.14), (inner ? page.scrollHeight : root.scrollHeight) - vh)); }
+      var y = aim(), owns = !e.defaultPrevented, pending = [];
+      if(owns){
         e.preventDefault();
+        [].forEach.call(page.querySelectorAll('img[loading="lazy"]'), function(im){
+          if(!(im.compareDocumentPosition(secs[k]) & 4)) return;            // only what sits above the target
+          im.loading = "eager";
+          if(!im.complete) pending.push(im);
+        });
+        secs[k].classList.add("in");
         scroller().scrollTo({ top:y, behavior: reduceMQ.matches ? "auto" : "smooth" });
         if(!secs[k].hasAttribute("tabindex")) secs[k].setAttribute("tabindex", "-1");
         if(lastType === "mouse" && e.detail === 0) secs[k].focus({ preventScroll:true });   // keyboard: follow focus to the section
       }
       lockTo = k; landed = false;
-      (function settle(prev, still){              // landed = the scroll has stopped for ~12 frames
+      var t0 = performance.now(), aimed = y;
+      (function settle(prev, still){              // landed = the scroll has stopped for ~12 frames (and the page has stopped growing)
         requestAnimationFrame(function(){
           if(lockTo !== k || landed) return;
-          var now = getY();
-          if(Math.abs(now - prev) < 0.5){ if(++still >= 12){ landed = true; lockY = now; return; } } else still = 0;
+          var now = getY(), growing = false;
+          if(owns && performance.now() - t0 < 8000){
+            pending = pending.filter(function(im){ return !im.complete; });
+            growing = pending.length > 0;
+            var want = aim();
+            if(Math.abs(want - aimed) > 2 || (still >= 12 && Math.abs(now - want) > 4)){
+              aimed = want; still = 0;
+              scroller().scrollTo({ top:want, behavior: reduceMQ.matches ? "auto" : "smooth" });
+            }
+          }
+          if(Math.abs(now - prev) < 0.5){ if(++still >= 12 && !growing){ landed = true; lockY = now; return; } } else still = 0;
           settle(now, still);
         });
       })(getY(), 0);
