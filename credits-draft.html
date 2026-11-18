@@ -1678,6 +1678,7 @@
   .proj-marquee:has(> .pcr-under){overflow-x:hidden;overflow-y:auto}
   .pcr-under{padding-top:calc(100vh + 24px)}
   .pcr-under .pcr-sec{margin-top:0}
+  .pcr-after{padding-top:0}
   /* phone */
   @media (max-width:767px){
     .rz-snav,.proj-page > .rz-snav{--seg-w:3px;--seg-h:9px;--seg-cur:24px;--snav-w:26px;--snav-r:13px;--snav-px:10.5px;--snav-py:10px;right:12px}
@@ -2364,14 +2365,15 @@
     <section class="page proj-detail" id="making-ordinary-sense">
       <nav class="rz-snav snav-proj" aria-label="Page sections" data-snav-end=".proj-detail-wrap">
         <ol>
-          <li><a class="snav-row" href="#making-ordinary-sense-credits"><span class="snav-lbl">Credits</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#making-ordinary-sense-overview"><span class="snav-lbl">Overview</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#making-ordinary-sense-credits"><span class="snav-lbl">Credits</span><span class="snav-num">02</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
         </ol>
       </nav>
 
       <div class="proj-detail-wrap">
         <button class="back" data-nav="archive" style="margin-bottom:40px">← Archive</button>
 
-        <img loading="lazy" class="proj-detail-hero" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/thumbnails/thumbnail.jpg?width=1280&height=720&fit=crop" alt="Making Ordinary Sense">
+        <img id="making-ordinary-sense-overview" loading="lazy" class="proj-detail-hero" src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/2e55db6d182f6cb0667fa118b13784de/thumbnails/thumbnail.jpg?width=1280&height=720&fit=crop" alt="Making Ordinary Sense">
 
         <h1 class="proj-detail-title">Making Ordinary Sense</h1>
         <span class="proj-detail-sub">CSM PDP Year 2 Project &nbsp;·&nbsp; 2024</span>
@@ -3028,10 +3030,11 @@
 <section class="page proj-marquee" id="pt-dualitywithin">
       <nav class="rz-snav snav-proj" aria-label="Page sections" data-snav-end=".proj-detail-wrap">
         <ol>
-          <li><a class="snav-row" href="#pt-dualitywithin-credits"><span class="snav-lbl">Credits</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#pt-dualitywithin-gallery"><span class="snav-lbl">Gallery</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#pt-dualitywithin-credits"><span class="snav-lbl">Credits</span><span class="snav-num">02</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
         </ol>
       </nav>
-      <div class="proj-head">
+      <div id="pt-dualitywithin-gallery" class="proj-head">
         <button class="back" data-nav="portraiture">← Portraiture</button>
         <span class="proj-name">Duality Within</span>
         <span class="proj-meta">Portrait · 2021</span>
@@ -3149,7 +3152,11 @@
       <img decoding="async" class="hs-hero" src="/images/projects/黑松-cover.jpg" alt="黑松沙士" loading="lazy" fetchpriority="high">
       <nav class="rz-snav snav-proj" aria-label="Page sections" data-snav-end=".proj-detail-wrap">
         <ol>
-          <li><a class="snav-row" href="#proj-heysong-credits"><span class="snav-lbl">Credits</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-heysong-overview"><span class="snav-lbl">Overview</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-heysong-reel"><span class="snav-lbl">Reel</span><span class="snav-num">02</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-heysong-sarsaparilla"><span class="snav-lbl">黑松沙士 Sarsaparilla</span><span class="snav-num">03</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-heysong-soda"><span class="snav-lbl">黑松汽水 Soda</span><span class="snav-num">04</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-heysong-credits"><span class="snav-lbl">Credits</span><span class="snav-num">05</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
         </ol>
       </nav>
 
@@ -3158,7 +3165,7 @@
           <button class="back" data-nav="projects">← Projects</button>
         </div>
 
-        <div class="proj-detail-section hs-meta">
+        <div id="proj-heysong-overview" class="proj-detail-section hs-meta">
           <div><div class="hs-meta-k">Project</div><div class="hs-meta-v">黑松沙士 (HeySong Sarsaparilla)</div></div>
           <div><div class="hs-meta-k">Studio</div><div class="hs-meta-v">Local Remote</div></div>
           <div><div class="hs-meta-k">Category</div><div class="hs-meta-v">Branding</div></div>
@@ -3186,13 +3193,13 @@
         </p>
 
         <!-- The reel, self-hosted on Cloudflare Stream. 16:9; adaptive player so it plays reliably in Chrome. -->
-        <div class="proj-reel">
+        <div id="proj-heysong-reel" class="proj-reel">
           <iframe data-src="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/c296648c4661eaae6b325a4e243acee8/iframe?poster=https%3A%2F%2Fcustomer-8gvoxd7i9ystgmlw.cloudflarestream.com%2Fc296648c4661eaae6b325a4e243acee8%2Fthumbnails%2Fthumbnail.jpg%3Fwidth%3D720" title="黑松沙士 — Local Remote" loading="lazy" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;" allowfullscreen></iframe>
         </div>
         <p class="proj-reel-link"><a href="https://www.instagram.com/reel/DbXpNKStGdU/" target="_blank" rel="noopener">View on Instagram ↗</a></p>
 
         <!-- 黑松沙士 gallery -->
-        <div class="proj-detail-section hs-sec-label" style="margin-top:calc(100%/3)">
+        <div id="proj-heysong-sarsaparilla" class="proj-detail-section hs-sec-label" style="margin-top:calc(100%/3)">
           <img class="hs-sec-logo" src="/images/projects/黑松沙士title_red.png" alt="黑松沙士 Sarsaparilla" loading="lazy">
         </div>
         <div class="proj-detail-img-full is-wide"><img src="/images/projects/黑松-17.jpg" alt="黑松沙士" loading="lazy"></div>
@@ -3220,7 +3227,7 @@
         <p class="hs-quote">與其被時代賦予新標籤，我們選擇大膽留白，將經典的詮釋權交還給大眾。讓這份最熟悉的台式風味，以更從容、自信的姿態，走入未來的日常。</p>
 
         <!-- 黑松汽水 gallery -->
-        <div class="proj-detail-section hs-sec-label">
+        <div id="proj-heysong-soda" class="proj-detail-section hs-sec-label">
           <img class="hs-sec-logo" src="/images/projects/黑松汽水title_green.png" alt="黑松汽水 Soda" loading="lazy">
         </div>
         <div class="proj-detail-img-full is-wide"><img src="/images/projects/黑松-10.jpg" alt="黑松汽水" loading="lazy"></div>
@@ -3288,7 +3295,9 @@
         muted loop playsinline preload="none"></video>
       <nav class="rz-snav snav-proj" aria-label="Page sections" data-snav-end=".proj-detail-wrap">
         <ol>
-          <li><a class="snav-row" href="#proj-sub-credits"><span class="snav-lbl">Credits</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-sub-overview"><span class="snav-lbl">Overview</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-sub-gallery"><span class="snav-lbl">Gallery</span><span class="snav-num">02</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-sub-credits"><span class="snav-lbl">Credits</span><span class="snav-num">03</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
         </ol>
       </nav>
 
@@ -3297,7 +3306,7 @@
           <button class="back" data-nav="projects">← Projects</button>
         </div>
 
-        <div class="proj-detail-section hs-meta">
+        <div id="proj-sub-overview" class="proj-detail-section hs-meta">
           <div><div class="hs-meta-k">Project</div><div class="hs-meta-v">SUB</div></div>
           <div><div class="hs-meta-k">Studio</div><div class="hs-meta-v">Local Remote</div></div>
           <div><div class="hs-meta-k">Category</div><div class="hs-meta-v">Branding</div></div>
@@ -3321,7 +3330,7 @@
         </p>
 
         <!-- Gallery -->
-        <div class="proj-detail-img-full is-wide" style="margin-top:0"><img src="/images/projects/SUB_cover.jpg" alt="SUB" loading="lazy"></div>
+        <div id="proj-sub-gallery" class="proj-detail-img-full is-wide" style="margin-top:0"><img src="/images/projects/SUB_cover.jpg" alt="SUB" loading="lazy"></div>
         <div class="proj-detail-img-full is-wide">
           <video class="hs-gallery-video" data-stream="131fe7c30b055e74bb56ea353a3acd8b"
             poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/131fe7c30b055e74bb56ea353a3acd8b/thumbnails/thumbnail.jpg?width=1280"
@@ -3377,7 +3386,10 @@
       <img decoding="async" class="hs-hero" src="/images/projects/LLP_1.avif" alt="Local Local Park" loading="lazy">
       <nav class="rz-snav snav-proj" aria-label="Page sections" data-snav-end=".proj-detail-wrap">
         <ol>
-          <li><a class="snav-row" href="#proj-locallocalpark-credits"><span class="snav-lbl">Credits</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-locallocalpark-overview"><span class="snav-lbl">Overview</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-locallocalpark-gallery"><span class="snav-lbl">Gallery</span><span class="snav-num">02</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-locallocalpark-reels"><span class="snav-lbl">Reels</span><span class="snav-num">03</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-locallocalpark-credits"><span class="snav-lbl">Credits</span><span class="snav-num">04</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
         </ol>
       </nav>
 
@@ -3386,7 +3398,7 @@
           <button class="back" data-nav="projects">← Projects</button>
         </div>
 
-        <div class="proj-detail-section hs-meta">
+        <div id="proj-locallocalpark-overview" class="proj-detail-section hs-meta">
           <div><div class="hs-meta-k">Project</div><div class="hs-meta-v">Local Local Park</div></div>
           <div><div class="hs-meta-k">Studio</div><div class="hs-meta-v">Local Remote</div></div>
           <div><div class="hs-meta-k">Category</div><div class="hs-meta-v">Branding</div></div>
@@ -3421,7 +3433,7 @@
              (image slots use the curated LLP_N subset; every video slot from the
              source page is kept, using the Cloudflare Stream IDs for this project). -->
         <!-- Carousel: LLP_2-5 and 8-9 as a seamless, slowly self-moving loop (JS clones the set; drag/swipe still works). -->
-        <div class="proj-detail-img-full is-wide llp-carousel" style="margin-top:0">
+        <div id="proj-locallocalpark-gallery" class="proj-detail-img-full is-wide llp-carousel" style="margin-top:0">
           <div class="llp-track" tabindex="0" aria-label="Local Local Park images">
             <figure class="llp-slide is-land"><img data-src="/images/projects/LLP_2.avif" alt="Local Local Park" loading="lazy" draggable="false"></figure>
             <figure class="llp-slide is-land"><img data-src="/images/projects/LLP_3.avif" alt="Local Local Park" loading="lazy" draggable="false"></figure>
@@ -3465,22 +3477,10 @@
             poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/4e5e8e41b491b76c5cdb360e79266395/thumbnails/thumbnail.jpg?width=1280"
             style="aspect-ratio:1756/1080" muted loop playsinline preload="none"></video>
         </div>
-
-        <div id="proj-locallocalpark-credits" class="proj-detail-section pcr-sec">
-          <span class="proj-detail-section-label">Credits</span>
-          <div class="proj-credits">
-            <div class="cr-role">Creative Director</div><div class="cr-names">Brian Liu</div>
-            <div class="cr-role">Designer</div><div class="cr-names">Chen Chi Chen<br>Ben Song<br>Xin Jiang<br>Hao Jun Fu</div>
-            <div class="cr-role">Project Manager</div><div class="cr-names">April Cheng</div>
-            <div class="cr-role">Creative Strategy</div><div class="cr-names">Celine Tung<br>Annie Xue<br>Narci Chang</div>
-            <div class="cr-role">Photography Production</div><div class="cr-names">Shan Chiang</div>
-            <div class="cr-role">Video Production</div><div class="cr-names">Intention Co.</div>
-          </div>
-        </div>
       </div>
 
       <!-- LLP REELS (draft): built by the "LLP REELS" script from its REELS list. -->
-      <div class="llp-reels" aria-roledescription="reel player" aria-label="Local Local Park reels">
+      <div id="proj-locallocalpark-reels" class="llp-reels" aria-roledescription="reel player" aria-label="Local Local Park reels">
         <div class="llp-reels-stage">
           <div class="llp-reels-view">
           <div class="llp-reels-col"></div>
@@ -3528,6 +3528,19 @@
         </div>
       </div>
       <!-- /LLP REELS -->
+      <div class="proj-detail-wrap pcr-after">
+        <div id="proj-locallocalpark-credits" class="proj-detail-section pcr-sec">
+          <span class="proj-detail-section-label">Credits</span>
+          <div class="proj-credits">
+            <div class="cr-role">Creative Director</div><div class="cr-names">Brian Liu</div>
+            <div class="cr-role">Designer</div><div class="cr-names">Chen Chi Chen<br>Ben Song<br>Xin Jiang<br>Hao Jun Fu</div>
+            <div class="cr-role">Project Manager</div><div class="cr-names">April Cheng</div>
+            <div class="cr-role">Creative Strategy</div><div class="cr-names">Celine Tung<br>Annie Xue<br>Narci Chang</div>
+            <div class="cr-role">Photography Production</div><div class="cr-names">Shan Chiang</div>
+            <div class="cr-role">Video Production</div><div class="cr-names">Intention Co.</div>
+          </div>
+        </div>
+      </div>
     </section>
 <!-- HIPPO GARAGE: Local Remote, 2026. Same .hs-layout template as 黑松沙士; only the hero,
      title and meta for now — write-up, gallery and credits are still to come. -->
@@ -3578,7 +3591,9 @@
         muted loop playsinline preload="none"></video>
       <nav class="rz-snav snav-proj" aria-label="Page sections" data-snav-end=".proj-detail-wrap">
         <ol>
-          <li><a class="snav-row" href="#proj-frometo-credits"><span class="snav-lbl">Credits</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-frometo-overview"><span class="snav-lbl">Overview</span><span class="snav-num">01</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-frometo-gallery"><span class="snav-lbl">Gallery</span><span class="snav-num">02</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
+          <li><a class="snav-row" href="#proj-frometo-credits"><span class="snav-lbl">Credits</span><span class="snav-num">03</span><span class="snav-seg" aria-hidden="true"><i></i></span></a></li>
         </ol>
       </nav>
 
@@ -3587,7 +3602,7 @@
           <button class="back" data-nav="projects">← Projects</button>
         </div>
 
-        <div class="proj-detail-section hs-meta">
+        <div id="proj-frometo-overview" class="proj-detail-section hs-meta">
           <div><div class="hs-meta-k">Project</div><div class="hs-meta-v">FROMETO</div></div>
           <div><div class="hs-meta-k">Studio</div><div class="hs-meta-v">Local Remote</div></div>
           <div><div class="hs-meta-k">Category</div><div class="hs-meta-v">Branding</div></div>
@@ -3607,7 +3622,7 @@
           <a class="hs-link-btn" href="https://localremote.co/projects/frometo" target="_blank" rel="noopener">View on Local Remote ↗</a>
         </p>
 
-        <div class="proj-detail-img-full is-wide" style="margin-top:0"><img src="/images/projects/FRM_1.avif" alt="FROMETO" loading="lazy"></div>
+        <div id="proj-frometo-gallery" class="proj-detail-img-full is-wide" style="margin-top:0"><img src="/images/projects/FRM_1.avif" alt="FROMETO" loading="lazy"></div>
         <div class="proj-detail-img-full is-wide">
           <video class="hs-gallery-video" data-stream="4dff21a9da448b6604f29f88f0b161ff"
             poster="https://customer-8gvoxd7i9ystgmlw.cloudflarestream.com/4dff21a9da448b6604f29f88f0b161ff/thumbnails/thumbnail.jpg?width=1280"
@@ -7609,24 +7624,39 @@
       if(!a || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       var r = rows.indexOf(a), k = sIdx.indexOf(r); if(k < 0) return;
       if(!tops.length) measure();
-      var y = Math.max(0, topOf(secs[k]) - Math.round(vh * 0.14));
-      if(!e.defaultPrevented){
+      // DRAFT: the project pages' images are lazy and carry no size, so everything between here
+      // and a far section is 0px tall until it loads (SUB's credits: 2,073px -> 12,463px down).
+      // So: start loading all of it now, and keep re-aiming the glide while the page grows.
+      function aim(){ return Math.max(0, Math.min(topOf(secs[k]) - Math.round(vh * 0.14), (inner ? page.scrollHeight : root.scrollHeight) - vh)); }
+      var y = aim(), owns = !e.defaultPrevented, pending = [];
+      if(owns){
         e.preventDefault();
+        [].forEach.call(page.querySelectorAll('img[loading="lazy"]'), function(im){
+          if(!(im.compareDocumentPosition(secs[k]) & 4)) return;            // only what sits above the target
+          im.loading = "eager";
+          if(!im.complete) pending.push(im);
+        });
+        secs[k].classList.add("in");
         scroller().scrollTo({ top:y, behavior: reduceMQ.matches ? "auto" : "smooth" });
         if(!secs[k].hasAttribute("tabindex")) secs[k].setAttribute("tabindex", "-1");
         if(lastType === "mouse" && e.detail === 0) secs[k].focus({ preventScroll:true });   // keyboard: follow focus to the section
       }
       lockTo = k; landed = false;
-      (function settle(prev, still){              // landed = the scroll has stopped for ~12 frames
+      var t0 = performance.now(), aimed = y;
+      (function settle(prev, still){              // landed = the scroll has stopped for ~12 frames (and the page has stopped growing)
         requestAnimationFrame(function(){
           if(lockTo !== k || landed) return;
-          var now = getY();
-          if(Math.abs(now - prev) < 0.5){ if(++still >= 12){
-            // DRAFT: lazy media above can grow the page mid-glide; re-aim (a few times) if the target moved
-            var want = Math.min(Math.max(0, topOf(secs[k]) - Math.round(vh * 0.14)), (inner ? page.scrollHeight : root.scrollHeight) - vh);
-            if(Math.abs(now - want) > 4 && (settle.n = (settle.n || 0) + 1) <= 4){ still = 0; scroller().scrollTo({ top:want, behavior: reduceMQ.matches ? "auto" : "smooth" }); }
-            else { settle.n = 0; landed = true; lockY = now; return; }
-          } } else still = 0;
+          var now = getY(), growing = false;
+          if(owns && performance.now() - t0 < 8000){
+            pending = pending.filter(function(im){ return !im.complete; });
+            growing = pending.length > 0;
+            var want = aim();
+            if(Math.abs(want - aimed) > 2 || (still >= 12 && Math.abs(now - want) > 4)){
+              aimed = want; still = 0;
+              scroller().scrollTo({ top:want, behavior: reduceMQ.matches ? "auto" : "smooth" });
+            }
+          }
+          if(Math.abs(now - prev) < 0.5){ if(++still >= 12 && !growing){ landed = true; lockY = now; return; } } else still = 0;
           settle(now, still);
         });
       })(getY(), 0);
