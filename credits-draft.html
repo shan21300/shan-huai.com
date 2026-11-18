@@ -3360,13 +3360,11 @@
         <div id="proj-sub-credits" class="proj-detail-section pcr-sec">
           <span class="proj-detail-section-label">Credits</span>
           <div class="proj-credits">
-            <div class="cr-role">Team</div><div class="cr-names">
-            <span class="sub">Creative Director</span>Brian Liu
-            <span class="sub">Art Director</span>Yi Xuan Lu
-            <span class="sub">Designer</span>Thomas Liu<br>Ben Song<br>Darren Mulianto<br>Chen Yang
-            <span class="sub">Photography Production</span>Shan Chiang
-            <span class="sub">Project Management</span>Chuck Yang<br>Lo An
-            </div>
+            <div class="cr-role">Creative Director</div><div class="cr-names">Brian Liu</div>
+            <div class="cr-role">Art Director</div><div class="cr-names">Yi Xuan Lu</div>
+            <div class="cr-role">Designer</div><div class="cr-names">Thomas Liu<br>Ben Song<br>Darren Mulianto<br>Chen Yang</div>
+            <div class="cr-role">Photography Production</div><div class="cr-names">Shan Chiang</div>
+            <div class="cr-role">Project Management</div><div class="cr-names">Chuck Yang<br>Lo An</div>
           </div>
         </div>
       </div>
@@ -3471,14 +3469,12 @@
         <div id="proj-locallocalpark-credits" class="proj-detail-section pcr-sec">
           <span class="proj-detail-section-label">Credits</span>
           <div class="proj-credits">
-            <div class="cr-role">Team</div><div class="cr-names">
-            <span class="sub">Creative Director</span>Brian Liu
-            <span class="sub">Designer</span>Chen Chi Chen<br>Ben Song<br>Xin Jiang<br>Hao Jun Fu
-            <span class="sub">Project Manager</span>April Cheng
-            <span class="sub">Creative Strategy</span>Celine Tung<br>Annie Xue<br>Narci Chang
-            <span class="sub">Photography Production</span>Shan Chiang
-            <span class="sub">Video Production</span>Intention Co.
-            </div>
+            <div class="cr-role">Creative Director</div><div class="cr-names">Brian Liu</div>
+            <div class="cr-role">Designer</div><div class="cr-names">Chen Chi Chen<br>Ben Song<br>Xin Jiang<br>Hao Jun Fu</div>
+            <div class="cr-role">Project Manager</div><div class="cr-names">April Cheng</div>
+            <div class="cr-role">Creative Strategy</div><div class="cr-names">Celine Tung<br>Annie Xue<br>Narci Chang</div>
+            <div class="cr-role">Photography Production</div><div class="cr-names">Shan Chiang</div>
+            <div class="cr-role">Video Production</div><div class="cr-names">Intention Co.</div>
           </div>
         </div>
       </div>
@@ -3702,14 +3698,12 @@
         <div id="proj-frometo-credits" class="proj-detail-section pcr-sec">
           <span class="proj-detail-section-label">Credits</span>
           <div class="proj-credits">
-            <div class="cr-role">Team</div><div class="cr-names">
-            <span class="sub">Creative Director</span>Brian Liu
-            <span class="sub">Designer</span>Chen Chen Chi<br>Mark Yen
-            <span class="sub">Motion Design</span>Ben Song
-            <span class="sub">3D Design</span>Kumo Hsiao
-            <span class="sub">Photography</span>Shan Huai Chiang
-            <span class="sub">Project Manager</span>April Cheng
-            </div>
+            <div class="cr-role">Creative Director</div><div class="cr-names">Brian Liu</div>
+            <div class="cr-role">Designer</div><div class="cr-names">Chen Chen Chi<br>Mark Yen</div>
+            <div class="cr-role">Motion Design</div><div class="cr-names">Ben Song</div>
+            <div class="cr-role">3D Design</div><div class="cr-names">Kumo Hsiao</div>
+            <div class="cr-role">Photography</div><div class="cr-names">Shan Huai Chiang</div>
+            <div class="cr-role">Project Manager</div><div class="cr-names">April Cheng</div>
           </div>
         </div>
       </div>
@@ -4532,7 +4526,7 @@
   };
   var PATH2ID = {};
   for (var k in ROUTES){ PATH2ID[ROUTES[k]] = k; }
-  function urlForId(id){ return ROUTES[id] ? "/credits-draft.html?p=" + id : null; }   // DRAFT: stay on the draft file
+  function urlForId(id){ return ROUTES[id] || null; }
   function idForPath(p){
     if(p.length>1 && p.charAt(p.length-1)==="/") p=p.slice(0,-1); // strip trailing slash
     return PATH2ID[p] || null;
@@ -4540,7 +4534,7 @@
   function pushRoute(id){
     var url = urlForId(id);
     if(url && window.history && history.pushState){
-      if(location.pathname + location.search !== url) history.pushState({id:id}, "", url);
+      if(location.pathname !== url) history.pushState({id:id}, "", url);
     }
   }
   // On load: if the URL points at a project, jump there (after init settles)
