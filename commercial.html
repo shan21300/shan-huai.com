@@ -28,15 +28,10 @@
   Optional: data-orient="portrait" (otherwise detected from the media's own size; portrait
   media is never cropped — it is fitted inside the frame on the dark background).
 -->
+<link rel="stylesheet" href="/shared.css" />
 <style>
+  /* colours, base type, grain, menu, logo flip + scribbles: /shared.css */
   :root{
-    --ink:#0B0B0C;
-    --paper:#EDEAE3;
-    --grey:#7E7E79;
-    --line:rgba(237,234,227,0.14);
-    --edge:rgba(237,234,227,0.55);
-    /* logo spot shared with index.html / personal.html: top-left on every page */
-    --cc-px:clamp(16px,2.6vw,40px);--cc-py:clamp(14px,2vw,26px);--cc-logo:clamp(40px,3.6vw,52px);
     /* timeline */
     --clip-w:clamp(150px,19vw,288px);
     --clip-h:calc(var(--clip-w) * 9 / 16);
@@ -47,18 +42,11 @@
   }
   @media (max-width:600px){ :root{ --clip-w:36vw } }
 
-  *{margin:0;padding:0;box-sizing:border-box}
-  html,body{height:100%}
-  body{background:var(--ink);color:var(--paper);font-family:"Archivo","Noto Sans TC",system-ui,sans-serif;
-    -webkit-font-smoothing:antialiased;overflow:hidden;overscroll-behavior:none}
-  .mono{font-family:"IBM Plex Mono","Noto Sans TC",monospace;font-weight:400}
+  body{overflow:hidden;overscroll-behavior:none}
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   button{font:inherit;color:inherit}
   a{color:inherit}
   :focus-visible{outline:1px solid var(--paper);outline-offset:4px}
-  /* faint film grain, as on the rest of the site */
-  body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.04;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 
   /* ---------- Site header (same geometry as personal.html) ---------- */
   header{position:fixed;top:0;left:0;right:0;z-index:40;pointer-events:none;height:0}
@@ -73,19 +61,14 @@
   body.menu-is-open .brandBtn:focus-visible{outline-color:var(--ink)}
 
   /* ---------- Menu overlay (same look as index.html / personal.html) ---------- */
-  #menu{position:fixed;inset:0;z-index:70;background:var(--paper);
-    padding:clamp(70px,10vh,120px) clamp(20px,4vw,48px) clamp(28px,4vw,48px);
-    display:flex;flex-direction:column;opacity:0;visibility:hidden;transition:opacity .35s ease,visibility 0s linear .35s}
-  #menu.open{opacity:1;visibility:visible;transition:opacity .35s ease}
-  .menu-cats{display:flex;flex-direction:column;align-items:flex-start;gap:clamp(24px,3vh,44px);margin:auto 0}
+  #menu{transition:opacity .35s ease,visibility 0s linear .35s}   /* base look: /shared.css */
+  #menu.open{transition:opacity .35s ease}
   .m-link,.m-sub,.menu-mini a{display:block;background:none;border:none;color:var(--ink);cursor:pointer;text-align:left;width:fit-content;
     font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:800;font-stretch:125%;font-size:clamp(24px,3.1vw,42px);line-height:1.1;letter-spacing:-.01em;
     text-transform:lowercase;text-decoration:none}
   .m-link:hover,.m-sub:hover,.menu-mini a:hover{font-style:italic}
   .m-link[aria-current="page"]{font-style:italic;cursor:default}
   #menu :focus-visible{outline-color:var(--ink)}
-  .menu-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:26px;flex-wrap:wrap;margin-top:auto}
-  .menu-mini{display:flex;gap:clamp(16px,2vw,30px);flex-wrap:wrap;align-items:flex-end}
 
   /* ---------- Stage: the active project's media, full screen ---------- */
   .ct-stage{position:fixed;inset:0;z-index:0;background:var(--ink);overflow:hidden}
@@ -181,81 +164,7 @@
   html:not(.js) .ct-clip img{filter:none}
   html:not(.js) .ct-hit,html:not(.js) .ct-loading,html:not(.js) .ct-playhead,html:not(.js) .ct-tc{display:none}
 
-  /* ===== Header name / logo flip (every page) =====
-     SHAN-HUAI stays where it is. The logo shares its spot, centred on the name both ways. */
-  .bf-btn{perspective:600px}
-  .bf{display:block;position:relative;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.16,1,.3,1)}
-  .bf-name,.bf-logo{display:block;backface-visibility:hidden;-webkit-backface-visibility:hidden}
-  .bf-name{font-family:"Archivo","Noto Sans TC",sans-serif;font-weight:800;font-stretch:125%;font-size:15px;line-height:1;
-    letter-spacing:.02em;white-space:nowrap;color:#fff;opacity:.92;padding:6px 0;transition:color .35s ease}
-  /* the logo, set horizontally (善懷 side by side), each character about 1.7x its old size (1.3x the first horizontal version);
-     placed as it must be before the turn (the turn mirrors it) */
-  header .brandBtn .bf-logo .logo-img,header .brandBtn .bf-logo .logo-img-b{height:28px}
-  /* centred on the name, both ways (a centred logo stays centred through the turn); fixed 28px like the
-     15px name; the pair is centred on the SHAN/HUAI midpoint (the hyphen sits off-centre, so that
-     is 2px right of the name's centre) with the 善/懷 gap half of the word-over-word spacing */
-  .bf-logo{position:absolute;left:50%;top:50%;transform:translate(calc(-50% + 2px),-50%) rotateX(180deg)}
-  body.menu-is-open .brandBtn .bf,.brandBtn.bf-home .bf{transform:rotateX(180deg)}
-  @media(hover:hover){
-    .bf-btn:hover .bf{transform:rotateX(180deg)}
-    body.menu-is-open .brandBtn:hover .bf{transform:none}
-  }
-  .bf-btn:focus-visible .bf{transform:rotateX(180deg)}
-  body.menu-is-open .brandBtn:focus-visible .bf{transform:none}
-  @media(prefers-reduced-motion:reduce){ .bf{transition:none !important} }
-  /* menu items set at the name's size */
-  #menu .m-link,#menu .m-sub,#menu .menu-mini a{font-size:15px;letter-spacing:.02em}
   body.menu-is-open .bf-name{color:#0B0B0C}
-  /* hand-drawn scribble beside commercial / personal. Hidden until the link is
-     hovered (or keyboard-focused), then it flickers like a badly-lit sign, with a tiny
-     hand-drawn "boil" jitter. Pointer events off, so only the word itself triggers it. */
-  .m-has-scribble{position:relative}
-  .m-scribble{position:absolute;left:calc(100% + clamp(10px,1.4vw,20px));top:50%;
-    width:min(280px,50vw);height:auto;max-width:none;pointer-events:none;
-    opacity:0;visibility:hidden;transform:translateY(-50%)}
-  .m-has-scribble:hover .m-scribble,
-  .m-has-scribble:focus-visible .m-scribble{visibility:visible;
-    animation:m-flicker 1.1s steps(1,end) infinite, m-boil .36s steps(1,end) infinite}
-  #menu.menu-inverted .m-scribble{filter:invert(1) brightness(.93)}
-  /* bio's scribble tilts up 10deg, pivoting on its arrow tip (0.7% across, 45% down the
-     image; -5% once translateY(-50%) has run) so the arrow still points at the word */
-  .m-sub .m-scribble{rotate:-10deg;transform-origin:0.7% -5%}
-  /* instagram's scribble sits above the link: its down-arrow tip (95.8% across, at the
-     image's bottom edge) lands on the top-middle of the word */
-  .m-scribble.m-scribble-up{top:auto;bottom:100%;left:calc(50% - min(280px,50vw) * .958);transform:none;transform-origin:95.8% 95.6%}
-  .m-has-scribble:hover .m-scribble-up,
-  .m-has-scribble:focus-visible .m-scribble-up{animation-name:m-flicker,m-boil-up}
-  /* logo button: over the open menu, hovering it turns the logo back to SHAN-HUAI and
-     "type shiiii" flickers in, tilted 10deg (left end up), its arrow tip just under the hyphen.
-     The hyphen's ink centre (measured, Archivo 800 125% 15px) is 3.1px in and 8.9px down
-     from the top of its box (the tip sits at 23px, under the letters); the arrow tip is 0.9% across and 14.6% down the image. */
-  .bf-hy{position:relative}
-  .bf-scribble{position:absolute;--w:min(280px,50vw);width:var(--w);height:auto;max-width:none;
-    left:calc(3.1px - var(--w) * .009);top:calc(23px - var(--w) * .144 * .146);
-    rotate:10deg;transform-origin:.9% 14.6%;pointer-events:none;opacity:0;visibility:hidden}
-  @media(hover:hover){
-    body.menu-is-open .brandBtn:hover .bf-scribble{visibility:visible;
-      animation:m-flicker 1.1s steps(1,end) infinite, m-boil-up .36s steps(1,end) infinite}
-  }
-  body.menu-is-open .brandBtn:focus-visible .bf-scribble{visibility:visible;
-    animation:m-flicker 1.1s steps(1,end) infinite, m-boil-up .36s steps(1,end) infinite}
-  body.menu-inv .bf-scribble{filter:invert(1) brightness(.93)}
-  header .brandBtn.scribble-hold .bf-scribble{visibility:hidden !important;animation:none !important}
-  @keyframes m-boil-up{
-    0%{transform:none}
-    33%{transform:translate(1px,-1px) rotate(-.4deg)}
-    66%{transform:translate(-1px,.5px) rotate(.3deg)}}
-  @keyframes m-flicker{
-    0%{opacity:1} 6%{opacity:.15} 9%{opacity:1} 14%{opacity:0} 17%{opacity:.9}
-    31%{opacity:1} 44%{opacity:.25} 47%{opacity:1} 63%{opacity:.85} 66%{opacity:0}
-    70%{opacity:1} 82%{opacity:.6} 85%{opacity:1} 100%{opacity:1}}
-  @keyframes m-boil{
-    0%{transform:translate(0,-50%) rotate(0deg)}
-    33%{transform:translate(1px,calc(-50% - 1px)) rotate(-.4deg)}
-    66%{transform:translate(-1px,calc(-50% + .5px)) rotate(.3deg)}}
-  @media (prefers-reduced-motion:reduce){
-    .m-has-scribble:hover .m-scribble,.m-has-scribble:focus-visible .m-scribble,
-    body.menu-is-open .brandBtn:hover .bf-scribble,body.menu-is-open .brandBtn:focus-visible .bf-scribble{animation:none;opacity:1}}
 </style>
 </head>
 <body>
